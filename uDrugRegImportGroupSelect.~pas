@@ -1,0 +1,109 @@
+unit uDrugRegImportGroupSelect;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  cxGridLevel, cxClasses, cxControls, cxGridCustomView,
+  cxGridCustomTableView, cxGridTableView, cxGridDBTableView, cxGrid,
+  cxContainer, cxEdit, cxLabel, ExtCtrls, dxmdaset, db, dbTables, GenTypesConst,
+  cxUtils, StdCtrls, cxButtons, KRoutines;
+
+type
+  TfmDrugRegImportGroupSelect = class(TForm)
+    GroupGridLevel: TcxGridLevel;
+    GroupGrid: TcxGrid;
+    pInfo: TPanel;
+    lInfo: TcxLabel;
+    btnExit: TcxButton;
+    GroupGridTableView: TcxGridTableView;
+    GroupGridTableViewSelected: TcxGridColumn;
+    GroupGridTableViewGroupCode: TcxGridColumn;
+    GroupGridTableViewGroupName: TcxGridColumn;
+    GroupGridTableViewGroupType: TcxGridColumn;
+    GroupGridTableViewGroupID: TcxGridColumn;
+    procedure btnExitClick(Sender: TObject);
+  private
+    { Private declarations }
+    function GetGroupIDArray : PIntegerArray;
+  public
+    { Public declarations }
+    class procedure ShowTheForm (var AGroupIDArray : PIntegerArray);
+  end;
+
+var
+  fmDrugRegImportGroupSelect: TfmDrugRegImportGroupSelect;
+
+implementation
+
+{$R *.DFM}
+
+{ TfmDrugRegImportGroupSelect }
+
+class procedure TfmDrugRegImportGroupSelect.ShowTheForm(var AGroupIDArray : PIntegerArray);
+var
+   RecordIndex : Integer;
+begin
+   with TfmDrugRegImportGroupSelect.Create(nil) do
+      try
+         with TQuery.Create(nil) do
+            try
+               DatabaseName := AliasName;
+               SQL.Clear;
+               SQL.Add('SELECT ID, Code, Description, GroupType');
+               SQL.Add('FROM Grps');
+               try
+                  Open;
+                  First;
+                  RecordIndex := 0;
+                  GroupGridTableView.DataController.RecordCount := RecordCount;
+                  while ( not(Eof) ) do
+                     begin
+                        if ( InArray(Fields[0].
+                        GroupGridTableView.DataController.Values[RecordIndex, 0] := False;
+                        GroupGridTableView.DataController.Values[RecordIndex, 1] := Fields[0].AsInteger;
+                        GroupGridTableView.DataController.Values[RecordIndex, 2] := Fields[1].AsString;
+                        GroupGridTableView.DataController.Values[RecordIndex, 3] := Fields[2].AsString;
+                        GroupGridTableView.DataController.Values[RecordIndex, 4] := Fields[3].AsString;
+                        Inc(RecordIndex);
+                        Next;
+                     end;
+                  except
+                     on e : Exception do
+                        ShowMessage(e.Message);
+                  end;
+            finally
+               Free;
+            end;
+
+         ShowModal;
+
+      finally
+         AGroupIDArray := GetGroupIDArray;
+         Free;
+      end;
+end;
+
+function TfmDrugRegImportGroupSelect.GetGroupIDArray: PIntegerArray;
+var
+   RecordIndex : Integer;
+begin
+   SetLength(Result,0);
+   for RecordIndex := 0 to GroupGridTableView.DataController.RecordCount-1 do
+      begin
+         if ( not(VarIsNull(GroupGridTableView.DataController.Values[RecordIndex, 0])) ) then
+            if ( GroupGridTableView.DataController.Values[RecordIndex, 0] = True ) then
+               begin
+                  SetLength(Result,Length(Result)+1);
+                  Result[Length(Result)-1] := GroupGridTableView.DataController.Values[RecordIndex, 1];
+               end;
+      end;
+
+end;
+
+procedure TfmDrugRegImportGroupSelect.btnExitClick(Sender: TObject);
+begin
+   Close;
+end;
+
+end.

@@ -1,0 +1,815 @@
+unit uPedAddAmend;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  TB97Tlbr, TB97Ctls, TB97, StdCtrls, ExtCtrls, Mask, ToolEdit, RxLookup,
+  Db, DBTables, ImgList, GenTypesConst, Grids, DBGridEh, cxPC, cxControls,
+  cxRadioGroup, cxButtons;
+
+type
+  TAnimalClassification = record
+     AClass : string[2];
+     AScore : byte;
+  end;
+  TfPedAddAmend = class(TForm)
+    Dock971: TDock97;
+    Toolbar971: TToolbar97;
+    tbbPedAddAmendExit: TToolbarButton97;
+    ToolbarSep971: TToolbarSep97;
+    tbbSaveNew: TToolbarButton97;
+    tbbAmendExisting: TToolbarButton97;
+    tbbRemove: TToolbarButton97;
+    GenQuery: TQuery;
+    ToolbarSep973: TToolbarSep97;
+    ImageList1: TImageList;
+    ToolbarSep974: TToolbarSep97;
+    Help: TToolbarButton97;
+    qDams: TQuery;
+    qSires: TQuery;
+    dsSires: TDataSource;
+    dsDams: TDataSource;
+    AddExisting: TToolbarButton97;
+    ToolbarSep972: TToolbarSep97;
+    PedAnimals: TTable;
+    PageControl: TcxPageControl;
+    tsAnimal: TcxTabSheet;
+    tsMilkHistory: TcxTabSheet;
+    pPedAddAmend: TPanel;
+    lPedAddAmend: TLabel;
+    pSelectDamSire: TPanel;
+    lSireRDam: TLabel;
+    DamSireLookup: TRxDBLookupCombo;
+    pDetails: TPanel;
+    Label1: TLabel;
+    Label2: TLabel;
+    Label3: TLabel;
+    Label4: TLabel;
+    eHerdBookNum: TEdit;
+    ePedName: TEdit;
+    eClassCombo: TEdit;
+    eAnimalNo: TEdit;
+    QueryMilk: TQuery;
+    QueryMilkMilkDiskID: TIntegerField;
+    QueryMilkAnimalID: TIntegerField;
+    QueryMilkLactNo: TSmallintField;
+    QueryMilkDailyYield: TFloatField;
+    QueryMilkDailyBfatPerc: TFloatField;
+    QueryMilkDailyProtPerc: TFloatField;
+    QueryMilkDailyLactosePerc: TFloatField;
+    QueryMilkSCC: TSmallintField;
+    QueryMilkCumYield: TFloatField;
+    QueryMilkCumBfatPerc: TFloatField;
+    QueryMilkCumProtPerc: TFloatField;
+    QueryMilkCumLactosePerc: TFloatField;
+    QueryMilkNoOfRecordings: TSmallintField;
+    QueryMilkDaysInMilk: TSmallintField;
+    QueryMilkYield305: TFloatField;
+    QueryMilkBfatPerc305: TFloatField;
+    QueryMilkProtPerc305: TFloatField;
+    QueryMilkLactosePerc305: TFloatField;
+    dbgMilk: TDBGridEh;
+    dsQueryMilk: TDataSource;
+    rbShow305Yield: TcxRadioButton;
+    rbShowCumYield: TcxRadioButton;
+    btnAncestorListing: TcxButton;
+    procedure tbbPedAddAmendExitClick(Sender: TObject);
+    procedure tbbSaveNewClick(Sender: TObject);
+    procedure FormActivate(Sender: TObject);
+    procedure tbbAmendExistingClick(Sender: TObject);
+    procedure tbbRemoveClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure eHerdBookNumExit(Sender: TObject);
+    procedure DamSireLookupCloseUp(Sender: TObject);
+    procedure AddExistingClick(Sender: TObject);
+    procedure HelpClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure eAnimalNoChange(Sender: TObject);
+    procedure eHerdBookNumChange(Sender: TObject);
+    procedure ePedNameChange(Sender: TObject);
+    procedure eClassComboChange(Sender: TObject);
+    procedure PedAnimalsNewRecord(DataSet: TDataSet);
+    procedure PedAnimalsAfterPost(DataSet: TDataSet);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure tsMilkHistoryShow(Sender: TObject);
+    procedure rbShowCumYieldClick(Sender: TObject);
+    procedure btnAncestorListingClick(Sender: TObject);
+
+  private
+    { Private declarations }
+    Sex : String;
+    OrigHBNo : String;
+    AnimalID : Integer;
+    MessageToShow : String;
+    NSex : SmallInt;
+    FPedigreeRec : PPedigreeRec;
+
+    function IsUnique : Boolean;
+    function CheckInput(Action : Byte) : Boolean;
+    function GetAnimalClassScore(const Str : string) : TAnimalClassification;
+    procedure SetMilkDiskGridDisplayColumns;
+  public
+    { Public declarations }
+
+  end;
+
+procedure ShowTheForm(PedigreeRec : PPedigreeRec);
+
+const
+   AddNew  = 0;
+   EditExisting = 1;
+
+var
+  fPedAddAmend : TfPedAddAmend;
+  RecordsUpdated : Boolean;
+
+
+implementation
+uses
+    DairyData, SetUpAnimals, BDE, uHUKIRegistrationLogin,
+  uHUKISireDamListing;
+
+{$R *.DFM}
+
+procedure ShowTheForm(PedigreeRec : PPedigreeRec);
+begin
+    try
+       if PedigreeRec <> nil then
+          begin
+             GetMem(fPedAddAmend.FPedigreeRec, SizeOf(PPedigreeRec));
+             fPedAddAmend.FPedigreeRec := PedigreeRec;
+          end;
+       fPedAddAmend.ShowModal;
+    except
+       ShowMessage('Cannot create form - close program and re-boot');
+    end;
+end;
+
+procedure TfPedAddAmend.tbbPedAddAmendExitClick(Sender: TObject);
+begin
+   RecordsUpdated := False;  //No Records Updated
+   Close;
+end;
+
+procedure TfPedAddAmend.tbbSaveNewClick(Sender: TObject);
+var
+   NewID, NewSex : Integer;
+
+begin
+   //First check for the uniqueness of the input details
+   if IsUnique then
+      begin
+         If ( MessageDlg('Are all details correct?', mtConfirmation, [mbYes, mbNo],0) = mrYes ) then
+            Begin
+               //Now to create a new animal with the input details.
+               WinData.BreedRequired := FALSE;
+               PedAnimals.Append;
+               NewID := PedAnimals.FieldByName('ID').AsInteger;
+               PedAnimals.FieldByName('AnimalNo').AsString := eAnimalNo.Text;
+               PedAnimals.FieldByName('SortAnimalNo').AsString := WinData.InsertZeros(PedAnimals.FieldByName('AnimalNo').AsString, 10 );//SP
+               PedAnimals.FieldByName('HerdBookNo').AsString := eHerdBookNum.Text;
+               PedAnimals.FieldByName('Name').AsString := ePedName.Text;
+               case FPedigreeRec^.prAnimalIndex Of
+                  2,4,6,8,10,12,14 : Begin
+                                       PedAnimals.FieldByName('Sex').AsString := 'Bull';
+                                       NewSex := 1;
+                                     End;
+                  3,5,7,9,11,13,15 : Begin
+                                       PedAnimals.FieldByName('Sex').AsString := 'Female';
+                                       NewSex := 2;
+                                     End;
+               end;
+               PedAnimals.Post;
+               WinData.IncreaseSeqNo(WinData.NONEHerdID); //SP
+
+
+                  //Now to update Animal Classification
+                  if NewSex = 1 then
+                     begin
+                        WinData.tBullExt.Active := True;
+                        try
+                           WinData.tBullExt.Append;
+                           try
+                              WinData.tBullExt.FieldByName('AnimalID').AsInteger := PedAnimals.FieldByName('ID').AsInteger;
+                              if Trim(Copy(eClassCombo.Text, 1, 2)) <> '' then
+                                 WinData.tBullExt.FieldByName('LatestClass').AsString := Copy(eClassCombo.Text, 1, 2);
+                              if Trim(Copy(eClassCombo.Text, 3, 2)) <> '' then
+                                 WinData.tBullExt.FieldByName('LatestClassScore').AsInteger := StrToInt(Copy(eClassCombo.Text, 3, 2));
+                              WinData.tBullExt.Post;
+                           except
+                              on E : EDatabaseError do
+                                 begin
+                                    WinData.tBullExt.Cancel;
+                                    raise EDatabaseError.Create(E.Message);
+                                 end;
+                           end;
+                        finally
+                           WinData.tBullExt.Active := False;
+                        end;
+                     end
+                  else
+                     begin      // Sex = 'F'
+                        WinData.tCowExt.Active := True;
+                        try
+                           WinData.tCowExt.Append;
+                           try
+                              WinData.tCowExt.FieldByName('AnimalID').AsInteger := PedAnimals.FieldByName('ID').AsInteger;
+                              if Trim(Copy(eClassCombo.Text, 1, 2)) <> '' then
+                                 WinData.tCowExt.FieldByName('LatestClass').AsString := Copy(eClassCombo.Text, 1, 2);
+                              if Trim(Copy(eClassCombo.Text, 3, 2)) <> '' then
+                                 WinData.tCowExt.FieldByName('LatestClassScore').AsInteger := StrToInt( Copy(eClassCombo.Text, 3, 2));
+                              WinData.tCowExt.Post;
+                           except
+                              on E : EDatabaseError do
+                                 begin
+                                    WinData.tCowExt.Cancel;
+                                    raise EDatabaseError.Create(E.Message);
+                                 end;
+                           end;
+                       finally
+                           WinData.tCowExt.Active := False;
+                       end;
+                     end;
+
+               if ( not PedAnimals.Locate('ID', FPedigreeRec^.prDescAnimalID, []) ) then
+                  MessageDlg('Can not locate Descendent in the Animal File', mtInformation, [mbOK], 0)
+               else
+                  begin
+                     PedAnimals.Edit;
+                     if NewSex = 1 then
+                        PedAnimals.FieldByName('SireID').AsInteger := NewID
+                     else
+                        PedAnimals.FieldByName('DamID').AsInteger := NewID;
+                     PedAnimals.Post;
+                  end;
+               RecordsUpdated := True;  //Records Updated
+               Close;
+            end;
+      end
+   else
+      MessageDlg('Animal details below are associated with another animal.'+#13+
+                 'Please check the details are correct and try again', mtWarning, [mbOK], 0);
+
+end;
+
+procedure TfPedAddAmend.tbbAmendExistingClick(Sender: TObject);
+var
+   AnimalClass : TAnimalClassification;
+   bTableWasActive : Boolean;
+begin
+      If ( MessageDlg('Do you wish to Amend this Animal'#39's details?', mtConfirmation, [mbYes, mbNo],0) = mrYes ) then
+         Begin
+            If IsUnique then
+               Begin
+                  //Now to modify the existing animal details.
+                  PedAnimals.Refresh;
+                  if ( not PedAnimals.Locate('ID', FPedigreeRec^.prAnimalID, []) ) then
+                     MessageDlg('Can not locate this Record in Animal File', mtInformation, [mbOK], 0)
+                  else
+                     Begin
+                        WinData.BreedRequired := FALSE;
+
+                        PedAnimals.Edit;
+                        try
+                           // Input AnimalNo Here
+                           PedAnimals.FieldByName('AnimalNo').AsString := eAnimalNo.Text;
+                           PedAnimals.FieldByName('HerdBookNo').AsString := eHerdBookNum.Text;
+                           PedAnimals.FieldByName('Name').AsString := ePedName.Text;
+                           PedAnimals.Post;
+                        except
+                           on E : EDatabaseError do
+                              begin
+                                 PedAnimals.Cancel;
+                                 raise EDatabaseError.Create(E.Message);
+                              end;
+                        end;
+
+                        // Now to update Animal Classification
+                        if NOT(Trim(eClassCombo.Text) = '0') and NOT(Trim(eClassCombo.Text) = '') then
+                           begin
+                              AnimalClass := GetAnimalClassScore( eClassCombo.Text );
+                              if Sex = 'M' then
+                                 Begin
+                                    if not WinData.tBullExt.Active then
+                                       begin
+                                          WinData.tBullExt.Active := True;
+                                          bTableWasActive := false;
+                                       end;
+
+                                    try
+                                       if WinData.tBullExt.Locate('AnimalID', FPedigreeRec^.prAnimalID, []) then
+                                          WinData.tBullExt.Edit
+                                       else
+                                          WinData.tBullExt.Append;
+                                       try
+                                          if WinData.tBullExt.FieldByName('AnimalID').IsNull then // Append
+                                             WinData.tBullExt.FieldByName('AnimalID').AsInteger := FPedigreeRec^.prAnimalID;
+                                          WinData.tBullExt.FieldByName('LatestClass').AsString := AnimalClass.AClass;
+                                          WinData.tBullExt.FieldByName('LatestClassScore').AsInteger := AnimalClass.AScore;
+//                                          WinData.tBullExt.FieldByName('LatestClass').AsString := Copy(eClassCombo.Text, 1, 2);
+//                                          WinData.tBullExt.FieldByName('LatestClassScore').AsInteger := StrToInt( Copy(eClassCombo.Text, 3, 2));
+                                          WinData.tBullExt.Post;
+                                       except
+                                          on E : EDatabaseError do
+                                             begin
+                                                WinData.tBullExt.Cancel;
+                                                raise EDatabaseError.Create(E.Message);
+                                             end;
+                                       end;
+                                    finally
+                                       if not bTableWasActive then
+                                          WinData.tBullExt.Active := bTableWasActive;
+                                    end;
+                                 end
+                              else
+                                 begin      //Sex = 'F'
+                                    if not WinData.tCowExt.Active then
+                                       begin
+                                          WinData.tCowExt.Active := True;
+                                          bTableWasActive := false;
+                                       end;
+                                    try
+                                       if WinData.tCowExt.Locate('AnimalID', FPedigreeRec^.prAnimalID, []) then
+                                          WinData.tCowExt.Edit
+                                       else
+                                          WinData.tCowExt.Append;
+                                       try
+                                          if WinData.tCowExt.FieldByName('AnimalID').IsNull then
+                                             WinData.tCowExt.FieldByName('AnimalID').AsInteger := FPedigreeRec^.prAnimalID;
+                                          WinData.tCowExt.FieldByName('LatestClass').AsString := AnimalClass.AClass;
+                                          WinData.tCowExt.FieldByName('LatestClassScore').AsInteger := AnimalClass.AScore;
+//                                          WinData.tCowExt.FieldByName('LatestClass').AsString := Copy(eClassCombo.Text, 1, 2);
+//                                          WinData.tCowExt.FieldByName('LatestClassScore').AsInteger := StrToInt( Copy(eClassCombo.Text, 3, 2));
+                                          WinData.tCowExt.Post;
+                                       except
+                                          on E : EDatabaseError do
+                                             begin
+                                                WinData.tCowExt.Cancel;
+                                                raise EDatabaseError.Create(E.Message);
+                                             end;
+                                       end;
+                                    finally
+                                       if not bTableWasActive then
+                                          WinData.tCowExt.Active := bTableWasActive;
+                                    end;
+                                 end;
+                           end;
+                        RecordsUpdated := True;
+                        Close;
+                     end;
+               end;
+         end;
+end;
+
+function TfPedAddAmend.IsUnique : Boolean;
+Begin
+   MessageToShow := '';
+
+   if Trim(FPedigreeRec^.prAnimalNum) <> '' then
+      begin
+         //Now to search for the number of occurences of the SearchStrings
+         GenQuery.SQL.Clear;
+         GenQuery.SQL.Add('SELECT Count(ID) IDCount ');
+         GenQuery.SQL.Add('FROM Animals');
+         GenQuery.SQL.Add('WHERE (UPPER(AnimalNo) = "'+ UPPERCASE(FPedigreeRec^.prAnimalNum) +'") ');
+         GenQuery.SQL.Add('AND   (NOT ( ID = '+ IntToStr(FPedigreeRec^.prAnimalID) +  ')) ');
+         GenQuery.Open;
+
+         if GenQuery.FieldByName('IDCount').AsInteger > 0 then
+            begin
+               Result := False;
+               MessageDlg('Animal Number is not unique.', mtInformation, [mbOK], 0);
+               Exit;
+            end;
+      end
+   else
+      Result := True;
+
+   if Trim(FPedigreeRec^.prAnimalHerdBookNum) <> '' then
+      begin
+         GenQuery.SQL.Clear;
+         GenQuery.SQL.Add('SELECT Count(ID) IDCount ');
+         GenQuery.SQL.Add('FROM Animals');
+         GenQuery.SQL.Add('WHERE (UPPER(HerdBookNo) = "' + FPedigreeRec^.prAnimalHerdBookNum + '")');
+         GenQuery.SQL.Add('AND   (NOT ( ID = '+ IntToStr(FPedigreeRec^.prAnimalID) +  ')) ');
+         GenQuery.Open;
+
+         if GenQuery.FieldByName('IDCount').AsInteger > 0 then
+            begin
+               Result := False;
+               MessageDlg('HerdBook Number is not unique.', mtInformation, [mbOK], 0);
+               Exit;
+            end;
+      end
+   else if not result then
+      Result := True;
+
+   if Trim(FPedigreeRec^.prAnimalPedName) <> '' then
+      begin
+         GenQuery.SQL.Clear;
+         GenQuery.SQL.Add('SELECT Count(ID) IDCount ');
+         GenQuery.SQL.Add('FROM Animals                              ');
+         GenQuery.SQL.Add('WHERE (UPPER(Name) = "' + UPPERCASE(FPedigreeRec^.prAnimalPedName) + '")');
+         GenQuery.SQL.Add('AND   (NOT ( ID = '+ IntToStr(FPedigreeRec^.prAnimalID) +  ')) ');
+         GenQuery.SQL.Add('GROUP BY ID, Name                         ');
+         GenQuery.Open;
+
+         if GenQuery.FieldByName('IDCount').AsInteger > 0 then
+            begin
+               Result := False;
+               MessageDlg('Animal Name is not unique.', mtInformation, [mbOK], 0);
+               Exit;
+            end;
+      end
+   else if not result then
+      Result := True;
+end;
+
+procedure TfPedAddAmend.tbbRemoveClick(Sender: TObject);
+begin
+   //First check that there is an animal to remove
+   If FPedigreeRec^.prAnimalID = 0 then
+      MessageDlg('There is no animal to remove', mtInformation, [mbOK], 0)
+   Else
+      //Now to remove the selected animal from the Ancestry List
+      If ( MessageDlg('Do you wish to remove this Animal from the list of Ancesters?', mtConfirmation, [mbYes, mbNo],0) = mrYes ) then
+         If ( Not PedAnimals.Locate('ID', FPedigreeRec^.prDescAnimalID, []) ) then
+            MessageDlg('Can not locate this Record in Animal File', mtInformation, [mbOK], 0)
+         Else
+            Begin
+               PedAnimals.Edit;
+               If ( PedAnimals.FieldByName('SireID').AsInteger = FPedigreeRec^.prAnimalID ) then
+                  PedAnimals.FieldByName('SireID').AsInteger := 0
+               Else                                                                                                          //SP
+                  PedAnimals.FieldByName('DamID').AsInteger := 0;
+               PedAnimals.Post;
+               RecordsUpdated := True;  //Records Updated
+               Close;
+            End;
+end;
+
+procedure TfPedAddAmend.FormActivate(Sender: TObject);
+begin
+   RecordsUpdated := False;  //Records Updated
+   //Now to fill in the known values
+   case FPedigreeRec^.prAnimalIndex of
+      2 : lPedAddAmend.Caption := 'Please Input the Sire Details';
+      3 : lPedAddAmend.Caption := 'Please Input the Dam Details';
+      4 : lPedAddAmend.Caption := 'Please Input the SSire Details';
+      5 : lPedAddAmend.Caption := 'Please Input the SDam Details';
+      6 : lPedAddAmend.Caption := 'Please Input the DSire Details';
+      7 : lPedAddAmend.Caption := 'Please Input the DDam Details';
+      8 : lPedAddAmend.Caption := 'Please Input the SSSire Details';
+      9 : lPedAddAmend.Caption := 'Please Input the SSDam Details';
+      10: lPedAddAmend.Caption := 'Please Input the SDSire Details';
+      11: lPedAddAmend.Caption := 'Please Input the SDDam Details';
+      12: lPedAddAmend.Caption := 'Please Input the DSSire Details';
+      13: lPedAddAmend.Caption := 'Please Input the DSDam Details';
+      14: lPedAddAmend.Caption := 'Please Input the DDSire Details';
+      15: lPedAddAmend.Caption := 'Please Input the DDDam Details';
+   else
+      MessageDlg('Error has occurred, Please contact Kingswood Computing', mtError, [mbOK], 0);
+   end;
+
+   //Now to input (if possible) the animal details
+   eAnimalNo.Text    := FPedigreeRec^.prAnimalNum;
+   eHerdBookNum.Text := FPedigreeRec^.prAnimalHerdBookNum;
+   ePedName.Text     := FPedigreeRec^.prAnimalPedName;
+   eClassCombo.Text  := FPedigreeRec^.prAnimalCombo;
+
+   //Now to determine Animal Gender
+   case FPedigreeRec^.prAnimalIndex Of
+      2,4,6,8,10,12,14 : begin
+                            Sex := 'M';
+                            btnAncestorListing.Caption := Format('View your %s Listing (Downloaded from HUKI Server)',['Sire']);
+                         end;
+      3,5,7,9,11,13,15 : begin
+                            Sex := 'F';
+                            rbShow305Yield.Checked := True;
+                            tsMilkHistory.TabVisible := true;
+                            btnAncestorListing.Caption := Format('View your %s Listing (Downloaded from HUKI Server)',['Dam']);
+                         end;
+
+   end;
+//  btnAncestorListing.Visible := (FPedigreeRec^.prAnimalID>0);
+  eAnimalNo.SetFocus;
+
+end;
+
+procedure TfPedAddAmend.FormShow(Sender: TObject);
+begin
+  PedAnimals.Close;
+  PedAnimals.Open;
+  WinData.BreedRequired := TRUE;
+  OrigHBNo := FPedigreeRec^.prAnimalHerdBookNum;
+  pDetails.Show;                                                                                                         //SP
+
+  if FPedigreeRec^.prAnimalID <= 0 then
+     begin
+        tbbAmendExisting.Visible := FALSE;
+        tbbSaveNew.Visible := TRUE;
+        AddExisting.Visible := True;
+     end
+  else
+     begin
+        tbbAmendExisting.Visible := TRUE;
+        tbbSaveNew.Visible := FALSE;
+        AddExisting.Visible := False;
+        pSelectDamSire.Visible := FALSE;
+
+
+     end;
+end;
+
+procedure TfPedAddAmend.eHerdBookNumExit(Sender: TObject);
+var
+   HerdBookNum : String;
+begin
+   HerdBookNum := eHerdBookNum.Text;
+   if OrigHBNo <> HerdBookNum then
+      if HerdBookNum <> '' then
+         if PedAnimals.Locate('HerdBookNo', UPPERCASE(HerdBookNum),[]) then
+            begin
+               MessageDlg('HerdBook Number already exists',mtError,[mbOK],0);
+               eHerdBookNum.SetFocus;
+            end;
+end;
+
+procedure TfPedAddAmend.DamSireLookupCloseUp(Sender: TObject);
+var
+   IDToUse : Integer;
+begin
+   if DamSireLookup.KeyValue <> '' then
+      if MessageDlg('Do you wish to update record?',mtConfirmation,[mbYes,mbNo],0) = idYes then
+         begin
+            WinData.BreedRequired := False;
+            if NOT PedAnimals.Locate('ID', FPedigreeRec^.prDescAnimalID,[]) then
+               MessageDlg('Can not locate Descendent in the Animal File', mtInformation, [mbOK], 0)
+            else
+               begin
+                  IDToUse := StrToInt(DamSireLookup.Value);
+                  PedAnimals.Edit;
+                  if NSex = 1 then                                                                                   //SP
+                     PedAnimals.FieldByName('SireID').AsInteger := IDToUse
+                  else
+                     PedAnimals.FieldByName('DamID').AsInteger := IDToUse;
+                  PedAnimals.Post;
+                  RecordsUpdated := True;  //Records Updated
+                  Close;
+              end;
+         end
+      else
+         begin
+            pSelectDamSire.Visible := False;
+            pDetails.Show;
+         end;
+end;
+
+procedure TfPedAddAmend.AddExistingClick(Sender: TObject);
+begin
+   pDetails.Hide;
+   case FPedigreeRec^.prAnimalIndex of
+      2,4,6,8,10,12,14 : begin
+                            qSires.Open;
+                            DamSireLookup.LookUpSource := dsSires;
+                            NSex := 1;
+                            lSireRDam.Caption := 'Select Existing Sire';                                         //SP
+                         end;
+      3,5,7,9,11,13,15 : begin
+                            qDams.Open;
+                            DamSireLookup.LookUpSource := dsDams;
+                            NSex := 2;
+                            lSireRDam.Caption := 'Select Existing Dam';
+                         end;
+   end;
+   pSelectDamSire.Visible := True;
+end;
+
+procedure TfPedAddAmend.HelpClick(Sender: TObject);
+begin
+   WinData.HTMLHelp('PedAddAmend');
+end;
+
+procedure TfPedAddAmend.FormCreate(Sender: TObject);                                                         //SP
+begin
+   tsMilkHistory.TabVisible := False;
+   PedAnimals.Open;
+end;
+
+procedure TfPedAddAmend.eAnimalNoChange(Sender: TObject);
+begin
+   FPedigreeRec^.prAnimalNum := Trim(eAnimalNo.Text);                                                    //SP
+end;
+
+procedure TfPedAddAmend.eHerdBookNumChange(Sender: TObject);
+begin
+   FPedigreeRec^.prAnimalHerdBookNum := Trim(eHerdBookNum.Text);                                     //SP
+end;
+
+procedure TfPedAddAmend.ePedNameChange(Sender: TObject);
+begin
+   FPedigreeRec^.prAnimalPedName := Trim(ePedName.Text);                                         //SP
+end;
+
+procedure TfPedAddAmend.eClassComboChange(Sender: TObject);
+begin
+   FPedigreeRec^.prAnimalCombo := Trim(eClassCombo.Text);
+end;                                                                                         //SP
+
+function TfPedAddAmend.CheckInput(Action : Byte) : Boolean;
+begin
+   if FPedigreeRec^.prAnimalID = 0 then
+      begin
+         Result := False;
+         MessageDlg('There is no animal to amend', mtInformation, [mbOK], 0);
+         Exit;
+      end;
+
+   case Action of
+      AddNew : begin
+                  if (( eHerdBookNum.Text = '' ) AND ( ePedName.Text = '' )) then
+                     begin
+                        Result := False;
+                        MessageDlg('One or Both of the Input fields must not be empty.', mtInformation, [mbOK], 0);
+                     end;
+               end;
+      EditExisting
+             : begin
+                  if ( ( eAnimalNo.Text = '' ) AND ( eHerdBookNum.Text = '' ) AND ( ePedName.Text = '' ) AND ( eClassCombo.Text = '' )) then
+                     begin
+                        Result := False;
+                        MessageDlg('At least one of the Input fields cannot be empty.', mtInformation, [mbOK], 0);
+                     end;
+               end;
+   end;
+
+end;
+
+procedure TfPedAddAmend.PedAnimalsNewRecord(DataSet: TDataSet);
+begin
+   //SP
+   PedAnimals.FieldByName('ID').AsInteger := WinData.NextAnimalID;
+   PedAnimals.FieldByName('SeqNo').AsInteger := WinData.GetSeqNo(WinData.NONEHerdID);//SP
+   PedAnimals.FieldByName('HerdID').AsInteger := WinData.NONEHerdID;
+   PedAnimals.FieldByName('Ancestor').AsBoolean := True;
+   PedAnimals.FieldByName('InHerd').AsBoolean := True;
+   PedAnimals.FieldByName('LactNo').AsInteger := 0;
+   PedAnimals.FieldByName('Breeding').AsBoolean := True;
+   PedAnimals.FieldByName('AnimalDeleted').AsBoolean := False;
+end;
+
+procedure TfPedAddAmend.PedAnimalsAfterPost(DataSet: TDataSet);
+begin
+   if PedAnimals.FieldByName('Sex').AsString = cSex_Bull then
+      begin
+         WinData.QSire.DataSet.Active := False;
+         WinData.QSire.DataSet.Active := True;
+      end
+   else if PedAnimals.FieldByName('Sex').AsString = cSex_Female then
+      begin
+         WinData.QDams.DataSet.Active := False;
+         WinData.QDams.DataSet.Active := True;
+      end;
+   DBISaveChanges(PedAnimals.Handle);                                                    //SP
+end;
+
+procedure TfPedAddAmend.FormClose(Sender: TObject;
+  var Action: TCloseAction);
+begin
+   WinData.CowExt.Refresh;
+   WinData.BullExt.Refresh;
+   PageControl.ActivePage := tsAnimal;
+end;
+
+function TfPedAddAmend.GetAnimalClassScore(const Str: string): TAnimalClassification;
+var
+   i : integer;
+   TempScore : string;
+begin
+   FillChar(Result, SizeOf(Result), #0);
+   TempScore := '';
+   if Trim(Str) = '' then Exit;
+
+   for i := 1 to Length(Str) do
+     begin
+        if ( str[i] in ['A'..'Z', 'a'..'z'] ) then
+           begin
+              if Length(Result.AClass) < 2 then // only allow two digits
+                 Result.AClass := Result.AClass + str[i];
+           end
+        else if ( str[i] in ['0'..'9'] ) then
+           begin
+              if ( Length(TempScore) < 2 ) then      // only allow two digits
+                TempScore := TempScore + str[i];
+           end
+     end;
+   if TempScore <> '' then
+      try
+         Result.AScore := StrToInt(TempScore);
+      except
+         Result.AScore := 0;
+      end;
+end;
+
+procedure TfPedAddAmend.SetMilkDiskGridDisplayColumns;
+var
+   i : Integer;
+begin
+   if (not (rbShow305Yield.Checked) and not (rbShowCumYield.Checked)) then
+      rbShow305Yield.Checked := True;
+
+   if rbShowCumYield.Checked then
+      begin
+         for i := 7 to 12 do
+            dbgMilk.Columns[i].Visible := True;
+         for i := 1 to 6 do
+            dbgMilk.Columns[i].Visible := False;
+      end
+   else
+      begin
+         for i := 1 to 6 do
+            dbgMilk.Columns[i].Visible := True;
+         for i := 7 to 12 do
+            dbgMilk.Columns[i].Visible := False;
+      end;
+
+end;
+
+procedure TfPedAddAmend.tsMilkHistoryShow(Sender: TObject);
+begin
+   SetMilkDiskGridDisplayColumns;
+   QueryMilk.Close;
+   QueryMilk.Params[0].AsInteger := FPedigreeRec^.prAnimalID;
+   QueryMilk.Open;
+end;
+
+procedure TfPedAddAmend.rbShowCumYieldClick(Sender: TObject);
+begin
+   SetMilkDiskGridDisplayColumns;
+end;
+
+procedure TfPedAddAmend.btnAncestorListingClick(Sender: TObject);
+begin
+
+   if not HUKILoginVerified then
+      begin
+         if not THUKIRegistrationLogin.CalfRegistrationLogin then
+            begin
+               MessageDlg('HUKI Calf Registration login failed.',mtError,[mbOK],0);
+               Exit;
+            end;
+      end;
+
+   if FPedigreeRec^.prAnimalIndex in ([2,4,6,8,10,12,14]) then
+      TfmHUKISireDamListing.ShowAsSireListing(FPedigreeRec^.prAnimalID)
+   else
+      TfmHUKISireDamListing.ShowAsDamListing(FPedigreeRec^.prAnimalID);
+
+
+   if ( PedAnimals.Locate('ID', FPedigreeRec^.prAnimalID, []) ) then
+       begin
+          with TQuery.Create(nil) do
+             try
+                DatabaseName := AliasName;
+                SQL.Clear;
+                SQL.Add('SELECT HerdBookNo, Name From Animals Where ID=:ID');
+                Params[0].AsInteger := FPedigreeRec^.prAnimalID;
+                Open;
+                if RecordCount=1 then
+                   begin
+                      try
+                         First;
+                         eHerdBookNum.Text := FieldByName('HerdBookNo').AsString;
+                         ePedName.Text := FieldByName('Name').AsString;
+                         try
+                            PedAnimals.Edit;
+                            PedAnimals.FieldByName('HerdBookNo').AsString := eHerdBookNum.Text;
+                            PedAnimals.FieldByName('Name').AsString := ePedName.Text;
+                            PedAnimals.Post;
+                            RecordsUpdated := True;  //Records Updated
+                            fPedAddAmend.Close;
+                            //MessageDlg('Animal details successfully updated!',mtInformation,[mbOK],0);
+                         except
+                            on E : EDatabaseError do
+                               begin
+                                  PedAnimals.Cancel;
+                                  raise EDatabaseError.Create(E.Message);
+                               end;
+                         end
+                      finally
+                         Close;
+                      end;
+                   end
+                else
+                   MessageDlg('Animal details coulf not be updated - contact Kingswood.',mtError,[mbOK],0);
+
+             finally
+                Free;
+             end;
+      end;
+
+end;
+
+
+end.

@@ -1,0 +1,39 @@
+unit uPhoneLinkReviewRpt;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  QuickRpt, QRCtrls, ExtCtrls;
+
+type
+  TForm4 = class(TForm)
+    QuickRep1: TQuickRep;
+    QRBand1: TQRBand;
+    QRLabel1: TQRLabel;
+    QRSubDetail1: TQRSubDetail;
+    QRSubDetail2: TQRSubDetail;
+    QRSubDetail3: TQRSubDetail;
+    QRSubDetail4: TQRSubDetail;
+    QRSubDetail5: TQRSubDetail;
+    QRSubDetail6: TQRSubDetail;
+    QRSubDetail7: TQRSubDetail;
+    QRBand2: TQRBand;
+    QRBand3: TQRBand;
+    GroupHeaderBand1: TQRBand;
+    GroupHeaderBand2: TQRBand;
+    QRLabel2: TQRLabel;
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  Form4: TForm4;
+
+implementation
+
+{$R *.DFM}
+
+end.

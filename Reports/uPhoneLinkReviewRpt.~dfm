@@ -1,0 +1,371 @@
+object Form4: TForm4
+  Left = 213
+  Top = 114
+  Width = 870
+  Height = 640
+  Caption = 'Form4'
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'MS Sans Serif'
+  Font.Style = []
+  OldCreateOrder = False
+  Scaled = False
+  PixelsPerInch = 96
+  TextHeight = 13
+  object QuickRep1: TQuickRep
+    Left = 24
+    Top = 40
+    Width = 794
+    Height = 1123
+    Frame.Color = clBlack
+    Frame.DrawTop = False
+    Frame.DrawBottom = False
+    Frame.DrawLeft = False
+    Frame.DrawRight = False
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Arial'
+    Font.Style = []
+    Functions.Strings = (
+      'PAGENUMBER'
+      'COLUMNNUMBER'
+      'REPORTTITLE')
+    Functions.DATA = (
+      '0'
+      '0'
+      #39#39)
+    Options = [FirstPageHeader, LastPageFooter]
+    Page.Columns = 1
+    Page.Orientation = poPortrait
+    Page.PaperSize = A4
+    Page.Values = (
+      100
+      2970
+      100
+      2100
+      100
+      100
+      0)
+    PrinterSettings.Copies = 1
+    PrinterSettings.OutputBin = Auto
+    PrinterSettings.Duplex = False
+    PrinterSettings.FirstPage = 0
+    PrinterSettings.LastPage = 0
+    PrinterSettings.UseStandardprinter = False
+    PrinterSettings.UseCustomBinCode = False
+    PrinterSettings.CustomBinCode = 0
+    PrinterSettings.ExtendedDuplex = 0
+    PrinterSettings.UseCustomPaperCode = False
+    PrinterSettings.CustomPaperCode = 0
+    PrinterSettings.PrintMetaFile = False
+    PrintIfEmpty = True
+    SnapToGrid = True
+    Units = MM
+    Zoom = 100
+    PrevFormStyle = fsNormal
+    PreviewInitialState = wsNormal
+    object QRBand1: TQRBand
+      Left = 38
+      Top = 38
+      Width = 718
+      Height = 75
+      Frame.Color = clBlack
+      Frame.DrawTop = False
+      Frame.DrawBottom = False
+      Frame.DrawLeft = False
+      Frame.DrawRight = False
+      AlignToBottom = False
+      Color = clWhite
+      ForceNewColumn = False
+      ForceNewPage = False
+      Size.Values = (
+        198.4375
+        1899.70833333333)
+      BandType = rbPageHeader
+      object QRLabel1: TQRLabel
+        Left = 8
+        Top = 8
+        Width = 304
+        Height = 35
+        Frame.Color = clBlack
+        Frame.DrawTop = False
+        Frame.DrawBottom = False
+        Frame.DrawLeft = False
+        Frame.DrawRight = False
+        Size.Values = (
+          92.6041666666667
+          21.1666666666667
+          21.1666666666667
+          804.333333333333)
+        Alignment = taLeftJustify
+        AlignToBand = False
+        AutoSize = True
+        AutoStretch = False
+        Caption = 'PhoneLink Events Review'
+        Color = clWhite
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clRed
+        Font.Height = -29
+        Font.Name = 'Times New Roman'
+        Font.Style = [fsItalic, fsUnderline]
+        ParentFont = False
+        Transparent = False
+        WordWrap = True
+        FontSize = 22
+      end
+    end
+    object QRSubDetail1: TQRSubDetail
+      Left = 38
+      Top = 153
+      Width = 718
+      Height = 40
+      Frame.Color = clBlack
+      Frame.DrawTop = False
+      Frame.DrawBottom = False
+      Frame.DrawLeft = False
+      Frame.DrawRight = False
+      AlignToBottom = False
+      Color = clWhite
+      ForceNewColumn = False
+      ForceNewPage = False
+      Size.Values = (
+        105.833333333333
+        1899.70833333333)
+      Master = QuickRep1
+      HeaderBand = GroupHeaderBand1
+      PrintBefore = False
+      PrintIfEmpty = True
+    end
+    object QRSubDetail2: TQRSubDetail
+      Left = 38
+      Top = 233
+      Width = 718
+      Height = 40
+      Frame.Color = clBlack
+      Frame.DrawTop = False
+      Frame.DrawBottom = False
+      Frame.DrawLeft = False
+      Frame.DrawRight = False
+      AlignToBottom = False
+      Color = clWhite
+      ForceNewColumn = False
+      ForceNewPage = False
+      Size.Values = (
+        105.833333333333
+        1899.70833333333)
+      Master = QuickRep1
+      HeaderBand = GroupHeaderBand2
+      PrintBefore = False
+      PrintIfEmpty = True
+    end
+    object QRSubDetail3: TQRSubDetail
+      Left = 38
+      Top = 273
+      Width = 718
+      Height = 40
+      Frame.Color = clBlack
+      Frame.DrawTop = False
+      Frame.DrawBottom = False
+      Frame.DrawLeft = False
+      Frame.DrawRight = False
+      AlignToBottom = False
+      Color = clWhite
+      ForceNewColumn = False
+      ForceNewPage = False
+      Size.Values = (
+        105.833333333333
+        1899.70833333333)
+      Master = QuickRep1
+      PrintBefore = False
+      PrintIfEmpty = True
+    end
+    object QRSubDetail4: TQRSubDetail
+      Left = 38
+      Top = 313
+      Width = 718
+      Height = 40
+      Frame.Color = clBlack
+      Frame.DrawTop = False
+      Frame.DrawBottom = False
+      Frame.DrawLeft = False
+      Frame.DrawRight = False
+      AlignToBottom = False
+      Color = clWhite
+      ForceNewColumn = False
+      ForceNewPage = False
+      Size.Values = (
+        105.833333333333
+        1899.70833333333)
+      Master = QuickRep1
+      PrintBefore = False
+      PrintIfEmpty = True
+    end
+    object QRSubDetail5: TQRSubDetail
+      Left = 38
+      Top = 353
+      Width = 718
+      Height = 40
+      Frame.Color = clBlack
+      Frame.DrawTop = False
+      Frame.DrawBottom = False
+      Frame.DrawLeft = False
+      Frame.DrawRight = False
+      AlignToBottom = False
+      Color = clWhite
+      ForceNewColumn = False
+      ForceNewPage = False
+      Size.Values = (
+        105.833333333333
+        1899.70833333333)
+      Master = QuickRep1
+      PrintBefore = False
+      PrintIfEmpty = True
+    end
+    object QRSubDetail6: TQRSubDetail
+      Left = 38
+      Top = 393
+      Width = 718
+      Height = 40
+      Frame.Color = clBlack
+      Frame.DrawTop = False
+      Frame.DrawBottom = False
+      Frame.DrawLeft = False
+      Frame.DrawRight = False
+      AlignToBottom = False
+      Color = clWhite
+      ForceNewColumn = False
+      ForceNewPage = False
+      Size.Values = (
+        105.833333333333
+        1899.70833333333)
+      Master = QuickRep1
+      PrintBefore = False
+      PrintIfEmpty = True
+    end
+    object QRSubDetail7: TQRSubDetail
+      Left = 38
+      Top = 433
+      Width = 718
+      Height = 40
+      Frame.Color = clBlack
+      Frame.DrawTop = False
+      Frame.DrawBottom = False
+      Frame.DrawLeft = False
+      Frame.DrawRight = False
+      AlignToBottom = False
+      Color = clWhite
+      ForceNewColumn = False
+      ForceNewPage = False
+      Size.Values = (
+        105.833333333333
+        1899.70833333333)
+      Master = QuickRep1
+      PrintBefore = False
+      PrintIfEmpty = True
+    end
+    object QRBand2: TQRBand
+      Left = 38
+      Top = 473
+      Width = 718
+      Height = 40
+      Frame.Color = clBlack
+      Frame.DrawTop = False
+      Frame.DrawBottom = False
+      Frame.DrawLeft = False
+      Frame.DrawRight = False
+      AlignToBottom = False
+      Color = clWhite
+      ForceNewColumn = False
+      ForceNewPage = False
+      Size.Values = (
+        105.833333333333
+        1899.70833333333)
+      BandType = rbSummary
+    end
+    object QRBand3: TQRBand
+      Left = 38
+      Top = 513
+      Width = 718
+      Height = 40
+      Frame.Color = clBlack
+      Frame.DrawTop = False
+      Frame.DrawBottom = False
+      Frame.DrawLeft = False
+      Frame.DrawRight = False
+      AlignToBottom = False
+      Color = clWhite
+      ForceNewColumn = False
+      ForceNewPage = False
+      Size.Values = (
+        105.833333333333
+        1899.70833333333)
+      BandType = rbPageFooter
+    end
+    object GroupHeaderBand1: TQRBand
+      Left = 38
+      Top = 113
+      Width = 718
+      Height = 40
+      Frame.Color = clBlack
+      Frame.DrawTop = False
+      Frame.DrawBottom = False
+      Frame.DrawLeft = False
+      Frame.DrawRight = False
+      AlignToBottom = False
+      Color = clWhite
+      ForceNewColumn = False
+      ForceNewPage = False
+      Size.Values = (
+        105.833333333333
+        1899.70833333333)
+      BandType = rbGroupHeader
+      object QRLabel2: TQRLabel
+        Left = 8
+        Top = 16
+        Width = 61
+        Height = 17
+        Frame.Color = clBlack
+        Frame.DrawTop = False
+        Frame.DrawBottom = False
+        Frame.DrawLeft = False
+        Frame.DrawRight = False
+        Size.Values = (
+          44.9791666666667
+          21.1666666666667
+          42.3333333333333
+          161.395833333333)
+        Alignment = taLeftJustify
+        AlignToBand = False
+        AutoSize = True
+        AutoStretch = False
+        Caption = 'Animal No'
+        Color = clWhite
+        Transparent = False
+        WordWrap = True
+        FontSize = 10
+      end
+    end
+    object GroupHeaderBand2: TQRBand
+      Left = 38
+      Top = 193
+      Width = 718
+      Height = 40
+      Frame.Color = clBlack
+      Frame.DrawTop = False
+      Frame.DrawBottom = False
+      Frame.DrawLeft = False
+      Frame.DrawRight = False
+      AlignToBottom = False
+      Color = clWhite
+      ForceNewColumn = False
+      ForceNewPage = False
+      Size.Values = (
+        105.833333333333
+        1899.70833333333)
+      BandType = rbGroupHeader
+    end
+  end
+end

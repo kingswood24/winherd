@@ -1,0 +1,59 @@
+unit uUK9RetagReconcile;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  cxControls, cxContainer, cxEdit, cxGroupBox, StdCtrls, cxButtons,
+  cxLabel, cxTextEdit, cxMaskEdit, cxDropDownEdit;
+
+type
+  TfmUK9RetagReconcile = class(TForm)
+    gbSelectNatID: TcxGroupBox;
+    cmboTagList: TcxComboBox;
+    cxLabel1: TcxLabel;
+    btnUpdateDatabase: TcxButton;
+    btnIgnore: TcxButton;
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+  private
+    FAnimalID : Integer;
+    { Private declarations }
+  public
+    { Public declarations }
+    class function Execute(ATagList : TStrings) : Integer;
+  end;
+
+var
+  fmUK9RetagReconcile: TfmUK9RetagReconcile;
+
+implementation
+
+{$R *.DFM}
+
+class function TfmUK9RetagReconcile.Execute(ATagList: TStrings): Integer;
+begin
+
+   with TfmUK9RetagReconcile.Create(nil) do
+      try
+         FAnimalID := 0;
+         cmboTagList.Clear;
+         cmboTagList.Properties.Items.Assign(ATagList);
+
+         if ShowModal = mrOK then
+            FAnimalID := Integer(cmboTagList.ItemObject);
+      finally
+         Free;
+      end;
+end;
+
+procedure TfmUK9RetagReconcile.FormCloseQuery(Sender: TObject;
+  var CanClose: Boolean);
+begin
+   if ModalResult = mrOK then
+      begin
+         if cmboTagList.ItemIndex <= -1 then
+            CanClose := False;
+      end;
+end;
+
+end.

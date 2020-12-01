@@ -1,0 +1,1051 @@
+object fmCrushSalesGroup: TfmCrushSalesGroup
+  Left = 306
+  Top = 118
+  BorderStyle = bsSingle
+  Caption = 'Crush Sales'
+  ClientHeight = 572
+  ClientWidth = 1100
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'MS Sans Serif'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poMainFormCenter
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  PixelsPerInch = 96
+  TextHeight = 13
+  object pcCrushSalesGroup: TcxPageControl
+    Left = 0
+    Top = 0
+    Width = 1100
+    Height = 572
+    ActivePage = tsDispatch
+    Align = alClient
+    Color = 15987699
+    Font.Charset = ANSI_CHARSET
+    Font.Color = clGrayText
+    Font.Height = -24
+    Font.Name = 'Segoe UI'
+    Font.Style = [fsBold]
+    LookAndFeel.Kind = lfOffice11
+    LookAndFeel.NativeStyle = True
+    ParentColor = False
+    ParentFont = False
+    Style = 9
+    TabHeight = 45
+    TabOrder = 0
+    TabWidth = 345
+    OnDrawTabEx = pcCrushSalesGroupDrawTabEx
+    ClientRectBottom = 572
+    ClientRectRight = 1100
+    ClientRectTop = 46
+    object tsHeader: TcxTabSheet
+      Caption = 'Header'
+      Color = 15987699
+      Font.Charset = ANSI_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -19
+      Font.Name = 'Segoe UI'
+      Font.Style = [fsBold]
+      ImageIndex = 0
+      ParentColor = False
+      ParentFont = False
+      OnShow = tsHeaderShow
+      object btnCancelAnimal: TcxButton
+        Left = 809
+        Top = 69
+        Width = 157
+        Height = 107
+        Action = actClearHeader
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clWindow
+        Font.Height = -24
+        Font.Name = 'Segoe UI'
+        Font.Style = [fsBold]
+        ParentFont = False
+        TabOrder = 1
+        Colors.Normal = 4951795
+        LookAndFeel.Kind = lfFlat
+      end
+      object btnClose: TcxButton
+        Left = 908
+        Top = 430
+        Width = 118
+        Height = 58
+        Action = actClose
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clWindow
+        Font.Height = -24
+        Font.Name = 'Segoe UI'
+        Font.Style = [fsBold]
+        ParentFont = False
+        TabOrder = 2
+        Colors.Normal = 16629124
+        LookAndFeel.Kind = lfFlat
+      end
+      object btnSaveAnimal: TcxButton
+        Left = 629
+        Top = 69
+        Width = 157
+        Height = 107
+        Action = actSaveHeader
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clWindow
+        Font.Height = -24
+        Font.Name = 'Segoe UI'
+        Font.Style = [fsBold]
+        ParentFont = False
+        TabOrder = 0
+        Colors.Normal = 6409593
+        LookAndFeel.Kind = lfFlat
+      end
+      object lFactory: TcxLabel
+        Left = 30
+        Top = 60
+        Caption = 'Factory:'
+        ParentFont = False
+        Style.StyleController = WinData.TouchScreenLabelStyleController
+        Style.TextColor = 6316128
+        Style.TransparentBorder = False
+        Transparent = True
+      end
+      object lSlaughterDate: TcxLabel
+        Left = 30
+        Top = 142
+        AutoSize = False
+        Caption = 'Expected'#13#10'Slaughter Date:'
+        ParentFont = False
+        Style.StyleController = WinData.TouchScreenLabelStyleController
+        Style.TextColor = 6316128
+        Transparent = True
+        Height = 53
+        Width = 137
+      end
+      object cxHeaderGrid: TcxGrid
+        Left = 33
+        Top = 241
+        Width = 557
+        Height = 235
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -16
+        Font.Name = 'Segoe UI'
+        Font.Style = [fsBold]
+        ParentFont = False
+        TabOrder = 5
+        LookAndFeel.Kind = lfUltraFlat
+        object cxHeaderGridDBTableView: TcxGridDBTableView
+          NavigatorButtons.ConfirmDelete = False
+          NavigatorButtons.First.Visible = True
+          NavigatorButtons.PriorPage.Visible = True
+          NavigatorButtons.Prior.Visible = True
+          NavigatorButtons.Next.Visible = True
+          NavigatorButtons.NextPage.Visible = True
+          NavigatorButtons.Last.Visible = True
+          NavigatorButtons.Insert.Visible = True
+          NavigatorButtons.Delete.Visible = True
+          NavigatorButtons.Edit.Visible = True
+          NavigatorButtons.Post.Visible = True
+          NavigatorButtons.Cancel.Visible = True
+          NavigatorButtons.Refresh.Visible = True
+          NavigatorButtons.SaveBookmark.Visible = True
+          NavigatorButtons.GotoBookmark.Visible = True
+          NavigatorButtons.Filter.Visible = True
+          OnFocusedRecordChanged = cxHeaderGridDBTableViewFocusedRecordChanged
+          DataController.DataSource = dsHeader
+          DataController.Summary.DefaultGroupSummaryItems = <>
+          DataController.Summary.FooterSummaryItems = <>
+          DataController.Summary.SummaryGroups = <>
+          OptionsCustomize.ColumnFiltering = False
+          OptionsCustomize.ColumnGrouping = False
+          OptionsCustomize.ColumnHidingOnGrouping = False
+          OptionsCustomize.ColumnMoving = False
+          OptionsCustomize.ColumnSorting = False
+          OptionsData.CancelOnExit = False
+          OptionsData.Deleting = False
+          OptionsData.DeletingConfirmation = False
+          OptionsData.Editing = False
+          OptionsData.Inserting = False
+          OptionsSelection.CellSelect = False
+          OptionsSelection.HideFocusRectOnExit = False
+          OptionsSelection.InvertSelect = False
+          OptionsSelection.UnselectFocusedRecordOnExit = False
+          OptionsView.DataRowHeight = 45
+          OptionsView.GridLines = glHorizontal
+          OptionsView.GroupByBox = False
+          OptionsView.HeaderHeight = 38
+          OptionsView.IndicatorWidth = 22
+          Preview.MaxLineCount = 4
+          Styles.Content = cxStyle2
+          Styles.Inactive = SelectedRecord
+          Styles.Selection = SelectedRecord
+          Styles.Header = cxStyle1
+          object cxGridDBGroupID: TcxGridDBColumn
+            DataBinding.FieldName = 'GroupID'
+            Visible = False
+          end
+          object cxGridDBFactory: TcxGridDBColumn
+            Caption = 'Factory'
+            DataBinding.FieldName = 'Description'
+            PropertiesClassName = 'TcxTextEditProperties'
+            Properties.Alignment.Horz = taLeftJustify
+            Properties.Alignment.Vert = taVCenter
+            HeaderAlignmentVert = vaCenter
+            Hidden = True
+            Width = 310
+          end
+          object cxGridDBEventDate: TcxGridDBColumn
+            Caption = 'Date'
+            DataBinding.FieldName = 'EventDate'
+            PropertiesClassName = 'TcxDateEditProperties'
+            Properties.Alignment.Horz = taCenter
+            Properties.Alignment.Vert = taVCenter
+            HeaderAlignmentHorz = taCenter
+            HeaderAlignmentVert = vaCenter
+            Width = 125
+          end
+          object cxGridDBActive: TcxGridDBColumn
+            DataBinding.FieldName = 'Active'
+            PropertiesClassName = 'TcxTextEditProperties'
+            Properties.Alignment.Horz = taCenter
+            Properties.Alignment.Vert = taVCenter
+            HeaderAlignmentHorz = taCenter
+            HeaderAlignmentVert = vaCenter
+            Width = 90
+          end
+        end
+        object cxHeaderGridLevel: TcxGridLevel
+          GridView = cxHeaderGridDBTableView
+        end
+      end
+      object cmboFactory: TcxLookupComboBox
+        Left = 200
+        Top = 54
+        AutoSize = False
+        ParentFont = False
+        Properties.Alignment.Horz = taCenter
+        Properties.Alignment.Vert = taVCenter
+        Properties.KeyFieldNames = 'ID'
+        Properties.ListColumns = <
+          item
+            FieldName = 'Name'
+          end>
+        Properties.ListSource = WinData.dsCustomers
+        Style.BorderStyle = ebsThick
+        Style.Edges = [bLeft, bTop, bRight, bBottom]
+        Style.LookAndFeel.Kind = lfUltraFlat
+        Style.StyleController = WinData.TouchScreenEditStyleController
+        Style.ButtonStyle = btsFlat
+        StyleDisabled.LookAndFeel.Kind = lfUltraFlat
+        StyleFocused.BorderColor = clRed
+        StyleFocused.LookAndFeel.Kind = lfUltraFlat
+        StyleHot.LookAndFeel.Kind = lfUltraFlat
+        TabOrder = 6
+        Height = 43
+        Width = 253
+      end
+      object deSlaughterDate: TcxDateEdit
+        Left = 200
+        Top = 147
+        AutoSize = False
+        ParentFont = False
+        Properties.Alignment.Horz = taCenter
+        Properties.Alignment.Vert = taVCenter
+        Properties.ShowTime = False
+        Style.BorderStyle = ebsThick
+        Style.Edges = [bLeft, bTop, bRight, bBottom]
+        Style.LookAndFeel.Kind = lfUltraFlat
+        Style.StyleController = WinData.TouchScreenEditStyleController
+        Style.ButtonStyle = btsFlat
+        StyleDisabled.LookAndFeel.Kind = lfUltraFlat
+        StyleFocused.BorderColor = clRed
+        StyleFocused.LookAndFeel.Kind = lfUltraFlat
+        StyleHot.LookAndFeel.Kind = lfUltraFlat
+        TabOrder = 7
+        Height = 43
+        Width = 253
+      end
+      object cbShowAllHeaders: TcxCheckBox
+        Left = 598
+        Top = 356
+        Action = actShowAllHeaders
+        AutoSize = False
+        Properties.Alignment = taLeftJustify
+        Properties.MultiLine = True
+        TabOrder = 8
+        Height = 61
+        Width = 106
+      end
+      object btnRemoveHeader: TcxButton
+        Left = 598
+        Top = 307
+        Width = 104
+        Height = 43
+        Action = actRemoveHeader
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clWindow
+        Font.Height = -24
+        Font.Name = 'Segoe UI'
+        Font.Style = [fsBold]
+        ParentFont = False
+        TabOrder = 9
+        Colors.Normal = clRed
+        LookAndFeel.Kind = lfFlat
+      end
+    end
+    object tsDispatch: TcxTabSheet
+      Caption = 'Dispatch'
+      Color = 15987699
+      ImageIndex = 1
+      ParentColor = False
+      OnShow = tsDispatchShow
+      object cxLabel8: TcxLabel
+        Left = 670
+        Top = 179
+        Caption = 'Weight (Kg):  '
+        ParentFont = False
+        Style.StyleController = WinData.TouchScreenLabelStyleController
+        Style.TextColor = 6316128
+        Transparent = True
+      end
+      object AnimalGrid: TcxGrid
+        Left = 19
+        Top = 102
+        Width = 634
+        Height = 224
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -16
+        Font.Name = 'Segoe UI'
+        Font.Style = [fsBold]
+        ParentFont = False
+        TabOrder = 1
+        LookAndFeel.Kind = lfUltraFlat
+        object AnimalTableView: TcxGridDBTableView
+          NavigatorButtons.ConfirmDelete = False
+          NavigatorButtons.First.Visible = True
+          NavigatorButtons.PriorPage.Visible = True
+          NavigatorButtons.Prior.Visible = True
+          NavigatorButtons.Next.Visible = True
+          NavigatorButtons.NextPage.Visible = True
+          NavigatorButtons.Last.Visible = True
+          NavigatorButtons.Insert.Visible = True
+          NavigatorButtons.Delete.Visible = True
+          NavigatorButtons.Edit.Visible = True
+          NavigatorButtons.Post.Visible = True
+          NavigatorButtons.Cancel.Visible = True
+          NavigatorButtons.Refresh.Visible = True
+          NavigatorButtons.SaveBookmark.Visible = True
+          NavigatorButtons.GotoBookmark.Visible = True
+          NavigatorButtons.Filter.Visible = True
+          OnFocusedRecordChanged = AnimalTableViewFocusedRecordChanged
+          DataController.Summary.DefaultGroupSummaryItems = <>
+          DataController.Summary.FooterSummaryItems = <
+            item
+              Format = '0.00'
+              Kind = skSum
+              FieldName = 'Weight'
+              Column = AnimalTableViewWeight
+            end>
+          DataController.Summary.SummaryGroups = <>
+          OptionsCustomize.ColumnFiltering = False
+          OptionsCustomize.ColumnGrouping = False
+          OptionsCustomize.ColumnHidingOnGrouping = False
+          OptionsCustomize.ColumnMoving = False
+          OptionsCustomize.ColumnSorting = False
+          OptionsData.CancelOnExit = False
+          OptionsData.Deleting = False
+          OptionsData.DeletingConfirmation = False
+          OptionsData.Editing = False
+          OptionsData.Inserting = False
+          OptionsSelection.CellSelect = False
+          OptionsSelection.HideFocusRectOnExit = False
+          OptionsSelection.InvertSelect = False
+          OptionsSelection.UnselectFocusedRecordOnExit = False
+          OptionsView.DataRowHeight = 54
+          OptionsView.GridLines = glHorizontal
+          OptionsView.GroupByBox = False
+          OptionsView.HeaderHeight = 50
+          OptionsView.IndicatorWidth = 22
+          Styles.Content = cxStyle2
+          Styles.Inactive = SelectedRecord
+          Styles.Selection = SelectedRecord
+          Styles.Header = cxStyle1
+          object AnimalTableViewID: TcxGridDBColumn
+            DataBinding.FieldName = 'ID'
+            Visible = False
+            HeaderAlignmentVert = vaCenter
+            Hidden = True
+          end
+          object AnimalTableViewNatIdNum: TcxGridDBColumn
+            Caption = 'Nat. Id. No.'
+            DataBinding.FieldName = 'NatIdNum'
+            PropertiesClassName = 'TcxTextEditProperties'
+            Properties.Alignment.Vert = taVCenter
+            HeaderAlignmentVert = vaCenter
+            Width = 145
+          end
+          object AnimalTableViewAgeInMonths: TcxGridDBColumn
+            Caption = 'Age (Months)'
+            DataBinding.FieldName = 'AgeInMonths'
+            PropertiesClassName = 'TcxCurrencyEditProperties'
+            Properties.Alignment.Horz = taCenter
+            Properties.Alignment.Vert = taVCenter
+            Properties.DisplayFormat = '0'
+            HeaderAlignmentHorz = taCenter
+            Width = 72
+          end
+          object AnimalTableViewBreed: TcxGridDBColumn
+            DataBinding.FieldName = 'Breed'
+            PropertiesClassName = 'TcxTextEditProperties'
+            Properties.Alignment.Horz = taCenter
+            Properties.Alignment.Vert = taVCenter
+            HeaderAlignmentHorz = taCenter
+            HeaderAlignmentVert = vaCenter
+          end
+          object AnimalTableViewSex: TcxGridDBColumn
+            DataBinding.FieldName = 'Sex'
+            PropertiesClassName = 'TcxTextEditProperties'
+            Properties.Alignment.Horz = taCenter
+            Properties.Alignment.Vert = taVCenter
+            HeaderAlignmentHorz = taCenter
+            HeaderAlignmentVert = vaCenter
+            MinWidth = 50
+          end
+          object AnimalTableViewDaysToTest: TcxGridDBColumn
+            Caption = 'Days Left '#13#10'In Test'
+            DataBinding.FieldName = 'DaysToTest'
+            PropertiesClassName = 'TcxCurrencyEditProperties'
+            Properties.Alignment.Horz = taCenter
+            Properties.Alignment.Vert = taVCenter
+            Properties.DisplayFormat = '0'
+            HeaderAlignmentHorz = taCenter
+            HeaderAlignmentVert = vaCenter
+            Width = 79
+          end
+          object AnimalTableViewOutsideWithdrawal: TcxGridDBColumn
+            Caption = 'Outside Withdrawal'
+            DataBinding.FieldName = 'OutsideWithdrawal'
+            PropertiesClassName = 'TcxCheckBoxProperties'
+            Properties.Alignment = taCenter
+            HeaderAlignmentHorz = taCenter
+            Width = 95
+          end
+          object AnimalTableViewAnimalNo: TcxGridDBColumn
+            Caption = 'Jumbo'
+            DataBinding.FieldName = 'AnimalNo'
+            PropertiesClassName = 'TcxTextEditProperties'
+            Properties.Alignment.Vert = taVCenter
+            HeaderAlignmentHorz = taCenter
+            HeaderAlignmentVert = vaCenter
+            HeaderGlyphAlignmentHorz = taCenter
+            Width = 97
+          end
+          object AnimalTableViewWeight: TcxGridDBColumn
+            DataBinding.FieldName = 'Weight'
+            PropertiesClassName = 'TcxSpinEditProperties'
+            Properties.Alignment.Horz = taCenter
+            Properties.Alignment.Vert = taVCenter
+            Visible = False
+            HeaderAlignmentHorz = taCenter
+            HeaderAlignmentVert = vaCenter
+          end
+        end
+        object AnimalGridLevel: TcxGridLevel
+          GridView = AnimalTableView
+        end
+      end
+      object btnFind: TcxButton
+        Left = 502
+        Top = 17
+        Width = 118
+        Height = 58
+        Cursor = crHandPoint
+        Action = actSearchAnimal
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clWindow
+        Font.Height = -24
+        Font.Name = 'Segoe UI'
+        Font.Style = [fsBold]
+        ParentFont = False
+        TabOrder = 2
+        Colors.Normal = 16629124
+        LookAndFeel.Kind = lfFlat
+      end
+      object btnClear: TcxButton
+        Left = 640
+        Top = 17
+        Width = 118
+        Height = 58
+        Cursor = crHandPoint
+        Caption = 'Clear'
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clWindow
+        Font.Height = -24
+        Font.Name = 'Segoe UI'
+        Font.Style = [fsBold]
+        ParentFont = False
+        TabOrder = 3
+        OnClick = btnClearClick
+        Colors.Normal = 16629124
+        LookAndFeel.Kind = lfFlat
+      end
+      object teSearchAnimalTag: TcxTextEdit
+        Left = 217
+        Top = 34
+        Constraints.MinHeight = 43
+        ParentFont = False
+        Properties.Alignment.Horz = taCenter
+        Properties.Alignment.Vert = taVCenter
+        Style.BorderColor = clBlack
+        Style.BorderStyle = ebsFlat
+        Style.Font.Charset = ANSI_CHARSET
+        Style.Font.Color = clBlack
+        Style.Font.Height = -24
+        Style.Font.Name = 'Segoe UI'
+        Style.Font.Style = []
+        Style.Shadow = False
+        Style.StyleController = WinData.TouchScreenEditStyleController
+        Style.IsFontAssigned = True
+        TabOrder = 4
+        OnKeyDown = teSearchAnimalTagKeyDown
+        Width = 236
+      end
+      object btnUpdate: TcxButton
+        Left = 760
+        Top = 265
+        Width = 147
+        Height = 95
+        Action = actSaveAnimal
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clWindow
+        Font.Height = -24
+        Font.Name = 'Segoe UI'
+        Font.Style = [fsBold]
+        ParentFont = False
+        TabOrder = 5
+        Colors.Normal = 6409593
+        LookAndFeel.Kind = lfFlat
+      end
+      object cxButton6: TcxButton
+        Left = 929
+        Top = 265
+        Width = 147
+        Height = 95
+        Action = actClearAnimal
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clWindow
+        Font.Height = -24
+        Font.Name = 'Segoe UI'
+        Font.Style = [fsBold]
+        ParentFont = False
+        TabOrder = 6
+        Colors.Normal = 4951795
+        LookAndFeel.Kind = lfFlat
+      end
+      object ceWeight: TcxCurrencyEdit
+        Left = 796
+        Top = 169
+        Constraints.MinHeight = 43
+        ParentFont = False
+        Properties.Alignment.Horz = taCenter
+        Properties.Alignment.Vert = taVCenter
+        Properties.DisplayFormat = '#.##'
+        Properties.EditFormat = '#.##'
+        Style.BorderColor = clGray
+        Style.BorderStyle = ebsThick
+        Style.StyleController = WinData.TouchScreenEditStyleController
+        Style.TextStyle = []
+        TabOrder = 7
+        Width = 164
+      end
+      object bUpdateClose: TcxButton
+        Left = 954
+        Top = 430
+        Width = 118
+        Height = 58
+        Action = actClose
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clWindow
+        Font.Height = -24
+        Font.Name = 'Segoe UI'
+        Font.Style = [fsBold]
+        ParentFont = False
+        TabOrder = 8
+        Colors.Normal = 16629124
+        LookAndFeel.Kind = lfFlat
+      end
+      object cxLabel10: TcxLabel
+        Left = 17
+        Top = 7
+        Caption = 'Search By:'
+        ParentFont = False
+        Style.StyleController = WinData.TouchScreenLabelStyleController
+        Style.TextColor = 6316128
+        Transparent = True
+      end
+      object cbSearchOn: TcxComboBox
+        Left = 20
+        Top = 34
+        Constraints.MinHeight = 43
+        ParentFont = False
+        Properties.Alignment.Horz = taCenter
+        Properties.Alignment.Vert = taVCenter
+        Properties.DropDownListStyle = lsFixedList
+        Properties.OnCloseUp = cbSearchOnPropertiesCloseUp
+        Style.BorderColor = clGray
+        Style.BorderStyle = ebsThick
+        Style.StyleController = WinData.TouchScreenEditStyleController
+        Style.ButtonStyle = btsFlat
+        StyleFocused.BorderColor = clRed
+        TabOrder = 10
+        Width = 170
+      end
+      object cxLabel1: TcxLabel
+        Left = 214
+        Top = 7
+        Caption = 'Search Text:'
+        ParentFont = False
+        Style.StyleController = WinData.TouchScreenLabelStyleController
+        Style.TextColor = 6316128
+        Transparent = True
+      end
+      object lDispatchHeader: TcxLabel
+        Left = 670
+        Top = 106
+        Caption = 'Header:'
+        ParentFont = False
+        Style.StyleController = WinData.TouchScreenLabelStyleController
+        Style.TextColor = 6316128
+        Transparent = True
+      end
+      object cmboHeader: TcxLookupComboBox
+        Left = 796
+        Top = 101
+        ParentFont = False
+        Properties.Alignment.Vert = taVCenter
+        Properties.DropDownListStyle = lsFixedList
+        Properties.ListColumns = <>
+        Properties.UseLeftAlignmentOnEditing = False
+        Properties.OnCloseUp = cmboHeaderPropertiesCloseUp
+        Style.BorderColor = clGray
+        Style.BorderStyle = ebsThick
+        Style.Font.Charset = ANSI_CHARSET
+        Style.Font.Color = clWindowText
+        Style.Font.Height = -24
+        Style.Font.Name = 'Segoe UI'
+        Style.Font.Style = []
+        Style.StyleController = WinData.TouchScreenEditStyleController
+        Style.IsFontAssigned = True
+        TabOrder = 13
+        Width = 282
+      end
+      object HeaderGrid: TcxGrid
+        Left = 20
+        Top = 362
+        Width = 634
+        Height = 148
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -13
+        Font.Name = 'Segoe UI'
+        Font.Style = [fsBold]
+        ParentFont = False
+        TabOrder = 14
+        Visible = False
+        LookAndFeel.Kind = lfUltraFlat
+        object HeaderGridDBTableView: TcxGridDBTableView
+          NavigatorButtons.ConfirmDelete = False
+          NavigatorButtons.First.Visible = True
+          NavigatorButtons.PriorPage.Visible = True
+          NavigatorButtons.Prior.Visible = True
+          NavigatorButtons.Next.Visible = True
+          NavigatorButtons.NextPage.Visible = True
+          NavigatorButtons.Last.Visible = True
+          NavigatorButtons.Insert.Visible = True
+          NavigatorButtons.Delete.Visible = True
+          NavigatorButtons.Edit.Visible = True
+          NavigatorButtons.Post.Visible = True
+          NavigatorButtons.Cancel.Visible = True
+          NavigatorButtons.Refresh.Visible = True
+          NavigatorButtons.SaveBookmark.Visible = True
+          NavigatorButtons.GotoBookmark.Visible = True
+          NavigatorButtons.Filter.Visible = True
+          DataController.Summary.DefaultGroupSummaryItems = <>
+          DataController.Summary.FooterSummaryItems = <>
+          DataController.Summary.SummaryGroups = <>
+          OptionsCustomize.ColumnFiltering = False
+          OptionsCustomize.ColumnGrouping = False
+          OptionsCustomize.ColumnHidingOnGrouping = False
+          OptionsCustomize.ColumnMoving = False
+          OptionsCustomize.ColumnSorting = False
+          OptionsData.CancelOnExit = False
+          OptionsData.Deleting = False
+          OptionsData.DeletingConfirmation = False
+          OptionsData.Inserting = False
+          OptionsSelection.HideFocusRectOnExit = False
+          OptionsSelection.InvertSelect = False
+          OptionsSelection.UnselectFocusedRecordOnExit = False
+          OptionsView.DataRowHeight = 35
+          OptionsView.GridLines = glHorizontal
+          OptionsView.GroupByBox = False
+          OptionsView.HeaderHeight = 35
+          OptionsView.IndicatorWidth = 22
+          Preview.MaxLineCount = 4
+          Styles.Content = DeSelectedHeaderRecord
+          Styles.Inactive = DeSelectedHeaderRecord
+          Styles.Selection = SelectedHeaderRecord
+          object HeaderGridDBTableViewGroupID: TcxGridDBColumn
+            Visible = False
+            Options.Editing = False
+          end
+          object HeaderGridDBTableViewName: TcxGridDBColumn
+            Caption = 'Header Name'
+            PropertiesClassName = 'TcxTextEditProperties'
+            Properties.Alignment.Horz = taLeftJustify
+            Properties.Alignment.Vert = taVCenter
+            HeaderAlignmentHorz = taCenter
+            HeaderAlignmentVert = vaCenter
+            Options.Editing = False
+            Width = 350
+          end
+          object HeaderGridDBTableViewFCount: TcxGridDBColumn
+            Caption = 'Females'
+            PropertiesClassName = 'TcxSpinEditProperties'
+            Properties.Alignment.Horz = taCenter
+            Properties.Alignment.Vert = taVCenter
+            HeaderAlignmentHorz = taCenter
+            HeaderAlignmentVert = vaCenter
+            Options.Editing = False
+            Width = 55
+          end
+          object HeaderGridDBTableViewSCount: TcxGridDBColumn
+            Caption = 'Males'
+            PropertiesClassName = 'TcxSpinEditProperties'
+            Properties.Alignment.Horz = taCenter
+            Properties.Alignment.Vert = taVCenter
+            HeaderAlignmentHorz = taCenter
+            HeaderAlignmentVert = vaCenter
+            Options.Editing = False
+            Width = 45
+          end
+          object HeaderGridDBTableViewPrintLoad: TcxGridDBColumn
+            Caption = 'Print'
+            PropertiesClassName = 'TcxButtonEditProperties'
+            Properties.Alignment.Horz = taCenter
+            Properties.Alignment.Vert = taVCenter
+            Properties.Buttons = <
+              item
+                Caption = 'Print Load'
+                Default = True
+                Glyph.Data = {
+                  36030000424D3603000000000000360000002800000010000000100000000100
+                  18000000000000030000830F0000830F00000000000000000000FF00FFFF00FF
+                  FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00
+                  FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFA6A8A99B9B9B9B
+                  9B9B9B9B9B9B9B9B9B9B9B9B9B9BFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF
+                  FF00FFFF00FFFF00FFA6A8A9FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF9B9B9BFF00
+                  FFFF00FFFF00FFFF00FFFF00FFFF00FF737373696969656563929391FFFFFFAF
+                  AFAFAFAFAFAFAFAFFFFFFF7B7B754F4F4F545454545454FF00FFFF00FF737373
+                  93979793979775777590918EFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7B7B755B5C
+                  5C787B7B606161545454FF00FF737373939797ADB5B56667665F5F5F77777777
+                  77777777777777777171715A5A586869697F8282707171545454FF00FF737373
+                  ADB5B5ADB5B5ADB5B5ADB5B5ADB5B5ADB5B5ADB5B5ADB5B5ADB5B5A2A8A86AA4
+                  7708B518767878565757FF00FF737373D2D2D2988D91997C809A797BAA8186AA
+                  7F86AA7E86AD828AA77F859D7C7F8B7D7A5E9063787A7A575858FF00FF737373
+                  D2D2D2855A62956B6D8A6969896D6D876B6B866A6A886E6D8A706F8D6A699363
+                  6A9C6C819397975C5D5DFF00FF737373D2D2D26F4952583F415F4C4C74696972
+                  67677166667166667166665E424254393C8A72749397976C6D6DFF00FF737373
+                  ADB5B57E686A757272A6A8A9FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF9B9B9B6E5F
+                  61988989ADB5B56C6D6DFF00FFFF00FF7373738E81818F8485A6A8A9FFFFFFFF
+                  FFFFFFFFFFFFFFFFFFFFFF9B9B9B8473748F85856C6D6DFF00FFFF00FFFF00FF
+                  FF00FFFF00FFFF00FFA6A8A9FFFFFFFFFFFFFFFFFFA6A8A99B9B9B9B9B9BFF00
+                  FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFA6A8A9FFFFFFFF
+                  FFFFFFFFFFA6A8A9FFFFFF9B9B9BFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF
+                  FF00FFFF00FFFF00FFA6A8A9FFFFFFFCFCFCFFFFFFA6A8A99B9B9BFF00FFFF00
+                  FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFA6A8A99B9B9B9B
+                  9B9B9B9B9B9B9B9BFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
+                Kind = bkGlyph
+                Width = 66
+              end>
+            Properties.OnButtonClick = HeaderGridDBTableViewPrintLoadPropertiesButtonClick
+            HeaderAlignmentHorz = taCenter
+            HeaderAlignmentVert = vaCenter
+            Options.ShowEditButtons = isebAlways
+            Width = 66
+          end
+          object HeaderGridDBTableViewSaveLoad: TcxGridDBColumn
+            Caption = 'Finish'
+            PropertiesClassName = 'TcxButtonEditProperties'
+            Properties.Alignment.Horz = taCenter
+            Properties.Alignment.Vert = taVCenter
+            Properties.Buttons = <
+              item
+                Default = True
+                Glyph.Data = {
+                  36030000424D3603000000000000360000002800000010000000100000000100
+                  18000000000000030000720B0000720B00000000000000000000FF00FFFF00FF
+                  FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00
+                  FFFF00FFFF00FFFF00FFFF00FFFF00FF5E5E5E545454B7B7B7B7B7B7B7B7B7B7
+                  B7B7B7B7B7B7B7B7B7B7B75E5E5E5E5E5E646464FF00FFFF00FFFF00FF515151
+                  6D6D6D5B5B5BB7B7B7606060777777525252CBCBCBD6D6D6DCDCDC5050505050
+                  505858583F3F3FFF00FFFF00FF5151517171715D5D5DB7B7B754545460606052
+                  5252C5C5C5CBCBCBD6D6D6484848484848555555424242FF00FFFF00FF515151
+                  7676765E5E5EB7B7B74C4C4C505050525252BDBDBDC5C5C5CBCBCB4242424242
+                  42555555454545FF00FFFF00FF4F4F4F797979606060B7B7B7B7B7B7B7B7B7B7
+                  B7B7BABABABDBDBDC5C5C53D3D3D3D3D3D555555494949FF00FFFF00FF515151
+                  7F7F7F6060606060605F5F5F5D5D5D5C5C5C5B5B5B5A5A5A5959595757575656
+                  565555554C4C4CFF00FFFF00FF4F4F4F999998BDBDBDBDBDBDBDBDBDBDBDBDBD
+                  BDBDBDBDBDBDBDBDBDBDBDBDBDBDBDBDBDBDBDBD505050FF00FFFF00FF575757
+                  AFAFAFF7F7F7F7F7F7F8F8F8F8F8F8F8F8F8F9F9F9F9F9F9FAFAFAFBFBFBFCFC
+                  FCFEFEFE535353FF00FFFF00FF575757B5B5B5F7F7F7D5D5D4B9B9B9B9B9B9B9
+                  B9B9B9B9B9B9B9B9B9B9B9B9B9B9EBEBEBFEFEFE565656FF00FFFF00FF5E5E5E
+                  BABABAF6F6F6F7F7F7F7F7F7F7F7F7F7F7F7F8F8F8F8F8F8F9F9F9F9F9F9FBFB
+                  FBFCFCFC5A5A5AFF00FFFF00FF5E5E5EBDBDBDF6F6F6D5D5D4B9B9B9B9B9B9B9
+                  B9B9B9B9B9B9B9B9B9B9B9B9B9B9EBEBEAFBFBFB5D5D5DFF00FFFF00FF666666
+                  C7C7C7F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6F6
+                  F6F9F9F9616161FF00FFFF00FF666666CBCBCBF5F5F5F5F5F5F6F6F6F6F6F6F6
+                  F6F6F6F6F6F7F7F7F7F7F7F7F7F7F8F8F8EBEBEA636363FF00FFFF00FFFF00FF
+                  666666ED9131E68B2CE08526D97E20D57A1CD17619CE7316C96E13C66B10C267
+                  0D666666FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
+                  00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
+                Kind = bkGlyph
+                Width = 66
+              end>
+            Properties.OnButtonClick = HeaderGridDBTableViewSaveLoadPropertiesButtonClick
+            HeaderAlignmentHorz = taCenter
+            HeaderAlignmentVert = vaCenter
+            Options.ShowEditButtons = isebAlways
+            Width = 66
+          end
+        end
+        object HeaderGridLevel: TcxGridLevel
+          GridView = HeaderGridDBTableView
+        end
+      end
+      object cxLabel2: TcxLabel
+        Left = 19
+        Top = 332
+        Caption = 'Active Headers'
+        ParentFont = False
+        Style.StyleController = WinData.TouchScreenLabelStyleController
+        Style.TextColor = 6316128
+        Transparent = True
+      end
+      object btnRemoveAnimal: TcxButton
+        Left = 976
+        Top = 168
+        Width = 104
+        Height = 43
+        Action = actRemoveAnimal
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clWindow
+        Font.Height = -24
+        Font.Name = 'Segoe UI'
+        Font.Style = [fsBold]
+        ParentFont = False
+        TabOrder = 16
+        Visible = False
+        Colors.Normal = clRed
+        LookAndFeel.Kind = lfFlat
+      end
+    end
+  end
+  object QueryAnimals: TQuery
+    DatabaseName = 'Kingswd'
+    SQL.Strings = (
+      'Select A.ID, A.NatIdNum, A.SearchNatId, A.AnimalNo,'
+      '       A.DateOfBirth, A.Sex, B.Code'
+      'From Animals A'
+      'Left Join Breeds B ON (A.PrimaryBreed=B.Id)'
+      'Where SUBSTRING(A.SearchNatId FROM 8) Like :SearchNo'
+      'And (A.InHerd=True)'
+      'And (A.AnimalDeleted=False)'
+      ' ')
+    Left = 992
+    Top = 50
+    ParamData = <
+      item
+        DataType = ftString
+        Name = 'SearchNo'
+        ParamType = ptInput
+        Value = '"%20%"'
+      end>
+  end
+  object dsQueryAnimals: TDataSource
+    DataSet = QueryAnimals
+    Left = 961
+    Top = 50
+  end
+  object cxStyleRepository1: TcxStyleRepository
+    Left = 1023
+    Top = 50
+    object cxStyle1: TcxStyle
+      AssignedValues = [svColor, svFont, svTextColor]
+      Color = 6316128
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -16
+      Font.Name = 'Segoe UI'
+      Font.Style = [fsBold]
+      TextColor = clHighlightText
+    end
+    object SelectedRecord: TcxStyle
+      AssignedValues = [svColor, svFont, svTextColor]
+      Color = 16629124
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -16
+      Font.Name = 'Segoe UI'
+      Font.Style = [fsBold]
+      TextColor = clWindow
+    end
+    object cxStyle2: TcxStyle
+      AssignedValues = [svFont]
+      Font.Charset = ANSI_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -16
+      Font.Name = 'Segoe UI'
+      Font.Style = []
+    end
+    object SelectedHeaderRecord: TcxStyle
+      AssignedValues = [svColor, svFont]
+      Color = 16629124
+      Font.Charset = ANSI_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Segoe UI'
+      Font.Style = []
+    end
+    object DeSelectedHeaderRecord: TcxStyle
+      AssignedValues = [svColor, svFont, svTextColor]
+      Color = clWhite
+      Font.Charset = ANSI_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Segoe UI'
+      Font.Style = []
+      TextColor = clBlack
+    end
+  end
+  object ActionList: TActionList
+    Left = 929
+    Top = 51
+    object actSaveHeader: TAction
+      Caption = 'Save'
+      OnExecute = actSaveHeaderExecute
+    end
+    object actClearHeader: TAction
+      Caption = 'Cancel'
+      OnExecute = actClearHeaderExecute
+    end
+    object actClose: TAction
+      Caption = 'Close'
+      OnExecute = actCloseExecute
+    end
+    object actSaveAnimal: TAction
+      Caption = 'Save'
+      OnExecute = actSaveAnimalExecute
+    end
+    object actClearAnimal: TAction
+      Caption = 'Clear'
+      OnExecute = actClearAnimalExecute
+    end
+    object actShowAllHeaders: TAction
+      Caption = 'Show All Headers'
+      OnExecute = actShowAllHeadersExecute
+    end
+    object actRemoveAnimal: TAction
+      Caption = 'Remove'
+      OnExecute = actRemoveAnimalExecute
+    end
+    object actSearchAnimal: TAction
+      Caption = 'Find'
+      OnExecute = actSearchAnimalExecute
+    end
+    object actRemoveHeader: TAction
+      Caption = 'Remove'
+      OnExecute = actRemoveHeaderExecute
+    end
+  end
+  object dsHeader: TDataSource
+    DataSet = qHeader
+    Left = 961
+    Top = 82
+  end
+  object qHeader: TQuery
+    OnCalcFields = qHeaderCalcFields
+    DatabaseName = 'Kingswd'
+    SQL.Strings = (
+      
+        'SELECT G.ID GroupID, G.Description, G.EventDate, G.CrushLoadComp' +
+        'lete'
+      'FROM Grps G'
+      'WHERE G.GroupType = '#39'Sales'#39
+      'AND G.EventDate Is Not Null')
+    Left = 993
+    Top = 82
+    object qHeaderGroupID: TIntegerField
+      FieldName = 'GroupID'
+      Origin = 'KINGSWD."Grps.DB".ID'
+    end
+    object qHeaderDescription: TStringField
+      FieldName = 'Description'
+      Origin = 'KINGSWD."Grps.DB".Description'
+      Size = 30
+    end
+    object qHeaderEventDate: TDateField
+      FieldName = 'EventDate'
+      Origin = 'KINGSWD."Grps.DB".EventDate'
+    end
+    object qHeaderCrushLoadComplete: TBooleanField
+      FieldName = 'CrushLoadComplete'
+      Origin = 'KINGSWD."Grps.DB".CrushLoadComplete'
+    end
+    object qHeaderActive: TStringField
+      FieldKind = fkCalculated
+      FieldName = 'Active'
+      Calculated = True
+    end
+  end
+  object HeaderGridtPrinterLinkComponent: TdxComponentPrinter
+    CurrentLink = AnimalGridPrinterLink
+    PrintTitle = 'Kingswood Grid Print'
+    Version = 0
+    Left = 930
+    Top = 83
+    object AnimalGridPrinterLink: TdxGridReportLink
+      Active = True
+      Component = AnimalGrid
+      PrinterPage.DMPaper = 1
+      PrinterPage.Footer = 6350
+      PrinterPage.Header = 6350
+      PrinterPage.Margins.Bottom = 12700
+      PrinterPage.Margins.Left = 12700
+      PrinterPage.Margins.Right = 12700
+      PrinterPage.Margins.Top = 12700
+      PrinterPage.PageSize.X = 215900
+      PrinterPage.PageSize.Y = 279400
+      PrinterPage._dxMeasurementUnits_ = 0
+      PrinterPage._dxLastMU_ = 2
+      ReportDocument.Caption = 'Animal Grid'
+      ReportDocument.CreationDate = 43067.6759463194
+      OptionsOnEveryPage.Caption = False
+      OptionsOnEveryPage.FilterBar = False
+      OptionsView.Caption = False
+      OptionsView.ExpandButtons = False
+      OptionsView.FilterBar = False
+      OptionsView.GroupFooters = False
+      BuiltInReportLink = True
+    end
+  end
+  object Timer: TTimer
+    Interval = 500
+    OnTimer = TimerTimer
+    Left = 1022
+    Top = 82
+  end
+end

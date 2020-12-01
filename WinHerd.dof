@@ -1,0 +1,113 @@
+[Compiler]
+A=1
+B=0
+C=1
+D=1
+E=0
+F=0
+G=1
+H=1
+I=1
+J=1
+K=0
+L=1
+M=0
+N=1
+O=1
+P=1
+Q=0
+R=0
+S=0
+T=0
+U=0
+V=1
+W=0
+X=1
+Y=1
+Z=1
+ShowHints=1
+ShowWarnings=1
+UnitAliases=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
+[Linker]
+MapFile=0
+OutputObjs=0
+ConsoleApp=1
+DebugInfo=0
+RemoteSymbols=0
+MinStackSize=16384
+MaxStackSize=1048576
+ImageBase=4194304
+ExeDescription=
+[Directories]
+OutputDir=C:\Kingswood Herd Management
+UnitOutputDir=C:\Kingswood\Output\Winherd\Development\DCU
+PackageDLLOutputDir=
+PackageDCPOutputDir=
+SearchPath=
+Packages=Vcl50;Vclx50;VclSmp50;ibevnt50;Vclbde50;Vcldb50;VCLIB50;vclie50;Inetdb50;Inet50;vcldbx50;NMFast50;dclocx50;dclaxserver50;SPParser;Adrock;VaComm5;Tips;dz30;igHHPack;HToolsD5;KWNB;OxygenSMS;RxCtl5;RxDB5;RxBDE5;XPCDBurner;LeftAlignTEdit;KCDB;lmdweb30_d5;qrpt50;TeeQR50;TeeDB50;TeeUI50;Tee50;IE5Download;ProLibDB50;ProLib50;MSXMLv20;xml;ptsres;XPBurner;OxygenActiveX31Beta4;cxLibraryVCLD5;dxBarD5;dxcomnD5;dxBarDBNavD5;dxBarExtDBItemsD5;dxBarExtItemsD5;dxDockingD5;dxsbd5;cxEditorsD5;dxThemeD5;cxDataD5;cxExtEditorsD5;cxPageControlD5;cxGridD5;cxSchedulerD5;cxTreeListD5;cxVerticalGridD5;cxSpreadSheetVCLD5;dxNavBarD5;dxMasterViewD5;dxmdsd5;dxdbtrd5;dxtrmdd5;dxorgcd5;dxdbord5;dxFlowChartD5;dxLayoutControlD5;dxLayoutControlcxEditAdaptersD5;dxPSCoreD5;dxPSTeeChartD5;dxPsPrVwAdvD5;dxPSLnksD5;dxPSdxOCLnkD5;dxPSdxMVLnkD5;dxPSdxLCLnkD5;dxPSdxFCLnkD5;dxPSdxDBTVLnkD5;dxPSdxDBOCLnkD5;dxPSDBTeeChartD5;dxPScxCommonD5;dxPscxTLLnkD5;dxPScxSSLnkD5;dxPScxScheduler2LnkD5;dxPScxPCProdD5;dxPScxGridLnkD5;dxPScxExtCommonD5;dxPScxVGridLnkD5;KRX;EditLeftAlign;TeeDB85;TeeQR85
+Conditionals=
+DebugSourceDirs=
+UsePackages=0
+[Parameters]
+RunParams=
+HostApplication=
+[Version Info]
+IncludeVerInfo=1
+AutoIncBuild=0
+MajorVer=5
+MinorVer=9
+Release=7
+Build=6
+Debug=0
+PreRelease=1
+Special=0
+Private=0
+DLL=0
+Locale=6153
+CodePage=1252
+[Version Info Keys]
+CompanyName=Kingswood Computing Ltd
+FileDescription=Kingswood Herd Management
+FileVersion=5.9.7.6
+InternalName=Winherd
+LegalCopyright=Kingswood Computing Ltd.
+LegalTrademarks=
+OriginalFilename=Winherd
+ProductName=Winherd.exe
+ProductVersion=V5.9 R7.6
+Comments=Kingswood Computing Ltd.
+[Excluded Packages]
+C:\PDBDataManager3\D5\PDBDataManD5.bpl=PDBDataManager v3.0
+C:\Program Files (x86)\EXTRAFIL\DELPHI5\LIB\xtrafil.bpl=Extra Filters for QuickReport
+C:\Program Files\Developer Express.VCL\Library\Delphi5\dcldxDBOrd5.bpl=ExpressDBOrgChart by Developer Express Inc.
+$(DELPHI)\Projects\Bpl\KpeedButton.bpl=(untitled)
+$(DELPHI)\Projects\Bpl\dclIndy50.bpl=Internet Direct (Indy) for D5 Property and Component Editors
+$(DELPHI)\Projects\Bpl\Adom_5_1Delphi5.bpl=Open XML Alternative Document Object Model (ADOM 5.1)
+$(DELPHI)\Projects\Bpl\DbproProfessional_d5.bpl=Database Pro Components
+$(DELPHI)\Bin\dcldss50.bpl=Borland Decision Cube Components
+$(DELPHI)\Bin\dclite50.bpl=Borland Integrated Translation Environment
+[HistoryLists\hlDebugSourcePath]
+Count=1
+Item0=$(DELPHI)\quickrpt
+[HistoryLists\hlConditionals]
+Count=1
+Item0=DEBUG
+[HistoryLists\hlUnitAliases]
+Count=1
+Item0=WinTypes=Windows;WinProcs=Windows;DbiTypes=BDE;DbiProcs=BDE;DbiErrs=BDE;
+[HistoryLists\hlSearchPath]
+Count=1
+Item0=C:\Program Files\Steema Software\TeeChart 804 for Delphi 5\Delphi5\Lib
+[HistoryLists\hlUnitOutputDirectory]
+Count=2
+Item0=C:\Kingswood\Output\Winherd\Development\DCU
+Item1=C:\Kingswood\Output\Winherd\Release\DCU
+[HistoryLists\hlOutputDirectorry]
+Count=7
+Item0=C:\Kingswood Herd Management
+Item1=C:\Kingswd
+Item2=C:\Kingswood\Output\Winherd\Development\Compiled
+Item3=T:\
+Item4=C:\Kingswood\Output\Winherd\Release\Compiled
+Item5=C:\Kingswood\Output\Winherd\Development\
+Item6=C:\Kingswood\Output

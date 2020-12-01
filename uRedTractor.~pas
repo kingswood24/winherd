@@ -1,0 +1,134 @@
+{
+   13/10/14 [V5.3 R7.5] /MK Bug Fix - fmRedTractorTreatSum instead of TfmRedTractorTreatSum.
+
+   22/09/17 [V5.7 R3.1] /MK Additional Feature - Added Veterinary Purchases, Treatments and Feed Purchases - GL Request.
+}
+
+unit uRedTractor;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  uBaseForm, dxBar, dxBarExtItems, ActnList, cxControls, dxStatusBar,
+  uRedTractorTreatSum, DairyData, GenTypesConst, cxContainer, cxEdit,
+  cxLabel, ExtCtrls, StdCtrls, cxButtons, HealthFilterU, uRedTractorDrugCollation;
+
+type
+  TfmRedTractor = class(TfmBaseForm)
+    dxBarLargeButton1: TdxBarLargeButton;
+    actPrintAll: TAction;
+    pInfo: TPanel;
+    imgRedTractorLogo: TImage;
+    lInfo: TcxLabel;
+    btnTreatmentSummary: TcxButton;
+    actDiseaseSummary: TAction;
+    btnVetPurchase: TcxButton;
+    btnVetTreatments: TcxButton;
+    btnFeedPurchases: TcxButton;
+    actVeterinaryRegister: TAction;
+    actVetPurchases: TAction;
+    actFeedPurchases: TAction;
+    btnAnnualCollation: TcxButton;
+    actAnnualCollation: TAction;
+    procedure actPrintAllExecute(Sender: TObject);
+    procedure actDiseaseSummaryExecute(Sender: TObject);
+    procedure actVeterinaryRegisterExecute(Sender: TObject);
+    procedure actVetPurchasesExecute(Sender: TObject);
+    procedure actFeedPurchasesExecute(Sender: TObject);
+    procedure actAnnualCollationExecute(Sender: TObject);
+  private
+    procedure PrintAllReports;
+    { Private declarations }
+  public
+    class procedure ShowTheForm;
+    { Public declarations }
+  end;
+
+var
+  fmRedTractor: TfmRedTractor;
+
+implementation
+
+{$R *.DFM}
+
+class procedure TfmRedTractor.ShowTheForm;
+begin
+   with TfmRedTractor.Create(nil) do
+      try
+         ShowModal;
+      finally
+         Free;
+      end;
+end;
+
+procedure TfmRedTractor.actPrintAllExecute(Sender: TObject);
+begin
+   inherited;
+   if ( MessageDlg('Are you sure you want to proceed?'+cCRLF+
+                   'This action will generate a lot of printed pages.'+cCRLF+
+                   'Have your printer ready.',mtConfirmation,[mbYes,mbNo],0) = mrYes ) then
+      PrintAllReports;
+end;
+
+procedure TfmRedTractor.PrintAllReports;
+begin
+   Screen.Cursor := crHourGlass;
+
+   WinData.FBordBiaBlockPrint := True;
+
+   // Print Red Tractor Summary.
+   TfmRedTractorHealthCodeSummary.ShowTheForm(WinData.UserDefaultHerdID);
+
+   // Print Annual Collation.
+   TfmRedTractorDrugCollation.ShowTheForm;
+
+   // Print Veterinary Purchases.
+   THeatlthFilter.ShowTheForm(rtMediFeedPurch,ptVeterinary,True);
+
+   // Print Veterinary Treatments.
+   THeatlthFilter.ShowTheForm(rtMediTreat,ptVeterinary,True);
+
+   // Print Feed Purchases.
+   THeatlthFilter.ShowTheForm(rtMediFeedPurch,ptFeed,True);
+
+   WinData.FBordBiaBlockPrint := False;
+
+   Screen.Cursor := crDefault;
+end;
+
+procedure TfmRedTractor.actDiseaseSummaryExecute(Sender: TObject);
+begin
+   inherited;
+   WinData.FBordBiaBlockPrint := False;
+   TfmRedTractorHealthCodeSummary.ShowTheForm(WinData.UserDefaultHerdID);
+end;
+
+procedure TfmRedTractor.actVeterinaryRegisterExecute(Sender: TObject);
+begin
+   inherited;
+   WinData.FBordBiaBlockPrint := False;
+   THeatlthFilter.ShowTheForm(rtMediTreat,ptVeterinary,True);
+end;
+
+procedure TfmRedTractor.actVetPurchasesExecute(Sender: TObject);
+begin
+   inherited;
+   WinData.FBordBiaBlockPrint := False;
+   THeatlthFilter.ShowTheForm(rtMediFeedPurch,ptVeterinary,True);
+end;
+
+procedure TfmRedTractor.actFeedPurchasesExecute(Sender: TObject);
+begin
+   inherited;
+   WinData.FBordBiaBlockPrint := False;
+   THeatlthFilter.ShowTheForm(rtMediFeedPurch,ptFeed,True);
+end;
+
+procedure TfmRedTractor.actAnnualCollationExecute(Sender: TObject);
+begin
+   inherited;
+   TfmRedTractorDrugCollation.ShowTheForm;
+end;
+
+end.

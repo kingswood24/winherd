@@ -1,0 +1,333 @@
+{
+   28/09/12 [V5.1 R0.0] /MK Additional Feature - Allow animals to be deselected and not saved.
+
+   05/10/12 [V5.1 R0.2] /MK Change - Change to new WinData.UpdateTempMovementEvents.
+}
+
+unit uTempMovementsIn;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  uBaseForm, dxBar, dxBarExtItems, ActnList, cxControls, dxStatusBar,
+  DairyData, GenTypesConst, db, dbTables, cxContainer, cxEdit, cxLabel,
+  cxGridCustomTableView, cxGridTableView, cxGridDBTableView, cxGridLevel,
+  cxClasses, cxGridCustomView, cxGrid, ExtCtrls, cxGroupBox, cxTextEdit,
+  cxMaskEdit, cxDropDownEdit, cxCalendar, StdCtrls, cxButtons,
+  cxLookupEdit, cxDBLookupEdit, cxDBLookupComboBox, KRoutines;
+
+type
+  TfmTempMovementsIn = class(TfmBaseForm)
+    gbMovedOutDate: TcxGroupBox;
+    gbMovedInDate: TcxGroupBox;
+    lMovementDate: TcxLabel;
+    cxGroupBox1: TcxGroupBox;
+    TempMoveGrid: TcxGrid;
+    TempMoveGridDBTableView: TcxGridDBTableView;
+    TempMoveGridDBTableViewAnimalNo: TcxGridDBColumn;
+    TempMoveGridDBTableViewNatIDNum: TcxGridDBColumn;
+    TempMoveGridDBTableViewMovementDate: TcxGridDBColumn;
+    empMoveGridDBTableViewMovedTo: TcxGridDBColumn;
+    TempMoveGridLevel: TcxGridLevel;
+    lMovedIn: TcxLabel;
+    deMovedInDate: TcxDateEdit;
+    btnSave: TcxButton;
+    actSaveEvents: TAction;
+    cmboMovedOff: TcxComboBox;
+    TempMoveGridDBTableViewSelected: TcxGridDBColumn;
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure actSaveEventsExecute(Sender: TObject);
+    procedure deMovedInDatePropertiesChange(Sender: TObject);
+    procedure cmboMovedOffPropertiesChange(Sender: TObject);
+    procedure TempMoveGridDBTableViewEditing(
+      Sender: TcxCustomGridTableView; AItem: TcxCustomGridTableItem;
+      var AAllow: Boolean);
+  private
+    function GetMovedOutDate: TDateTime;
+    function StripPunctuation(StrToStrip: String): String;
+  private
+    FEventsTable : TTable;
+    FEventSource : TDataSource;
+    FMovedToID : Integer;
+    FMovedOutDate : TDateTime;
+    procedure GetEventDates;
+    procedure GetEventsByDate(AMovedDate : TDateTime; AMovedToID : Integer);
+    procedure RefreshScreen;
+    property MovedOutDate : TDateTime read GetMovedOutDate;
+    { Private declarations }
+  public
+    { Public declarations }
+    class procedure ShowForm;
+  end;
+
+var
+  fmTempMovementsIn: TfmTempMovementsIn;
+
+implementation
+
+{$R *.DFM}
+
+{ TfmTempMovementsIn }
+
+class procedure TfmTempMovementsIn.ShowForm;
+begin
+   with TfmTempMovementsIn.Create(nil) do
+      try
+         ShowModal;
+      finally
+         Free;
+      end;
+end;
+
+procedure TfmTempMovementsIn.FormCreate(Sender: TObject);
+begin
+   inherited;
+   FEventsTable := TTable.Create(nil);
+   with FEventsTable do
+      begin
+         DatabaseName := AliasName;
+         TableName := 'tmpMovedAnimals';
+         FieldDefs.Add('ID',ftAutoInc);
+         FieldDefs.Add('Selected',ftBoolean);
+         FieldDefs.Add('AnimalNo',ftString,10);
+         FieldDefs.Add('SortAnimalNo',ftString,20);
+         FieldDefs.Add('NatIDNum',ftString,20);
+         FieldDefs.Add('SortNatID',ftString,20);
+         FieldDefs.Add('EventID',ftInteger);
+         FieldDefs.Add('EventDate',ftDate);
+         FieldDefs.Add('MovedTo',ftString,40);
+         CreateTable;
+      end;
+
+   FEventSource := TDataSource.Create(nil);
+   FEventSource.DataSet := FEventsTable;
+
+   RefreshScreen;
+end;
+
+procedure TfmTempMovementsIn.RefreshScreen;
+begin
+   lMovedIn.Enabled := False;
+   deMovedInDate.Enabled := False;
+   deMovedInDate.Clear;
+   btnSave.Enabled := False;
+
+   GetEventDates;
+
+   cmboMovedOff.ItemIndex := 0;
+
+   TempMoveGridDBTableView.DataController.DataSource := nil;
+end;
+
+procedure TfmTempMovementsIn.GetEventDates;
+var
+   MovedToQuery : TQuery;
+begin
+   MovedToQuery := TQuery.Create(nil);
+   with MovedToQuery do
+      try
+         DatabaseName := AliasName;
+         SQL.Clear;
+         SQL.Add('SELECT DISTINCT(M.MovedTo),');
+         SQL.Add('       E.EventDate,');
+         SQL.Add('       MT.Name');
+         SQL.Add('FROM Movements M');
+         SQL.Add('LEFT JOIN Events E On (E.ID = M.EventID)');
+         SQL.Add('LEFT JOIN MovedTo MT On (MT.ID = M.MovedTo)');
+         SQL.Add('WHERE (StillOffFarm = True)');
+         SQL.Add('ORDER BY E.EventDate ASC');
+         Open;
+
+         First;
+         cmboMovedOff.Properties.Items.Clear;
+         cmboMovedOff.Properties.Items.Add('<Select Date>');
+         while not(Eof) do
+            begin
+               cmboMovedOff.Properties.Items.Add(DateToStr(FieldByName('EventDate').AsDateTime)+'('+FieldByName('Name').AsString+')');
+               Next;
+            end;
+      finally
+         Free;
+      end;
+end;
+
+procedure TfmTempMovementsIn.GetEventsByDate(AMovedDate : TDateTime; AMovedToID : Integer);
+var
+   TempQuery : TQuery;
+begin
+   FEventsTable.Close;
+   FEventsTable.EmptyTable;
+   TempQuery := TQuery.Create(nil);
+   with TempQuery do
+      try
+         DatabaseName := AliasName;
+         SQL.Clear;
+         //SQL.Add('INSERT INTO '+FEventsTable.TableName+' (AnimalNo, SortAnimalNo, NatIDNum, SortNatID,');
+         //SQL.Add('                                        EventID, EventDate, MovedTo)');
+         SQL.Add('SELECT A.AnimalNo, A.SortAnimalNo, A.NatIDNum, A.SortNatID,');
+         SQL.Add('       E.ID, E.EventDate,');
+         SQL.Add('       MT.Name');
+         SQL.Add('FROM Animals A');
+         SQL.Add('LEFT JOIN Movements M ON (M.AID = A.ID)');
+         SQL.Add('LEFT JOIN Events E ON (E.ID = M.EventID)');
+         SQL.Add('LEFT JOIN MovedTo MT ON (MT.ID = M.MovedTo)');
+         SQL.Add('WHERE (M.DateMovedBack IS NULL)');
+         SQL.Add('AND   (E.EventDate = "'+FormatDateTime(cUSDateStyle,AMovedDate)+'")');
+         SQL.Add('AND   (M.MovedTo = '+IntToStr(AMovedToID)+')');
+         //ExecSQL;
+         Open;
+
+         SQL.Clear;
+         SQL.Add('UPDATE '+FEventsTable.TableName+' ');
+         SQL.Add('SET Selected = True');
+         ExecSQL;
+      finally
+         Free;
+      end;
+end;
+
+procedure TfmTempMovementsIn.cmboMovedOffPropertiesChange(Sender: TObject);
+begin
+   inherited;
+   if cmboMovedOff.ItemIndex > 0 then
+      begin
+         TempMoveGridDBTableView.DataController.DataSource := nil;
+         GetEventsByDate(MovedOutDate,FMovedToID);
+         FEventsTable.Close;
+         FEventsTable.Open;
+         TempMoveGridDBTableView.DataController.DataSource := FEventSource;
+         lMovedIn.Enabled := True;
+         deMovedInDate.Enabled := True;
+         btnSave.Enabled := True;
+      end;
+end;
+
+procedure TfmTempMovementsIn.deMovedInDatePropertiesChange(
+  Sender: TObject);
+begin
+   inherited;
+   if ( deMovedInDate.Date > Date ) then
+      begin
+         MessageDlg('Date Moved In must be on or before todays date.',mtError,[mbOK],0);
+         deMovedInDate.Clear;
+      end
+   else if ( (deMovedInDate.Date > 0) and (deMovedInDate.Date < FMovedOutDate) ) then
+      begin
+         MessageDlg('Date Moved In must be after Date Moved Out.',mtError,[mbOK],0);
+         deMovedInDate.Clear;
+      end
+   else if ( deMovedInDate.Date > 0 ) then
+      btnSave.Enabled := True;
+end;
+
+procedure TfmTempMovementsIn.actSaveEventsExecute(Sender: TObject);
+var
+  iSavedCount : Integer;
+begin
+   inherited;
+   iSavedCount := 0;
+   if ( deMovedInDate.Date > 0 ) and ( deMovedInDate.Date > FMovedOutDate ) then
+      begin
+         FEventsTable.First;
+         while ( not(FEventsTable.Eof) ) do
+            begin
+               if ( FEventsTable.FieldByName('Selected').AsBoolean ) then
+                  begin
+                     //   05/10/12 [V5.1 R0.2] /MK Change - Change to new WinData.UpdateTempMovementEvents.
+                     WinData.UpdateTempMovementEvents(FEventsTable.FieldByName('EventID').AsInteger,
+                                                      deMovedInDate.Date);
+                     Inc(iSavedCount);
+                  end;
+               FEventsTable.Next;
+            end;
+         if ( iSavedCount > 0 ) then
+            MessageDlg(Format('%d Temp Movement Events updated sucessfully.',[iSavedCount]),mtInformation,[mbOK],0);
+         RefreshScreen;
+      end
+   else if ( (deMovedInDate.Date > 0) and ( deMovedInDate.Date < FMovedOutDate) ) then
+      begin
+         MessageDlg('Moved In Date must be after Date Moved Out.',mtError,[mbOK],0);
+         deMovedInDate.Date := 0;
+      end
+   else if ( deMovedInDate.Date <= 0 ) then
+      MessageDlg('Please select a Moved In Date.',mtInformation,[mbOk],0);
+end;
+
+function TfmTempMovementsIn.GetMovedOutDate: TDateTime;
+var
+   i,
+   DateLength,
+   StringLength,
+   BracketStart : Integer;
+   sMovedToName : String;
+   sTempString : String;
+begin
+   DateLength := 0;
+   BracketStart := 0;
+   DateLength := 0;
+   StringLength := Length(cmboMovedOff.EditValue);
+   sTempString := cmboMovedOff.EditValue;
+
+   if StringLength > 0 then
+      begin
+         for i := 0 to StringLength do
+            begin
+               if sTempString[i] = '(' then
+                  begin
+                     BracketStart := i;
+                     Inc(DateLength);
+                     Break;
+                  end;
+            end;
+      end;
+
+   sMovedToName := StripPunctuation(Copy(sTempString,BracketStart+1,Length(sTempString)+1));
+   WinData.tMovedTo.Open;
+   if WinData.tMovedTo.Locate('Name',sMovedToName,[]) then
+      FMovedToID := WinData.tMovedTo.FieldByName('ID').AsInteger;
+   WinData.tMovedTo.Close;
+
+   if BracketStart > 0 then
+      begin
+         Result := StrToDate(Copy(sTempString,0,BracketStart-1));
+         FMovedOutDate := Result;
+      end;
+end;
+
+procedure TfmTempMovementsIn.TempMoveGridDBTableViewEditing(
+  Sender: TcxCustomGridTableView; AItem: TcxCustomGridTableItem;
+  var AAllow: Boolean);
+begin
+   inherited;
+   if AItem.Index = TempMoveGridDBTableViewSelected.Index then
+      AAllow := True
+   else
+      AAllow := False;
+end;
+
+function TfmTempMovementsIn.StripPunctuation(StrToStrip: String ): String;
+var
+   i,
+   LenOfStr : Integer;
+   TempStr  : String;
+begin
+   TempStr := StrToStrip;
+   LenOfStr := Length(TempStr);
+   if (LenOfStr > 0) then
+      for i := 1 to LenOfStr do
+         if NOT (TempStr[i] IN ['A'..'Z','a'..'z','0'..'9',' ']) then
+          Delete(TempStr,i,1);
+   Result := TempStr;
+end;
+
+procedure TfmTempMovementsIn.FormDestroy(Sender: TObject);
+begin
+   inherited;
+   FEventsTable.Close;
+   FEventsTable.DeleteTable;
+   FreeAndNil(FEventsTable);
+end;
+
+end.

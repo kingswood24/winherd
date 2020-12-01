@@ -1,0 +1,216 @@
+{
+   16/02/17 [V5.6 R4.5] /MK Bug Fix - actSaveExecute - DateTimeToStr not working and SQL failed to Execute.
+
+   02/05/17 [V5.6 R8.0] /MK Bug Fix - actSaveExecute - Make use of the new CustSuppID to only update the selected customer/supplier - Geraldine Murray.
+}
+
+unit uChangeCustomerSupplierNames;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  uBaseForm, dxBar, dxBarExtItems, ActnList, cxControls, dxStatusBar,
+  cxContainer, cxEdit, cxLabel, ExtCtrls, cxGridLevel, cxClasses,
+  cxGridCustomView, cxGridCustomTableView, cxGridTableView,
+  cxGridDBTableView, cxGrid, cxGroupBox, cxRadioGroup, StdCtrls, Db,
+  dxmdaset, cxUtils, dbTables, GenTypesConst;
+
+type
+  TSourceType = (stCustomer, stSupplier);
+  TfmChangeCustomerSupplierNames = class(TfmBaseForm)
+    pInfo: TPanel;
+    lInfo: TcxLabel;
+    CustomerSupplierGridLevel: TcxGridLevel;
+    CustomerSupplierGrid: TcxGrid;
+    CustomerSupplierGridDBTableView: TcxGridDBTableView;
+    CustomerSupplierGridDBTableViewExistingName: TcxGridColumn;
+    CustomerSupplierGridDBTableViewNewName: TcxGridColumn;
+    pCustomerSupplier: TPanel;
+    rbCustomer: TcxRadioButton;
+    rbSupplier: TcxRadioButton;
+    dxblbSave: TdxBarLargeButton;
+    actSave: TAction;
+    procedure rbCustomerClick(Sender: TObject);
+    procedure rbSupplierClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure actSaveExecute(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+  private
+    { Private declarations }
+    FMDSourceTable : TdxMemData;
+    FDSSourceTable : TDataSource;
+    FTableName : String;
+    procedure GetSourceDetails ( ASourceType : TSourceType );
+  public
+    { Public declarations }
+    class procedure ShowForm;
+  end;
+
+var
+  fmChangeCustomerSupplierNames: TfmChangeCustomerSupplierNames;
+
+implementation
+
+{$R *.DFM}
+
+class procedure TfmChangeCustomerSupplierNames.ShowForm;
+begin
+   with TfmChangeCustomerSupplierNames.Create(nil) do
+      try
+         ShowModal;
+      finally
+         Free;
+      end;
+end;
+
+procedure TfmChangeCustomerSupplierNames.FormCreate(Sender: TObject);
+begin
+   inherited;
+   FMDSourceTable := TdxMemData.Create(nil);
+   rbCustomer.Checked := True;
+   GetSourceDetails(stCustomer);
+end;
+
+procedure TfmChangeCustomerSupplierNames.rbCustomerClick(Sender: TObject);
+begin
+   inherited;
+   rbCustomer.Checked := True;
+   if ( rbCustomer.Checked ) then
+      rbSupplier.Checked := False;
+   GetSourceDetails(stCustomer);
+end;
+
+procedure TfmChangeCustomerSupplierNames.rbSupplierClick(Sender: TObject);
+begin
+   inherited;
+   rbSupplier.Checked := True;
+   if ( rbSupplier.Checked ) then
+      rbSupplier.Checked := False;
+   GetSourceDetails(stSupplier);
+end;
+
+procedure TfmChangeCustomerSupplierNames.GetSourceDetails(ASourceType: TSourceType);
+begin
+   if ( ASourceType = stCustomer ) then
+      FTableName := 'Customers'
+   else
+      FTableName := 'SuppliersBreeders';
+
+   CustomerSupplierGridDBTableView.DataController.DataSource := nil;
+   if FDSSourceTable = nil then
+      FDSSourceTable := TDataSource.Create(nil);
+   FDSSourceTable.DataSet := nil;
+
+   ClearMemDataFieldDefs(FMDSourceTable);
+   CreateMemDataFieldDef(FMDSourceTable,'ID',ftAutoInc);
+   CreateMemDataFieldDef(FMDSourceTable,'OldName',ftString,50);
+   CreateMemDataFieldDef(FMDSourceTable,'NewName',ftString,50);
+   CreateMemDataFieldDef(FMDSourceTable,'CustSuppID',ftInteger);
+   if ( not(FMDSourceTable.Active) ) then
+      FMDSourceTable.Active := True;
+
+   with TQuery.Create(nil) do
+      try
+         DatabaseName := AliasName;
+         SQL.Clear;
+         SQL.Add('SELECT ID, Name');
+         SQL.Add('FROM '+FTableName+'');
+         SQL.Add('ORDER BY Name');
+         try
+            Open;
+            while ( not(Eof) ) do
+               begin
+                  try
+                     if ( FMDSourceTable.RecordCount = 0 ) then
+                        FMDSourceTable.Insert
+                     else
+                        FMDSourceTable.Append;
+                     FMDSourceTable.FieldByName('CustSuppID').AsInteger := Fields[0].AsInteger;
+                     FMDSourceTable.FieldByName('OldName').AsString := Fields[1].AsString;
+                     FMDSourceTable.Post;
+                  except
+                     on e : Exception do
+                        ShowMessage(e.Message);
+                  end;
+                  Next;
+               end;
+         except
+            on e : Exception do
+               ShowMessage(e.Message);
+         end;
+      finally
+         Free;
+      end;
+
+   FMDSourceTable.First;
+   FDSSourceTable.DataSet := FMDSourceTable;
+   CustomerSupplierGridDBTableView.DataController.DataSource := FDSSourceTable;
+end;
+
+procedure TfmChangeCustomerSupplierNames.actSaveExecute(Sender: TObject);
+begin
+   inherited;
+   if ( not(FMDSourceTable.Active) ) then
+      FMDSourceTable.Active := True;
+
+   FMDSourceTable.First;
+   while ( not(FMDSourceTable.Eof) ) do
+      begin
+         if ( Length(FMDSourceTable.FieldByName('NewName').AsString) > 0 ) then
+            with TQuery.Create(nil) do
+               try
+                  DatabaseName := AliasName;
+                  SQL.Clear;
+                  SQL.Add('SELECT *');
+                  SQL.Add('FROM '+FTableName+'');
+                  SQL.Add('WHERE Upper(Name) = "'+UpperCase(FMDSourceTable.FieldByName('NewName').AsString)+'"');
+                  try
+                     Open;
+                     if ( RecordCount > 0 ) then
+                        begin
+                           MessageDlg(Format('%s already exists',[FMDSourceTable.FieldByName('NewName').AsString]),mtError,[mbOK],0);
+                           Exit;
+                        end;
+
+                     SQL.Clear;
+                     SQL.Add('UPDATE '+FTableName+'');
+                     SQL.Add('SET Name = "'+FMDSourceTable.FieldByName('NewName').AsString+'",');
+                     //   16/02/17 [V5.6 R4.5] /MK Bug Fix - DateTimeToStr not working and SQL failed to Execute.
+                     SQL.Add('    NameChangedDate = "'+FormatDateTime(cUSDateStyle,Now)+'",');
+                     SQL.Add('    IsSynchronized = False');
+                     SQL.Add('WHERE Upper(Name) = "'+UpperCase(FMDSourceTable.FieldByName('OldName').AsString)+'"');
+                     //   02/05/17 [V5.6 R8.0] /MK Bug Fix - Make use of the new CustSuppID to only update the selected customer/supplier - Geraldine Murray.
+                     SQL.Add('AND   ID = '+IntToStr(FMDSourceTable.FieldByName('CustSuppID').AsInteger)+'');
+                     try
+                        ExecSQL;
+                     except
+                        on e : Exception do
+                           ShowMessage(e.Message);
+                     end;
+                  except
+                     on e : Exception do
+                        ShowMessage(e.Message);
+                  end;
+               finally
+                  Free;
+               end;
+         FMDSourceTable.Next;
+      end;
+
+   if ( rbCustomer.Checked ) then
+      GetSourceDetails(stCustomer)
+   else
+      GetSourceDetails(stSupplier);
+end;
+
+procedure TfmChangeCustomerSupplierNames.FormDestroy(Sender: TObject);
+begin
+   inherited;
+   if ( FDSSourceTable <> nil ) then
+      FreeAndNil(FDSSourceTable);
+   if ( FMDSourceTable <> nil ) then
+      FreeAndNil(FMDSourceTable);
+end;
+
+end.

@@ -1,0 +1,151 @@
+{
+   23/10/17 [V5.7 R4.0] /MK Additional Feature - Added status bar text to show the total amount used and the amount of treatments - Noel Keane.
+
+   08/04/20 [V5.9 R3.1] /MK Change - Focus on the first record.
+
+   17/08/20 [V5.9 R5.4] /MK Bug Fix - New form variable, FDrugUsed, used to pass into the HerdLookupqBatchNoMedDetails and HerdLookup.qMedBatchNoTreats
+                                      to get exact treatments for this purchase. David Hemmingways data was showing two different drugs for the same
+                                      DrugPurchaseId so treatments were not appearing correctly.
+}
+
+unit uMedBatchNoTreatments;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  uHerdLookup, uBaseForm, cxGridCustomTableView, cxGridTableView,
+  cxGridDBTableView, cxGridLevel, cxClasses, cxControls, cxGridCustomView,
+  cxGrid, cxContainer, cxEdit, cxLabel, ExtCtrls, dxBar, dxBarExtItems,
+  ActnList, dxStatusBar, dxPSCore, dxPScxCommon, dxPScxGridLnk, db, dbTables,
+  GenTypesConst;
+
+type
+  TfmMedBatchNoTreatments = class(TfmBaseForm)
+    pMedBatchInfo: TPanel;
+    MedBatchGridDBTableView: TcxGridDBTableView;
+    MedBatchGridLevel: TcxGridLevel;
+    MedBatchGrid: TcxGrid;
+    MedBatchGridDBTableViewNatIDNum: TcxGridDBColumn;
+    MedBatchGridDBTableViewDateOfBirth: TcxGridDBColumn;
+    MedBatchGridDBTableViewSex: TcxGridDBColumn;
+    MedBatchGridDBTableViewBreed: TcxGridDBColumn;
+    MedBatchGridDBTableViewEventDate: TcxGridDBColumn;
+    MedBatchGridDBTableViewNoDays: TcxGridDBColumn;
+    MedBatchGridDBTableViewNoTimes: TcxGridDBColumn;
+    MedBatchGridDBTableViewAdminBy: TcxGridDBColumn;
+    MedBatchGridDBTableViewPrescBy: TcxGridDBColumn;
+    blbPrintGrid: TdxBarLargeButton;
+    actPrint: TAction;
+    cpPrintGrid: TdxComponentPrinter;
+    cpPrintGridLink: TdxGridReportLink;
+    lBatchNo: TcxLabel;
+    lBatchNoInfo: TcxLabel;
+    lDrugName: TcxLabel;
+    lDrugNameInfo: TcxLabel;
+    MedBatchGridDBTableViewApplicRate: TcxGridDBColumn;
+    procedure actPrintExecute(Sender: TObject);
+  private
+    { Private declarations }
+    FDrugUsed : Integer;
+    function TotalAmountAdministeredCaption : String;
+  public
+    { Public declarations }
+    class procedure ShowTheForm(AMedPurchID : Integer);
+  end;
+
+var
+  fmMedBatchNoTreatments: TfmMedBatchNoTreatments;
+
+implementation
+
+{$R *.DFM}
+
+class procedure TfmMedBatchNoTreatments.ShowTheForm(AMedPurchID : Integer);
+begin
+   with TfmMedBatchNoTreatments.Create(nil) do
+      try
+         if ( AMedPurchID > 0 ) then
+            begin
+               HerdLookup.qBatchNoMedDetails.Close;
+               HerdLookup.qBatchNoMedDetails.Params[0].AsInteger := AMedPurchID;
+               HerdLookup.qBatchNoMedDetails.Open;
+               lBatchNoInfo.Caption := HerdLookup.qBatchNoMedDetails.FieldByName('BatchNo').AsString;
+               lDrugNameInfo.Caption := HerdLookup.qBatchNoMedDetails.FieldByName('Name').AsString;
+               FDrugUsed := HerdLookup.qBatchNoMedDetails.FieldByName('DrugId').AsInteger;
+
+               HerdLookup.qMedBatchNoTreats.Close;
+               HerdLookup.qMedBatchNoTreats.Params[0].AsInteger := AMedPurchID;
+               HerdLookup.qMedBatchNoTreats.Params[1].AsInteger := FDrugUsed;
+               HerdLookup.qMedBatchNoTreats.Open;
+
+               StatusBar.Panels[1].Text := TotalAmountAdministeredCaption;
+
+               MedBatchGridDBTableView.DataController.DataSource := nil;
+               MedBatchGridDBTableView.DataController.DataSource := HerdLookup.dsMedBatchNoTreats;
+
+               //   08/04/20 [V5.9 R3.1] /MK Change - Focus on the first record.
+               MedBatchGridDBTableView.DataController.FocusedRowIndex := 0;
+
+               ShowModal;
+            end;
+      finally
+         HerdLookup.qBatchNoMedDetails.Close;
+         HerdLookup.qMedBatchNoTreats.Close;
+         Free;
+      end;
+end;
+
+procedure TfmMedBatchNoTreatments.actPrintExecute(Sender: TObject);
+begin
+   inherited;
+   cpPrintGridLink.Preview;
+end;
+
+function TfmMedBatchNoTreatments.TotalAmountAdministeredCaption: String;
+var
+   fTotApplicRate,
+   fDoseUnit,
+   fPurchUnit,
+   fTotAmount : Double;
+   iTotTreatments : Integer;
+   sDoseUnit,
+   sPurchUnit : String;
+begin
+   Result := '';
+
+   fTotApplicRate := 0;
+   fDoseUnit := 0;
+   fPurchUnit := 0;
+   fTotAmount := 0;
+   iTotTreatments := 0;
+   sDoseUnit := '';
+   sPurchUnit := '';
+
+   HerdLookup.qMedBatchNoTreats.First;
+   fDoseUnit := HerdLookup.MedicineUnitUsed(FDrugUsed,utDose);
+   if ( fDoseUnit = 0 ) then
+      fDoseUnit := 1;
+   fPurchUnit := HerdLookup.MedicineUnitUsed(FDrugUsed,utPurchase);
+   if ( fPurchUnit = 0 ) then
+      fPurchUnit := 1;
+   sDoseUnit := HerdLookup.LookupDrugDosePurchUnitCode(FDrugUsed,utDose);
+   sPurchUnit := HerdLookup.LookupDrugDosePurchUnitCode(FDrugUsed,utPurchase);
+   while ( not(HerdLookup.qMedBatchNoTreats.Eof) ) do
+      begin
+         fTotApplicRate := fTotApplicRate + ( HerdLookup.qMedBatchNoTreats.FieldByName('RateApplic').AsFloat *
+                                             (HerdLookup.qMedBatchNoTreats.FieldByName('NoTimes').AsInteger *
+                                              HerdLookup.qMedBatchNoTreats.FieldByName('NoDays').AsInteger) );
+         iTotTreatments := iTotTreatments + ( HerdLookup.qMedBatchNoTreats.FieldByName('NoTimes').AsInteger *
+                                              HerdLookup.qMedBatchNoTreats.FieldByName('NoDays').AsInteger );
+         HerdLookup.qMedBatchNoTreats.Next;
+      end;
+   if ( fTotApplicRate > 0 ) or ( iTotTreatments > 0 ) then
+      begin
+         fTotAmount := fTotApplicRate * (fDoseUnit / fPurchUnit);
+         Result := Format('Animal(s) Treated : %d      Treatment(s) : %d      Medicine Used : %n %s (%n %s)',
+                          [HerdLookup.qMedBatchNoTreats.RecordCount, iTotTreatments, fTotApplicRate, sDoseUnit, fTotAmount, sPurchUnit]);
+      end;
+end;
+
+end.

@@ -1,0 +1,149 @@
+unit uModuleDefUpdate;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  uBaseForm, dxBar, dxBarExtItems, ActnList, cxControls, dxStatusBar,
+  uImageStore, Def, cxLabel, cxCheckBox, cxContainer, cxEdit, cxGroupBox,
+  ExtCtrls, uApplicationLog, KRoutines, cxTextEdit, cxMaskEdit, cxSpinEdit;
+
+type
+  TfmModuleDefUpdate = class(TfmBaseForm)
+    pModules: TPanel;
+    GroupBox3: TcxGroupBox;
+    cbAccs: TcxCheckBox;
+    cbParlour: TcxCheckBox;
+    cbRation: TcxCheckBox;
+    cbElecWeigh: TcxCheckBox;
+    cbPDAHerd: TcxCheckBox;
+    cbDIY: TcxCheckBox;
+    cbPDAFields: TcxCheckBox;
+    cbCrush: TcxCheckBox;
+    cbDanRyanImport: TcxCheckBox;
+    cbPlateMeterImport: TcxCheckBox;
+    cbDealer: TcxCheckBox;
+    Label2: TcxLabel;
+    Label4: TcxLabel;
+    Label5: TcxLabel;
+    Label7: TcxLabel;
+    Label8: TcxLabel;
+    mod2: TcxGroupBox;
+    UseManCal: TcxCheckBox;
+    mod6: TcxGroupBox;
+    UseBeefManagement: TcxCheckBox;
+    mod1: TcxGroupBox;
+    UsePremiums: TcxCheckBox;
+    mod3: TcxGroupBox;
+    UseQuotaMan: TcxCheckBox;
+    mod4: TcxGroupBox;
+    UseMilkRec: TcxCheckBox;
+    mod5: TcxGroupBox;
+    UsePedigree: TcxCheckBox;
+    dlbSave: TdxBarLargeButton;
+    actSave: TAction;
+    seSerialNo: TcxSpinEdit;
+    procedure actSaveExecute(Sender: TObject);
+  private
+    procedure LoadDefFile;
+    { Private declarations }
+  public
+    { Public declarations }
+    class procedure ShowTheForm;
+  end;
+
+var
+  fmModuleDefUpdate: TfmModuleDefUpdate;
+
+implementation
+
+{$R *.DFM}
+
+{ TfmModuleDefUpdate }
+
+class procedure TfmModuleDefUpdate.ShowTheForm;
+begin
+   with TfmModuleDefUpdate.Create(nil) do
+      try
+         LoadDefFile;
+         ShowModal;
+      finally
+         Free;
+      end;
+end;
+
+procedure TfmModuleDefUpdate.LoadDefFile;
+begin
+   if DefOpenOK then
+     try
+        CloseDef;
+     except
+     end;
+   Def.LoadDef(DataPath, False);
+
+   with Def.Definition do
+      begin
+         UsePremiums.Checked := dUsePremiums;
+         UseMilkRec.Checked := dUseMilkRec;
+         UseManCal.Checked := dUseManCal;
+         UsePedigree.Checked := dUsePedigree;
+         UseBeefManagement.Checked := dUseBeefMan;
+         UseQuotaMan.Checked := dUseQuotaMan;
+         cbParlour.Checked := dUseParlour;
+         cbRation.Checked := dUseRationCalc;
+         cbAccs.Checked := dUseKingsAccs;
+         cbPDAHerd.Checked := dUsePhoneLink;
+         cbDIY.Checked := dUseDIYMilkRec;
+         cbPDAFields.Checked := dPDAFields;
+         cbCrush.Checked := dUseCrush;
+         cbElecWeigh.Checked := dUseElecWeigh;
+         cbDanRyanImport.Checked := dUseDanRyanImport;
+         cbPlateMeterImport.Checked := dUsePlateMeterImport;
+         cbDealer.Checked := dUseDealer;
+         seSerialNo.Value := dSerialNo;
+      end;
+end;
+
+procedure TfmModuleDefUpdate.actSaveExecute(Sender: TObject);
+begin
+   inherited;
+   try
+      try
+         Update;
+         With Def.Definition Do
+            begin
+               dUseWeighings := UseManCal.Checked;
+               dUsePremiums  := UsePremiums.Checked;
+               dUseMilkRec   := UseMilkRec.Checked;
+               dUseManCal    := UseManCal.Checked;
+               dUsePedigree  := UsePedigree.Checked;
+               dUseBeefMan   := UseBeefManagement.Checked;
+               dUseQuotaMan    := UseQuotaMan.Checked;
+               dUseParlour     := cbParlour.Checked;
+               dUseRationCalc  := cbRation.Checked;
+               dUseKingsAccs   := cbAccs.Checked;
+               dUsePhoneLink := cbPDAHerd.Checked;
+               dUseDIYMilkRec := cbDIY.Checked;
+               dPDAFields := cbPDAFields.Checked;
+               dUseCrush := cbCrush.Checked;
+               dUseElecWeigh := cbElecWeigh.Checked;
+               dUseDanRyanImport := cbDanRyanImport.Checked;
+               dUsePlateMeterImport := cbPlateMeterImport.Checked;
+               dUseDealer := cbDealer.Checked;
+               dSerialNo := seSerialNo.Value;
+            End;
+         WriteDef(Def.Definition);
+         Def.LoadDef(DataPath, False);
+      except
+         on e : Exception do
+            begin
+               ApplicationLog.LogException(e);
+               ApplicationLog.LogError('Error saving def file.');
+            end;
+      end;
+   finally
+      Close;
+   end;
+end;
+
+end.

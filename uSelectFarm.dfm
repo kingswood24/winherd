@@ -1,0 +1,84 @@
+object fmSelectFarm: TfmSelectFarm
+  Left = 350
+  Top = 315
+  Width = 383
+  Height = 178
+  Caption = 'Select Farm'
+  Color = clBtnFace
+  Font.Charset = ANSI_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -13
+  Font.Name = 'Verdana'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poMainFormCenter
+  OnCloseQuery = FormCloseQuery
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  PixelsPerInch = 96
+  TextHeight = 16
+  object Label1: TLabel
+    Left = 9
+    Top = 8
+    Width = 338
+    Height = 49
+    Alignment = taCenter
+    AutoSize = False
+    Caption = 
+      'The forage area will be calculated based upon the chosen farm. N' +
+      'B: If "All Farms" is selected the forage area calculation will b' +
+      'e based on ALL FARMS'
+    Font.Charset = ANSI_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Verdana'
+    Font.Style = []
+    ParentFont = False
+    WordWrap = True
+  end
+  object FarmCombo: TRxDBLookupCombo
+    Left = 16
+    Top = 65
+    Width = 333
+    Height = 25
+    DropDownCount = 8
+    DisplayEmpty = '<All Farms>'
+    EmptyValue = '0'
+    LookupField = 'ID'
+    LookupDisplay = 'Name'
+    LookupSource = DataSource1
+    TabOrder = 0
+    OnChange = FarmComboCloseUp
+    OnCloseUp = FarmComboCloseUp
+  end
+  object Button1: TButton
+    Left = 180
+    Top = 104
+    Width = 78
+    Height = 25
+    Caption = 'OK'
+    ModalResult = 1
+    TabOrder = 1
+  end
+  object Button2: TButton
+    Left = 268
+    Top = 104
+    Width = 78
+    Height = 25
+    Caption = 'Cancel'
+    ModalResult = 2
+    TabOrder = 2
+  end
+  object QueryFarms: TQuery
+    DatabaseName = 'Kingswd'
+    SQL.Strings = (
+      'Select ID, Name From p1')
+    Left = 8
+    Top = 98
+  end
+  object DataSource1: TDataSource
+    DataSet = QueryFarms
+    Left = 38
+    Top = 98
+  end
+end

@@ -1,0 +1,112 @@
+object fmMessageScr: TfmMessageScr
+  Left = 616
+  Top = 318
+  BorderStyle = bsDialog
+  Caption = 'fmMessageScr'
+  ClientHeight = 182
+  ClientWidth = 510
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -13
+  Font.Name = 'Segoe UI'
+  Font.Style = []
+  FormStyle = fsStayOnTop
+  OldCreateOrder = False
+  Position = poMainFormCenter
+  PixelsPerInch = 96
+  TextHeight = 17
+  object pInfo: TPanel
+    Left = 0
+    Top = 0
+    Width = 510
+    Height = 182
+    Align = alClient
+    BevelOuter = bvNone
+    Color = clInfoBk
+    TabOrder = 0
+    object lInfo: TcxLabel
+      Left = 0
+      Top = 27
+      Align = alClient
+      AutoSize = False
+      Caption = 
+        'Only events for animals that are in the herd are showing.'#13#10#13#10'If ' +
+        'you would like to show events for sold animals exit the Event Di' +
+        'ary,'#13#10'tick Show All Animal'#39#39's above the main grid of animal'#39#39's g' +
+        'rid and then click'#13#10'the Event Diary button again.'#13#10
+      ParentColor = False
+      ParentFont = False
+      Properties.Alignment.Horz = taCenter
+      Properties.Alignment.Vert = taVCenter
+      Style.Color = clInfoBk
+      Style.Font.Charset = DEFAULT_CHARSET
+      Style.Font.Color = clRed
+      Style.Font.Height = -13
+      Style.Font.Name = 'Segoe UI'
+      Style.Font.Style = []
+      Style.TextColor = clNavy
+      Style.TextStyle = [fsBold]
+      Style.IsFontAssigned = True
+      Height = 103
+      Width = 510
+    end
+    object lInfoExtra: TcxLabel
+      Left = 0
+      Top = 0
+      Align = alTop
+      AutoSize = False
+      Caption = 'Click Save to proceed with the import of these purchases.'
+      ParentColor = False
+      ParentFont = False
+      Properties.Alignment.Horz = taCenter
+      Properties.Alignment.Vert = taVCenter
+      Style.Color = clInfoBk
+      Style.Font.Charset = DEFAULT_CHARSET
+      Style.Font.Color = clRed
+      Style.Font.Height = -16
+      Style.Font.Name = 'Segoe UI'
+      Style.Font.Style = [fsBold]
+      Style.TextColor = clNavy
+      Style.IsFontAssigned = True
+      Height = 27
+      Width = 510
+    end
+    object pButton: TPanel
+      Left = 0
+      Top = 130
+      Width = 510
+      Height = 52
+      Align = alBottom
+      BevelOuter = bvNone
+      Color = clInfoBk
+      TabOrder = 2
+      object btnOK: TcxButton
+        Left = 160
+        Top = 2
+        Width = 93
+        Height = 35
+        Anchors = [akRight, akBottom]
+        Caption = 'OK'
+        ModalResult = 1
+        TabOrder = 0
+        LookAndFeel.Kind = lfOffice11
+      end
+      object btnCancel: TcxButton
+        Left = 271
+        Top = 2
+        Width = 93
+        Height = 35
+        Anchors = [akRight, akBottom]
+        Caption = 'Cancel'
+        ModalResult = 2
+        TabOrder = 1
+        LookAndFeel.Kind = lfOffice11
+      end
+    end
+  end
+  object ActionList: TActionList
+    Left = 314
+    Top = 198
+  end
+end

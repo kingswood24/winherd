@@ -1,0 +1,216 @@
+unit uFertProgramAdmin;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  uBaseForm, cxLabel, cxDropDownEdit, cxLookupEdit, cxDBLookupEdit,
+  cxDBLookupComboBox, cxTextEdit, cxMaskEdit, cxCalendar, cxContainer,
+  cxEdit, cxGroupBox, ActnList, dxBar, dxBarExtItems, cxControls,
+  dxStatusBar, db, dbtables, StdCtrls, cxButtons, cxGridLevel,
+  cxGridCustomTableView, cxGridTableView, cxGridDBTableView, cxClasses,
+  cxGridCustomView, cxGrid;
+
+type
+  TfmFertProgramAdmin = class(TfmBaseForm)
+    cxGroupBox1: TcxGroupBox;
+    deStartDate: TcxDateEdit;
+    erFertProgramList: TcxLookupComboBox;
+    cxLabel1: TcxLabel;
+    cxLabel2: TcxLabel;
+    dxBarLargeButton1: TdxBarLargeButton;
+    dxBarLargeButton2: TdxBarLargeButton;
+    actSave: TAction;
+    cxGroupBox2: TcxGroupBox;
+    cxGrid1: TcxGrid;
+    cxGrid1DBTableView1: TcxGridDBTableView;
+    cxGrid1DBTableView1Code: TcxGridDBColumn;
+    cxGrid1DBTableView1Description: TcxGridDBColumn;
+    cxGrid1DBTableView1StartDate: TcxGridDBColumn;
+    cxGrid1DBTableView1ID: TcxGridDBColumn;
+    cxGrid1Level1: TcxGridLevel;
+    cxButton1: TcxButton;
+    actCancel: TAction;
+    blbSetupProgram: TdxBarLargeButton;
+    actFertProgramSetup: TAction;
+    blbFertililtyChart: TdxBarLargeButton;
+    actFertilityChart: TAction;
+    cxButton2: TcxButton;
+    procedure cxLookupComboBox1PropertiesEditValueChanged(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure actSaveExecute(Sender: TObject);
+    procedure cxButton1Click(Sender: TObject);
+    procedure actCancelExecute(Sender: TObject);
+    procedure actFertProgramSetupExecute(Sender: TObject);
+    procedure actHelpExecute(Sender: TObject);
+    procedure actFertilityChartExecute(Sender: TObject);
+  private
+    { Private declarations }
+    FAnimalID : Integer;
+    FLactNo : Integer;
+    FEventID : Integer;
+    FEventDate : TDateTime;
+    procedure ShowProgramHistory;
+  public
+    { Public declarations }
+    class function Execute(AAnimalID, ALactNo, AEventID : Integer; AEventDate : TDateTime) : Boolean;
+  end;
+
+var
+  fmFertProgramAdmin: TfmFertProgramAdmin;
+
+implementation
+
+uses uHerdLookup, cxLookupDBGrid, GenTypesConst, uSetupFertPrograms,
+  DairyData, uFertilityTreatmentsReport, uFertTreatmentsReview;
+
+{$R *.DFM}
+
+procedure TfmFertProgramAdmin.cxLookupComboBox1PropertiesEditValueChanged(
+  Sender: TObject);
+var
+   LGrid: TcxCustomLookupDBGrid;
+   colStartDay : TcxLookupDBGridColumn;
+   StartDay : Variant;
+begin
+   inherited;
+   LGrid := HerdLookup.erFertProgramsLookup.Properties.Grid;
+   colStartDay := LGrid.Columns.ColumnByFieldName('StartDay');
+   if ColStartDay <> nil then
+      begin
+         StartDay := LGrid.DataController.Values[ LGrid.DataController.FocusedRecordIndex, 2];
+         if not VarIsNull(StartDay) then
+            begin
+               deStartDate.Date := FEventDate+StartDay;
+            end
+         else
+            begin
+               deStartDate.Date := FEventDate;
+            end;
+      end
+   else
+      deStartDate.Date := FEventDate;
+end;
+
+class function TfmFertProgramAdmin.Execute(AAnimalID, ALactNo, AEventID: Integer;
+  AEventDate: TDateTime): Boolean;
+begin
+   result := false;
+   with TfmFertProgramAdmin.Create(nil) do
+      try
+         FAnimalID := AAnimalID;
+         FLactNo := ALactNo;
+         FEventID := AEventID;
+         FEventDate := AEventDate;
+         deStartDate.Date := FEventDate;
+         ShowProgramHistory;
+         HerdLookup.QueryFertPrograms.Active := False;
+         HerdLookup.QueryFertPrograms.Active := True;
+         ShowModal;
+      finally
+         HerdLookup.QueryFertPrograms.Active := False;
+         Free;
+      end;
+end;
+
+procedure TfmFertProgramAdmin.FormCreate(Sender: TObject);
+begin
+  inherited;
+  HerdLookup.QueryFertPrograms.Active := True;
+end;
+
+procedure TfmFertProgramAdmin.FormDestroy(Sender: TObject);
+begin
+  inherited;
+  HerdLookup.QueryFertPrograms.Active := False;
+
+end;
+
+procedure TfmFertProgramAdmin.actSaveExecute(Sender: TObject);
+begin
+  inherited;
+  //
+  if VarIsNull(erFertProgramList.EditValue) then
+     begin
+        MessageDlg('You must select a fertility program!',mtError,[mbOk],0);
+        exit;
+     end
+  else if deStartDate.Date <= 0 then
+     begin
+        MessageDlg('You must select a start date for the fertility program!',mtError,[mbOk],0);
+        exit;
+     end;
+
+  with TQuery.Create(nil) do
+     try
+        DatabaseName := AliasName;
+        SQL.Add('INSERT INTO FertProgAdmin (AnimalID, LactNo, ProgramID, ParentEvent, StartDate)');
+        SQL.Add('VALUES (:AnimalID, :LactNo, :ProgramID, :ParentEvent, :StartDate)');
+        Params[0].AsInteger := FAnimalID;
+        Params[1].AsInteger := FLactNo;
+        Params[2].AsInteger := Integer(erFertProgramList.EditValue);
+        Params[3].AsInteger := FEventID;
+        Params[4].AsDateTime := deStartDate.Date;
+        ExecSQL;
+        ShowProgramHistory;
+        MessageDlg('Fertility Program Saved',mtInformation,[mbOK],0);
+
+     finally
+        Free;
+     end;
+  Close;
+end;
+
+procedure TfmFertProgramAdmin.ShowProgramHistory;
+begin
+   HerdLookup.QueryFertProgramHistory.Active := False;
+   HerdLookup.QueryFertProgramHistory.Params[0].AsInteger := FAnimalID;
+   HerdLookup.QueryFertProgramHistory.Active := True;
+end;
+
+procedure TfmFertProgramAdmin.cxButton1Click(Sender: TObject);
+begin
+  inherited;
+
+  if MessageDlg('Delete program?',mtConfirmation,[mbYes,mbNo],0) = idNo then  exit;
+
+  with TQuery.Create(nil) do
+     try
+        DatabaseName := AliasName;
+        SQL.Add('Delete From FertProgAdmin Where ID =:ID');
+        params[0].AsInteger := HerdLookup.QueryFertProgramHistoryID.AsInteger;
+        ExecSQL;
+     finally
+        Free;
+        ShowProgramHistory;
+     end;
+end;
+
+procedure TfmFertProgramAdmin.actCancelExecute(Sender: TObject);
+begin
+  inherited;
+  Close;
+end;
+
+procedure TfmFertProgramAdmin.actFertProgramSetupExecute(Sender: TObject);
+begin
+  inherited;
+  TfmSetupFertPrograms.Execute;
+  HerdLookup.QueryFertPrograms.Close;
+  HerdLookup.QueryFertPrograms.Open;
+end;
+
+procedure TfmFertProgramAdmin.actHelpExecute(Sender: TObject);
+begin
+  inherited;
+    WinData.HTMLHelp('ferttreatrep.htm');
+end;
+
+procedure TfmFertProgramAdmin.actFertilityChartExecute(Sender: TObject);
+begin
+  inherited;
+  TfmFertTreatmentsReview.Execute();
+end;
+
+end.

@@ -1,0 +1,20 @@
+unit uMilkData;
+
+interface
+
+TMilk = class
+private
+
+protected
+
+public
+  constructor Create; override;
+  destructor Destroy; override;
+published 
+
+end;
+
+
+implementation
+
+end.

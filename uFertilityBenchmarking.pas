@@ -1,0 +1,877 @@
+{
+   02/04/12 [V5.0 R4.6] /MK Additional Feature - Favourite Button Added.
+}
+
+unit uFertilityBenchmarking;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  StdCtrls, Db, DBTables, xml_generator, cxGridCustomTableView,
+  cxGridTableView, cxGridDBTableView, cxGridLevel, cxClasses, cxControls,
+  cxGridCustomView, cxGrid, DateUtil, cxGridBandedTableView,
+  cxGridDBBandedTableView, ExtCtrls, cxStyles, cxContainer, cxEdit,
+  cxTextEdit, cxMemo, cxPC, dxBar, dxBarExtItems, ActnList, cxLookAndFeels,
+  cxLabel, cxMaskEdit, cxDropDownEdit, cxCheckBox;
+
+type
+  TfmFertilityBenchmarking = class(TForm)
+    CalvingQuery: TQuery;
+    dsOutputTable: TDataSource;
+    ServiceQuery: TQuery;
+    PregDiagQuery: TQuery;
+    cxStyleRepository1: TcxStyleRepository;
+    cxStyle1: TcxStyle;
+    PageControl: TcxPageControl;
+    tsRawData: TcxTabSheet;
+    tsXMLData: TcxTabSheet;
+    Grid: TcxGrid;
+    GridDBTableView1: TcxGridDBTableView;
+    GridDBTableView1AnimalNo: TcxGridDBColumn;
+    GridDBTableView1NatIDNum: TcxGridDBColumn;
+    GridDBTableView1LactNo: TcxGridDBColumn;
+    GridDBTableView1CalvingDate: TcxGridDBColumn;
+    GridDBTableView1PDDate: TcxGridDBColumn;
+    GridDBTableView1SDate1: TcxGridDBColumn;
+    GridDBTableView1SDate2: TcxGridDBColumn;
+    GridDBTableView1SDate3: TcxGridDBColumn;
+    GridDBTableView1SDate4: TcxGridDBColumn;
+    GridDBTableView1SDate5: TcxGridDBColumn;
+    BandedTableView: TcxGridDBBandedTableView;
+    BandedTableViewAnimalNo: TcxGridDBBandedColumn;
+    BandedTableViewNatIDNum: TcxGridDBBandedColumn;
+    BandedTableViewLactNo: TcxGridDBBandedColumn;
+    BandedTableViewCalvingDate: TcxGridDBBandedColumn;
+    BandedTableViewSDate1: TcxGridDBBandedColumn;
+    BandedTableViewSDate2: TcxGridDBBandedColumn;
+    BandedTableViewSDate3: TcxGridDBBandedColumn;
+    BandedTableViewSDate4: TcxGridDBBandedColumn;
+    BandedTableViewSDate5: TcxGridDBBandedColumn;
+    BandedTableViewPregnant: TcxGridDBBandedColumn;
+    GridLevel1: TcxGridLevel;
+    XMLData: TcxMemo;
+    dxBarManager1: TdxBarManager;
+    blbExit: TdxBarLargeButton;
+    blbView: TdxBarLargeButton;
+    blbCreateFile: TdxBarLargeButton;
+    blbViewFile: TdxBarLargeButton;
+    ActionList1: TActionList;
+    actLoadData: TAction;
+    actCreateFile: TAction;
+    BarCombo: TdxBarCombo;
+    actClose: TAction;
+    cxStyle2: TcxStyle;
+    blbHelp: TdxBarLargeButton;
+    BandedTableViewHiddenNatIDNum: TcxGridDBBandedColumn;
+    BandedTableViewHiddenAnimalNo: TcxGridDBBandedColumn;
+    LoadDataTimer: TTimer;
+    dxBarControlContainerItem1: TdxBarControlContainerItem;
+    pSeasonInfo: TPanel;
+    SeasonCombo: TcxComboBox;
+    cxLabel1: TcxLabel;
+    blbReviewFiles: TdxBarLargeButton;
+    actReviewFiles: TAction;
+    CalcCalvingHistory: TQuery;
+    qDeleteRecords: TQuery;
+    dxBarControlContainerItem: TdxBarControlContainerItem;
+    pFavourite: TPanel;
+    cbFavourite: TcxCheckBox;
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure actLoadDataExecute(Sender: TObject);
+    procedure actCreateFileExecute(Sender: TObject);
+    procedure BarComboChange(Sender: TObject);
+    procedure actCloseExecute(Sender: TObject);
+    procedure blbViewFileClick(Sender: TObject);
+    procedure PageControlPageChanging(Sender: TObject;
+      NewPage: TcxTabSheet; var AllowChange: Boolean);
+    procedure BandedTableViewPregnantGetDisplayText(
+      Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
+      var AText: String);
+    procedure FormShow(Sender: TObject);
+    procedure LoadDataTimerTimer(Sender: TObject);
+    procedure BandedTableViewAnimalNoGetDisplayText(
+      Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
+      var AText: String);
+    procedure BandedTableViewNatIDNumGetDisplayText(
+      Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
+      var AText: String);
+    procedure SeasonComboPropertiesChange(Sender: TObject);
+    procedure actReviewFilesExecute(Sender: TObject);
+    procedure cbFavouritePropertiesChange(Sender: TObject);
+  private
+    { Private declarations }
+     XMLWriter : TXMLGenerator;
+     StartDate, EndDate : TDateTime;
+     CarryOverStartDate, CarryOverEndDate : TDateTime;
+     OutputTable : TTable;
+     OutputFileName : string;
+     procedure SetBreedSeasons;
+     function NoOfRecords : Integer;
+     procedure ValidateFileOutput;
+  public
+    { Public declarations }
+    class procedure Show;
+  end;
+
+var
+  fmFertilityBenchmarking: TfmFertilityBenchmarking;
+
+const
+    RuralPortalDir = 'DARD Rural Portal Files';
+    cCRLF = #13#10;
+
+implementation
+
+uses DairyData, KDBRoutines, uImageStore, KRoutines, ShellAPI,
+  GenTypesConst;
+
+{$R *.DFM}
+
+procedure TfmFertilityBenchmarking.FormCreate(Sender: TObject);
+begin
+
+   if not ForceApplicationDirectories(RuralPortalDir) then
+      Raise Exception.Create('Cannot create export directory. ');
+
+   LoadDataTimer.Enabled := False;
+   blbViewFile.Enabled := False;
+//   tsXMLData.TabVisible := False;
+   ImageStore := TImageStore.Create(nil);
+   SetBreedSeasons;
+   OutputTable := TTable.Create(nil);
+   OutputTable.DatabaseName := 'kingswd';
+   OutputTable.TableName := 'tmp00001';
+   with OutputTable.FieldDefs do
+      begin
+         Add('ID', ftAutoInc);
+         Add('AID', ftInteger);
+         Add('AnimalNo', ftString, 10);
+         Add('NatIDNum', ftString, 20);
+         Add('SortAnimalNo', ftString, 10);
+         Add('SortNatIDNum', ftString, 20);
+         Add('LactNo', ftInteger);
+         Add('CalvingDate', ftDateTime);
+
+         Add('SDate1', ftDateTime);
+         //Add('BullID1', ftString,10);
+         Add('PedName1', ftString,30);
+         Add('PedNo1', ftString,20);
+         Add('BreedCode1', ftString,6);
+
+         Add('SDate2', ftDateTime);
+//         Add('BullID2', ftString,10);
+         Add('PedName2', ftString,30);
+         Add('PedNo2', ftString,20);
+         Add('BreedCode2', ftString,6);
+
+         Add('SDate3', ftDateTime);
+//         Add('BullID3', ftString,10);
+         Add('PedName3', ftString,30);
+         Add('PedNo3', ftString,20);
+         Add('BreedCode3', ftString,6);
+
+         Add('SDate4', ftDateTime);
+//         Add('BullID4', ftString,10);
+         Add('PedName4', ftString,30);
+         Add('PedNo4', ftString,20);
+         Add('BreedCode4', ftString,6);
+
+         Add('SDate5', ftDateTime);
+//         Add('BullID5', ftString,10);
+         Add('PedName5', ftString,30);
+         Add('PedNo5', ftString,20);
+         Add('BreedCode5', ftString,6);
+
+         Add('Pregnant', ftBoolean);
+      end;
+   OutputTable.CreateTable;
+   dsOutputTable.DataSet := OutputTable;
+end;
+
+procedure TfmFertilityBenchmarking.SetBreedSeasons;
+var
+   Year, ThisYear : Word;
+begin
+   ThisYear := ExtractYear(Date);
+   Year := ThisYear;
+   with SeasonCombo do
+      begin
+         Properties.Items.BeginUpdate;
+         try
+            Properties.Items.Clear;
+            while Year > ( ThisYear - 5 ) do
+               begin
+                  Properties.Items.Insert(0, IntToStr(Year));
+                  Dec(Year);
+               end
+         finally
+            ItemIndex := Properties.Items.IndexOf(IntToStr(ThisYear-1));
+            Properties.Items.EndUpdate;
+         end;
+      end;
+end;
+
+class procedure TfmFertilityBenchmarking.Show;
+begin
+   with TfmFertilityBenchmarking.create(nil) do
+   try
+      ShowModal;
+   finally
+      Free;
+   end;
+end;
+
+procedure TfmFertilityBenchmarking.FormDestroy(Sender: TObject);
+begin
+   OutputTable.Close;
+   OutputTable.DeleteTable;
+   OutputTable.Free;
+   ImageStore.Free;
+end;
+
+procedure TfmFertilityBenchmarking.actLoadDataExecute(Sender: TObject);
+const
+
+   MaxServicesToOutput = 5;
+
+var
+  i : Integer;
+  ServiceStartDate : TDateTime;
+  NextServiceDate : TDateTime;
+  SQlText : TStringList;
+
+begin
+
+   Screen.Cursor := crHourGlass;
+   Enabled := False;
+   try
+      blbViewFile.Enabled := False;
+//      tsXMLData.TabVisible := False;
+      blbCreateFile.Enabled := False;
+      XMLData.Lines.Clear;
+      Update;
+      OutputTable.DisableControls;
+      SQLEmptyTable( OutputTable.TableName );
+      OutputTable.EnableControls;// Show Empty Grid.
+
+      OutputTable.DisableControls;
+      ServiceStartDate := EncodeDate(ExtractYear(StartDate), 10, 15 );
+
+      SQLText := TStringList.Create;
+      SQLText.Add('Insert into tmp00001 ( AID, AnimalNo, SortAnimalNo, NatIDNum, SortNatIDNum, CalvingDate, LactNo )');
+      SQLText.Add('Select ID, AnimalNo, SortAnimalNo, NatIDNum, SortNatID, Max(E.EventDate) CalvingDate, E.AnimalLactNo');
+      SQLText.Add('From Animals A, Events E');
+      SQLText.Add('Where (E.AnimalID=A.ID)');
+      SQLText.Add('And(A.Sex="Female")');
+      SQLText.Add('And (A.AnimalDeleted=False)');
+      SQLText.Add('And (A.LactNo > 0)');
+      SQLText.Add('And (E.EventType = 5)');
+      SQLText.Add('And ( E.EventDate Between :ADate1 And :ADate2)');
+      SQLText.Add('And ( A.HerdID = '+IntToStr(WinData.UserDefaultHerdID)+')');
+      SQLText.Add('And (ID > 0)');
+      SQLText.Add('And (AnimalNo <> "")');
+      SQLText.Add('And Not ( ID IN ( Select E2.AnimalID From Events E2 Where ( E2.EventType=11 And ( E2.EventDate <= '''+FormatDateTime('mm/dd/yyyy',StartDate)+'''))))');
+      SQLText.Add('And ID IN ( Select E3.AnimalID From Events E3 Where ( E3.EventType=2 ) And ( E3.EventDate >= '''+FormatDateTime('mm/dd/yyyy',ServiceStartDate)+''') )');
+      SQLText.Add('Group By ID, AnimalNo, SortAnimalNo, NatIDNum, SortNatID, E.AnimalLactNo');
+
+      CalvingQuery.Close;
+      CalvingQuery.SQL.Text := SQLText.Text;
+      CalvingQuery.ParamByName('ADate1').AsDateTime := CarryOverStartDate;
+      CalvingQuery.ParamByName('ADate2').AsDateTime := CarryOverEndDate;
+      CalvingQuery.ExecSQL;
+
+      CalvingQuery.Close;
+      // Remove CarryOver Cow Service date requirement.
+      SQLText.Delete(SQLText.Count-2);
+      CalvingQuery.SQL.Text := SQLText.Text;
+      CalvingQuery.ParamByName('ADate1').AsDateTime := StartDate;
+      CalvingQuery.ParamByName('ADate2').AsDateTime := EndDate;
+      CalvingQuery.ExecSQL;
+      SQLText.Free;
+
+      OutputTable.Active := True;
+      if ( NoOfRecords <= 0 ) then
+         begin
+            MessageDlg(Format('No records can be found for the breeding season %s - %s',
+                              [FormatDateTime(cIrishDateStyle,StartDate),
+                              FormatDateTime(cIrishDateStyle,EndDate)]),mtInformation,[mbOK],0);
+            SQLEmptyTable( OutputTable.TableName );
+            OutputTable.EnableControls;
+            Exit;
+         end;
+      try
+         ServiceStartDate := 0;
+         OutputTable.First;
+         while not OutputTable.eof do
+            begin
+               OutputTable.Edit;
+               try
+                  PregDiagQuery.Active := False;
+                  PregDiagQuery.Params[0].AsInteger := OutputTable.FieldByName('AID').AsInteger;
+                  PregDiagQuery.Params[1].AsInteger := OutputTable.FieldByName('LactNo').AsInteger;
+                  PregDiagQuery.Prepare;
+                  PregDiagQuery.Active := True;
+                  try
+                      OutputTable.FieldByName('Pregnant').AsBoolean := PregDiagQuery.FieldByName('PregnancyStatus').AsBoolean;
+                  finally
+                     PregDiagQuery.Active := False;
+                  end;
+
+                  ServiceStartDate := OutputTable.FieldByName('CalvingDate').AsDateTime + 14;
+
+                  ServiceQuery.Active := False;
+                  ServiceQuery.Params[0].AsInteger := OutputTable.FieldByName('AID').AsInteger;
+                  ServiceQuery.Params[1].AsInteger := OutputTable.FieldByName('LactNo').AsInteger;
+                  ServiceQuery.Params[2].AsDateTime := ServiceStartDate;
+                  ServiceQuery.Params[3].AsDateTime := EncodeDate(ExtractYear(StartDate), 10, 15 );
+                  ServiceQuery.Params[4].AsDateTime := EncodeDate(ExtractYear(EndDate), 10, 31 );
+                  ServiceQuery.Prepare;
+                  ServiceQuery.Active := True;
+
+                  i := 1;
+                  try
+                     while not ServiceQuery.Eof do
+                        begin
+                           NextServiceDate := 0;
+                           ServiceQuery.Next;
+                           if not ServiceQuery.Eof then
+                              begin
+                                 NextServiceDate := ServiceQuery.FieldByName('EventDate').AsDateTime;
+                                 ServiceQuery.Prior;
+                              end;
+
+                           if ( i <= MaxServicesToOutput ) then
+                              begin
+                                 if ( ( ServiceQuery.FieldByName('EventDate').AsDateTime + 3 ) < NextServiceDate ) or ( NextServiceDate = 0 ) then
+                                    begin
+                                       OutputTable.FieldByName(Format('SDate%d',[i])).AsDateTime := ServiceQuery.FieldByName('EventDate').AsDateTime;
+                                       //OutputTable.FieldByName(Format('BullID%d',[i])).AsString := ServiceQuery.FieldByName('BullNo').AsString;
+                                       OutputTable.FieldByName(Format('PedName%d',[i])).AsString := ServiceQuery.FieldByName('Name').AsString;
+                                       OutputTable.FieldByName(Format('PedNo%d',[i])).AsString := ServiceQuery.FieldByName('HerdBookNo').AsString;
+                                       OutputTable.FieldByName(Format('BreedCode%d',[i])).AsString := ServiceQuery.FieldByName('Code').AsString;
+                                       inc(i);
+                                    end;
+                              end;
+                           ServiceQuery.Next;
+                        end;
+
+                  finally
+                     ServiceQuery.Active := False;
+                  end;
+                  OutputTable.Post;
+               except
+                  OutputTable.Cancel;
+               end;
+               OutputTable.Next;
+            end;
+      finally
+         ValidateFileOutput;
+         OutputTable.First;
+         OutputTable.Refresh;
+         OutputTable.EnableControls;
+         BandedTableView.DataController.Refresh;
+      end;
+   finally
+      Screen.Cursor := crDefault;
+      Enabled := True;
+      BandedTableView.DataController.FocusedRowIndex := 0;
+      blbCreateFile.Enabled := True;
+      blbViewFile.Enabled := True;
+   end;
+end;
+
+procedure TfmFertilityBenchmarking.actCreateFileExecute(Sender: TObject);
+const
+   cTagDairyDataset = 'DairyDataset';
+   cTagDairyData = 'DairyData';
+   cTagCowID = 'CowID';
+   cTagUK9 = 'UK9';
+   cTagCalving = 'Calving';
+   cTagService1 = 'Service1';
+   cTagServiceBull1 = 'BullID1';
+   cTagService2 = 'Service2';
+   cTagServiceBull2 = 'BullID2';
+   cTagService3 = 'Service3';
+   cTagServiceBull3 = 'BullID3';
+   cTagService4 = 'Service4';
+   cTagServiceBull4 = 'BullID4';
+   cTagService5 = 'Service5';
+   cTagServiceBull5 = 'BullID5';
+   cTagPregnant = 'Pregnant';
+   cTagLactationNo = 'LactationNo';
+   cTagDate = 'Date';
+   cTagPedName = 'PedName';
+   cTagPedNo = 'PedNo';
+   cTagBreedCode = 'BreedCode';
+var
+   FileLineCount : Integer;
+begin
+   if WinData.AdvisoryRoleActive then
+      begin
+         MessageDlg(cAdvisoryAccessMsg,mtWarning,[mbOK],0);
+         exit;
+      end;
+
+   Screen.Cursor := crHourglass;
+   XMLWriter := TXMLGenerator.CreateFragment(1024);
+   BandedTableView.DataController.BeginFullUpdate;
+   try
+      XMLWriter.AddRaw('<?xml version="1.0" standalone="yes"?>');
+      XMLWriter.NewLine;
+
+      XMLWriter.StartTag(cTagDairyDataset);
+
+        with OutputTable do
+           begin
+              First;
+              FileLineCount := 0;
+              while not OutputTable.Eof do
+                 begin
+                    XMLWriter.StartTag(cTagDairyData);
+
+                    XMLWriter.StartTag(cTagCowID);
+                    XMLWriter.AddData(FieldByName('AnimalNo').AsString);
+                    XMLWriter.StopTag();
+
+                    XMLWriter.StartTag(cTagUK9);
+                    XMLWriter.AddData(Copy(Trim(FieldByName('NatIDNum').AsString),1,18));
+                    XMLWriter.StopTag();
+
+                    XMLWriter.StartTag(cTagCalving);
+                    XMLWriter.AddData(FormatDateTime('yyyy-mm-dd',FieldByName('CalvingDate').AsDateTime));
+                    XMLWriter.StopTag();
+
+                    XMLWriter.StartTag(cTagService1);
+
+                       XMLWriter.StartTag(cTagDate);
+                       if ( FieldByName('SDate1').AsDateTime > 0 ) then
+                          XMLWriter.AddData(FormatDateTime('yyyy-mm-dd',FieldByName('SDate1').AsDateTime))
+                       else
+                          XMLWriter.AddData('');
+                       XMLWriter.StopTag();
+
+                       XMLWriter.StartTag(cTagPedName);
+                       if ( Length(FieldByName('PedName1').AsString) > 0 ) then
+                          XMLWriter.AddData(FieldByName('PedName1').AsString)
+                       else
+                          XMLWriter.AddData('');
+                       XMLWriter.StopTag();
+
+                       XMLWriter.StartTag(cTagPedNo);
+                       if ( Length(FieldByName('PedNo1').AsString) > 0 ) then
+                          XMLWriter.AddData(FieldByName('PedNo1').AsString)
+                       else
+                          XMLWriter.AddData('');
+                       XMLWriter.StopTag();
+
+                       XMLWriter.StartTag(cTagBreedCode);
+                       if ( Length(FieldByName('BreedCode1').AsString) > 0 ) then
+                          XMLWriter.AddData(FieldByName('BreedCode1').AsString)
+                       else
+                          XMLWriter.AddData('');
+                       XMLWriter.StopTag();
+
+{                    XMLWriter.StartTag(cTagServiceBull1);
+                    XMLWriter.AddData(FieldByName('BullID1').AsString);
+                    XMLWriter.StopTag();
+}
+                    XMLWriter.StopTag();
+
+                    XMLWriter.StartTag(cTagService2);
+
+
+                       XMLWriter.StartTag(cTagDate);
+                       if ( FieldByName('SDate2').AsDateTime > 0 ) then
+                          XMLWriter.AddData(FormatDateTime('yyyy-mm-dd',FieldByName('SDate2').AsDateTime))
+                       else
+                          XMLWriter.AddData('');
+                       XMLWriter.StopTag();
+
+                       XMLWriter.StartTag(cTagPedName);
+                       if ( Length(FieldByName('PedName2').AsString) > 0 ) then
+                          XMLWriter.AddData(FieldByName('PedName2').AsString)
+                       else
+                          XMLWriter.AddData('');
+                       XMLWriter.StopTag();
+
+                       XMLWriter.StartTag(cTagPedNo);
+                       if ( Length(FieldByName('PedNo2').AsString) > 0 ) then
+                          XMLWriter.AddData(FieldByName('PedNo2').AsString)
+                       else
+                          XMLWriter.AddData('');
+                       XMLWriter.StopTag();
+
+                       XMLWriter.StartTag(cTagBreedCode);
+                       if ( Length(FieldByName('BreedCode2').AsString) > 0 ) then
+                          XMLWriter.AddData(FieldByName('BreedCode2').AsString)
+                       else
+                          XMLWriter.AddData('');
+                       XMLWriter.StopTag();
+
+{                       XMLWriter.StartTag(cTagServiceBull2);
+                       XMLWriter.AddData(FieldByName('BullID2').AsString);
+                       XMLWriter.StopTag();
+}
+
+                    XMLWriter.StopTag();
+
+                    XMLWriter.StartTag(cTagService3);
+
+                       XMLWriter.StartTag(cTagDate);
+                       if ( FieldByName('SDate3').AsDateTime > 0 ) then
+                          XMLWriter.AddData(FormatDateTime('yyyy-mm-dd',FieldByName('SDate3').AsDateTime))
+                       else
+                          XMLWriter.AddData('');
+                       XMLWriter.StopTag();
+
+                       XMLWriter.StartTag(cTagPedName);
+                       if ( Length(FieldByName('PedName3').AsString) > 0 ) then
+                          XMLWriter.AddData(FieldByName('PedName3').AsString)
+                       else
+                          XMLWriter.AddData('');
+                       XMLWriter.StopTag();
+
+                       XMLWriter.StartTag(cTagPedNo);
+                       if ( Length(FieldByName('PedNo3').AsString) > 0 ) then
+                          XMLWriter.AddData(FieldByName('PedNo3').AsString)
+                       else
+                          XMLWriter.AddData('');
+                       XMLWriter.StopTag();
+
+                       XMLWriter.StartTag(cTagBreedCode);
+                       if ( Length(FieldByName('BreedCode3').AsString) > 0 ) then
+                          XMLWriter.AddData(FieldByName('BreedCode3').AsString)
+                       else
+                          XMLWriter.AddData('');
+                       XMLWriter.StopTag();
+
+{                       XMLWriter.StartTag(cTagServiceBull3);
+                       XMLWriter.AddData(FieldByName('BullID3').AsString);
+                       XMLWriter.StopTag();
+}
+                   XMLWriter.StopTag();
+
+                   XMLWriter.StartTag(cTagService4);
+
+                       XMLWriter.StartTag(cTagDate);
+                       if ( FieldByName('SDate4').AsDateTime > 0 ) then
+                          XMLWriter.AddData(FormatDateTime('yyyy-mm-dd',FieldByName('SDate4').AsDateTime))
+                       else
+                          XMLWriter.AddData('');
+                       XMLWriter.StopTag();
+
+                       XMLWriter.StartTag(cTagPedName);
+                       if ( Length(FieldByName('PedName4').AsString) > 0 ) then
+                          XMLWriter.AddData(FieldByName('PedName4').AsString)
+                       else
+                          XMLWriter.AddData('');
+                       XMLWriter.StopTag();
+
+                       XMLWriter.StartTag(cTagPedNo);
+                       if ( Length(FieldByName('PedNo4').AsString) > 0 ) then
+                          XMLWriter.AddData(FieldByName('PedNo4').AsString)
+                       else
+                          XMLWriter.AddData('');
+                       XMLWriter.StopTag();
+
+                       XMLWriter.StartTag(cTagBreedCode);
+                       if ( Length(FieldByName('BreedCode4').AsString) > 0 ) then
+                          XMLWriter.AddData(FieldByName('BreedCode4').AsString)
+                       else
+                          XMLWriter.AddData('');
+                       XMLWriter.StopTag();
+
+{                       XMLWriter.StartTag(cTagServiceBull4);
+                       XMLWriter.AddData(FieldByName('BullID4').AsString);
+                       XMLWriter.StopTag();
+}
+                    XMLWriter.StopTag();
+
+                    XMLWriter.StartTag(cTagService5);
+                       XMLWriter.StartTag(cTagDate);
+                       if ( FieldByName('SDate5').AsDateTime > 0 ) then
+                          XMLWriter.AddData(FormatDateTime('yyyy-mm-dd',FieldByName('SDate5').AsDateTime))
+                       else
+                          XMLWriter.AddData('');
+                       XMLWriter.StopTag();
+
+                       XMLWriter.StartTag(cTagPedName);
+                       if ( Length(FieldByName('PedName5').AsString) > 0 ) then
+                          XMLWriter.AddData(FieldByName('PedName5').AsString)
+                       else
+                          XMLWriter.AddData('');
+                       XMLWriter.StopTag();
+
+                       XMLWriter.StartTag(cTagPedNo);
+                       if ( Length(FieldByName('PedNo5').AsString) > 0 ) then
+                          XMLWriter.AddData(FieldByName('PedNo5').AsString)
+                       else
+                          XMLWriter.AddData('');
+                       XMLWriter.StopTag();
+
+                       XMLWriter.StartTag(cTagBreedCode);
+                       if ( Length(FieldByName('BreedCode5').AsString) > 0 ) then
+                          XMLWriter.AddData(FieldByName('BreedCode5').AsString)
+                       else
+                          XMLWriter.AddData('');
+                       XMLWriter.StopTag();
+
+{                       XMLWriter.StartTag(cTagServiceBull4);
+                       XMLWriter.AddData(FieldByName('BullID4').AsString);
+                       XMLWriter.StopTag();
+}
+                    XMLWriter.StopTag();
+
+                    XMLWriter.StartTag(cTagPregnant);
+                    if FieldByName('Pregnant').AsBoolean = True then
+                       XMLWriter.AddData('1')
+                    else
+                       XMLWriter.AddData('0');
+                    XMLWriter.StopTag();
+
+                    XMLWriter.StartTag(cTagLactationNo);
+                    XMLWriter.AddData(FieldByName('LactNo').AsString);
+                    XMLWriter.StopTag();
+
+                    XMLWriter.StopTag;
+                    OutputTable.Next;
+                    Inc(FileLineCount);
+                 end;
+           end;
+
+      XMLWriter.StopTag;
+      XMLWriter.SaveToFile(OutputFileName);
+   finally
+      XMLWriter.Free;
+      OutputTable.First;
+      OutputTable.EnableControls;
+      Screen.Cursor := crDefault;
+      blbViewFile.Enabled := True;
+//      tsXMLData.TabVisible := True;
+      BandedTableView.DataController.FocusedRowIndex := 0;
+      BandedTableView.DataController.EndFullUpdate;
+      if FileExists(OutputFileName) then
+         MessageDlg(Format('XML data file created.'+cCRLF+cCRLF+'"%s"',[OutputFileName]),mtInformation, [mbOk],0)
+      else
+         MessageDlg('Error creating file',mtError, [mbOk],0)
+   end;
+end;
+
+procedure TfmFertilityBenchmarking.BarComboChange(Sender: TObject);
+begin
+{   StartDate := StrToDate('31/07/'+BarCombo.Text);
+   EndDate   := StrToDate('01/08/'+IntToStr(StrToInt(BarCombo.Text)+1));
+   OutputFileName := BarCombo.Text+'_'+IntToStr(StrToInt(BarCombo.Text)+1)+'.xml';
+   BandedTableView.Bands[0].Caption :=
+       'Season Breeding Events For Period      ' + '31/07/'+BarCombo.Text + ' - ' + '01/08/'+IntToStr(StrToInt(BarCombo.Text)+1);
+   Update;
+   if Showing then
+      actLoadData.Execute;}
+end;
+
+procedure TfmFertilityBenchmarking.actCloseExecute(Sender: TObject);
+begin
+   Close;
+end;
+
+procedure TfmFertilityBenchmarking.blbViewFileClick(Sender: TObject);
+begin
+   tsXMLData.TabVisible := True;
+   PageControl.ActivePage := tsXMLData;
+end;
+
+procedure TfmFertilityBenchmarking.PageControlPageChanging(
+  Sender: TObject; NewPage: TcxTabSheet; var AllowChange: Boolean);
+begin
+   if NewPage = tsXMLData then
+      begin
+         blbView.Visible := ivNever;
+         blbCreateFile.Visible := ivNever;
+         blbViewFile.Visible := ivNever;
+         XMLData.Lines.Clear;
+         if FileExists(OutputFileName) then
+            begin
+               XMLData.Lines.LoadFromFile(OutputFileName);
+            end
+         else
+            XMLData.Lines.Add('XML Data not found.');
+      end
+   else
+      begin
+         blbView.Visible := ivAlways;
+         blbCreateFile.Visible := ivAlways;
+         blbViewFile.Visible := ivAlways;
+         tsXMLData.TabVisible := False;
+      end;
+end;
+
+procedure TfmFertilityBenchmarking.BandedTableViewPregnantGetDisplayText(
+  Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
+  var AText: String);
+begin
+   if AText = 'False' then
+      AText := 'No'
+   else
+      AText := 'Yes';
+end;
+
+procedure TfmFertilityBenchmarking.FormShow(Sender: TObject);
+begin
+   pSeasonInfo.Font.Name := 'Tahoma';
+   pSeasonInfo.Font.Size := 8;
+   cxLabel1.Style.Font := pSeasonInfo.Font;
+   SeasonCombo.Style.Font := pSeasonInfo.Font;
+   LoadDataTimer.Enabled := True;
+
+   //   02/04/12 [V5.0 R4.8] /MK Additional Feature - Favourite Button Added.
+   cbFavourite.Checked := WinData.IsReportFavourite(cDARDDairyFertBenchRep);
+   WinData.UpdateRecentReportUsage(cDARDDairyFertBenchRep);
+end;
+
+procedure TfmFertilityBenchmarking.LoadDataTimerTimer(Sender: TObject);
+begin
+   LoadDataTimer.Enabled := False;
+   actLoadData.Execute;
+end;
+
+procedure TfmFertilityBenchmarking.BandedTableViewAnimalNoGetDisplayText(
+  Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
+  var AText: String);
+begin
+   if ARecord <> nil then
+      AText := ARecord.DisplayTexts[BandedTableViewHiddenAnimalNo.Index]
+   else
+      AText := '';
+end;
+
+procedure TfmFertilityBenchmarking.BandedTableViewNatIDNumGetDisplayText(
+  Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
+  var AText: String);
+begin
+   if ARecord <> nil then
+      AText := ARecord.DisplayTexts[BandedTableViewHiddenNatIDNum.Index]
+   else
+      AText := '';
+end;
+
+procedure TfmFertilityBenchmarking.SeasonComboPropertiesChange(
+  Sender: TObject);
+begin
+   Update;
+   CarryOverStartDate := StrToDate('01/01/'+SeasonCombo.Text);
+   CarryOverEndDate := StrToDate('31/07/'+SeasonCombo.Text);
+   StartDate := StrToDate('01/08/'+SeasonCombo.Text);
+   EndDate   := StrToDate('31/07/'+IntToStr(StrToInt(SeasonCombo.Text)+1));
+   OutputFileName := ApplicationPath + RuralPortalDir +'\'+ SeasonCombo.Text+'_'+IntToStr(StrToInt(SeasonCombo.Text)+1)+'.xml';
+   BandedTableView.Bands[0].Caption :=
+       'Season Breeding Events For Period      ' + '01/08/'+SeasonCombo.Text + ' - ' + '31/07/'+IntToStr(StrToInt(SeasonCombo.Text)+1);
+   Update;
+   if Showing then
+      actLoadData.Execute;
+end;
+
+procedure TfmFertilityBenchmarking.actReviewFilesExecute(Sender: TObject);
+begin
+   ShellExecute(Self.Handle,'open',PChar(ApplicationPath + RuralPortalDir),nil,nil,SW_SHOWNORMAL);
+end;
+
+function TfmFertilityBenchmarking.NoOfRecords: Integer;
+begin
+
+
+
+   with TQuery.Create(nil) do
+      try
+          DatabaseName := 'kingswd';
+
+          SQL.Text := 'Delete From '+OutputTable.TableName+' Where AID IS NULL ';
+          ExecSQL;
+
+          SQL.Text := 'Select Count(AID) CID From '+OutputTable.TableName+' Where AID > 0 ';
+          Open;
+          try
+             First;
+             Result := FieldByName('CID').AsInteger;
+          finally
+             Close;
+          end;
+      finally
+         Free;
+      end;
+
+end;
+
+procedure TfmFertilityBenchmarking.ValidateFileOutput;
+var
+   i :integer;
+   StoredID : Integer;
+   StoredCalvingDate : TDateTime;
+begin
+   // check if animal has calved twice of more within the
+   // selected period (including carry over period.
+   // if animal found more than once, include the record
+   // which contains the most service events for that lactation.
+   OutputTable.Close;
+   OutputTable.Open;
+   OutputTable.First;
+   while not OutputTable.eof do
+      begin
+         CalcCalvingHistory.Close;
+         CalcCalvingHistory.Params[0].AsInteger := OutputTable.FieldByName('AID').AsInteger;
+         CalcCalvingHistory.Open;
+
+         if ( CalcCalvingHistory.RecordCount > 1 ) then
+            begin
+               CalcCalvingHistory.First;
+               StoredID := 0;
+               StoredCalvingDate := 0;
+               while not CalcCalvingHistory.Eof do
+                  begin
+                     if ( CalcCalvingHistory.FieldByName('CalvingDate').AsDateTime > StoredCalvingDate ) then
+                        begin
+                           StoredCalvingDate := CalcCalvingHistory.FieldByName('CalvingDate').AsDateTime;
+                           StoredID := CalcCalvingHistory.FieldByName('ID').AsInteger;
+                        end;
+                     CalcCalvingHistory.Next;
+                  end;
+
+                if ( StoredID > 0 ) then  // delete the most recent calving from the output file.
+                   begin
+                      qDeleteRecords.Close;
+                      qDeleteRecords.Params[0].AsInteger := CalcCalvingHistory.FieldByName('AID').AsInteger;
+                      qDeleteRecords.Params[1].AsInteger := StoredID;
+                      qDeleteRecords.ExecSQL;
+                   end;
+                OutputTable.Refresh;
+            end
+         else
+            OutputTable.Next;
+      end;
+   OutputTable.Refresh;
+
+end;
+
+//   02/04/12 [V5.0 R4.8] /MK Additional Feature - Favourite Button Added.
+procedure TfmFertilityBenchmarking.cbFavouritePropertiesChange(
+  Sender: TObject);
+begin
+   if cbFavourite.Checked then
+      begin
+         WinData.SetReportAsFavourite(cDARDDairyFertBenchRep,True);
+         cbFavourite.Style.TextColor := clBlue;
+         cbFavourite.StyleHot.TextColor := clBlue;
+      end
+   else
+      begin
+         WinData.SetReportAsFavourite(cDARDDairyFertBenchRep,False);
+         cbFavourite.Style.TextColor := clBlack;
+         cbFavourite.StyleHot.TextColor := clBlack;
+      end;
+   Application.ProcessMessages;
+   Update;
+end;
+
+end.
+

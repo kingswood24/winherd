@@ -1,0 +1,78 @@
+#------------------------------------------------------------------------------
+VERSION = BWS.01
+#------------------------------------------------------------------------------
+!ifndef ROOT
+ROOT = $(MAKEDIR)\..
+!endif
+#------------------------------------------------------------------------------
+MAKE = $(ROOT)\bin\make.exe -$(MAKEFLAGS) -f$**
+DCC = $(ROOT)\bin\dcc32.exe $**
+BRCC = $(ROOT)\bin\brcc32.exe $**
+#------------------------------------------------------------------------------
+PROJECTS = CDBackup.exe KDownload.exe HerdUtils.exe InstallHerd.exe \
+  ICBFConversion.exe KInterface.exe kuinstallshield.exe Install.exe Changes.exe \
+  ProDev.exe parlink.exe PrintTagBarcodes.exe Paddocks.exe pdaupgrade.exe BDE.exe \
+  diymilk.exe reportgen.exe Registry.exe WinHerd.exe
+#------------------------------------------------------------------------------
+default: $(PROJECTS)
+#------------------------------------------------------------------------------
+
+
+Paddocks.exe: ..\Paddocks\Paddocks.dpr
+  $(DCC)
+
+WinHerd.exe: WinHerd.dpr
+  $(DCC)
+
+CDBackup.exe: ..\CD Backup\CD Backup\CDBackup.dpr
+  $(DCC)
+
+KDownload.exe: ..\Download\KDownload.dpr
+  $(DCC)
+
+HerdUtils.exe: ..\Utilities\HerdUtils.dpr
+  $(DCC)
+
+InstallHerd.exe: ..\Installation\InstallHerd.dpr
+  $(DCC)
+
+ICBFConversion.exe: ..\..\ICBF Conversion\ICBFConversion.dpr
+  $(DCC)
+
+KInterface.exe: ..\Setup Interface\KInterface.dpr
+  $(DCC)
+
+kuinstallshield.exe: ..\KU Install Shield\kuinstallshield.dpr
+  $(DCC)
+
+Install.exe: ..\Upgrade Install\Install.dpr
+  $(DCC)
+
+Changes.exe: ..\..\..\Rec Changes\Changes.dpr
+  $(DCC)
+
+ProDev.exe: ..\..\..\Program Development\Source\ProDev.dpr
+  $(DCC)
+
+parlink.exe: ..\..\..\Parlour Links\Cow Parlour Link\parlink.dpr
+  $(DCC)
+
+pdaupgrade.exe: ..\..\PDA\pdaupgrade.dpr
+  $(DCC)
+
+BDE.exe: ..\..\Common\BDE.dpr
+  $(DCC)
+
+PrintTagBarcodes.exe: ..\Print Tag Barcodes\PrintTagBarcodes.dpr
+  $(DCC)
+
+diymilk.exe: ..\..\diymilkrecording\diymilk.dpr
+  $(DCC)
+
+reportgen.exe: ..\..\..\..\TGM Code\reportgen\reportgen.dpr
+  $(DCC)
+
+Registry.exe: ..\..\..\..\Delphi 5 Projects\Registry SeSeacurityPriv\Registry.dpr
+  $(DCC)
+
+

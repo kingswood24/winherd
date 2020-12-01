@@ -1,0 +1,206 @@
+{DONE -oKHM V3.7 R0.7 -cGerry/RY : Herd Reconcile Use Scanner Options Improved (Return to search box and{DONE -oKHM V3.7 R0.7 -cGerry/RY : E-mail Bulls Nat ID Num to ICBF}{DONE -oKHM V3.7 R0.7 -cCust Req. : Electronic weighing must accept different file type}{DONE -oKHM V3.7 R0.7 -cGerry : Protein\ Butter Fat\ Solids added to milk reports}{DONE -oKHM V3.7 R0.7 -cGMegarry : Column widths on feed\ purchase reports}{DONE -oKHM V3.7 R0.7 -cNoel Byrne : Check for breeding events before saving a calving event}{DONE -oKHM V3.7 R0.7 -cJon Tighe : NBAS forms [date\ Customer added]}{DONE -oKHM V3.7 R0.7 -cRobert Young : Vet\ Customer Select correct option when clicked on}{DONE -oKHM V3.7 R0.7 -cAgents : Filter animals, if sorting on the main screen the filter options are removed}{DONE 1 -oKHM V3.7 R0.6 -cJoanne : Restore from XP}{DONE 1 -oKHM V3.7 R0.6 -cJoanne : CMMS Permits - Seller labels reporting incorrect data}{DONE 1 -oKHM V3.7 R0.6 -cJoanne : Due to PD report - Column resizing}{DONE 1 -oKHM V3.7 R0.6 -cJoanne :
+Herd Reconciliation - After sorting, the manual select option disappeared from
+grid}{DONE 1 -oKHM V3.7 R0.6 -cJoanne : Import/Export - Add "Name" column to grid.}{DONE 1 -oKHM V3.7 R0.6 -cJoanne : Heats/Services/PD's Report - The sorting}{DONE 1 -oKHM V3.7 R0.6 -cShane : Password Protection again - use KingData as Database to add/remove password}{DONE -oKHM V3.7 R0.6 -cJoanne : CMMS Permits Screen  - Change of Buyer captions - Customer}{DONE -oKHM V3.7 R0.6 -cJoanne : Herd Index and Calving index added to herd stats screen}{DONE -oKHM V3.7 R0.6 -cJoanne :
+Move herd reconciliation from stock on hand to the report screen
+stocking density restrictions move to drop down arrow on extensifications}{DONE 1 -oKHM V3.7 R0.5 -cGerry :
+Stocking Density Restrictions - Call FormShow(nil) before calc of PremApplicsForThisYear
+FormShow(nil) sets the EligDate.Date to today.}{DONE 1 -oKHM V3.7 R0.6 -cGerry : Suckler Premium - Remove 15% heifer topup message}{DONE -o-cGerry/Joanne7 R0.6 1 -cGerry : Browse Sire Register - Download sires.db from herd.}{DONE 1 -oKHM V3.7 R0.3 -cJulie Granger : NATID Mask - New mask for UK}{DONE 1 -oKHM V3.7 R0.5 -cMichael :
+Group Setup - Add Partial NatIDNum Seach, also before for selecting all
+animals into group, give confirmation message.}{DONE 1 -oKHM V3.7 R0.5 -cGerry :
+Ext. Census - Fix for projected calves, also if  0 lact heifer under two years has
+projected calving ensure the LU is taken as 1 from dates after projected calving}{DONE 1 -oKHM V3.7 R0.5 -cTGM :
+Database Password - Remove password from tables before taking backup, add 
+password after restoring data. Also password added to backup file.}{DONE 1 -oKHM V3.7 R0.5 -cJon Tighe : Preferences - Allow user to toggle between renumbering AnimalNo after Sales/Death}{DONE 1 -oKHM V3.7 R0.5 -cRY : Ind. Cow Fertility - All lactation option (Joanne/Shane)}{DONE 1 -oKHM V3.7 R0.5 -cJon Tighe : Sales/Deaths - Renumbering of Animal No., also in import/Export}{DONE 1 -oKHM V3.7 R0.5 -cGerry/John : Profit Monitor - Changes (Joanne)}{DONE 1 -oKHM V3.7 R0.5 -cShane Maxwell : Livestock Classification - Changes (Joanne)}{DONE 1 -oKHM V3.7 R0.5 -cGerry/John : Livestock Classification - Profit Monitor Changes (Joanne)}{DONE 1 -oKHM V3.7 R0.5 -cGerry/TGm : Report Generator - Calf Performance}{DONE -cShane Maxwell -oKHM V3.7 R0.5 : Livestock Inventory - Stock Dates need to be redone. Joanne}{DONE 1 -oKHM V3.7 R0.3 -cGerry : Calf Registration - Cards Received}{DONE 1 -oKHM V3.7 R0.3 -cGerry :
+Menu Unit - Breed on main grid for all types of Herds. Option to select/deselect is
+situ in preferences/general screen.}{DONE 1 -oKHM V3.7 R0.3 -cGerry : BLADE - Mock up for John Kelly to Demo on 8/3/2004}{DONE 1 -oKHM V3.7 R0.3 -cMichael : Calf Registration - Donor Dam field must contain either animalno/ natid/ Name/ HB Num}{DONE 1 -oKHM V3.7 R0.3 -cMichael : Import/Export - Purchases not being saved to database}{DONE 1 -oKHM V3.7 R0.3 -cTGM : Best Cows In Herd - Sort by Protein 305 fixed.}{DONE 1 -oKHM V3.7 R0.3 -cTGM : Calving Screen - After Another Calf click, the Nat ID Mask disappeared.}{DONE 1 -oKHM V3.7 R0.3 -cGerry : NBAS Forms - Form A/B Completed.}{DONE 1 -oKHM V3.7 R0.4 -cJohn Templeton :
+Vet Treatments Report - Access Violation, this was due to instance of Irish report 
+being called without initialisation}{DONE 1 -cGerry : Menu Unit - Remove the View Button from the toolbar}{DONE 1 -cGerry -oKHM V3.7 R0.4 : READ ME - Take out onto front menu item.}{TODO :
+Calving Screen -  Remove Gen Dam field if there is no pedigree module OR
+if no Gen Dam selected at service time}{TODO :
+Calf Reg - If no bull breed, use breed of calf to decipher bulls breed.
+Example : If calf is Limousin Cross then bull will be Limousin .}{DONE 1 -cJoanne -oKHM V3.7 R0.6 : Bring CMMS Recon. out into reports section}{DONE 1 -cGerry/Julie Garnger -oKHM V3.7 R0.3 : Main Grid - Show Breed on grid regardless of Herd Type}{DONE -oKHM V3.7 R0.3 1 -cShane/Gerry : Backup - Export XP CD Backup to external dll or exe}{DONE 1 -oRel KHM V3.6 R9.7 -cGerry : ICBF - Title click sort both calving/service grids.
+
+Marie Farrell}{DONE 1 -oRel KHM V3.6 R9.7 -cJonaton Tighe : Grout Event - was not saving individual event dates. ie changes to grid data.}{DONE 1 -oRel KHM V3.6 R9.7 -cShane :
+Purch/Sales Ana. - Removed the ONly from filter captions. Wording caused
+confusion.}{DONE 1 -oRel KHM V3.6 R9.7 -cShane : Livestock Inventory - Changed caption from animal inventory to livestock inventory.}{DONE 1 -oRel KHM V3.6 R9.7 -cShane :
+Group Event - Not saving evendate, if differnet from main details - eventdate.
+
+Fixed in Test
+Reported by Johnaton Tighe.}{TODO 1 -cGerry : Group events - Add Castration Event}{DONE 1 -oRel KHM V3.6 R9.6 -cMichael :
+Cattle Margins Report - Sale Date caption widened.
+
+Fixed in Test Version 3.6 9.6}{DONE 1 -oRel KHM V3.6 R9.6 -cGerry :
+Backup - Changed the wording on CD Button From XP CD to CD (XP)
+Also changed the backup complete message after XP CD Call to "Exiting
+XP CD Backup"
+
+Release V3.6 R9.5
+Test  V3.6 R9.6}{DONE 1 -oRel KHM V3.6 R9.6 -cTGM : Bovine Herd Reg - NI Changes Add UserDate Lable to Bovine Reg}{DONE 1 -oRel KHM V3.6 R9.6 -cMichael :
+Suck Prem Report - Replace Date was being shown as Applic Date
+
+Test Version 9.6
+Release Version 9.5}{DONE 1 -oRel KHM V3.6 R9.6 -cShane :
+Database password required.
+
+Assigned to Animals.db, Events.db, Afdoa, pHrd, sHrd, SalesDeaths, Purchases, Beefsub, Applications, sApplic, sApplied}{DONE 1 -oRel KHM V3.6 R9.6 -cShane : Pre Sale event taken from SaleDeath Screen.}{DONE 1 -oRel KHM V3.6 R9.5 -cShane/Gerry :
+Calving Screen - If Amending Calving Record and the Dam is less than 1 year
+old, error occurs cannot focus on invisible or disabled window. 
+The fix is done just needs to be incorporated into release after Xmas '04}{DONE 1 -oRel KHM V3.6 R9.5 -cGerry :
+Temporry Movement - If Exists prompt warning message if user wants to record
+an event for the animal.}{DONE 1 -oRel KHM V3.6 R9.5 -cGerry : Calving Screen - Disable replacement heifer option}{DONE 1 -oRel KHM V3.6 R9.5 -cGerry : Special Beef Premiums}{DONE 1 -oRel KHM V3.6 R9.5 -cGerry : Suckler Cow Premiums}{DONE 1 -oRel KHM V3.6 R9.4 -cGerry/RY :
+IHFA Report - If herd type = dairy then animal sire must be of dairy breed
+if Beef then animal sire must be of beef breed
+if no sire exists / suckler / undetermined herd type leave animal in report or}{DONE 1 -oRel KHM V3.6 R9.4 -cMichael :
+Moorepark - All Group Events were not being sent to moorepark event export.
+Events.db fields were left null, Action = A Notified = False}{DONE 1 -oRel KHM V3.6 R9.4 -cGerry :
+Group Events - Selected field option. When dataset is OnScroll event occurrs check 
+the desired user option, then go to that field.}{DONE 1 -oRel KHM V3.6 R9.4 -cMichael :
+Weighing Event - Dont add another event to current animal, go to next animal
+on grid. 
+
+Also widened the NatIDNum field.}{DONE 1 -oRel KHM V3.6 R9.4 -cMichael : Milk Recording Analysis - Last Month wasnt assigned.}{DONE 1 -oRel KHM V3.6 R9.3 -cGerry : Download - Allow NI Customers to download.}{DONE -oRel KHM V3.6 R9.3 -cShane :
+Backup/Restore - When restore was used, the def. file was not being opened.
+This was due to KingData being closed at the same time as Def.Load() expecting
+KingData.DatabaseName.}{DONE 1 -oRel KHM V3.6 R9.3 -cTGM : NI Special Beef Premiums - 2004 Preium Forms. 9/12/2003}{DONE 1 -oRel KHM V3.6 R9.2 -cGerry : Exten Census Report - Co-efficient completely ignored + Bought/Sold LU's}{DONE 1 -oRel KHM V3.6 R9.1 -cShane : Group Setup - Allow sort of columns. Also changed from RX to EH grids.}{DONE 1 -oRel KHM V3.6 R9.1 -cShane : IHFA Report - Using main animal grid filter would cause SQL exception. Fixed}{DONE 1 -oRel KHM V3.6 R9.1 -cShane : Event Filters - Changed the SQL layout. Needs to be well tested.}{DONE 1 -oRel KHM V3.6 R9.1 -cShane : Ext Census - The country fix required. if ireland the show 5 dates else show 6}{DONE 1 -oRel KHM V3.6 R9.1 -cShane : Health Report - The country fix required.}{DONE 1 -oRel KHM V3.6 R9.1 -cShane :
+Stock On Hand - Use Filter changed to Apply Main Grid Filter, also this opion is 
+hidden from user if the filter is not active, if it is active then default it to on. 
+if checked the font is red otherwise black.
+
+This was also done for Purch/Sales Ana. and the Sales Planner Report.}{DONE 1 -oRel KHM V3.6 R9.1 -cShane : Password - Moved to SysUser Screen.}{DONE 1 -oV3.6 R9.0 -cGerry :
+Graphs - two new graph options,
+
+1) By Calving Month
+2) -12 Month Period from current date.}{DONE 1 -oV3.6 R9.0 -cTGM :
+NI Bovine Register - Include Notes for Guidance
+
+Created by Joanne, 
+Implemented by Shane.}{DONE 1 -oRel KHM V3.6 R8.9 -cMichael : Milk Recording - Uppercase ICBF Filename to Uppercase before check for valid file}{DONE -cGerry -oRel KHM V3.6 R8.9 1 :
+Stock On Hand Report - If Herd is Dairy or Suckler then Calving date column should
+be shown, otherwise if Beef show Purch Date column}{DONE -cGerry -oRel KHM V3.6 R8.9 1 :
+Purch/Sales Analysis report - Include new option - Purchased Animals Only  (without sale)
+
+Requested by Margaret Blackmore}{TDONE -cRoy Condell-oRel KHM V3.6 R8.9 1 : Sales Eligibility - Use QR Export filters with report.}{DONE 1 -oRel KHM V3.6 R8.6 -cTGM : NI Health Report - Quantity not calc correctly. Misinterpreting "Nodays"}{DONE 1 -oRel KHM V3.6 R8.6 -cTGM : Remarks - For changes to NI animals, all records should contain date inputte by the current user. "userdate" as datetime}{TODO 1 -cPeter McCutcheon :
+Health Codes - Need to add grid view to health code listings
+PhoneLink requirement}{TODO 1 -cGer Lynes :
+Herd Accs Reports - 
+
+User will need to select All Herds from drop list as well as single herd.}{DONE -oRel KHM V3.6 R8.5 -cGerry : Backup - Now on CD for XP users.}{DONE 1 -oRel KHM V3.6 R8.5 -cTGM :
+Health Report - Withdrawal dates, Enddate, Quantities not being calc's correctly
+with SQL Lang, switch to pascal source. seems to be OK}{DONE 1 -oRel KHM V3.6 R8.5 -cShane : Main Screen - Go to first animal on the grid when opening the program}{DONE 1  -oRel KHM V3.6 R8.4 -cGerry :
+Preferences - Use the last part of the NatID Number for the animal number 
+only if the animal number is blank at time of natid entry
+
+This only applies to the calving entry scr.}{DONE 1 -oRel KHM V3.6 R8.4 -cGerry :
+Preferences - Use the last part of the NatID Number for the animal number 
+only if the animal number is blank at time of natid entry}{DONE 1 -oRel KHM V3.6 R8.3 -cShane :
+Partial Search - In MenuUnit - Disable the controls before loop. this has greatly 
+increased the speed.}{DONE 1 -oRel KHM V3.6 R8.4 -cShane :
+Health Event Screen - On view of event, drug purch cost was not begin calculated.
+works fine if your adding or tab out of application rate.}{DONE 1 -oRel KHM V3.6 R8.4 -cTGM : TGM - Veterinary Report - Quantity = ( H.DoseUnitUsed * H.RateApplic * NoTimes * H.NoDays-1)}{DONE 1 -oRel KHM V3.6 R8.4 -cTGM :
+TGM - Health Event Screen - Show Dose Unit beside Application Rate
+                                               Also changed caption From Rate of Applic.
+                                               to Applic Rate}{DONE 1 -oRel KHM V3.6 R8.4 -cTGM : TGM - Sort By Event Date in NI Vet Report}{DONE 1 -oRel KHM V3.6 R8.4 -cTGM : TGM - Default to "No Filter" if NI Herd in Veterinary Report Screen}{DONE 1 -oRel KHM V3.6 R8.4 -cTGM : TGM - Include Dry Off Events in NI Health Report.}{DONE 1 -oRel KHM V3.6 R8.2 -cGerry : New Version - changed from a menu to a button.}{DONE 1 -oRel KHM V3.6 R8.2 -cGerry :
+Preferences  - brought out to the main menu on front screen
+
+Preferences}{DONE 1 -oRel KHM V3.6 R8.2 -cGOM : Herd Setup - The FQAS checkbox label was not set correctly.}{DONE 1 -oRel KHM V3.6 R8.2 -cTGM :
+NI - Bovine Register. The Lotnumber is not appearing in report.
+
+Fixed.}{DONE -oRel KHM V3.6 R8.1 -cTGM :
+TGM - NI Bovine Register 
+
+The contemporaneous sort is now using the Animal "ID" field instead of the
+sequence number. This was felt the better sort in light of the invalid sequences
+in animal database}{DONE 1 -oRel KHM V3.6 R8.1 -cShane : IAD - Crush File Weighing Reconciliation / weighing recordings.}{DONE -oRel KHM V3.6 R8.1 -cShane :
+Password Facility - Requested by a number of people, the latest being
+eugene lawler.
+
+Setup/Disable in global settings.}{DONE  -oRel KHM V3.6 R8.1 -cShane :
+Pedigree Upgrade Report - Sent to RY and BF to check over
+
+Booby Franks, finalised 17.30 8/10/2003}{DONE 1 -oKHM 3.6 8.0 -cShane :
+Preferences screen updated. Now has left menu, then settings are on the 
+left.}{DONE -oKHM 3.6 8.0 -cShane :
+Program Download - 
+Can now download the fields program depending on version. 
+Changes made to fields program, write the version number
+to the registry if not already there. This is then checked by the herd 
+program at download time.}{DONE 1 -oRel KHM V3.6 R8.0 -cRobert Young :
+Herd Fertility - Non detected Oestrous shown as 100%
+
+Reported by F Jacob Butler via RY}{DONE 1 -oRel KHM V3.6 R8.0 -cRobert Young :
+Herd Fertility - Infertile Percentage shown as 0%
+
+Reported by Dan Butler via RY}{DONE 1 -oRel KHM V3.6 R8.0 -cShane : Calf Reg - Insert the IE of Calf/Dam if it is missing from the valid tag number.}{DONE -cTGM -oRel KHM V3.6 R8.1 : TGM Seq No Problem. sent up customers (Mr. Michael Kearney ) data
+
+Example : there is an animal with seq no of 747 when it should one.
+
+Ongoing----}{DONE 1 -oKHM V3.6 R7.9 -cTGM :
+When saving an AI Bull from the register, exception raised Breed Code must be entered.
+This is now changed.}{DONE 1 -cTGM -oKHM V3.6 R7.9  :
+URGENT
+NI National ID Number : The tag validation was not working correctly if 
+the mask was applied. 
+
+}{DONE 1 -oRel KHM V3.6 R7.7 -cShane : Calf Reg - New options to preview registered calves. input date of birth.}{DONE 1 -oRel KHM V3.6 R7.7 -cShane : Calf Reg - New options to removed animals from reg. right click on grid.}{DONE 1 -oRel KHM V3.6 R7.7 -cShane : Calf Reg - Removed one report to seperate unit. This was done for
+PC resources.}{DONE 1 -oRel KHM V3.6 R7.7 -cGerry : Filter Screen - New Status filter, Animals born into herd}{DONE  -oRel KHM V3.6 R7.5 -cShane :
+Sort AnimalNo, NatIDNum Fields. These values are cleared and
+re-generated ater edit of either field.}{DONE 1 -oRel KHM V3.6 R7.5 -cHugh Collender : Service Event - Ancestor Lookup wasn't right - No problem found
+
+(Hugh Colender )}{DONE  -oRel KHM V3.6 R7.5 -cHugh Collender :
+Ancestry Screen - Ancestor animals were not saved until exit of the program.
+general tidy up of code + introduction of new pointers to replace static AnimalFileByID record properties}{DONE 1 -oTest KHM V3.6 R7.4 -cGerry :
+Definition file - Four new Params Add
+
+Kingswood Accounts, Parlour Link, Ration Calc, Report Generator}{DONE 1 -oTest KHM V3.6 R7.4 -cGerry :
+Kings Accounts Module - 
+CC Param passed to the accounts program on opening.}{DONE 1 -oRel KHM V3.6 R7.3 -cTech call :
+ICBF Milk Recording - Problem reading file for DENIS FITZGERALD.
+
+Lact history was completely empty. This caused trouble Dividin by 0, check wasn't
+included for 305 Yield.
+
+Rel KHM V3.6 R7.3}{DONE 1 -oRel KHM V3.6 R7.2 / V7.1 -cGerry :
+CMMS Data File Import - Complete
+
+For Test/Release CC Ver 3.6 7.2
+For Release CC Ver 3.6 7.1}{DONE 1 -oRel KHM V3.6 R7.0  -cTech Call :
+In Herd Checkbox - Setup Animals Screen 
+Somehow ??? the default value changed to checked. 
+Now back to unchecked.}{DONE 1 -oRel KHM V3.6 R7.0  -cTech Call : Animal Grid Print - Datasource was lost.}{DONE 1 -cGerry :
+CMMS Reconciliation
+
+Date check and file reading.}{DONE 1 -cGerry :
+Ration Calc. Parlour Link need to rewrite the Definaition file.
+
+ASAP}{DONE 1 -oKHM V3.6 R7.0 -cTGM : Group Health Event - Include Farm Code Field.}{DONE 1 -oKHM V3.6 R7.0 -cTGM :
+NI Bovine Herd Register - Audits for Sex field = Steer was appearing as "S" where
+it should have been "M"}{DONE 1 -oKHM V3.6 R7.0 -cTGM :
+Group Events - Health event not saving the Drug Batch Number, after a certain sequence
+of keystroke events.}{DONE 2 -oKHM V3.6 R7.0 -cTGM : NI Bovine Register - Audit items overwriting each other.}{DONE 1 -oKHM V3.6 R7.0 -cMich Guinan ICBF Import :
+Monthly Summary Analysis - Milk Recording 
+Sorted the Milk Rec Date Items by Desc order
+Add date parameter to exlude zero dates.}{DONE 1 -oKHM V3.6 R7.0 -cJohn Templeton : Scottish Milk Recording remove the number of tests.}{DONE 1 -oKHM V3.6 R6.9 -cEugene Lawler :
+Cattle Margins Report. not calculating the Slaughter Heifer amount correctly.
+Didn't add the Heifer Slght topup amount.}{DONE 1 -oKHM V3.6 R7.0 -cEugene Lawler :
+Weighing Report, not showing animals left herd. Also none of the Date filters
+are working correctly. 
+
+Report source needs to be rewrote.}{TODO 2 -cJoan Geery : Combine the ICBF Calf Registration with the Bandon Registration.}{DONE 1 -oKHM V3.6 R6.9 -cGMegarry : NI Tag validation in calving screen.}{TODO -cPerter Cosgrave : When saving female animal with lactno > 0 the call last calving date screen.}{DONE 1 -oKHM V3.6 R6.9 -cGerry : New Oxygen SMS Component replaced the ActiveX control
+(Unregisted version)}{DONE 1 -oKHM V3.6 R7.2 -cProgram CC rewrite : New Copy Control System
+
+Completed for ver 3.6 7.2}{DONE 1 -o3667 -cGerry : Add Date param to nokia txt messaging. Complete!}{DONE 1 -oChristy Watson -cCust Req. : Check for new version on opening of program.}{DONE 3 -oBrendan Meade -cCust Req. :
+Check Fonts on Fertility Report/ Heats Services PD's Report. and any other reports 
+that might need changing}{DONE 1 -oKHM V3.6 R6.7 -cCust Req. : After coming from DOS Dairy, we did icbf conversion for Brendan. 
+he wasnt happy with existing filters.
+Enable to Filter by Farm Health Codes / ICBF Health Codes.
+Also filter by LactNo.
+New filter on Health Screen (look at DOS Dairy Filters)
+Also, New Health Code Option in Health Event. Seperate ICBF codes from on farm codes
+
+Units Changed 
+
+uHealth 
+HealthFilterU
+DairyData
+uUpdateTables
+Req. By "Brendan Meade"}

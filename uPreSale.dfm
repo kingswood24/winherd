@@ -1,0 +1,346 @@
+object fmPreSale: TfmPreSale
+  Left = 300
+  Top = 254
+  Width = 498
+  Height = 327
+  Caption = 'Pre-Sale Event'
+  Color = clBtnFace
+  Font.Charset = ANSI_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -13
+  Font.Name = 'Verdana'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poMainFormCenter
+  OnActivate = FormActivate
+  OnCloseQuery = FormCloseQuery
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  PixelsPerInch = 96
+  TextHeight = 16
+  object Bevel1: TBevel
+    Left = 14
+    Top = 69
+    Width = 457
+    Height = 217
+    Shape = bsFrame
+    Style = bsRaised
+  end
+  object lNo: TLabel
+    Left = 28
+    Top = 88
+    Width = 103
+    Height = 16
+    Alignment = taRightJustify
+    Caption = 'Animal No/Code'
+  end
+  object Label2: TLabel
+    Left = 68
+    Top = 118
+    Width = 62
+    Height = 16
+    Alignment = taRightJustify
+    Caption = 'Customer'
+  end
+  object Label3: TLabel
+    Left = 99
+    Top = 148
+    Width = 31
+    Height = 16
+    Alignment = taRightJustify
+    Caption = 'Date'
+  end
+  object SaleWtLabel: TLabel
+    Left = 52
+    Top = 178
+    Width = 78
+    Height = 16
+    Alignment = taRightJustify
+    Caption = 'Sale Weight'
+  end
+  object lSalesGrp: TLabel
+    Left = 59
+    Top = 208
+    Width = 71
+    Height = 16
+    Alignment = taRightJustify
+    Caption = 'Sale Group'
+  end
+  object CommentLabel: TLabel
+    Left = 69
+    Top = 238
+    Width = 61
+    Height = 16
+    Alignment = taRightJustify
+    Caption = 'Comment'
+  end
+  object lWgtDate: TLabel
+    Left = 269
+    Top = 178
+    Width = 54
+    Height = 16
+    Caption = 'On Date'
+  end
+  object SearchForAnimal: TComboEdit
+    Left = 141
+    Top = 86
+    Width = 204
+    Height = 24
+    ButtonHint = 'Search for Animals'
+    CharCase = ecUpperCase
+    Glyph.Data = {
+      42010000424D4201000000000000760000002800000011000000110000000100
+      040000000000CC00000000000000000000001000000010000000000000000000
+      BF0000BF000000BFBF00BF000000BF00BF00BFBF0000C0C0C000808080000000
+      FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00333333333333
+      33FFF00000003333333333333FFBF0000000333333333333FBFFFE0000003333
+      3333333FFBFB360000003333333333BFFFF3370000003333333444FBFF333600
+      000033333344834FB33331000000333334847F84333336000000333334484F84
+      3333300000003333348F7448333336000000333344FFF7433333300000003344
+      8F8444333333300000003448F7433333333330000000348F7733333333333000
+      000034F77433333333333F000000344443333333333330000000333333333333
+      333337000000}
+    MaxLength = 20
+    NumGlyphs = 1
+    TabOrder = 0
+    OnButtonClick = SearchForAnimalButtonClick
+    OnChange = SearchForAnimalChange
+    OnExit = SearchForAnimalExit
+  end
+  object Customers: TRxDBLookupCombo
+    Left = 141
+    Top = 116
+    Width = 204
+    Height = 24
+    DropDownCount = 8
+    DataField = 'Customer'
+    DataSource = WinData.dsSaleDeath
+    DisplayEmpty = '<Add>'
+    EmptyValue = '0'
+    LookupField = 'ID'
+    LookupDisplay = 'Name'
+    LookupSource = WinData.dsCustomers
+    TabOrder = 1
+    OnChange = CustomersChange
+    OnCloseUp = CustomersCloseUp
+  end
+  object DateOfPreSale: TDBDateEdit
+    Left = 141
+    Top = 146
+    Width = 121
+    Height = 24
+    DataField = 'EventDate'
+    DataSource = WinData.EventSource
+    NumGlyphs = 2
+    TabOrder = 2
+    Weekends = [Sun, Sat]
+    WeekendColor = clBlue
+    YearDigits = dyFour
+    OnChange = DateOfPreSaleChange
+    OnExit = DateOfPreSaleExit
+  end
+  object Weight: TDBEdit
+    Left = 141
+    Top = 176
+    Width = 121
+    Height = 24
+    Hint = 'Weight from Mart Documents'
+    DataField = 'Weight'
+    DataSource = WinData.dsSaleDeath
+    TabOrder = 3
+    OnChange = WeightChange
+  end
+  object cbSalesGrp: TComboBox
+    Left = 141
+    Top = 206
+    Width = 121
+    Height = 24
+    Style = csDropDownList
+    ItemHeight = 16
+    TabOrder = 4
+    OnChange = cbSalesGrpChange
+  end
+  object dbComment: TDBEdit
+    Left = 141
+    Top = 236
+    Width = 181
+    Height = 24
+    DataField = 'EventDesc'
+    DataSource = WinData.EventSource
+    TabOrder = 5
+    OnChange = dbCommentChange
+  end
+  object dbeWgtDate: TDBDateEdit
+    Left = 329
+    Top = 176
+    Width = 121
+    Height = 24
+    DataField = 'WeighingDate'
+    DataSource = WinData.dsSaleDeath
+    NumGlyphs = 2
+    TabOrder = 6
+    Weekends = [Sun, Sat]
+    YearDigits = dyFour
+    OnChange = dbeWgtDateChange
+  end
+  object ToolBar1: TToolBar
+    Left = 0
+    Top = 0
+    Width = 490
+    Height = 53
+    ButtonHeight = 47
+    ButtonWidth = 86
+    EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
+    TabOrder = 7
+    object ToolButton2: TToolButton
+      Left = 0
+      Top = 2
+      Width = 8
+      Caption = 'ToolButton2'
+      ImageIndex = 1
+      Style = tbsDivider
+    end
+    object sbExit: TRxSpeedButton
+      Left = 8
+      Top = 2
+      Width = 58
+      Height = 47
+      Hint = 'Click Here To Exit'
+      Caption = 'E&xit'
+      Flat = True
+      Glyph.Data = {
+        42040000424D4204000000000000420000002800000020000000100000000100
+        1000030000000004000000000000000000000000000000000000007C0000E003
+        00001F000000E03DE03D00000000000000000000000000000000000000000000
+        E03DE03DE03DE03DE03DEF3DEF3DEF3DEF3DEF3DEF3DEF3DEF3DEF3DEF3DEF3D
+        FF7FE03DE03DE03DE03D0000003C003C003C003C003C003C003C003C003C0000
+        E03DE03DE03DE03DE03DEF3DFF7FE03DE03DE03DE03DE03DE03DE03DE03DEF3D
+        FF7FE03DE03DE03DE03D0000003C003C003C003C003C003C003C003C003C0000
+        E03DE03DE03DE03DE03DEF3DFF7FE03DE03DE03DE03DE03DE03DE03DE03DEF3D
+        FF7FE03DE03DE03DE03D0000003C003C003C003C003C003C003C003C003C0000
+        E03DE03DE03DE03DE03DEF3DFF7FE03DE03DE03DE03DE03DE03DE03DE03DEF3D
+        FF7FE03DE03DE03DE03D0000003C003C003C003C003C003C003C003C003C0000
+        E03DE03DE03DE03DE03DEF3DFF7FE03DE03DE03DE03DE03DE03DE03DE03DEF3D
+        FF7FE03DE03DE03DE03D0000003C003C003C003C003C003C003C003C003C0000
+        E03DE03DE03DE03DE03DEF3DFF7FE03DE03DE03DE03DE03DE03DE03DE03DEF3D
+        FF7FE03DE03DE03DE03D0000003C003C003C003C003C003C003C003C003C0000
+        E03DE03DE03DE03DE03DEF3DFF7FE03DE03DE03DE03DE03DE03DE03DFF7FEF3D
+        FF7FE03DE03DE03DE03D0000003C003C003C003C003C003C003CE07F003C0000
+        E03DE03DE03DE03DE03DEF3DFF7FE03DE03DE03DE03DE03DE03DEF3DE03DEF3D
+        FF7FE03DE03DE03DE03D0000003C003C003C003C003C003C003C003C003C0000
+        E03DE03DE03DE03DE03DEF3DFF7FE03DE03DE03DE03DE03DE03DE03DE03DEF3D
+        FF7FE03DE03DE03DE03D0000003C003C003C003C003C003C003C003C003C0000
+        E03DE03DE03DE03DE03DEF3DFF7FE03DE03DFF7FFF7FFF7FFF7FFF7FE03DEF3D
+        FF7FE03DE03DE03DE03D0000003C003CFF03FF03FF03FF03FF03003C003C0000
+        E03DE03DE03DE03DE03DEF3DFF7FE03DEF3DEF3DEF3DEF3DEF3DFF7FE03DEF3D
+        FF7FE03DE03DE03DE03D0000003C003CFF03FF03FF03FF03FF03003C003C0000
+        E03DE03DE03DE03DE03DEF3DFF7FE03DEF3DFF7FFF7FFF7FEF3DFF7FE03DEF3D
+        FF7FE03DE03DE03DE03D0000003C003CFF03FF03FF03FF03FF03003C003C0000
+        E03DE03DE03DE03DE03DEF3DFF7FE03DEF3DEF3DEF3DEF3DEF3DE03DE03DEF3D
+        FF7FE03DE03DE03DE03D0000003C003C003C003C003C003C003C003C003C0000
+        E03DE03DE03DE03DE03DEF3DFF7FE03DE03DE03DE03DE03DE03DE03DE03DEF3D
+        FF7FE03DE03DE03DE03D0000003C003C003C003C003C003C003C003C003C0000
+        E03DE03DE03DE03DE03DEF3DFF7FFF7FFF7FFF7FFF7FFF7FFF7FFF7FFF7FEF3D
+        FF7FE03DE03DE03DE03D00000000000000000000000000000000000000000000
+        E03DE03DE03DE03DE03DEF3DEF3DEF3DEF3DEF3DEF3DEF3DEF3DEF3DEF3DEF3D
+        E03DE03DE03D}
+      NumGlyphs = 2
+      OnClick = sbExitClick
+    end
+    object ToolButton1: TToolButton
+      Left = 66
+      Top = 2
+      Width = 8
+      Caption = 'ToolButton1'
+      ImageIndex = 0
+      Style = tbsDivider
+    end
+    object SaleDeathNav: TKwDBNavigator
+      Left = 74
+      Top = 2
+      Width = 189
+      Height = 47
+      DataSource = WinData.EventSource
+      VisibleButtons = [kwnbPost, kwnbCancel, kwnbDelete]
+      Flat = True
+      Ctl3D = False
+      Hints.Strings = (
+        '&Save'
+        '&Cancel')
+      Captions.Strings = (
+        '&Save'
+        '&Cancel')
+      ParentCtl3D = False
+      TabOrder = 0
+      BeforeAction = SaleDeathNavBeforeAction
+      OnClick = SaleDeathNavClick
+    end
+    object ToolButton3: TToolButton
+      Left = 263
+      Top = 2
+      Width = 8
+      Caption = 'ToolButton3'
+      ImageIndex = 1
+      Style = tbsDivider
+    end
+    object btnImportWeight: TRxSpeedButton
+      Left = 271
+      Top = 2
+      Width = 85
+      Height = 47
+      Caption = 'Import Last '#13#10'Weighing'
+      Flat = True
+      OnClick = btnImportWeightClick
+    end
+    object ToolButton4: TToolButton
+      Left = 356
+      Top = 2
+      Width = 8
+      Caption = 'ToolButton4'
+      ImageIndex = 2
+      Style = tbsDivider
+    end
+    object sbHelp: TRxSpeedButton
+      Left = 364
+      Top = 2
+      Width = 58
+      Height = 47
+      Hint = 'Click Here For Help'
+      Caption = '&Help'
+      Flat = True
+      Glyph.Data = {
+        DE030000424DDE03000000000000420000002800000016000000150000000100
+        1000030000009C03000000000000000000000000000000000000007C0000E003
+        00001F000000FF7FFF7FFF7FFF7FFF7FFF7FFF7FFF7FBD775A6B5A6B5B6B9C73
+        FF7FFF7FFF7FFF7FFF7FFF7FFF7FFF7FFF7FFF7FFF7FFF7FFF7FFF7FFF7F5A6B
+        11422D258C00CC000F003121554A9C73FF7FFF7FFF7FFF7FFF7FFF7FFF7FFF7F
+        FF7FFF7FFF7FFF7F955207000B000F009008CB094F091300110050255A67FF7F
+        FF7FFF7FFF7FFF7FFF7FFF7FFF7FFF7FFF7F734E06006D0090087208B2082C0A
+        8D121412B9101500CF147B6FFF7FFF7FFF7FFF7FFF7FFF7FFF7FFF7F5A6B0700
+        4C00900892087300EF09AD0E1113981BBE1ABD101300D135FE7FFF7FFF7FFF7F
+        FF7FFF7FFF7FFF7F31460A008F0892085308F308AC0EED0E52133B1B3F1E3F15
+        D60868015967FF7FFF7FFF7FFF7FFF7FFF7FDE7B0C210F005108720813091209
+        6F0ED00E55121E0DFF00BE00B700A901934EFF7FFF7FFF7FFF7FFF7FFF7FBD77
+        AC1010002E09AE09D00D5611381119115B08F724D24932562F5608464F3EFF7F
+        FF7FFF7FFF7FFF7FFF7FDD7BAE106D018A0E2F0E57111A26FE2D9F21FD106B41
+        806A407F407F8366F039FF7FFF7FFF7FFF7FBD77396718630D194B02CB0E0C13
+        94239D43DF4A3F363E194F3D485E08770777465A3242FF7FFF7FFF7FFF7F7B6F
+        9C73BD7734424902CC0A2D0FB423FE439F4B5F363E19F528913DD149CE492B2D
+        185FFF7FFF7FFF7FFF7F9C73FF7FFF7F7B6B6A12CB0A0C0F0F17B627F9333727
+        B4118845806A237B207BCC66DE7BFF7FFF7FFF7FFF7F9C73DE7B7B6F7B6F903A
+        8A02EC0AAF0E530E30132E134E0A8A49826A237F207F0A77DE7BFF7FFF7FFF7F
+        FF7F9C73FF7F9C739C739C739136AA02CF01B3084D0A0E0A9300AE396066037B
+        237F007F3473FF7FFF7FFF7FFF7F9C73DE7B7B6F7B6F7B6F7B6BF6522E2A8C01
+        AB018D01B0000A124856A072247F227F04777A73FF7FFF7FFF7F9C73DE7B7B6F
+        7B6F7B6F7B6F5A6B9C73D552B5529552524AD55A9C736B66E272237F207F0673
+        BC7BFF7FFF7F9C73FF7F9C739C739C739C739C73DE7B39671767915A295A4362
+        136B176B00620277207B207F5577FF7FFF7F9C73FF7F9C739C739C739C737B6F
+        3967F75EB1624066207F427FE8720F46023DA372237B207F7577FF7FFF7F9C73
+        FF7FFF7FFF7FFF7FFF7FDE7B5A6B3967BC776A62007F237F227F8066445A237B
+        237B007B787BFF7FFF7F9C739C739C739C739C739C737B6F1867FF7FFF7F9C77
+        EC72207F207F247F247F207F207B0F73FF7FFF7FFF7FFF7FFF7FFF7FFF7FFF7F
+        FF7FFF7FFF7FFF7FFF7FFF7FDE7F54770B77247F247F0A775477DE7FFF7FFF7F
+        FF7F}
+    end
+  end
+end

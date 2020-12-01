@@ -1,0 +1,266 @@
+unit uRedTractorDrugCollation;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  uBaseForm, dxBar, dxBarExtItems, ActnList, cxControls, dxStatusBar,
+  uHerdLookup, cxGridCustomTableView, cxGridTableView, cxGridDBTableView,
+  cxGridLevel, cxClasses, cxGridCustomView, cxGrid, db, dbTables, GenTypesConst,
+  ExtCtrls, cxTextEdit, cxMaskEdit, cxDropDownEdit, cxCalendar,
+  cxContainer, cxEdit, cxLabel, dxPSCore, dxPScxCommon, dxPScxGridLnk,
+  StdCtrls, cxButtons, DateUtil, cxLookupEdit, cxDBLookupEdit,
+  cxDBLookupComboBox, cxGroupBox, uProgressIndicator, DairyData;
+
+type
+  TfmRedTractorDrugCollation = class(TfmBaseForm)
+    actPrint: TAction;
+    dxBarLargeButton1: TdxBarLargeButton;
+    DrugCollationGridDBTableView: TcxGridDBTableView;
+    DrugCollationGridLevel: TcxGridLevel;
+    DrugCollationGrid: TcxGrid;
+    DrugCollationGridDBTableViewDrugName: TcxGridDBColumn;
+    DrugCollationGridDBTableViewQuantity: TcxGridDBColumn;
+    PrintGrid: TdxComponentPrinter;
+    PrintGridLink: TdxGridReportLink;
+    actApplyFilter: TAction;
+    gbFilterBy: TcxGroupBox;
+    lDateFrom: TcxLabel;
+    lDateTo: TcxLabel;
+    deDateFrom: TcxDateEdit;
+    deDateTo: TcxDateEdit;
+    lDrugType: TcxLabel;
+    lcmboDrugType: TcxLookupComboBox;
+    btnApply: TcxButton;
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure actApplyFilterExecute(Sender: TObject);
+    procedure actPrintExecute(Sender: TObject);
+    procedure FormActivate(Sender: TObject);
+  private
+    { Private declarations }
+    FTable : TTable;
+    FQuery : TQuery;
+    FDataSource : TDataSource;
+  public
+    { Public declarations }
+    class procedure ShowTheForm;
+  end;
+
+var
+  fmRedTractorDrugCollation: TfmRedTractorDrugCollation;
+
+implementation
+
+{$R *.DFM}
+
+{ TfmRedTractorAntibioticCollation }
+
+class procedure TfmRedTractorDrugCollation.ShowTheForm;
+begin
+   with TfmRedTractorDrugCollation.Create(nil) do
+      try
+         if ( WinData.FBordBiaBlockPrint ) then
+            begin
+               actApplyFilter.Execute;
+               if ( FTable.RecordCount > 0 ) then
+                  PrintGridLink.PrintPages([1]);
+            end
+         else
+            ShowModal;
+      finally
+         Free;
+      end;
+end;
+
+procedure TfmRedTractorDrugCollation.FormCreate(Sender: TObject);
+begin
+   inherited;
+   FTable := TTable.Create(nil);
+   FTable.DatabaseName := AliasName;
+   FTable.TableName := 'tmpDrugCollation';
+   FTable.FieldDefs.Add('ID',ftAutoInc);
+   FTable.FieldDefs.Add('DrugID',ftInteger);
+   FTable.FieldDefs.Add('DrugName',ftString,30);
+   FTable.FieldDefs.Add('Unit',ftString,30);
+   FTable.FieldDefs.Add('Quantity',ftString,20);
+   FTable.IndexDefs.Add('iID','ID',[ixPrimary]);
+   FTable.IndexDefs.Add('iDrugID','DrugID',[ixUnique]);
+   FTable.CreateTable;
+
+   FQuery := TQuery.Create(nil);
+   FQuery.DatabaseName := AliasName;
+
+   FDataSource := TDataSource.Create(nil);
+   FDataSource.DataSet := FTable;
+
+   deDateFrom.Date := IncYear(Date,-1);
+   deDateTo.Date := Date;
+
+   if ( not(HerdLookup.QueryMedicineGroups.Active) ) then
+      HerdLookup.QueryMedicineGroups.Open;
+   if ( HerdLookup.QueryMedicineGroups.Locate('Description','Antibiotic',[loCaseInsensitive]) ) then
+      lcmboDrugType.EditValue := HerdLookup.QueryMedicineGroups.FieldByName('ID').AsInteger;
+end;
+
+procedure TfmRedTractorDrugCollation.FormActivate(Sender: TObject);
+begin
+   inherited;
+   OnActivate := nil;
+   actApplyFilter.Execute;
+end;
+
+procedure TfmRedTractorDrugCollation.actApplyFilterExecute(Sender: TObject);
+var
+   i,
+   iDrugType,
+   iNoDays,
+   iNoTimes : Integer;
+   fRateApplic,
+   fDrugQuantityUsed : Double;
+begin
+   inherited;
+   DrugCollationGridDBTableView.DataController.DataSource := nil;
+   FDataSource.DataSet := nil;
+
+   FQuery.Close;
+   FQuery.SQL.Clear;
+   FQuery.SQL.Add('DELETE FROM '+FTable.TableName);
+   FQuery.ExecSQL;
+   FTable.Close;
+   FTable.Open;
+
+   iDrugType := 0;
+   if ( lcmboDrugType.EditValue <> Null ) then
+      iDrugType := lcmboDrugType.EditValue;
+   if ( iDrugType = 0 ) then Exit;
+
+   FQuery.Close;
+   FQuery.SQl.Clear;
+   FQuery.SQL.Add('SELECT DISTINCT(H.DrugUsed), M.Name, U.UnitCode');
+   FQuery.SQL.Add('FROM Health H');
+   FQuery.SQL.Add('LEFT JOIN Events E ON (E.ID = H.EventID)');
+   FQuery.SQL.Add('LEFT JOIN Medicine M ON (M.ID = H.DrugUsed)');
+   FQuery.SQL.Add('LEFT JOIN Units U ON (U.ID = M.DoseUnit)');
+   FQuery.SQL.Add('WHERE (E.EventType IN ('+IntToStr(CHealthEvent)+', '+IntToStr(CDryOffEvent)+', '+IntToStr(CHerdVaccination)+'))');
+   FQuery.SQL.Add('AND   (M.MediGroup = '+IntToStr(iDrugType)+')');
+   if ( deDateFrom.Date > 0 ) and ( deDateTo.Date > 0 ) then
+      FQuery.SQL.Add('AND   (E.EventDate BETWEEN "'+FormatDateTime(cUSDateStyle,deDateFrom.Date)+'" AND "'+FormatDateTime(cUSDateStyle,deDateTo.Date)+'")')
+   else if ( deDateFrom.Date > 0 ) and ( deDateTo.Date <= 0 ) then
+      FQuery.SQL.Add('AND   (E.EventDate >= "'+FormatDateTime(cUSDateStyle,deDateFrom.Date)+'")')
+   else if ( deDateFrom.Date <= 0 ) and ( deDateTo.Date > 0 ) then
+      FQuery.SQL.Add('AND   (E.EventDate <= "'+FormatDateTime(cUSDateStyle,deDateTo.Date)+'")');
+   try
+      FQuery.Open;
+      if ( FQuery.RecordCount = 0 ) then
+         begin
+            MessageDlg('No data available for the filter criteria selected.',mtError,[mbOK],0);
+            Exit;
+         end;
+      FQuery.First;
+      while ( not(FQuery.Eof) ) do
+         begin
+            FTable.Append;
+            FTable.FieldByName('DrugID').AsInteger := FQuery.Fields[0].AsInteger;
+            FTable.FieldByName('DrugName').AsString := FQuery.Fields[1].AsString;
+            FTable.FieldByName('Unit').AsString := FQuery.Fields[2].AsString;
+            FTable.Post;
+            FQuery.Next;
+         end;
+
+      FTable.Close;
+      FTable.Open;
+      ShowProgressIndicator('Purchasing Existing Medicines',0,FTable.RecordCount,1);
+      ProgressIndicator.Max := FTable.RecordCount;
+      Application.ProcessMessages;
+      Update;
+      for i := 1 to FTable.RecordCount do
+         begin
+            fDrugQuantityUsed := 0;
+            FTable.RecNo := i;
+
+            FQuery.Close;
+            FQuery.SQL.Clear;
+            FQuery.SQL.Add('SELECT H.EventID, H.DrugUsed, H.RateApplic, H.NoDays, H.NoTimes');
+            FQuery.SQL.Add('FROM Health H');
+            FQuery.SQL.Add('LEFT JOIN Events E ON (E.ID = H.EventID)');
+            FQuery.SQL.Add('WHERE (E.EventType IN ('+IntToStr(CHealthEvent)+', '+IntToStr(CDryOffEvent)+', '+IntToStr(CHerdVaccination)+'))');
+            FQuery.SQL.Add('AND   (H.DrugUsed = '+IntToStr(FTable.FieldByName('DrugID').AsInteger)+')');
+            if ( deDateFrom.Date > 0 ) and ( deDateTo.Date > 0 ) then
+               FQuery.SQL.Add('AND   (E.EventDate BETWEEN "'+FormatDateTime(cUSDateStyle,deDateFrom.Date)+'" AND "'+FormatDateTime(cUSDateStyle,deDateTo.Date)+'")')
+            else if ( deDateFrom.Date > 0 ) and ( deDateTo.Date <= 0 ) then
+               FQuery.SQL.Add('AND   (E.EventDate >= "'+FormatDateTime(cUSDateStyle,deDateFrom.Date)+'")')
+            else if ( deDateFrom.Date <= 0 ) and ( deDateTo.Date > 0 ) then
+               FQuery.SQL.Add('AND   (E.EventDate <= "'+FormatDateTime(cUSDateStyle,deDateTo.Date)+'")');
+            FQuery.Open;
+            if ( FQuery.RecordCount = 0 ) then Continue;
+            FQuery.First;
+            while ( not(FQuery.Eof) ) do
+               begin
+                  fRateApplic := 0;
+                  iNoDays := 1;
+                  iNoTimes := 1;
+                  if ( FQuery.FieldByName('RateApplic').AsFloat > 0 ) then
+                     begin
+                        fRateApplic := FQuery.FieldByName('RateApplic').AsFloat;
+                        if ( FQuery.FieldByName('NoDays').AsInteger > 0 ) then
+                           iNoDays := FQuery.FieldByName('NoDays').AsInteger;
+                        if ( FQuery.FieldByName('NoTimes').AsInteger > 0 ) then
+                           iNoTimes := FQuery.FieldByName('NoTimes').AsInteger;
+                        fDrugQuantityUsed := fDrugQuantityUsed + ( fRateApplic * (iNoDays * iNoTimes) );
+                     end;
+                  FQuery.Next;
+               end;
+            FTable.Edit;
+            FTable.FieldByName('Quantity').AsString := FormatFloat('0.##',fDrugQuantityUsed) + ' ' + FTable.FieldByName('Unit').AsString;
+            FTable.Post;
+            ProgressIndicator.Position := ProgressIndicator.Position + 1;
+            Application.ProcessMessages;
+            Update;
+         end;
+      ProgressIndicator.Close;
+      Application.ProcessMessages;
+      Update;
+
+      FTable.Close;
+      FTable.Open;
+
+      FDataSource.DataSet := FTable;
+      DrugCollationGridDBTableView.DataController.DataSource := FDataSource;
+      DrugCollationGridDBTableView.DataController.FocusedRowIndex := 0;
+   except
+      on e : Exception do
+         ShowMessage(e.Message);
+   end;
+end;
+
+procedure TfmRedTractorDrugCollation.actPrintExecute(Sender: TObject);
+begin
+   inherited;
+   PrintGridLink.Preview;
+end;
+
+procedure TfmRedTractorDrugCollation.FormDestroy(Sender: TObject);
+begin
+   inherited;
+   if ( HerdLookup.QueryMedicineGroups.Active ) then
+      HerdLookup.QueryMedicineGroups.Close;
+
+   if ( FTable <> nil ) then
+      begin
+         FTable.Close;
+         FTable.DeleteTable;
+         FreeAndNil(FTable);
+      end;
+
+   if ( FQuery <> nil ) then
+      begin
+         FQuery.Close;
+         FreeAndNil(FQuery);
+      end;
+
+   if ( FDataSource <> nil ) then
+      FreeAndNil(FDataSource);
+end;
+
+end.

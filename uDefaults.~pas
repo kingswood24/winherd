@@ -1,0 +1,362 @@
+{
+   14/11/11 [V5.0 R2.1] /MK Bug Fix - rgNatIDClick - Check HerdCountry, If HerdCountry <> Ireland Then
+                                                     Set Mask To IE On Click Not WinData.DefaultHerdIdentifierMask.
+}
+unit uDefaults;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  StdCtrls, Mask, DBCtrls, RXCtrls, Buttons, ExtCtrls, ComCtrls, ToolWin,
+  cxTextEdit, cxHyperLinkEdit, cxControls, cxContainer, cxEdit, cxGroupBox,
+  GenTypesConst, KRoutines;
+
+type
+  TfDefaults = class(TForm)
+    rgNatID: TRadioGroup;
+    ToolBar1: TToolBar;
+    ToolButton3: TToolButton;
+    sbExit: TRxSpeedButton;
+    ToolButton1: TToolButton;
+    sbSave: TRxSpeedButton;
+    ToolButton2: TToolButton;
+    sbHelp: TRxSpeedButton;
+    pHerd: TPanel;
+    lHerd: TLabel;
+    eHerd: TMaskEdit;
+    lHerdeg: TLabel;
+    cxGroupBox1: TcxGroupBox;
+    HyperLinkEdit: TcxHyperLinkEdit;
+    procedure ExitButtonClick(Sender: TObject);
+    procedure sbSaveClick(Sender: TObject);
+    procedure eHerdEnter(Sender: TObject);
+    procedure rgNatIDClick(Sender: TObject);
+    procedure FormDeactivate(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure sbHelpClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure HyperLinkEditClick(Sender: TObject);
+  private
+    { Private declarations }
+//    function GetDefaultHerdIdentifierMask : string;    moved to Windata
+     FCountry : TCountry;
+     procedure CheckAutoGenNatIDNo;
+  public
+    { Public declarations }
+  end;
+
+var
+  fDefaults: TfDefaults;
+
+implementation
+uses
+    SetupAnimals,
+    DairyData,
+    DB, uHerdLookup, uGlobalSettings;
+
+{$R *.DFM}
+
+procedure TfDefaults.ExitButtonClick(Sender: TObject);
+begin
+   Close;
+end;
+
+procedure TfDefaults.sbSaveClick(Sender: TObject);
+var
+   TestStr,
+   NewMask : String;
+   i : Integer;
+   ExitOK : Boolean;
+begin
+   ExitOk := True;
+
+   WinData.Defaults.Active := True;
+   WinData.Defaults.First;
+   if ( not(WinData.Defaults.State in dsEditModes) ) then
+      WinData.Defaults.Edit;
+
+   // Irish New EID Tag
+   if ( rgNatId.ItemIndex = MT_NEWEIDTAG ) then
+      begin
+         TestStr := WinData.StripAllSpaces(eHerd.Text);
+         if ( Length(TestStr) = 10 ) then
+            begin
+               NewMask := '';
+               TestStr := Trim(eHerd.Text);
+               for i := 1 to Length(TestStr) do
+                  NewMask := NewMask + '\' + TestStr[i];
+               WinData.DefaultsNatIdMask.Value := NewMask + ' 0 0000;1;_';
+               ExitOK := True;
+            end
+         else
+            WinData.DefaultsNatIdMask.Value := '372 00 00000 0 0000;1;_';
+         WinData.DefaultsNatIdIndex.Value := MT_NEWEIDTAG;
+      end
+   // Irish New Plastic
+   else if ( rgNatId.ItemIndex = MT_NEWPLASTIC ) then
+      begin
+         TestStr := WinData.StripAllSpaces(eHerd.Text);
+         if ( Length(TestStr) = 9 ) then
+            begin
+               NewMask := '';
+               TestStr := Trim(eHerd.Text);
+               for i := 1 to Length(TestStr) do
+                  NewMask := NewMask + '\' + TestStr[i];
+               WinData.DefaultsNatIdMask.Value := NewMask + ' 0 0000;1;_';
+               ExitOK := True;
+            end
+         else
+            WinData.DefaultsNatIdMask.Value := 'IE 00 00000 0 0000;1;_';
+         WinData.DefaultsNatIdIndex.Value := MT_NEWPLASTIC;
+      end
+   else
+      // Irish Old Plastic
+      if (rgNatId.ItemIndex = MT_OLDPLASTIC) then
+         begin
+            TestStr := WinData.StripAllSpaces(eHerd.Text);
+            if (length(TestStr) = 6) then
+               begin
+                  NewMask := '';
+                  for i := 1 to Length(eHerd.Text) do
+                     NewMask := NewMask + '\' + eHerd.Text[i];
+                  WinData.DefaultsNatIdMask.Value := NewMask + ' 0000 A;1;_';
+                  ExitOK := True;
+               end
+            else
+               if ( TestStr = cIrishNatIDStartStr_IE ) then
+                  begin
+                     WinData.DefaultsNatIdMask.Value := 'IE LLLL 0000 A;1;_';
+                     ExitOK := True;
+                  end;
+            WinData.DefaultsNatIdIndex.Value := MT_OLDPLASTIC;
+         end
+   else
+      // Irish Brass tag
+      if (rgNatId.ItemIndex = MT_BRASSTAG) then
+         begin
+            WinData.DefaultsNatIdMask.Value := 'LLL 000000;1;_';
+            WinData.DefaultsNatIdIndex.Value := MT_BRASSTAG;
+         end
+   else
+      // NI Format
+      if (rgNatId.ItemIndex = MT_NITAG) then
+         begin
+            TestStr := WinData.StripAllSpaces(eHerd.Text);
+            if (length(TestStr) >= 6) then
+               begin
+                  NewMask := '';
+                  for i := 1 to Length(eHerd.Text) do
+                     NewMask := NewMask + '\' + eHerd.Text[i];
+                  WinData.DefaultsNatIdMask.Value := NewMask + ' 0aaa A;1;_';
+                  ExitOK := True;
+               end
+            else if (length(TestStr) > 0) then
+               begin
+                  WinData.DefaultsNatIdMask.Value := 'UK A 000aaa 0aaa A;1;_';
+                  ExitOK := True;
+               end;
+            WinData.DefaultsNatIdIndex.Value := MT_NITAG;
+         end
+      // NI Format
+     else if (rgNatId.ItemIndex = MT_UKTAG) then
+         begin
+            if (Length(WinData.StripAllSpaces(eHerd.Text)) = 8) then  // Valid
+               begin
+                  NewMask := '';
+                  for i := 1 to Length(eHerd.Text) do
+                     NewMask := NewMask + '\' + eHerd.Text[i];
+
+                  WinData.DefaultsNatIdMask.Value := NewMask +' 0 00000;1;_';
+                  ExitOK := True;
+               end
+            else
+               begin
+                  WinData.DefaultsNatIdMask.Value := 'LL 000000 0 00000;1;_';
+                  ExitOK := True;
+               end;
+            WinData.DefaultsNatIdIndex.Value := MT_UKTAG;
+         end
+   else
+      // Free Format
+      begin
+         WinData.DefaultsNatIdMask.Value := '';
+         WinData.DefaultsNatIdIndex.Value := MT_FREEFORMAT;
+      end;
+
+   if ( ExitOk ) then
+      begin
+         WinData.Defaults.Post;
+         WinData.DefaultNatIDMask := WinData.DefaultsNatIdMask.Value;
+         WinData.DefaultNatIdMaskIndex := WinData.DefaultsNatIDIndex.Value;
+         Close;
+      end;
+end;
+
+procedure TfDefaults.eHerdEnter(Sender: TObject);
+var
+  NewMask : String;
+begin
+   if ( rgNatId.ItemIndex = 0 ) then
+      eHerd.EditMask := '372 00 00000;1;_'
+   else if ( rgNatId.ItemIndex = 1 ) then
+      eHerd.EditMask := 'IE 00 00000;1;_'
+   else if ( rgNatId.ItemIndex = 2 ) then
+      eHerd.EditMask := '\IE LLLL'
+   else if ( rgNatId.ItemIndex = 3 ) then
+      eHerd.EditMask := 'LLL'
+   else if ( rgNatId.ItemIndex = 4 ) then
+      eHerd.EditMask := 'UK A 000aaa'
+   else if ( rgNatId.ItemIndex = 5 ) then
+      eHerd.EditMask := 'UK 000000'
+   else
+      eHerd.EditMask := '';
+end;
+
+procedure TfDefaults.rgNatIDClick(Sender: TObject);
+var
+  NewMask,
+  TempIdentifer : String;
+  CharIndex : Integer;
+begin
+   eHerd.EditText := '';
+   if ( rgNatId.ItemIndex = 0 ) then
+      begin
+         lHerdeg.Caption := 'e.g. 372 24 14875';
+         pHerd.Show;
+         eHerd.EditMask := '372 00 00000;1;_';
+         NewMask := WinData.DefaultHerdIdentifierMask;
+         if ( Length(NewMask) = 0 ) then
+            begin
+               //   14/11/11 [V5.0 R2.1] /MK Bug Fix - Check HerdCountry, If HerdCountry <> Ireland Then
+               //                                      Set Mask To IE On Click Not WinData.DefaultHerdIdentifierMask.
+               if ( Copy(NewMask,1,7) = '\I\E\ \' ) then
+                  begin
+                     Delete(NewMask,1,7);
+                     NewMask := '\3\7\2\ \'+NewMask;
+                  end;
+               TempIdentifer := Trim(StringReplaceNonAlphaChars(NewMask, ' '));
+               CharIndex := Pos(' ', TempIdentifer);
+               while CharIndex > 0 do
+                  begin
+                     Delete(TempIdentifer, CharIndex, 1);
+                     CharIndex := Pos(' ', TempIdentifer);
+                  end;
+               if ( Copy(TempIdentifer,0,2) = 'UK' ) then
+                  begin
+                     if ( FCountry <> Ireland ) then
+                        eHerd.EditMask := '372 00 00000;1;_';
+                  end
+               else
+                  eHerd.EditMask := NewMask;
+            end;
+      end
+   else if ( rgNatId.ItemIndex = 1 ) then
+      begin
+         lHerdeg.Caption := 'e.g. IE 24 14875';
+         pHerd.Show;
+         eHerd.EditMask := 'IE 00 00000;1;_';
+         NewMask := WinData.DefaultHerdIdentifierMask;
+         if ( Length(NewMask) = 0 ) then
+            begin
+               //   14/11/11 [V5.0 R2.1] /MK Bug Fix - Check HerdCountry, If HerdCountry <> Ireland Then
+               //                                      Set Mask To IE On Click Not WinData.DefaultHerdIdentifierMask.
+               if ( Copy(NewMask,1,9) = '\3\7\2\ \' ) then
+                  begin
+                     Delete(NewMask,1,9);
+                     NewMask := '\I\E\ \'+NewMask;
+                  end;
+               TempIdentifer := Trim(StringReplaceNonAlphaChars(NewMask, ' '));
+               CharIndex := Pos(' ', TempIdentifer);
+               while CharIndex > 0 do
+                  begin
+                     Delete(TempIdentifer, CharIndex, 1);
+                     CharIndex := Pos(' ', TempIdentifer);
+                  end;
+               if ( Copy(TempIdentifer,0,2) = 'UK' ) then
+                  begin
+                     if ( FCountry <> Ireland ) then
+                        eHerd.EditMask := 'IE 00 00000;1;_';
+                  end
+               else
+                  eHerd.EditMask := NewMask;
+            end;
+      end
+   else if ( rgNatId.ItemIndex = 2 ) then
+      begin
+         lHerdeg.Caption := 'e.g. IE ABCD';
+         pHerd.Show;
+         eHerd.EditMask := '\IE LLLL'
+      end
+   else if ( rgNatId.ItemIndex = 4 ) then // N Ireland
+      begin
+         lHerdeg.Caption := 'e.g. UK 9 123456';
+         pHerd.Show;
+         eHerd.EditMask := 'UK A 000aaa'
+      end
+   else if ( rgNatId.ItemIndex = 5 ) then // UK (rest of)
+      begin
+         lHerdeg.Caption := 'e.g. UK 123456';
+         pHerd.Show;
+         eHerd.EditMask := 'UK 000000'
+      end
+   else
+      begin
+         pHerd.Hide;
+      end;
+end;
+
+procedure TfDefaults.FormDeactivate(Sender: TObject);
+begin
+   if WinData.Defaults.State = dsEdit then
+    WinData.Defaults.Post;
+
+   WinData.Defaults.Close;
+end;
+
+procedure TfDefaults.FormShow(Sender: TObject);
+var
+   DisplayMask : string;
+begin
+   FCountry := WinData.DefCountry(WinData.DefaultHerdID);
+   with WinData.Defaults Do
+      begin
+         Open;
+         First;
+         Edit;
+         rgNatId.ItemIndex := WinData.Defaults.FieldByName('NatIdIndex').AsInteger;
+      end;
+end;
+
+procedure TfDefaults.sbHelpClick(Sender: TObject);
+begin
+   WinData.HTMLHelp('NatIDSetup.htm');
+end;
+
+procedure TfDefaults.CheckAutoGenNatIDNo;
+begin
+   HerdLookup.HerdOwnerData.HerdID := WinData.UserDefaultHerdID;
+   HyperLinkEdit.Text := HerdLookup.InputStyleAsString(HerdLookup.HerdOwnerData.InputNatIDStyle);
+end;
+
+procedure TfDefaults.FormCreate(Sender: TObject);
+begin
+   CheckAutoGenNatIDNo;
+   rgNatID.Items.Clear;
+   rgNatID.Items.Add('372 24 14875 ? 0027');
+   rgNatID.Items.Add('IE 24 14875 ? 0027');
+   rgNatID.Items.Add('IE DNFX 7345 L');
+   rgNatID.Items.Add('YCA 938671');
+   rgNatID.Items.Add('N. Ireland Format');
+   rgNatID.Items.Add('UK Format (rest of)');
+   rgNatID.Items.Add('Free Format');
+
+end;
+
+procedure TfDefaults.HyperLinkEditClick(Sender: TObject);
+begin
+   TfmGlobalSettings.ShowPreferences(ListEntryED, 'Calving');
+   CheckAutoGenNatIDNo;
+end;
+
+end.

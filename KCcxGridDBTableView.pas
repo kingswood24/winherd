@@ -1,0 +1,261 @@
+unit KCcxGridDBTableView;
+
+interface
+
+uses
+  cxCustomData,
+  cxGridRows,
+  cxGridCustomView,
+  cxGridCustomTableView,
+  cxGridTableView,
+  cxGridDBTableView,
+  cxGridDBBandedTableView;
+
+type
+  TKCGridDBTableView = class(TcxGridDBTableView)
+  private
+    FFooterHeight: Integer;
+    FGroupFooterHeight: Integer;
+  protected
+    procedure CreateOptions; override;
+    function GetViewInfoClass: TcxCustomGridViewInfoClass; override;
+    function GetViewDataClass: TcxCustomGridViewDataClass; override;    // Get the row class
+
+  published
+    property FooterHeight: Integer read FFooterHeight write FFooterHeight default -1;
+    property GroupFooterHeight: Integer read FGroupFooterHeight write FGroupFooterHeight default -1;
+  end;
+
+  TKCGridDBBandedTableView = class(TcxGridDBBandedTableView)
+  private
+    FFooterHeight: Integer;
+    FGroupFooterHeight: Integer;
+  protected
+    procedure CreateOptions; override;
+    function GetViewInfoClass: TcxCustomGridViewInfoClass; override;
+    function GetViewDataClass: TcxCustomGridViewDataClass; override;    // Get the row class
+
+  published
+    property FooterHeight: Integer read FFooterHeight write FFooterHeight default -1;
+    property GroupFooterHeight: Integer read FGroupFooterHeight write FGroupFooterHeight default -1;
+  end;
+
+  // Main footer event chain
+  //////////////////////////////////////////////////////////////////////////////
+
+  TKCGridTableViewInfo = class(TcxGridTableViewInfo)
+  protected
+    // Called by GetViewInfoClass
+    function GetFooterViewInfoClass: TcxGridFooterViewInfoClass; override;
+  end;
+
+  TKCGridFooterViewInfo = class(TcxGridFooterViewInfo)
+  protected
+    function GetItemHeight(AIndex: Integer): Integer; override;
+//    function GetItemClass: TcxGridColumnHeaderViewInfoClass;
+    function CalculateHeight: Integer; override;
+  end;
+
+  TKCGridFooterCellViewInfo = class(TcxGridFooterCellViewInfo)
+  protected
+
+  end;
+
+  // Group footer event chain
+  //////////////////////////////////////////////////////////////////////////////
+
+  TKCGridViewData = class(TcxCustomGridTableViewData)
+  protected
+    // Called by GetViewDataClass
+    function GetRecordClass(ARecordInfo: TcxRowInfo): TcxCustomGridRecordClass; override;
+  end;
+
+// group rows
+
+  TKCGridGroupRow = class(TcxGridGroupRow)
+  protected
+    //Called by GetRecordClass
+    function GetViewInfoClass: TcxCustomGridRecordViewInfoClass; override;
+  end;
+
+  TKCGridGroupRowViewInfo = class(TcxGridGroupRowViewInfo)
+  protected
+    // Called by GetViewInfoClass
+    function GetFootersViewInfoClass: TcxGridRowFootersViewInfoClass; override;
+  end;
+
+  TKCGridRowFootersViewInfo = class(TcxGridRowFootersViewInfo)
+  protected
+    // Called by GetFootersViewInfoClass
+    function GetItemClass: TcxGridRowFooterViewInfoClass; override;
+  end;
+
+  TKCGridRowFooterViewInfo = class(TcxGridRowFooterViewInfo)
+  protected
+    function CalculateHeight: Integer; override;
+    function GetItemHeight(AIndex: Integer): Integer; override;
+  end;
+
+// data rows
+
+  TKCGridDataRow = class(TcxGridDataRow)
+  protected
+    //Called by GetRecordClass
+    function GetViewInfoClass: TcxCustomGridRecordViewInfoClass; override;
+  end;
+
+  TKCGridDataRowViewInfo = class(TcxGridDataRowViewInfo)
+  protected
+    // Called by GetViewInfoClass
+    function GetFootersViewInfoClass: TcxGridRowFootersViewInfoClass; override;
+  end;
+
+
+
+implementation
+
+procedure TKCGridDBTableView.CreateOptions;
+begin
+  inherited;
+  FFooterHeight := -1;
+  FGroupFooterHeight := -1;
+
+  // Add other options here
+
+end;
+
+function TKCGridDBTableView.GetViewInfoClass: TcxCustomGridViewInfoClass;
+begin
+  Result := TKCGridTableViewInfo;
+end;
+
+function TKCGridTableViewInfo.GetFooterViewInfoClass: TcxGridFooterViewInfoClass;
+begin
+  Result := TKCGridFooterViewInfo;
+end;
+
+function TKCGridFooterViewInfo.CalculateHeight: Integer;
+begin
+  if GridView is TKCGridDBTableView then
+      begin
+         with GridView as TKCGridDBTableView do
+           if FooterHeight > -1 then
+             Result := FooterHeight
+           else
+             Result := inherited CalculateHeight;
+      end
+  else if GridView is TKCGridDBBandedTableView then
+      begin
+         with GridView as TKCGridDBBandedTableView do
+           if FooterHeight > -1 then
+             Result := FooterHeight
+           else
+             Result := inherited CalculateHeight;
+      end
+  else
+     Result := inherited CalculateHeight;
+end;
+
+function TKCGridDBTableView.GetViewDataClass: TcxCustomGridViewDataClass;
+begin
+  Result := TKCGridViewData;
+end;
+
+{ TcaGridViewData }
+
+function TKCGridViewData.GetRecordClass(ARecordInfo: TcxRowInfo): TcxCustomGridRecordClass;
+begin
+  if ARecordInfo.Level < DataController.Groups.GroupingItemCount then
+    Result := TKCGridGroupRow     // CA override    //if TcxGridGroupRow everything works ok
+  else
+    if GridView.IsMaster then
+      Result := TcxGridMasterDataRow
+    else
+      Result := TKCGridDataRow;
+end;
+
+{ TcxGridGroupRow }
+
+function TKCGridGroupRow.GetViewInfoClass: TcxCustomGridRecordViewInfoClass;
+begin
+  // broken by this event
+   Result := TKCGridGroupRowViewInfo;
+end;
+
+{ TcaGridGroupRowViewInfo }
+
+function TKCGridGroupRowViewInfo.GetFootersViewInfoClass: TcxGridRowFootersViewInfoClass;
+begin
+  Result := TKCGridRowFootersViewInfo;
+end;
+
+{TcaGridRowFootersViewInfo}
+
+function TKCGridRowFootersViewInfo.GetItemClass: TcxGridRowFooterViewInfoClass;
+begin
+  Result := TKCGridRowFooterViewInfo;
+end;
+
+{ TcaGridRowFooterViewInfo }
+
+function TKCGridRowFooterViewInfo.CalculateHeight: Integer;
+begin
+  with GridViewInfo.GridView as TKCGridDBTableView do
+    if GroupFooterHeight > -1 then
+      Result := GroupFooterHeight
+    else
+      Result := inherited CalculateHeight;
+//b  Height := Result;
+end;
+
+function TKCGridDataRow.GetViewInfoClass: TcxCustomGridRecordViewInfoClass;
+begin
+  Result := TKCGridDataRowViewInfo;
+end;
+
+function TKCGridRowFooterViewInfo.GetItemHeight(AIndex: Integer): Integer;
+begin
+  Result := CalculateHeight;
+end;
+
+{ TcaGridDataRowViewInfo }
+
+function TKCGridDataRowViewInfo.GetFootersViewInfoClass: TcxGridRowFootersViewInfoClass;
+begin
+  Result := TKCGridRowFootersViewInfo;;
+end;
+
+// initialization and finalization only required to all the views to show on the forms at design time
+{ TcaGridDataRow }
+function TKCGridFooterViewInfo.GetItemHeight(AIndex: Integer): Integer;
+begin
+  Result := CalculateHeight;
+end;
+
+{ TcaGridDBBandedTableView }
+
+procedure TKCGridDBBandedTableView.CreateOptions;
+begin
+  inherited;
+  FFooterHeight := -1;
+  FGroupFooterHeight := -1;
+end;
+
+function TKCGridDBBandedTableView.GetViewDataClass: TcxCustomGridViewDataClass;
+begin
+  Result := TKCGridViewData;
+end;
+
+function TKCGridDBBandedTableView.GetViewInfoClass: TcxCustomGridViewInfoClass;
+begin
+  Result := TKCGridTableViewInfo;
+end;
+
+initialization
+  cxGridRegisteredViews.Register(TKCGridDBTableView, 'CA DB Table View');
+
+finalization
+  cxGridRegisteredViews.Unregister(TKCGridDBTableView);
+
+end.
+

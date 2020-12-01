@@ -1,0 +1,111 @@
+object fmMartEmailRequest: TfmMartEmailRequest
+  Left = 410
+  Top = 200
+  Width = 456
+  Height = 327
+  Caption = 'Mart File - Email Request'
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'MS Sans Serif'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poMainFormCenter
+  OnDestroy = FormDestroy
+  PixelsPerInch = 96
+  TextHeight = 13
+  object MartEmailRequestGrid: TcxGrid
+    Left = 20
+    Top = 14
+    Width = 403
+    Height = 221
+    TabOrder = 0
+    LookAndFeel.Kind = lfFlat
+    object MartEmailRequestGridDBTableView: TcxGridDBTableView
+      NavigatorButtons.ConfirmDelete = False
+      FilterBox.CustomizeDialog = False
+      FilterBox.Visible = fvNever
+      DataController.DataSource = WinData.dsMarts
+      DataController.KeyFieldNames = 'ID'
+      DataController.Options = [dcoAnsiSort, dcoCaseInsensitive, dcoAssignGroupingValues, dcoAssignMasterDetailKeys, dcoSaveExpanding, dcoImmediatePost]
+      DataController.Summary.DefaultGroupSummaryItems = <>
+      DataController.Summary.FooterSummaryItems = <>
+      DataController.Summary.SummaryGroups = <>
+      OptionsCustomize.ColumnFiltering = False
+      OptionsCustomize.ColumnGrouping = False
+      OptionsData.CancelOnExit = False
+      OptionsData.Deleting = False
+      OptionsData.DeletingConfirmation = False
+      OptionsData.Editing = False
+      OptionsData.Inserting = False
+      OptionsSelection.CellSelect = False
+      OptionsView.DataRowHeight = 21
+      OptionsView.GridLines = glHorizontal
+      OptionsView.GroupByBox = False
+      OptionsView.HeaderHeight = 26
+      OptionsView.Indicator = True
+      OptionsView.IndicatorWidth = 15
+      object MartEmailRequestGridDBTableViewMartName: TcxGridDBColumn
+        DataBinding.FieldName = 'MartName'
+        HeaderAlignmentVert = vaCenter
+        Options.Editing = False
+        Width = 151
+      end
+      object MartEmailRequestGridDBTableViewAddress1: TcxGridDBColumn
+        DataBinding.FieldName = 'Address1'
+        Visible = False
+        HeaderAlignmentVert = vaCenter
+      end
+      object MartEmailRequestGridDBTableViewAddress2: TcxGridDBColumn
+        DataBinding.FieldName = 'Address2'
+        Visible = False
+        HeaderAlignmentVert = vaCenter
+      end
+      object MartEmailRequestGridDBTableViewAddress3: TcxGridDBColumn
+        DataBinding.FieldName = 'Address3'
+        Visible = False
+        HeaderAlignmentVert = vaCenter
+      end
+      object MartEmailRequestGridDBTableViewAddress4: TcxGridDBColumn
+        DataBinding.FieldName = 'Address4'
+        Visible = False
+        HeaderAlignmentVert = vaCenter
+      end
+      object MartEmailRequestGridDBTableViewEmail: TcxGridDBColumn
+        Caption = 'Email Address'
+        DataBinding.FieldName = 'Email'
+        HeaderAlignmentVert = vaCenter
+        Options.Editing = False
+        Width = 193
+      end
+    end
+    object MartEmailRequestGridLevel: TcxGridLevel
+      GridView = MartEmailRequestGridDBTableView
+    end
+  end
+  object btnSendEmail: TcxButton
+    Left = 266
+    Top = 242
+    Width = 75
+    Height = 25
+    Caption = 'Send Email'
+    TabOrder = 1
+    OnClick = btnSendEmailClick
+    LookAndFeel.Kind = lfOffice11
+  end
+  object btnClose: TcxButton
+    Left = 350
+    Top = 242
+    Width = 75
+    Height = 25
+    Caption = 'Close'
+    ModalResult = 1
+    TabOrder = 2
+    LookAndFeel.Kind = lfOffice11
+  end
+  object MAPIMail: TLMDMapiSendMail
+    Left = 134
+    Top = 238
+  end
+end

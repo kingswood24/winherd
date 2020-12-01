@@ -1,0 +1,249 @@
+{
+  05/01/09 [V3.8 R5.6] /SP Bug Fix - First Heat Caption chopped by the First Heat Interval Caption
+
+  01/10/10 [V4.0 R4.9] /MK Additional Feature - Added New Inseminator Label and DBText.
+
+  18/06/12 [V5.0 R7.2] /MK Additional Feature - Removed Fourth Heat To Make Room For Interval With Bull Or Inseminator In Services.
+                                              - Change All Dates To 2 Date Years.
+                                              - Sum Column Now Only Has One Label For PD Status, Cond Score or Due Service Date.
+
+  24/04/15 [V5.4 R4.0] /MK Bug Report - Changes to Detail.Height and TQRDBText.Height/Top/Left to fit properly on Excel file - Ed Dale reported.
+
+  16/07/18 [V5.8 R1.0] /MK Change - lSumCol - Made Due Service, Preg Status, Condition Score column header wider to allow for Last Serv. Days - Declan O'Meara. 
+}
+
+unit uHeatServiceScr;
+
+interface
+
+uses Windows, SysUtils, Messages, Classes, Graphics, Controls,
+  StdCtrls, ExtCtrls, Forms, Quickrpt, QRCtrls, Db, DBTables, QRExport;
+
+type
+  TfHeatServiceScr = class(TQuickRep)
+    Detail: TQRBand;
+    PageHeaderBand1: TQRBand;
+    PageFooterBand1: TQRBand;
+    RptTitle: TQRLabel;
+    QRLabel2: TQRLabel;
+    QRShape1: TQRShape;
+    QRSysData1: TQRSysData;
+    QRSysData2: TQRSysData;
+    QRLabel3: TQRLabel;
+    QRLabel5: TQRLabel;
+    QRLabel6: TQRLabel;
+    QRLabel8: TQRLabel;
+    qrShowIntOrBull: TQRLabel;
+    lSumCol: TQRLabel;
+    AnimalNo: TQRDBText;
+    LactNo: TQRDBText;
+    CalveDate: TQRDBText;
+    qdbFirstHeat: TQRDBText;
+    qdbThirdHeat: TQRDBText;
+    qdbFirstService: TQRDBText;
+    qdbSecondHeat: TQRDBText;
+    Summary: TQRBand;
+    QRLabel11: TQRLabel;
+    qdbFourthService: TQRDBText;
+    qHeatService: TQuery;
+    Srtlbl: TQRLabel;
+    QRLabel17: TQRLabel;
+    QRShape2: TQRShape;
+    QRShape4: TQRShape;
+    QRShape8: TQRShape;
+    SortedByLabel: TQRLabel;
+    OrderLabel: TQRLabel;
+    qdbSecondService: TQRDBText;
+    qdbThirdService: TQRDBText;
+    VerLabel: TQRLabel;
+    QRShape5: TQRShape;
+    QRSysData3: TQRSysData;
+    QRLabel7: TQRLabel;
+    qrdbFirstHeatInt: TQRDBText;
+    qrdbSecondHeatInt: TQRDBText;
+    QRLabel9: TQRLabel;
+    QRLabel13: TQRLabel;
+    QRLabel15: TQRLabel;
+    QRLabel18: TQRLabel;
+    qrDateText: TQRLabel;
+    qrToDate: TQRLabel;
+    qrFromDate: TQRLabel;
+    QRLabel23: TQRLabel;
+    QRLabel24: TQRLabel;
+    QRLabel25: TQRLabel;
+    qrLactfrom: TQRLabel;
+    qrLactTo: TQRLabel;
+    qrShowWhat: TQRLabel;
+    QRLabel10: TQRLabel;
+    QRShape6: TQRShape;
+    QRLabel12: TQRLabel;
+    QRLabel14: TQRLabel;
+    QRLabel16: TQRLabel;
+    QRLabel19: TQRLabel;
+    QRLabel20: TQRLabel;
+    QRLabel4: TQRLabel;
+    QRDBText1: TQRDBText;
+    qrdbSumCol: TQRDBText;
+    qrdbFirstInt: TQRDBText;
+    qrdbFirstBull: TQRDBText;
+    qrdbSecondInt: TQRDBText;
+    qrdbSecondBull: TQRDBText;
+    qrdbThirdInt: TQRDBText;
+    qrdbThirdBull: TQRDBText;
+    qrdbFourthBull: TQRDBText;
+    QRTextFilter1: TQRTextFilter;
+    QRCSVFilter1: TQRCSVFilter;
+    QRHTMLFilter1: TQRHTMLFilter;
+    QRExcelFilter1: TQRExcelFilter;
+    QRRTFFilter1: TQRRTFFilter;
+    QRWMFFilter1: TQRWMFFilter;
+    procedure DetailBeforePrint(Sender: TQRCustomBand;
+      var PrintBand: Boolean);
+    procedure qrdbSumColPrint(sender: TObject; var Value: String);
+    procedure CalveDatePrint(sender: TObject; var Value: String);
+    procedure qrdbFirstIntPrint(sender: TObject; var Value: String);
+    procedure qrdbFirstBullPrint(sender: TObject; var Value: String);
+  private
+
+  public
+     PrintingReport : Boolean;
+     ShowWhat       : Integer;
+     class procedure PrintBlank(const AHerdID : Integer );
+  end;
+
+var
+  fHeatServiceScr: TfHeatServiceScr;
+
+implementation
+uses
+   DairyData, kRoutines, GenTypesConst;
+
+{$R *.DFM}
+
+procedure TfHeatServiceScr.DetailBeforePrint(Sender: TQRCustomBand;
+  var PrintBand: Boolean);
+begin
+    if ( qHeatService.FieldByName('IrregularService').AsBoolean ) And
+       ( qHeatService.FieldByName('IrregularHeat').AsBoolean ) then
+       begin
+          if NOT PrintingReport then
+             Detail.Font.Color := clMaroon;
+          Detail.Font.Style := [fsItalic,fsBold];
+       end
+    else if qHeatService.FieldByName('IrregularService').AsBoolean then
+       begin
+          if NOT PrintingReport then
+             Detail.Font.Color := clRed;
+          Detail.Font.Style := [fsItalic,fsUnderline];
+       end
+    else if qHeatService.FieldByName('IrregularHeat').AsBoolean then
+       begin
+          if NOT PrintingReport then
+             Detail.Font.Color := clPurple;
+          Detail.Font.Style := [fsItalic];
+       end
+    else
+       begin
+          if NOT PrintingReport then
+             Detail.Font.Color := clNavy;
+          Detail.Font.Style := [];
+       end;
+    if ShowWhat = 1 then // Show Irregular Heats Only
+       begin
+          if NOT qHeatService.FieldByName('IrregularHeat').AsBoolean then
+             PrintBand := FALSE;
+       end
+    else if ShowWhat = 2 then // Show Irregular Service Only
+       begin
+          if NOT qHeatService.FieldByName('IrregularService').AsBoolean then
+             PrintBand := FALSE;
+       end;
+end;
+
+class procedure TfHeatServiceScr.PrintBlank(const AHerdID : Integer );
+var
+   i : Integer;
+   AnimalQuery : TQuery;
+begin
+   with TfHeatServiceScr.Create(nil) do
+      try
+         for i := 0 to Detail.ComponentCount-1 do
+            begin
+               if ( Detail.Components[i] is TQRDBText ) then
+                  ( Detail.Components[i] as TQRDBText ).DataSet := nil;
+            end;
+
+         Detail.Height := Detail.Height * 2;
+         Detail.BeforePrint := nil;
+
+         QRShape2.Height := QRShape2.Height*2;
+         QRShape4.Height := QRShape4.Height*2;
+         QRShape6.Height := QRShape6.Height*2;
+
+         AnimalQuery := TQuery.Create(nil);
+         AnimalQuery.DatabaseName := AliasName;
+
+         AnimalQuery.SQL.Add('SELECT ID, AnimalNo, SortAnimalNo, LactNo ');
+         AnimalQuery.SQL.Add('FROM Animals');
+         AnimalQuery.SQL.Add('WHERE (InHerd=True)');
+         AnimalQuery.SQL.Add('AND (AnimalDeleted=False)');
+         AnimalQuery.SQL.Add('AND (Breeding=True)');
+         AnimalQuery.SQL.Add('AND (Sex=''Female'')');
+         AnimalQuery.SQL.Add('AND ((LactNo>0) OR (DateOfBirth <= "'+ FormatDate( IncMonth(Date, -12), dsUS) +'"))'); // should include breeding heifers
+         if AHerdID > 0 then
+            begin
+               AnimalQuery.SQL.Add('AND HerdID=:AHerdID');
+               AnimalQuery.Params[0].AsInteger := AHerdID;
+            end
+         else
+            begin
+               AnimalQuery.SQL.Add('AND HerdID<>:AHerdID');
+               AnimalQuery.Params[0].AsInteger := WinData.NONEHerdID;
+            end;
+
+         AnimalQuery.SQL.Add('ORDER BY SortAnimalNo');
+         AnimalQuery.Open;
+
+         DataSet := AnimalQuery;
+         AnimalNo.DataSet := AnimalQuery;
+         LactNo.DataSet := AnimalQuery;
+
+         Preview;
+
+      finally
+         Free;
+      end;
+
+end;
+
+procedure TfHeatServiceScr.qrdbSumColPrint(sender: TObject;
+  var Value: String);
+begin
+   if Value = '.0' then
+      Value := ''
+   else if ( Value = '30/12/99' ) then
+      Value := '';
+end;
+
+procedure TfHeatServiceScr.CalveDatePrint(sender: TObject;
+  var Value: String);
+begin
+   if ( (Sender as TQRDBText).DataSet.FieldByName((Sender as TQRDBText).DataField).AsDateTime <= 0 ) then
+      Value := ''
+end;
+
+procedure TfHeatServiceScr.qrdbFirstIntPrint(sender: TObject;
+  var Value: String);
+begin
+   if ( Length(Value) > 3 ) then
+      Value := ( Copy(Value,0,3) );
+end;
+
+procedure TfHeatServiceScr.qrdbFirstBullPrint(sender: TObject;
+  var Value: String);
+begin
+   if ( Length(Value) > 5 ) then
+      Value := ( Copy(Value,0,5) );
+end;
+
+end.

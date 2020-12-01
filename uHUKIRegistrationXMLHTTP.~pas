@@ -1,0 +1,25 @@
+unit uHUKIRegistrationXMLHTTP;
+
+const
+
+   cCALFREG_SOCIETY_HUKI = 1;
+   cCALFREG_SOCIETY_JERSEY = 2;
+   cCALFREG_SOCIETY_BELGIANBLUE = 3;
+   cCALFREG_SOCIETY_GUERSEY = 4;
+   cCALFREG_SOCIETY_SIMMENTAL = 8;
+
+interface
+
+   function CalfRegistrationLogin(Society : Integer; MemberHerdPrefix : String;
+      MemberSecurityPin : String; ProgramsId : String = 'xxx');
+
+implementation
+
+function CalfRegistrationLogin(Society : Integer; MemberHerdPrefix : String;
+   MemberSecurityPin : String; ProgramsId : String);
+begin
+
+
+end;
+
+end.

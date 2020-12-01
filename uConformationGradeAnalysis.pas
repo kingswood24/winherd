@@ -1,0 +1,624 @@
+{
+   15/04/12 [V5.0 R4.9] /MK Additional Feature - Favourite Button Added.
+
+   26/07/12 [V5.0 R8.1] /MK Change - Added a footer to the bottom of the grid which prints.
+                                   - SQL for animals does not differentiate by sex.
+                                   - If query finds animals that do not match the expected sales grade then a messages appears
+                                     to show the total sales, the total animals not in the expected grades and the total animals
+                                     that are in the expected grades.
+                                   - Query also looks at the animals that are in the AFilters table.
+
+   30/07/12 [V5.0 R8.2] /MK Change - MessageDLG to show valid and invalid counts changed to Panel below grid.
+
+   08/01/20 [V5.9 R1.6] /MK Additional Feature - Added Columns, Fields and Consts for E+, E= and E- for James Feighery.
+                                               - Added count of blank records seperate to invalid records - Mary (Andrew Kirwan).
+                                               - Added a Invalid Grades button that shows the new uGeneralMemo screen that tells the user
+                                                 the amount blank and invalid grades and what the invalid grades are.
+                            Bug Fix - lInfoInvalid was showing ValidCount and lInfoValid was showing InvalidCount - Mary (Andrew Kirwan).
+}
+
+unit uConformationGradeAnalysis;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  uBaseForm, dxBar, dxBarExtItems, ActnList, cxControls, dxStatusBar, DB, DBTables,
+  cxLabel, cxContainer, cxEdit, cxTextEdit, cxMaskEdit, cxDropDownEdit,
+  cxCalendar, StdCtrls, GenTypesConst, cxGridLevel, cxClasses,
+  cxGridCustomView, cxGridCustomTableView, cxGridTableView,
+  cxGridDBTableView, cxGrid, cxStyles, cxProgressBar, ComCtrls, dxPSCore,
+  dxPScxCommon, dxPScxGridLnk, cxCheckBox, cxCustomData, ExtCtrls, DateUtil,
+  cxButtons, uGeneralMemo;
+
+type
+  TfmConformationGradeAnalysis = class(TfmBaseForm)
+    gbDateFilter: TGroupBox;
+    DateFrom: TcxDateEdit;
+    DateTo: TcxDateEdit;
+    lDateFrom: TcxLabel;
+    lDateTo: TcxLabel;
+    SaleGradeGridDBTableView: TcxGridDBTableView;
+    SaleGradeGridLevel: TcxGridLevel;
+    SaleGradeGrid: TcxGrid;
+    dxBarLargeButton1: TdxBarLargeButton;
+    SaleGradeGridDBTableViewBreedCode: TcxGridDBColumn;
+    SaleGradeGridDBTableViewUP: TcxGridDBColumn;
+    SaleGradeGridDBTableViewUE: TcxGridDBColumn;
+    SaleGradeGridDBTableViewUM: TcxGridDBColumn;
+    SaleGradeGridDBTableViewRP: TcxGridDBColumn;
+    SaleGradeGridDBTableViewRE: TcxGridDBColumn;
+    SaleGradeGridDBTableViewRM: TcxGridDBColumn;
+    SaleGradeGridDBTableViewOP: TcxGridDBColumn;
+    SaleGradeGridDBTableViewOE: TcxGridDBColumn;
+    SaleGradeGridDBTableViewOM: TcxGridDBColumn;
+    SaleGradeGridDBTableViewPP: TcxGridDBColumn;
+    cxStyleRepository1: TcxStyleRepository;
+    cxStyle1: TcxStyle;
+    actGenerate: TAction;
+    ProgressBar: TProgressBar;
+    blbPreview: TdxBarLargeButton;
+    actPrint: TAction;
+    ComponentPrinter: TdxComponentPrinter;
+    ComponentPrinterLink: TdxGridReportLink;
+    cbFavourite: TcxCheckBox;
+    cbFilter: TcxCheckBox;
+    pInfo: TPanel;
+    lInfoMain: TcxLabel;
+    lInfoTotal: TcxLabel;
+    lInfoInvalid: TcxLabel;
+    lInfoValid: TcxLabel;
+    SaleGradeGridDBTableViewEP: TcxGridDBColumn;
+    SaleGradeGridDBTableViewEE: TcxGridDBColumn;
+    SaleGradeGridDBTableViewEM: TcxGridDBColumn;
+    btnInvalidGrades: TcxButton;
+    actInvalidGrades: TAction;
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure actGenerateExecute(Sender: TObject);
+    procedure actPrintExecute(Sender: TObject);
+    procedure cbFavouritePropertiesChange(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure SaleGradeGridDBTableViewTcxGridDBDataFooterSummaryGetText(
+      Sender: TcxDataSummaryItem; const AValue: Variant;
+      AIsFooter: Boolean; var AText: String);
+    procedure actInvalidGradesExecute(Sender: TObject);
+  private
+    { Private declarations }
+    FAnimalGrades : TTable;
+    FDataSource : TDataSource;
+    FTotalValidGradeSales : Integer;
+    FBlankRecordCount,
+    FInvalidRecordCount : Integer;
+    procedure CreateTempTable;
+    function GetGradeType(AGrade : String) : TSaleGrade;
+    procedure Generate;
+  public
+    { Public declarations }
+    class procedure Show;
+  end;
+
+var
+   fmConformationGradeAnalysis: TfmConformationGradeAnalysis;
+   FQuery : TQuery;
+
+const
+   CSaleGrade : Array [1..13] of string = ('E+', 'E=', 'E-', 'U+', 'U=', 'U-', 'R+', 'R=', 'R-', 'O+', 'O=', 'O-', 'P+');
+
+implementation
+
+uses DairyData, KRoutines;
+
+{$R *.DFM}
+
+{ TAnimalGrades }
+
+procedure TfmConformationGradeAnalysis.CreateTempTable;
+begin
+   FAnimalGrades := TTable.Create(nil);
+   with FAnimalGrades do
+      begin
+         DatabaseName := AliasName;
+         TableName := 'tmpAnimalGrades';
+
+         if Exists then DeleteTable;
+
+         with FieldDefs do
+            begin
+               Add ('ID',ftAutoInc,0,False);
+               Add ('BreedCode',ftString,6,False);
+               Add ('EP',ftFloat,0,False);
+               Add ('EE',ftFloat,0,False);
+               Add ('EM',ftFloat,0,False);
+               Add ('UP',ftFloat,0,False);
+               Add ('UE',ftFloat,0,False);
+               Add ('UM',ftFloat,0,False);
+               Add ('RP',ftFloat,0,False);
+               Add ('RE',ftFloat,0,False);
+               Add ('RM',ftFloat,0,False);
+               Add ('OP',ftFloat,0,False);
+               Add ('OE',ftFloat,0,False);
+               Add ('OM',ftFloat,0,False);
+               Add ('PP',ftFloat,0,False);
+            end;
+          CreateTable;
+          Active := True;
+      end;
+
+   FDataSource := TDataSource.Create(nil);
+   FDataSource.DataSet := FAnimalGrades;
+
+   SaleGradeGridDBTableView.DataController.DataSource := FDataSource;
+   SaleGradeGridDBTableView.DataController.KeyFieldNames := 'ID';
+
+   FQuery := TQuery.Create(nil);
+   FQuery.DatabaseName := AliasName;
+
+end;
+
+procedure TfmConformationGradeAnalysis.FormCreate(Sender: TObject);
+begin
+   inherited;
+   ProgressBar.Hide;
+   CreateTempTable;
+
+   Height := 551;
+   pInfo.Visible := False;
+   btnInvalidGrades.Visible := False;
+
+   DateFrom.Date := IncYear(Date,-1);
+   DateTo.Date := Date;
+
+   SaleGradeGridDBTableView.OptionsView.Footer := False;
+
+   if WinData.ActiveFilter then
+      begin
+         cbFilter.Visible := True;
+         cbFilter.Checked := True;
+         cbFilter.Style.Font.Color := clBlue;
+      end
+   else
+      begin
+         cbFilter.Visible := False;
+         cbFilter.Checked := False;
+         cbFilter.Style.Font.Color := clBlack;
+      end;
+
+   ComponentPrinter.PrintTitle := Caption;
+   with ComponentPrinterLink.PrinterPage.PageHeader do
+      begin
+         Font.Name := 'Segoe UI';
+         Font.Size := 8;
+         CenterTitle.Clear;
+         CenterTitle.Add(Caption);
+      end;
+end;
+
+function TfmConformationGradeAnalysis.GetGradeType(AGrade: String): TSaleGrade;
+{
+     TSaleGrade = (sgNone, sgUP,sgUE,sgUM,sgRP,sgRE,sgRM,sgOP,sgOE,sgOM,sgPP);
+}
+var
+   tGrade : String;
+begin
+   Result := sgInvalid;
+   if ( Length(AGrade) = 0 ) then
+      Result := sgBlank;
+
+   tGrade := UPPERCASE(COPY(AGrade, 1, 2));
+   if tGrade = 'E+' then
+      Result := sgEP
+   else if tGrade = 'E=' then
+      Result := sgEE
+   else if tGrade = 'E-' then
+      Result := sgEM
+   else if tGrade = 'U+' then
+      Result := sgUP
+   else if tGrade = 'U=' then
+      Result := sgUE
+   else if tGrade = 'U-' then
+      Result := sgUM
+   else if tGrade = 'R+' then
+      Result := sgRP
+   else if tGrade = 'R=' then
+      Result := sgRE
+   else if tGrade = 'R-' then
+      Result := sgRM
+   else if tGrade = 'O+' then
+      Result := sgOP
+   else if tGrade = 'O=' then
+      Result := sgOE
+   else if tGrade = 'O-' then
+      Result := sgOM
+   else if tGrade = 'P+' then
+      Result := sgPP
+
+end;
+
+procedure TfmConformationGradeAnalysis.FormDestroy(Sender: TObject);
+begin
+  inherited;
+  if FDataSource <> nil then
+     begin
+        FDataSource.DataSet := nil;
+        FreeAndNil(FDataSource);
+     end;
+
+  if FQuery <> nil then
+     begin
+        FQuery.Close;
+        FreeAndNil(FQuery);
+     end;
+
+  if FAnimalGrades <> nil then
+     begin
+        FAnimalGrades.Close;
+        FAnimalGrades.DeleteTable;
+        FreeAndNil(FAnimalGrades);
+     end;
+end;
+
+procedure TfmConformationGradeAnalysis.actGenerateExecute(Sender: TObject);
+begin
+  inherited;
+  Generate;
+end;
+
+procedure TfmConformationGradeAnalysis.Generate;
+var
+  ValidRecordCount : Integer;
+begin
+   SaleGradeGridDBTableView.OptionsView.Footer := True;
+
+   ValidRecordCount := 0;
+   FBlankRecordCount := 0;
+   FInvalidRecordCount := 0;
+
+   Screen.Cursor := crHourGlass;
+   with FQuery do
+       begin
+          SQL.Clear;
+          SQL.Add('Delete From '+FAnimalGrades.TableName );
+          ExecSQL;
+
+          SQL.Clear;
+          SQL.Add('SELECT DISTINCT A.ID, A.Sex, B.Code BreedCode, S.Grade');
+          SQL.Add('FROM Animals A');
+          SQL.Add('LEFT JOIN Events E ON (A.ID=E.AnimalID)');
+          SQL.Add('LEFT JOIN Breeds B ON (A.PrimaryBreed=B.ID)');
+          SQL.Add('LEFT JOIN SalesDeaths S ON (E.ID=S.EventID)');
+          SQL.Add('WHERE E.EventType = :EventType');
+          SQL.Add('AND S.Sold = True');
+
+          //SQL.Add('AND A.Sex IN ("Steer", "Female")');
+
+          if (DateFrom.Date > 0) and (DateTo.Date > 0) then
+             SQL.Add('AND ( E.EventDate BETWEEN ' + '''' + FormatDateTime(cUSDateStyle,DateFrom.Date) + '''' + ' And ' + '''' + FormatDateTime(cUSDateStyle,DateTo.Date) + '''' + ')')
+          else if (DateFrom.Date <= 0) and (DateTo.Date > 0) then
+             SQL.Add('AND ( E.EventDate <= ' + '''' + FormatDateTime(cUSDateStyle,DateTo.Date) + '''' + ')')
+          else if (DateFrom.Date > 0 ) and (DateTo.Date <= 0) then
+             SQL.Add('AND ( E.EventDate >= ' + '''' + FormatDateTime(cUSDateStyle,DateFrom.Date) + '''' + ')');
+
+          if ( cbFilter.Checked ) and ( WinData.FilteredAnimals.RecordCount > 0 ) then
+             SQL.Add('AND A.ID IN (SELECT AF.AID FROM AFILTERS AF)');
+
+          Params[0].AsInteger := cSaleDeathEvent;
+
+          Open;
+
+          FAnimalGrades.DisableControls;
+          try
+
+             {
+             ProgressBar.Position := 0;
+             ProgressBar.Min := 0;
+             if RecordCount > 0 then
+                ProgressBar.Max := Trunc(RecordCount/100);
+             ProgressBar.Show;
+             }
+
+             Update;
+             First;
+             while not eof do
+                begin
+                   Application.ProcessMessages;
+                   if not FAnimalGrades.Locate('BreedCode', FieldByName('BreedCode').AsString, []) then
+                      begin
+                         FAnimalGrades.Append;
+                         FAnimalGrades.FieldByName('BreedCode').AsString := FieldByName('BreedCode').AsString;
+                      end
+                   else
+                      FAnimalGrades.Edit;
+
+                   case GetGradeType(FieldByName('Grade').AsString) of
+                      sgInvalid : begin
+                                     FAnimalGrades.Cancel;
+                                     Inc(FInvalidRecordCount);
+                                  end;
+                      sgBlank : begin
+                                   FAnimalGrades.Cancel;
+                                   Inc(FBlankRecordCount);
+                                end;
+                      sgEP : begin
+                                FAnimalGrades.FieldByName('EP').AsFloat := FAnimalGrades.FieldByName('EP').AsFloat + 1;
+                                Inc(ValidRecordCount);
+                             end;
+                      sgEE : begin
+                                FAnimalGrades.FieldByName('EE').AsFloat := FAnimalGrades.FieldByName('EE').AsFloat + 1;
+                                Inc(ValidRecordCount);
+                             end;
+                      sgEM : begin
+                                FAnimalGrades.FieldByName('EM').AsFloat := FAnimalGrades.FieldByName('EM').AsFloat + 1;
+                                Inc(ValidRecordCount);
+                             end;
+                      sgUP : begin
+                                FAnimalGrades.FieldByName('UP').AsFloat := FAnimalGrades.FieldByName('UP').AsFloat + 1;
+                                Inc(ValidRecordCount);
+                             end;
+                      sgUE : begin
+                                FAnimalGrades.FieldByName('UE').AsFloat := FAnimalGrades.FieldByName('UE').AsFloat + 1;
+                                Inc(ValidRecordCount);
+                             end;
+                      sgUM : begin
+                                FAnimalGrades.FieldByName('UM').AsFloat := FAnimalGrades.FieldByName('UM').AsFloat + 1;
+                                Inc(ValidRecordCount);
+                             end;
+                      sgRP : begin
+                                FAnimalGrades.FieldByName('RP').AsFloat := FAnimalGrades.FieldByName('RP').AsFloat + 1;
+                                Inc(ValidRecordCount);
+                             end;
+                      sgRE : begin
+                                FAnimalGrades.FieldByName('RE').AsFloat := FAnimalGrades.FieldByName('RE').AsFloat + 1;
+                                Inc(ValidRecordCount);
+                             end;
+                      sgRM : begin
+                                FAnimalGrades.FieldByName('RM').AsFloat := FAnimalGrades.FieldByName('RM').AsFloat + 1;
+                                Inc(ValidRecordCount);
+                             end;
+                      sgOP : begin
+                                FAnimalGrades.FieldByName('OP').AsFloat := FAnimalGrades.FieldByName('OP').AsFloat + 1;
+                                Inc(ValidRecordCount);
+                             end;
+                      sgOE : begin
+                                FAnimalGrades.FieldByName('OE').AsFloat := FAnimalGrades.FieldByName('OE').AsFloat + 1;
+                                Inc(ValidRecordCount);
+                             end;
+                      sgOM : begin
+                                FAnimalGrades.FieldByName('OM').AsFloat := FAnimalGrades.FieldByName('OM').AsFloat + 1;
+                                Inc(ValidRecordCount);
+                             end;
+                      sgPP : begin
+                                FAnimalGrades.FieldByName('PP').AsFloat := FAnimalGrades.FieldByName('PP').AsFloat + 1;
+                                Inc(ValidRecordCount);
+                             end;
+                   end;
+
+                   if ( FAnimalGrades.State in dsEditModes ) then
+                      FAnimalGrades.Post;
+
+                   Next;
+ //                  ProgressBar.StepIt;
+                end;
+
+             with FAnimalGrades do
+                begin
+
+                   First;
+                   try
+                       while not eof do
+                          begin
+                             Application.ProcessMessages;
+                             Edit;
+
+                             if FAnimalGrades.FieldByName('EP').AsFloat > 0 then
+                                FAnimalGrades.FieldByName('EP').AsFloat := MakePercentage(FAnimalGrades.FieldByName('EP').AsFloat, ValidRecordCount);
+
+                             if FAnimalGrades.FieldByName('EE').AsFloat > 0 then
+                                FAnimalGrades.FieldByName('EE').AsFloat := MakePercentage(FAnimalGrades.FieldByName('EE').AsFloat, ValidRecordCount);
+
+                             if FAnimalGrades.FieldByName('EM').AsFloat > 0 then
+                                FAnimalGrades.FieldByName('EM').AsFloat := MakePercentage(FAnimalGrades.FieldByName('EM').AsFloat, ValidRecordCount);
+
+                             if FAnimalGrades.FieldByName('UP').AsFloat > 0 then
+                                FAnimalGrades.FieldByName('UP').AsFloat := MakePercentage(FAnimalGrades.FieldByName('UP').AsFloat, ValidRecordCount);
+
+                             if FAnimalGrades.FieldByName('UE').AsFloat > 0 then
+                                FAnimalGrades.FieldByName('UE').AsFloat := MakePercentage(FAnimalGrades.FieldByName('UE').AsFloat, ValidRecordCount);
+
+                             if FAnimalGrades.FieldByName('UM').AsFloat > 0 then
+                                FAnimalGrades.FieldByName('UM').AsFloat := MakePercentage(FAnimalGrades.FieldByName('UM').AsFloat, ValidRecordCount);
+
+                             if FAnimalGrades.FieldByName('RP').AsFloat > 0 then
+                                FAnimalGrades.FieldByName('RP').AsFloat := MakePercentage(FAnimalGrades.FieldByName('RP').AsFloat, ValidRecordCount);
+
+                             if FAnimalGrades.FieldByName('RE').AsFloat > 0 then
+                                FAnimalGrades.FieldByName('RE').AsFloat := MakePercentage(FAnimalGrades.FieldByName('RE').AsFloat, ValidRecordCount);
+
+                             if FAnimalGrades.FieldByName('RM').AsFloat > 0 then
+                                FAnimalGrades.FieldByName('RM').AsFloat := MakePercentage(FAnimalGrades.FieldByName('RM').AsFloat, ValidRecordCount);
+
+                             if FAnimalGrades.FieldByName('OP').AsFloat > 0 then
+                                FAnimalGrades.FieldByName('OP').AsFloat := MakePercentage(FAnimalGrades.FieldByName('OP').AsFloat, ValidRecordCount);
+
+                             if FAnimalGrades.FieldByName('OE').AsFloat > 0 then
+                                FAnimalGrades.FieldByName('OE').AsFloat := MakePercentage(FAnimalGrades.FieldByName('OE').AsFloat, ValidRecordCount);
+
+                             if FAnimalGrades.FieldByName('OM').AsFloat > 0 then
+                                FAnimalGrades.FieldByName('OM').AsFloat := MakePercentage(FAnimalGrades.FieldByName('OM').AsFloat, ValidRecordCount);
+
+                             if FAnimalGrades.FieldByName('PP').AsFloat > 0 then
+                                FAnimalGrades.FieldByName('PP').AsFloat := MakePercentage(FAnimalGrades.FieldByName('PP').AsFloat, ValidRecordCount);
+
+                             Post;
+                             Next;
+                          end;
+                   finally
+                      First;
+
+                   end;
+
+                end;
+
+
+
+          finally
+ //            ProgressBar.Hide;
+             Close;
+             FAnimalGrades.EnableControls;
+          end;
+       end;
+
+    if ( FInvalidRecordCount > 0 ) or ( FBlankRecordCount > 0 ) then
+       begin
+           Height := 600;
+           pInfo.Visible := True;
+           btnInvalidGrades.Visible := True;
+
+           lInfoTotal.Caption := '';
+           lInfoValid.Caption := '';
+           lInfoInvalid.Caption := '';
+           lInfoTotal.Caption := FloatToStr(FBlankRecordCount+FInvalidRecordCount+ValidRecordCount);
+           lInfoValid.Caption := FloatToStr(ValidRecordCount);
+           lInfoInvalid.Caption := FloatToStr(FBlankRecordCount+FInvalidRecordCount);
+       end;
+
+    StatusBar.Panels[0].Text := Format('Total Sale Records processed: %d',[FBlankRecordCount+FInvalidRecordCount+ValidRecordCount]);
+    Screen.Cursor := crDefault;
+end;
+
+class procedure TfmConformationGradeAnalysis.Show;
+begin
+
+   with TfmConformationGradeAnalysis.create(nil) do
+      try
+         ShowModal;
+      finally
+         Free;
+      end;
+
+end;
+
+procedure TfmConformationGradeAnalysis.actPrintExecute(Sender: TObject);
+begin
+  inherited;
+  if not ComponentPrinterLink.PreviewExists then
+     begin
+        if Length(ComponentPrinter.PrintTitle) = 0 then
+           ComponentPrinter.PrintTitle := 'Kingswood Grid Print';
+        SaleGradeGridDBTableView.OptionsView.Footer := True;
+        ComponentPrinterLink.Preview;
+        SaleGradeGridDBTableView.OptionsView.Footer := False;
+     end;
+end;
+
+//   15/04/12 [V5.0 R4.9] /MK Additional Feature - Favourite Button Added.
+procedure TfmConformationGradeAnalysis.cbFavouritePropertiesChange(
+  Sender: TObject);
+begin
+   inherited;
+   if cbFavourite.Checked then
+      begin
+         WinData.SetReportAsFavourite(cConfGradAnalysisRep,True);
+         cbFavourite.Style.TextColor := clBlue;
+         cbFavourite.StyleHot.TextColor := clBlue;
+      end
+   else
+      begin
+         WinData.SetReportAsFavourite(cConfGradAnalysisRep,False);
+         cbFavourite.Style.TextColor := clBlack;
+         cbFavourite.StyleHot.TextColor := clBlack;
+      end;
+   Application.ProcessMessages;
+   Update;
+end;
+
+//   15/04/12 [V5.0 R4.9] /MK Additional Feature - Favourite Button Added.
+procedure TfmConformationGradeAnalysis.FormShow(Sender: TObject);
+begin
+   inherited;
+   cbFavourite.Checked := WinData.IsReportFavourite(cConfGradAnalysisRep);
+   WinData.UpdateRecentReportUsage(cConfGradAnalysisRep);
+end;
+
+procedure TfmConformationGradeAnalysis.SaleGradeGridDBTableViewTcxGridDBDataFooterSummaryGetText(
+  Sender: TcxDataSummaryItem; const AValue: Variant; AIsFooter: Boolean;
+  var AText: String);
+begin
+  inherited;
+  if AText = '0.00' then
+     AText := '';
+end;
+
+procedure TfmConformationGradeAnalysis.actInvalidGradesExecute(Sender: TObject);
+var
+   slList,
+   slInvalidGrades : TStringList;
+   sGrade : String;
+   qInvalidGrades : TQuery;
+   i,
+   InvalidGradeCount : Integer;
+begin
+   inherited;
+   InvalidGradeCount := 0;
+   slList := TStringList.Create();
+   slInvalidGrades := TStringList.Create();
+   try
+      slInvalidGrades.Add(IntToStr(FBlankRecordCount)+' Blank Grade(s) Found');
+
+      qInvalidGrades := TQuery.Create(nil);
+      with qInvalidGrades do
+         try
+            DatabaseName := AliasName;
+            SQL.Clear;
+            SQL.Add('SELECT DISTINCT(SUBSTRING(UPPER(S.Grade) FROM 1 FOR 2)) SalesGrade');
+            SQL.Add('FROM SalesDeaths S');
+            SQL.Add('LEFT JOIN Events E ON (E.ID = S.EventID)');
+            SQL.Add('WHERE S.Grade IS NOT NULL');
+            if (DateFrom.Date > 0) and (DateTo.Date > 0) then
+               SQL.Add('AND ( E.EventDate BETWEEN ' + '''' + FormatDateTime(cUSDateStyle,DateFrom.Date) + '''' + ' And ' + '''' + FormatDateTime(cUSDateStyle,DateTo.Date) + '''' + ')')
+            else if (DateFrom.Date <= 0) and (DateTo.Date > 0) then
+               SQL.Add('AND ( E.EventDate <= ' + '''' + FormatDateTime(cUSDateStyle,DateTo.Date) + '''' + ')')
+            else if (DateFrom.Date > 0 ) and (DateTo.Date <= 0) then
+               SQL.Add('AND ( E.EventDate >= ' + '''' + FormatDateTime(cUSDateStyle,DateFrom.Date) + '''' + ')');
+
+            if ( cbFilter.Checked ) and ( WinData.FilteredAnimals.RecordCount > 0 ) then
+               SQL.Add('AND A.ID IN (SELECT AF.AID FROM AFILTERS AF)');
+            try
+               Open;
+               if ( RecordCount > 0 ) then
+                  begin
+                     try
+                        First;
+                        while ( not(Eof) ) do
+                           begin
+                              sGrade := FieldByName('SalesGrade').AsString;
+                              if ( not(InArray(sGrade,CSaleGrade)) ) then
+                                 begin
+                                    slList.Add(sGrade);
+                                    Inc(InvalidGradeCount);
+                                 end;
+                              Next;
+                           end;
+                        slInvalidGrades.Add(IntToStr(InvalidGradeCount) + ' Invalid Grade(s) Found');
+                     finally
+                     end;
+                  end;
+            except
+               on e : Exception do
+                  ShowDebugMessage(e.Message);
+            end;
+         finally
+            Free;
+         end;
+      for i := 0 to slList.Count-1 do
+         slInvalidGrades.Add(slList.Strings[i]);
+      TfmGeneralMemo.ShowTheForm(slInvalidGrades,mtInvalidGrades);
+   finally
+      if ( slList <> nil ) then
+         FreeAndNil(slList);
+      if ( slInvalidGrades <> nil ) then
+         FreeAndNil(slInvalidGrades);
+   end;
+end;
+
+end.

@@ -1,0 +1,278 @@
+inherited fmMovementsInHealth: TfmMovementsInHealth
+  Left = 396
+  Top = 264
+  Width = 463
+  Height = 375
+  Caption = 'APHIS Movements In - Health'
+  OldCreateOrder = True
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited StatusBar: TdxStatusBar
+    Top = 324
+    Width = 455
+  end
+  object cxGroupBox1: TcxGroupBox [1]
+    Left = 24
+    Top = 122
+    Caption = 'Health Details'
+    Style.LookAndFeel.NativeStyle = True
+    StyleDisabled.LookAndFeel.NativeStyle = True
+    StyleFocused.LookAndFeel.NativeStyle = True
+    StyleHot.LookAndFeel.NativeStyle = True
+    TabOrder = 5
+    Height = 179
+    Width = 401
+    object cmboDrug: TcxDBLookupComboBox
+      Left = 92
+      Top = 60
+      RepositoryItem = HerdLookup.erMedicineLookup
+      DataBinding.DataField = 'DrugID'
+      Properties.ListColumns = <>
+      Properties.OnChange = cmboDrugIDPropertiesChange
+      Style.LookAndFeel.NativeStyle = True
+      StyleDisabled.LookAndFeel.NativeStyle = True
+      StyleFocused.LookAndFeel.NativeStyle = True
+      StyleHot.LookAndFeel.NativeStyle = True
+      TabOrder = 1
+      Width = 263
+    end
+    object ldate: TcxLabel
+      Left = 20
+      Top = 30
+      Caption = 'Date'
+    end
+    object cxLabel1: TcxLabel
+      Left = 20
+      Top = 62
+      Caption = 'Drug Name'
+    end
+    object cxLabel2: TcxLabel
+      Left = 20
+      Top = 94
+      Caption = 'Applic. Rate '
+    end
+    object teApplicRate: TcxDBTextEdit
+      Left = 92
+      Top = 94
+      DataBinding.DataField = 'ApplicRate'
+      Style.LookAndFeel.NativeStyle = True
+      StyleDisabled.LookAndFeel.NativeStyle = True
+      StyleFocused.LookAndFeel.NativeStyle = True
+      StyleHot.LookAndFeel.NativeStyle = True
+      TabOrder = 2
+      Width = 73
+    end
+    object lDoseUnit: TcxLabel
+      Left = 168
+      Top = 96
+      Caption = 'Dose Unit'
+    end
+    object tePerKgs: TcxDBTextEdit
+      Left = 280
+      Top = 94
+      DataBinding.DataField = 'ApplicRatePerKgs'
+      Style.LookAndFeel.NativeStyle = True
+      StyleDisabled.LookAndFeel.NativeStyle = True
+      StyleFocused.LookAndFeel.NativeStyle = True
+      StyleHot.LookAndFeel.NativeStyle = True
+      TabOrder = 3
+      Visible = False
+      Width = 43
+    end
+    object cxLabel5: TcxLabel
+      Left = 326
+      Top = 96
+      Caption = '(Kgs) '
+      Visible = False
+    end
+    object cxLabel6: TcxLabel
+      Left = 256
+      Top = 96
+      Caption = 'Per'
+      Visible = False
+    end
+    object cxLabel8: TcxLabel
+      Left = 20
+      Top = 130
+      Caption = 'Comment '
+    end
+    object teComment: TcxDBTextEdit
+      Left = 92
+      Top = 128
+      DataBinding.DataField = 'Comment'
+      Style.LookAndFeel.NativeStyle = True
+      StyleDisabled.LookAndFeel.NativeStyle = True
+      StyleFocused.LookAndFeel.NativeStyle = True
+      StyleHot.LookAndFeel.NativeStyle = True
+      TabOrder = 4
+      Width = 263
+    end
+    object deEventDate: TcxDBDateEdit
+      Left = 92
+      Top = 26
+      DataBinding.DataField = 'EventDate'
+      Style.LookAndFeel.NativeStyle = True
+      StyleDisabled.LookAndFeel.NativeStyle = True
+      StyleFocused.LookAndFeel.NativeStyle = True
+      StyleHot.LookAndFeel.NativeStyle = True
+      TabOrder = 0
+      Width = 121
+    end
+  end
+  object cxGroupBox2: TcxGroupBox [2]
+    Left = 22
+    Top = 52
+    Caption = 'Animal Details'
+    Style.LookAndFeel.NativeStyle = True
+    StyleDisabled.LookAndFeel.NativeStyle = True
+    StyleFocused.LookAndFeel.NativeStyle = True
+    StyleHot.LookAndFeel.NativeStyle = True
+    TabOrder = 6
+    Height = 59
+    Width = 401
+    object teTagNo: TcxTextEdit
+      Left = 92
+      Top = 24
+      Properties.ReadOnly = True
+      Style.Color = clBtnFace
+      Style.LookAndFeel.NativeStyle = True
+      StyleDisabled.LookAndFeel.NativeStyle = True
+      StyleFocused.LookAndFeel.NativeStyle = True
+      StyleHot.LookAndFeel.NativeStyle = True
+      TabOrder = 0
+      Width = 159
+    end
+    object cxLabel7: TcxLabel
+      Left = 20
+      Top = 26
+      Caption = 'Nat. Id. No.'
+    end
+    object cxLabel4: TcxLabel
+      Left = 260
+      Top = 26
+      Caption = 'Weight '
+    end
+    object teWeight: TcxTextEdit
+      Left = 306
+      Top = 24
+      Properties.ReadOnly = True
+      Style.Color = clBtnFace
+      Style.LookAndFeel.NativeStyle = True
+      StyleDisabled.LookAndFeel.NativeStyle = True
+      StyleFocused.LookAndFeel.NativeStyle = True
+      StyleHot.LookAndFeel.NativeStyle = True
+      TabOrder = 3
+      Width = 47
+    end
+    object cxLabel3: TcxLabel
+      Left = 358
+      Top = 26
+      Caption = '(Kgs) '
+    end
+  end
+  inherited ActionList: TActionList
+    Left = 65526
+    Top = 28
+    object actCancel: TAction
+      Caption = 'Cancel'
+      ImageIndex = 11
+      OnExecute = actCancelExecute
+      OnUpdate = actCancelUpdate
+    end
+    object actSave: TAction
+      Caption = 'Save'
+      ImageIndex = 18
+      OnExecute = actSaveExecute
+      OnUpdate = actSaveUpdate
+    end
+    object actDelete: TAction
+      Caption = 'Delete'
+      ImageIndex = 10
+      OnExecute = actDeleteExecute
+      OnUpdate = actDeleteUpdate
+    end
+  end
+  inherited BarManager: TdxBarManager
+    Bars = <
+      item
+        AllowClose = False
+        AllowCustomizing = False
+        AllowQuickCustomizing = False
+        AllowReset = False
+        Caption = 'Main'
+        DockedDockingStyle = dsTop
+        DockedLeft = 0
+        DockedTop = 0
+        DockingStyle = dsTop
+        FloatLeft = 353
+        FloatTop = 250
+        FloatClientWidth = 23
+        FloatClientHeight = 22
+        ItemLinks = <
+          item
+            Item = bClose
+            UserGlyph.Data = {00000000}
+            Visible = True
+          end
+          item
+            BeginGroup = True
+            Item = dxBarLargeButton1
+            UserGlyph.Data = {00000000}
+            Visible = True
+          end
+          item
+            BeginGroup = True
+            Item = dxBarLargeButton2
+            UserGlyph.Data = {00000000}
+            Visible = True
+          end
+          item
+            BeginGroup = True
+            Item = dxBarLargeButton3
+            UserGlyph.Data = {00000000}
+            Visible = True
+          end
+          item
+            BeginGroup = True
+            Item = bHelp
+            UserGlyph.Data = {00000000}
+            Visible = True
+          end>
+        Name = 'Main'
+        OneOnRow = True
+        Row = 0
+        ShowMark = False
+        SizeGrip = False
+        UseOwnFont = False
+        Visible = True
+        WholeRow = True
+        BackgroundBitmap.Data = {00000000}
+      end>
+    Categories.ItemsVisibles = (
+      2)
+    Categories.Visibles = (
+      True)
+    Left = 65522
+    Top = 84
+    DockControlHeights = (
+      0
+      0
+      49
+      0)
+    object dxBarLargeButton1: TdxBarLargeButton
+      Action = actSave
+      Category = 0
+      Width = 55
+    end
+    object dxBarLargeButton2: TdxBarLargeButton
+      Action = actCancel
+      Category = 0
+      Width = 55
+    end
+    object dxBarLargeButton3: TdxBarLargeButton
+      Action = actDelete
+      Category = 0
+      Width = 55
+    end
+  end
+end

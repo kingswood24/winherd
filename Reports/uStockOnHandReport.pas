@@ -1,0 +1,109 @@
+{
+   18/06/13 [V5.1 R7.4] /MK Additional Feature - If HerdType is Beef and Def.Defintion.dUseBeefMan then change last calving date
+                                                 to Quality Assured.
+}
+
+unit uStockOnHandReport;
+
+interface
+
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  Qrctrls, QuickRpt, ExtCtrls, QRExport;
+
+type
+  TfmStockOnHandReport = class(TForm)
+    StockOnHandScr: TQuickRep;
+    ColumnHeaderBand1: TQRBand;
+    StockRptTitle: TQRLabel;
+    QRLabel2: TQRLabel;
+    lPurchCalving: TQRLabel;
+    QRLabel4: TQRLabel;
+    QRLabel5: TQRLabel;
+    QRLabel6: TQRLabel;
+    QRShape1: TQRShape;
+    QRSysData1: TQRSysData;
+    QRLabel9: TQRLabel;
+    QRLabel10: TQRLabel;
+    QRLabel11: TQRLabel;
+    QRSysData2: TQRSysData;
+    SortLabel: TQRLabel;
+    OrderLabel: TQRLabel;
+    QRLabel8: TQRLabel;
+    TypeLabel: TQRLabel;
+    qrUsingFilters: TQRLabel;
+    lStockDOBFrom: TQRLabel;
+    lStockDOBTo: TQRLabel;
+    lDOBTextFrom: TQRLabel;
+    lDOBTextTo: TQRLabel;
+    qrlDamDisplay: TQRLabel;
+    QRLabel14: TQRLabel;
+    lRepDate: TQRLabel;
+    QRLabel13: TQRLabel;
+    lHerdID: TQRLabel;
+    StockDetail: TQRBand;
+    QRDBText1: TQRDBText;
+    QRDBText2: TQRDBText;
+    QRDBText3: TQRDBText;
+    QRDBText4: TQRDBText;
+    EventLabel: TQRDBText;
+    QRDBText6: TQRDBText;
+    QRDBText7: TQRDBText;
+    QRDBText9: TQRDBText;
+    dbDam: TQRDBText;
+    SummaryBand1: TQRBand;
+    QRLabel17: TQRLabel;
+    QRExpr2: TQRExpr;
+    QRLabel20: TQRLabel;
+    PageFooterBand1: TQRBand;
+    QRLabel7: TQRLabel;
+    VerLabel: TQRLabel;
+    QRTextFilter1: TQRTextFilter;
+    QRCSVFilter1: TQRCSVFilter;
+    QRHTMLFilter1: TQRHTMLFilter;
+    QRExcelFilter1: TQRExcelFilter;
+    QRRTFFilter1: TQRRTFFilter;
+    QRWMFFilter1: TQRWMFFilter;
+    procedure EventLabelPrint(sender: TObject; var Value: String);
+    procedure StockOnHandScrBeforePrint(Sender: TCustomQuickRep;
+      var PrintReport: Boolean);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  fmStockOnHandReport: TfmStockOnHandReport;
+
+implementation
+uses
+   StockInHerdFilt, kRoutines, QRExportHelper;
+
+{$R *.DFM}
+
+procedure TfmStockOnHandReport.EventLabelPrint(sender: TObject;
+  var Value: String);
+begin
+   if ( TQRDBText(Sender).DataField = 'LastCalvingDate' ) then
+      begin
+         if TQRDBText(Sender).DataSet.FieldByName(TQRDBText(Sender).DataField).AsDateTime <= 0 then
+            Value := '';
+      end
+   else if ( TQRDBText(Sender).DataField = 'QualityAssured' ) then
+      begin
+         if ( not(TQRDBText(Sender).DataSet.FieldByName(TQRDBText(Sender).DataField).AsBoolean) ) then
+            Value := 'No'
+         else if ( TQRDBText(Sender).DataSet.FieldByName(TQRDBText(Sender).DataField).AsBoolean ) then
+            Value := 'Yes'
+      end
+end;
+
+procedure TfmStockOnHandReport.StockOnHandScrBeforePrint(
+  Sender: TCustomQuickRep; var PrintReport: Boolean);
+begin
+   HideMinMaxButtons(Sender,PrintReport);
+end;
+
+end.

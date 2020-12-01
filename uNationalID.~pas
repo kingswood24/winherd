@@ -1,0 +1,531 @@
+{
+   27/09/17 [V5.7 R3.1] /MK Change - NatIDKind - Used KRoutines IsIETag and Is372Tag to determine TNatIDKind of NewPlastic (IE) and 372 tags.
+
+   29/09/17 [V5.7 R3.3] /MK Bug Fix - NatIDKind - Need to use IsNewIrishNatID to check if tag starts with IE or 372 first as error may appear with UK9X tags that 14 chars long - John Milliken
+
+   29/11/17 [V5.7 R5.7] /MK Change - NatIDKind - Allow this function return whether that tag is UK (non UK9) tag.
+}
+
+unit uNationalID;
+
+interface
+uses
+   Classes, SysUtils, Messages, Dialogs, db, dbTables, KRoutines, GenTypesConst;
+
+type
+   TNatIDKind = (nkUnknown, nkUK9, nkUK, nk372Tag, nkNewPlastic, nkIEOldPlastic, nkIEOldBrass);
+   TNatIDNumber = class
+   private
+      FCountryId : string;
+      FHerdNo : string;
+      FAnimalNo : string;
+      FCheckDigit : string;
+      FWorkingNatID : string;
+      FFormattedNatID: string;
+      procedure prepare;virtual;abstract;
+      function PadLeftZero(Str : String; Count : Byte) : String;
+      procedure ParseConstituents;virtual;abstract;
+   public
+      function find(ANatID : string) : integer;
+      function validate(ANatID : string) : boolean;virtual;abstract;
+      function CreateLocateNatID(ANatID : string) : string;virtual;abstract;
+      property FormattedNatID : string read FFormattedNatID;
+   end;
+
+   TUK9NatIDNumber = class(TNatIDNumber)
+   private
+      procedure prepare;override;
+      procedure ParseConstituents;override;
+   public
+      function CheckRetag(ANatID : string; const AUpdateTable : Boolean = True;
+        const ACreateAudit : Boolean = True) : Integer;
+      function validate(ANatID : string; const ACheckRolloverTag : Boolean = True) : boolean;
+      function CreateLocateNatID(ANatID : string) : string;override;
+   end;
+
+   function NatIDKind(ANatID : string) : TNatIDKind;
+   function CreateNatIDSortString(ANatID : string) : string;
+
+   function StripAllNomNumAlpha( StrToStrip : String) : String;
+   function StripSpaces( StrToStrip : String) : String;
+   function StripAllSpaces(StrToStrip: String): String;
+
+const
+   UK9Divider = 7;
+   DoubleSpace = '  ';
+   DoubleFSlash = '//';
+   DoubleBSlash = '\\ ';
+   DoubleHyphen = '--';
+
+var
+   UK9NatIDNumber : TUK9NatIDNumber;
+
+
+implementation
+uses
+   uUK9RetagReconcile;
+
+function NatIDKind(ANatID: string): TNatIDKind;
+
+   function IsIEBrassTag(Str : String) : Boolean;
+   var
+      i,
+      StrLen,
+      NoNums,
+      NoAlphas : Integer;
+   begin
+      NoNums   := 0;
+      NoAlphas := 0;
+      StrLen   := Length(Str);
+      if ( StrLen > 0 ) then
+         for i := 1 to StrLen do
+            if (Str[i] In ['A'..'Z']) then
+               Inc(NoAlphas);
+
+         // Count the No of Numbers
+         for i := 1 to StrLen do
+            if (Str[i] In ['0'..'9']) then
+               Inc(NoNums);
+      if ( NoAlphas = 3 ) And ( NoNums = 6 ) And ( StrLen = 9 ) then
+         Result := True
+   end;
+
+var
+   TestStr : String;
+   i,
+   StrLen,
+   NoNums,
+   NoAlphas : Integer;
+   LastIsChar : Boolean;
+begin
+   Result := nkUnknown;
+   if Copy( UPPERCASE( StripAllNomNumAlpha( ANatID )), 1, 3 ) = 'UK9' then
+      Result := nkUK9
+   //   29/11/17 [V5.7 R5.7] /MK Change - Allow this function return whether that tag is UK (non UK9) tag.
+   else if Copy( UPPERCASE( StripAllNomNumAlpha( ANatID )), 1, 2 ) = 'UK' then
+      Result := nkUK
+   //   29/09/17 [V5.7 R3.3] /MK Bug Fix - Need to use IsNewIrishNatID to check if tag starts with IE or 372 first as error may appear with UK9X tags that 14 chars long.
+   //   27/09/17 [V5.7 R3.1] /MK Change - Used KRoutines IsIETag and Is372Tag to determine TNatIDKind of NewPlastic (IE) and 372 tags.
+   else if ( IsNewIrishNatID(ANatID) ) then
+      begin
+         if ( IsIETag(ANatID) ) then
+            Result := nkNewPlastic
+         else if ( Is372Tag(ANatID) ) then
+            Result := nk372Tag
+      end
+   else
+      begin
+         // Store Passed value in a temporary string
+         TestStr := ANatID;
+         // Strip all spaces
+         TestStr := StripAllSpaces(TestStr);
+
+         if ( not(IsIEBrassTag(TestStr)) ) then
+            begin
+               // Remove the IE if entered
+               if ( Pos('IE', TestStr) > 0 ) then
+                  Delete(TestStr,Pos(cTagPrefix_IE, TestStr),2)
+               else if ( Copy(TestStr,1,3) = cTagPrefix_372 ) then
+                  Delete(TestStr,1,3);
+            end;
+
+         NoNums := 0;
+         NoAlphas := 0;
+         StrLen := Length(TestStr);
+         if ( StrLen > 0 ) then
+            begin
+               LastIsChar := ( TestStr[StrLen] In ['A'..'Z'] );
+               // Count the No of Alpha Char - exclude the last character
+               for i := 1 to StrLen do
+                  if (TestStr[i] In ['A'..'Z']) then
+                     Inc(NoAlphas);
+               if LastIsChar then
+                  Dec(NoAlphas);
+
+               // Count the No of Numbers
+               for i := 1 to StrLen do
+                  if (TestStr[i] In ['0'..'9']) then
+                     Inc(NoNums);
+            end;
+
+         // This is the pre 1996 Brass Tags
+         if ( NoAlphas = 3 ) And ( NoNums = 6 ) And ( StrLen = 9 ) then
+            Result := nkIEOldBrass
+         else if ( NoAlphas = 4 ) And ((( LastIsChar ) And ( NoNums = 4 )) Or
+                 ( NoNums = 5 )) then
+            Result := nkIEOldPlastic
+      end;
+end;
+
+function CreateNatIDSortString(ANatID : string) : string;
+var
+   CheckDigit : String;
+begin
+   if NatIDKind(ANatID) = nkNewPlastic then
+      begin
+         ANatID := StripAllSpaces(ANatID);
+         CheckDigit := Copy(ANatID, Length(ANatID)-4, 1);
+         Delete(ANatID, Length(ANatID)-4, 1);
+         Insert(CheckDigit, ANatID, Length(ANatID)+1);
+         Result := PadLeft(ANatID, '0', 20);
+      end;
+end;
+
+{ TNatIDNumber }
+
+function TNatIDNumber.find(ANatID : string) : integer;
+begin
+   with TQuery.Create(nil) do
+      try
+         DatabaseName := 'kingswd';
+         SQL.Clear;
+         SQL.Add('Select ID From Animals Where NatIDNum=:ANatIDNum');
+         Params[0].AsString := ANatID;
+         Open;
+         try
+            First;
+            Result := Fields[0].AsInteger;
+         finally
+            Close;
+         end;
+      finally
+         Free;
+      end;
+end;
+
+function TNatIDNumber.PadLeftZero(Str: String; Count: Byte): String;
+begin
+  while Length(Str) < Count do
+     Str := '0'+Str;
+  Result := Str;
+end;
+
+function StripAllNomNumAlpha(StrToStrip: String): String;
+var
+   j:integer;
+   st : string;
+begin
+   St := StripAllSpaces(StrToStrip);
+   if Length(St)>0 then
+      begin
+         j := length(St);
+         while (j>1) do
+            begin
+               if NOT ( St[j] in ['A'..'Z','0'..'9'] ) then
+                  Delete(St,j,1);
+               Dec(j);
+            end;
+      end;
+   Result := St;
+
+
+end;
+
+function StripAllSpaces(StrToStrip: String): String;
+var
+   j:integer;
+   st : string;
+begin
+   st := StripSpaces(StrToStrip);
+   if length(St)>0 then
+      begin
+         j := length(St);
+         while (j>1) do
+            begin
+               if St[j] = ' ' then
+                  Delete(St,j,1);
+               Dec(j);
+            end;
+      end;
+   Result := St;
+
+end;
+
+function StripSpaces(StrToStrip: String): String;
+var
+   i,
+   j:integer;
+begin
+   if length(StrToStrip)>0 then
+      begin
+         i := 1;
+         while (i<length(StrToStrip)) and (StrToStrip[i]=' ') do
+            i := i+1;                     { find first non-blank character }
+         if StrToStrip[i]=' ' then        { string is all blank }
+            StrToStrip := ''
+         else                      { string is not all blank }
+            begin
+               j := length(StrToStrip);
+               while (j>1) and (StrToStrip[j]=' ') do
+                  j := j-1;         { find end of non-blank section }
+               StrToStrip := copy(StrToStrip,i,j+1-i);
+            end;
+      end;
+   Result := StrToStrip;
+
+
+end;
+
+{ TUK9NatIDNumber }
+
+
+function TUK9NatIDNumber.CheckRetag(ANatID : string; const AUpdateTable : Boolean;
+ const ACreateAudit : Boolean) : Integer;
+var
+   HerdNo : string;
+   AnimalNo : string;
+   CheckDigit : string;
+   CountryId : string;
+
+   Retagged : Boolean;
+   TagList : TStringList;
+   NatIDQuery : TQuery;
+
+   OldNatID :string;
+   UK9NatReconcileRecord : TUK9NatReconcileRecord;
+begin
+   Result := find(ANatID);
+   if ( Result <= 0 ) then
+      begin
+        { no match has been found on the system for said ANatID.
+         1 reason for this could be the animal tag is actually
+         a retagger number.
+
+         Before retag: UK 9 1234 12 9
+         After retag: UK 9 120034 0012 9
+         If after the UK 9 the next section of numbers is not 6 characters wide
+         the new format will add in the required amount of zeros
+         in as the third digit onwards.
+         If the next section is not 4 characters wide it will add the required
+         amount of zeros at the start of this section to make it up to 4.
+        }
+{
+         if validate(ANatID) then
+            begin
+               HerdNo := FHerdNo;
+               AnimalNo := FAnimalNo;
+               CheckDigit := FCheckDigit;
+               Retagged := False;
+               if ((Length(HerdNo) = 6) and ( (HerdNo[3]='0') or (HerdNo[4]='0') or (HerdNo[5]='0') or (HerdNo[6]='0'))) and ((Length(AnimalNo) = 4) and (AnimalNo[1]='0')) then
+                  begin
+                     // This is a retagged number.
+                     Retagged := True;
+                  end;
+               if Retagged then
+                  begin
+
+                     // remove any leading zeros from the start of animal/check digit string.
+                     while ((Length(AnimalNo)>0) and (AnimalNo[1] = '0')) do
+                        Delete(AnimalNo,1,1);
+
+                     if (Trim(ANatID) <> '') then
+                        begin
+                           NatIDQuery := TQuery.Create(nil);
+                           with NatIDQuery do
+                              try
+                                 DatabaseName := 'kingswd';
+                                 SQL.Clear;
+                                 SQL.Add('Select ID, NatIDNum From Animals Where natIdNum Like "UK 9 '+HerdNo[1]+HerdNo[2]+'%'+AnimalNo+ ' '+CheckDigit+'"');
+                                 Open;
+                                 try
+                                    if RecordCount > 0 then
+                                       begin
+                                          TagList := TStringList.Create;
+                                          First;
+                                          while not eof do
+                                             begin
+                                                TagList.AddObject(Fields[1].AsString, pointer(Fields[0].AsInteger));
+                                                next;
+                                             end;
+                                       end;
+                                 finally
+                                    Close;
+                                 end;
+
+                                 if TagList <> nil then
+                                    begin
+
+                                       TfmUK9RetagReconcile.Execute(UK9NatReconcileRecord,TagList);
+
+                                       if ( AUpdateTable ) and ( UK9NatReconcileRecord.ID > 0 ) then
+                                          begin
+                                             SQL.Clear;
+                                             SQL.Add('UPDATE Animals SET NatIDNum=:ANatIDNum Where ID=:ID');
+                                             Params[0].AsString  := ANatID;
+                                             Params[1].AsInteger := UK9NatReconcileRecord.ID;
+                                             ExecSQL;
+
+                                             if ACreateAudit then
+                                                begin
+                                                   SQL.Clear;
+                                                   SQL.Add('INSERT INTO Afdoa (AID, DateChanged, TimeChanged, ItemChanged, OldItem, ChangedBy, Remark, Userdate)');
+                                                   SQL.Add('VALUES (:AID, :DateChanged, :TimeChanged, :ItemChanged, :OldItem, :ChangedBy, :Remark, :Userdate)');
+                                                   Params[0].AsInteger := Result;
+                                                   Params[1].AsDateTime := Date;
+                                                   Params[2].AsTime := Date;
+                                                   Params[3].AsInteger := 1;
+                                                   Params[4].AsString := UK9NatReconcileRecord.NatID;
+                                                   Params[5].AsString := 'User';
+                                                   Params[5].AsString := 'National ID Number';
+                                                   Params[6].AsDateTime := Now;
+                                                   ExecSQL;
+                                                end;
+                                          end;
+                                       FreeAndNil(TagList);
+                                    end;
+                              finally
+                                 Free;
+                              end;
+                        end;
+                  end;
+            end;}
+      end;
+end;
+
+function TUK9NatIDNumber.CreateLocateNatID(ANatID: string): string;
+var
+   tHerdNo, tAnimalNo : string;
+   i : integer;
+begin
+   FWorkingNatID := ANatID;
+   prepare;
+
+   tHerdNo   := FHerdNo;
+   tAnimalNo := FAnimalNo;
+
+   while length(tHerdNo) < 6 do
+      System.Insert('0',tHerdNo, 3);
+
+   while length(FAnimalNo) < 4 do
+      System.Insert('0',FAnimalNo, 1);
+
+   Result := UPPERCASE(StripAllSpaces( (Format('%s%s%s%s',[FCountryId,tHerdNo,FAnimalNo,FCheckDigit]))));
+   //Result := UPPERCASE(Format('%s %s %s %s',[FCountryId,tHerdNo,FAnimalNo,FCheckDigit]));
+end;
+
+procedure TUK9NatIDNumber.ParseConstituents;
+var
+   tNatID : string;
+   i : Integer;
+begin
+   tNatID := FWorkingNatID;
+   FCountryId := '';
+   FHerdNo := '';
+   FAnimalNo := '';
+   FCheckDigit := '';
+
+   if Copy(tNatID, 1, 3) = 'UK9' then
+      FCountryId := 'UK 9'
+   else if Copy(tnatID, 1, 4) = 'UK 9' then
+      FCountryId := Copy(tNatID, 1, 4);
+
+   Delete(tNatID, Pos(FCountryId, tNatID), Length(FCountryId));
+
+   if (FCountryId <> '' ) then
+      begin
+         tNatID := Trim(tNatID);
+         if (tNatID <> '') then
+            begin
+               // extract HerdNo
+               for i := 1 to Length(tNatID) do
+                  begin
+                     if tNatID[i] <> ' ' then
+                        FHerdNo := FHerdNo + tNatID[i]
+                     else
+                        Break;
+                  end;
+            end;
+
+         Delete(tNatID, Pos(FHerdNo, tNatID), Length(FHerdNo));
+         if (tNatID <> '') then
+            begin
+               tNatID := Trim(tNatID);
+               // extract AnimalNo
+               for i := 1 to Length(tNatID) do
+                  begin
+                     if tNatID[i] <> ' ' then
+                        FAnimalNo := FAnimalNo + tNatID[i]
+                     else
+                        Break;
+                  end;
+            end;
+
+         Delete(tNatID, Pos(FAnimalNo, tNatID), Length(FAnimalNo));
+         if (tNatID <> '') then
+            begin
+               // remainder should be Checkdigit
+               tNatID := Trim(tNatID);
+               FCheckDigit := tNatID[1];
+            end;
+      end;
+end;
+
+procedure TUK9NatIDNumber.prepare;
+begin
+  FWorkingNatID := Trim(FWorkingNatID);
+  while Pos(DoubleSpace, FWorkingNatID) > 0 do
+     Delete(FWorkingNatID, Pos(DoubleSpace, FWorkingNatID), 1);
+
+  while Pos(DoubleFSlash, FWorkingNatID) > 0 do
+     Delete(FWorkingNatID, Pos(DoubleFSlash, FWorkingNatID), 1);
+
+  while Pos(DoubleBSlash, FWorkingNatID) > 0 do
+     Delete(FWorkingNatID, Pos(DoubleBSlash, FWorkingNatID), 1);
+
+  while Pos(DoubleHyphen, FWorkingNatID) > 0 do
+     Delete(FWorkingNatID, Pos(DoubleHyphen, FWorkingNatID), 1);
+
+  if {(Copy(FWorkingNatID, 1, 4) = 'UK 9') or}
+     (Copy(FWorkingNatID, 1, 4) = 'UK-9') or
+     (Copy(FWorkingNatID, 1, 4) = 'UK/9') or
+     (Copy(FWorkingNatID, 1, 4) = 'UK\9') then
+  // remove unwanted char
+  System.Delete(FWorkingNatID, 3, 1) ;
+  if Copy(FWorkingNatID, 1, 3) = 'UK9' then
+     System.Insert(' ', FWorkingNatID, 3);
+  ParseConstituents;
+end;
+
+function TUK9NatIDNumber.validate(ANatID : string; const ACheckRolloverTag : Boolean = True) : boolean;
+var
+   UK9Identifier : Boolean;
+   StartPos, Len, x, j : Integer;
+   Remainder : Byte;
+   CalcStr : String;
+begin
+   Result := False;
+   FWorkingNatID := ANatID;
+   if (Trim(FWorkingNatID) <> '') then
+      begin
+         prepare;
+         CalcStr := Copy(FCountryId, 4, 1);
+         CalcStr := CalcStr + Copy(FHerdNo, 1, 2);
+         CalcStr := CalcStr + PadLeftZero(Copy(FHerdNo, 3, 4), 4);
+         CalcStr := CalcStr + PadLeftZero(FAnimalNo, 4);
+
+         Remainder := (StrToInt64(CalcStr) mod UK9Divider);
+         Inc(Remainder);
+         if FCountryId = 'UK9' then
+            FCountryId := 'UK 9'; // reset the 'UK9' to offical 'UK 9' format
+         FFormattedNatID := Format('%s %s %s %s',[FCountryId,FHerdNo,FAnimalNo,FCheckDigit]);
+         try
+            Result := Remainder = StrToInt(FCheckDigit);
+            if ( not(Result) ) and ( ACheckRolloverTag ) then
+               Result := CheckNIRolloverNatID(FWorkingNatID, FFormattedNatID);
+         except
+            Result := False;
+         end;
+      end
+   else
+      begin
+         MessageDlg('No Nat. Id. No. specified',mtError,[mbOK],0);
+      end;
+end;
+
+
+initialization
+   UK9NatIDNumber := TUK9NatIDNumber.create;
+
+finalization
+   FreeAndNil(UK9NatIDNumber);
+end.

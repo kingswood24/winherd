@@ -1,0 +1,337 @@
+{
+  13/03/2009 [V3.9 R6.6] /SP - Changed price/weight symbols to reflect registered country
+
+  30/11/10 [V4.0 R6.1] /MK Bug Fix - If BFat Or Prot Standard % Values = Zero (0) Then Set Pence/litre of Milk and Pence/kg Values To Zero (0).  
+}
+unit uMilkPricing;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  RxLookup, StdCtrls, ExtCtrls, RXCtrls, ComCtrls, ToolWin, Mask, DBCtrls,
+  Db;
+
+type
+  TfMilkPricing = class(TForm)
+    ToolBar1: TToolBar;
+    ToolButton2: TToolButton;
+    sbExit: TRxSpeedButton;
+    ToolButton1: TToolButton;
+    sbHelp: TRxSpeedButton;
+    ToolButton5: TToolButton;
+    Panel1: TPanel;
+    Label7: TLabel;
+    HerdCombo: TRxDBLookupCombo;
+    pMilk: TPanel;
+    Label4: TLabel;
+    dbeMilkPrice: TDBEdit;
+    lMilkPrice: TLabel;
+    pPerc: TPanel;
+    Label1: TLabel;
+    Label2: TLabel;
+    Label3: TLabel;
+    dbeBFatPerc: TDBEdit;
+    dbeProtPerc: TDBEdit;
+    dbeLactPerc: TDBEdit;
+    pPrice: TPanel;
+    dsHerd: TDataSource;
+    lBFatPrice: TLabel;
+    lProtPrice: TLabel;
+    lLactPrice: TLabel;
+    dbeBFatPrice: TDBEdit;
+    dbeProtPrice: TDBEdit;
+    dbeLactPrice: TDBEdit;
+    sbSave: TRxSpeedButton;
+    ToolButton3: TToolButton;
+    rgMeasure: TDBRadioGroup;
+    pWeight: TPanel;
+    lProtWeight: TLabel;
+    lLactWeight: TLabel;
+    dbeBFatWeight: TDBEdit;
+    dbeProtWeight: TDBEdit;
+    dbeLactWeight: TDBEdit;
+    lBFatWeight: TLabel;
+    pVar: TPanel;
+    dbeBFatVar: TDBEdit;
+    dbeProtVar: TDBEdit;
+    dbeLactVar: TDBEdit;
+    Label5: TLabel;
+    Label6: TLabel;
+    Label8: TLabel;
+    lVar: TLabel;
+    lPrice: TLabel;
+    lWeight: TLabel;
+    lStand: TLabel;
+    procedure sbHelpClick(Sender: TObject);
+    procedure sbExitClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure HerdComboChange(Sender: TObject);
+    procedure sbSaveClick(Sender: TObject);
+    procedure rgMeasureChange(Sender: TObject);
+    procedure rgMeasureExit(Sender: TObject);
+    procedure dbeMilkPriceExit(Sender: TObject);
+    procedure dbeBFatVarExit(Sender: TObject);
+    procedure dbeProtVarExit(Sender: TObject);
+    procedure dbeBFatPriceExit(Sender: TObject);
+    procedure dbeProtPriceExit(Sender: TObject);
+    procedure dbeBFatWeightExit(Sender: TObject);
+    procedure dbeProtWeightExit(Sender: TObject);
+    procedure dbeMilkPriceChange(Sender: TObject);
+  private
+    { Private declarations }
+    FocusHeld : Boolean;
+  public
+    { Public declarations }
+  end;
+
+const
+   SpecGrav = 1.02970;
+
+var
+   fMilkPricing: TfMilkPricing;
+
+implementation
+
+uses DairyData, GenTypesConst;
+
+{$R *.DFM}
+
+procedure TfMilkPricing.sbHelpClick(Sender: TObject);
+begin
+   WinData.HTMLHelp('MilkPrice.htm');
+end;
+
+procedure TfMilkPricing.sbExitClick(Sender: TObject);
+begin
+   if dsHerd.Dataset.Active then
+      begin
+         if (dsHerd.State in dsEditModes) then
+            dsHerd.DataSet.Cancel;
+      end;
+   Close;
+end;
+
+procedure TfMilkPricing.FormShow(Sender: TObject);
+begin
+   HerdCombo.Value := IntToStr(WinData.UserDefaultHerdID);
+   HerdComboChange(Sender);
+   // refresh components, set owners to modified
+   if (HerdCombo.Value <> '') then
+      dbeMilkPriceExit(dbeMilkPrice);
+end;
+
+procedure TfMilkPricing.HerdComboChange(Sender: TObject);
+begin
+   if (HerdCombo.Text <> '<None>') and (HerdCombo.Text <> 'NONE') then
+      begin
+         pWeight.Show;
+         pPrice.Show;
+         pPerc.Show;
+         pMilk.Show;
+         pVar.Show;
+         rgMeasure.Show;
+         dsHerd.DataSet.Edit;
+      end
+   else
+      begin
+         pWeight.Hide;
+         pPrice.Hide;
+         pPerc.Hide;
+         pMilk.Hide;
+         pVar.Hide;
+         rgMeasure.Hide;
+      end;
+end;
+
+procedure TfMilkPricing.sbSaveClick(Sender: TObject);
+begin
+   if (dsHerd.State = dsEdit) then
+      dsHerd.DataSet.Post;
+end;
+
+procedure TfMilkPricing.rgMeasureChange(Sender: TObject);
+var
+   CentsOrPence, LitreOrGallon, KgOrLb : string;
+begin
+   // change headings
+
+   { 13/03/2009 [V3.9 R6.6] /SP - Changed price/weight symbols to reflect registered country }
+
+   if (WinData.SystemRegisteredCountry = Ireland) then
+      CentsOrPence := 'Cents'
+   else
+      CentsOrPence := 'Pence';
+
+   if (rgMeasure.ItemIndex = 0) then
+      begin
+         LitreOrGallon := 'litre';
+         KgOrLb := 'kg';
+      end
+   else
+      begin
+         LitreOrGallon := 'gallon';
+         KgOrLb := 'lb';
+      end;
+
+   lMilkPrice.Caption := Format('(%s per %s)',[CentsOrPence,LitreOrGallon]);
+   lVar.Caption       := Format('%s/%s per 0.01%% variation in :',[CentsOrPence,LitreOrGallon]);
+   lPrice.Caption     := Format('%s/%s of milk containing:',[CentsOrPence,LitreOrGallon]);
+   lWeight.Caption    := Format('%s/%s of :',[CentsOrPence,KgOrLb]);
+
+
+   if not (dsHerd.State in dsEditModes) then exit;
+
+
+   if (rgMeasure.Value <> WinData.OwnerFile.FieldByName('Measure').AsString) or (FocusHeld) then
+      begin
+         // recalculate for measure unit change
+         if (rgMeasure.ItemIndex = 0) then
+            begin
+               // convert imperial to metric
+               // gallons to litres
+               dbeBFatVar.Field.Value    := (dbeBFatVar.Field.Value*0.21997);
+               dbeProtVar.Field.Value    := (dbeProtVar.Field.Value*0.21997);
+               dbeLactVar.Field.Value    := (dbeLactVar.Field.Value*0.21997);
+               dbeBFatPrice.Field.Value  := (dbeBFatPrice.Field.Value*0.21997);
+               dbeProtPrice.Field.Value  := (dbeProtPrice.Field.Value*0.21997);
+               dbeLactPrice.Field.Value  := (dbeLactPrice.Field.Value*0.21997);
+               dbeMilkPrice.Field.Value  := (dbeMilkPrice.Field.Value*0.21997);
+               // lb's to kg's
+               dbeBFatWeight.Field.Value := (dbeBFatWeight.Field.Value*0.45359);
+               dbeProtWeight.Field.Value := (dbeProtWeight.Field.Value*0.45359);
+               dbeLactWeight.Field.Value := (dbeLactWeight.Field.Value*0.45359);
+            end
+         else
+            begin
+               // convert metric to imperial
+               // litres to gallons
+               dbeBFatVar.Field.Value    := (dbeBFatVar.Field.Value*4.5461);
+               dbeProtVar.Field.Value    := (dbeProtVar.Field.Value*4.5461);
+               dbeLactVar.Field.Value    := (dbeLactVar.Field.Value*4.5461);
+               dbeBFatPrice.Field.Value  := (dbeBFatPrice.Field.Value*4.5461);
+               dbeProtPrice.Field.Value  := (dbeProtPrice.Field.Value*4.5461);
+               dbeLactPrice.Field.Value  := (dbeLactPrice.Field.Value*4.5461);
+               dbeMilkPrice.Field.Value  := (dbeMilkPrice.Field.Value*4.5461);
+               // kg's to lb's
+               dbeBFatWeight.Field.Value := (dbeBFatWeight.Field.Value*2.20462);
+               dbeProtWeight.Field.Value := (dbeProtWeight.Field.Value*2.20462);
+               dbeLactWeight.Field.Value := (dbeLactWeight.Field.Value*2.20462);
+            end;
+         // to allow repeat without exit
+         FocusHeld := True;
+         // update fields
+         dbeBFatPriceExit(dbeBFatPrice);
+         dbeProtPriceExit(dbeProtPrice);
+         dbeMilkPriceExit(dbeMilkPrice);
+         dbeBFatVarExit(dbeBFatVar);
+         dbeProtVarExit(dbeProtVar);
+      end;
+end;
+
+procedure TfMilkPricing.rgMeasureExit(Sender: TObject);
+begin
+   FocusHeld := False;
+end;
+
+procedure TfMilkPricing.dbeMilkPriceExit(Sender: TObject);
+begin
+   dbeMilkPriceChange(Sender);
+   dbeMilkPrice.Field.Value  := FormatFloat('0.000',dbeMilkPrice.Field.Value);
+end;
+
+procedure TfMilkPricing.dbeBFatVarExit(Sender: TObject);
+begin
+   dbeMilkPriceChange(Sender);
+   if (WinData.OwnerFile.Modified) then
+      begin
+         if dbeBFatPerc.Field.Value > 0 then
+            begin
+               // change p/l field
+               dbeBFatPrice.Field.Value  := FormatFloat('0.000',(dbeBFatVar.Field.Value*dbeBFatPerc.Field.Value*100));
+               // change p/kg field
+               dbeBFatWeight.Field.Value := FormatFloat('0.000',((dbeBFatPrice.Field.Value*100)/(dbeBFatPerc.Field.Value*SpecGrav)));
+            end
+         else
+            begin
+               dbeBFatPrice.Field.Value := 0;
+               dbeBFatWeight.Field.Value := 0;
+            end;
+      end;
+end;
+
+procedure TfMilkPricing.dbeProtVarExit(Sender: TObject);
+begin
+  dbeMilkPriceChange(Sender);
+   if (WinData.OwnerFile.Modified) then
+      begin
+         if dbeProtPerc.Field.Value > 0 then
+            begin
+               // change p/l field
+               dbeProtPrice.Field.Value  := FormatFloat('0.000',(dbeProtVar.Field.Value*dbeProtPerc.Field.Value*100));
+               // change p/kg field
+               dbeProtWeight.Field.Value := FormatFloat('0.000',((dbeProtPrice.Field.Value*100)/(dbeProtPerc.Field.Value*SpecGrav)));
+            end
+         else
+            begin
+               dbeProtPrice.Field.Value := 0;
+               dbeProtWeight.Field.Value := 0;
+            end;
+      end;
+end;
+
+procedure TfMilkPricing.dbeBFatPriceExit(Sender: TObject);
+begin
+   dbeMilkPriceChange(Sender);
+   if (WinData.OwnerFile.Modified) then
+      begin
+         // change p/l/variance field
+         dbeBFatVar.Field.Value := FormatFloat('0.000',((dbeBFatPrice.Field.Value/dbeBFatPerc.Field.Value)/100));
+         // change p/kg field
+         dbeBFatWeight.Field.Value := FormatFloat('0.000',(dbeBFatPrice.Field.Value*100/(dbeBFatPerc.Field.Value*SpecGrav)));
+      end;
+end;
+
+procedure TfMilkPricing.dbeProtPriceExit(Sender: TObject);
+begin
+   dbeMilkPriceChange(Sender);
+   if (WinData.OwnerFile.Modified) then
+      begin
+         // change p/l/variance field
+         dbeProtVar.Field.Value := FormatFloat('0.000',((dbeProtPrice.Field.Value/dbeProtPerc.Field.Value)/100));
+         // change p/kg field
+         dbeProtWeight.Field.Value := FormatFloat('0.000',((dbeProtPrice.Field.Value*100)/(dbeProtPerc.Field.Value*SpecGrav)));
+      end;
+end;
+
+procedure TfMilkPricing.dbeBFatWeightExit(Sender: TObject);
+begin
+   dbeMilkPriceChange(Sender);
+   if (WinData.OwnerFile.Modified) then
+      begin
+         // change p/l field
+         dbeBFatPrice.Field.Value  := FormatFloat('0.000',((dbeBFatWeight.Field.Value*dbeBFatPerc.Field.Value*SpecGrav)/100));
+         // change p/l/variance field
+         dbeBFatVar.Field.Value := FormatFloat('0.000',((dbeBFatPrice.Field.Value/dbeBFatPerc.Field.Value)/100));
+      end;
+end;
+
+procedure TfMilkPricing.dbeProtWeightExit(Sender: TObject);
+begin
+   dbeMilkPriceChange(Sender);
+   if (WinData.OwnerFile.Modified) then
+      begin
+         // change p/l field
+         dbeProtPrice.Field.Value  := FormatFloat('0.000',((dbeProtWeight.Field.Value*dbeProtPerc.Field.Value*SpecGrav)/100));
+         // change p/l/variance field
+         dbeProtVar.Field.Value := FormatFloat('0.000',((dbeProtPrice.Field.Value/dbeProtPerc.Field.Value)/100));
+      end;
+end;
+
+procedure TfMilkPricing.dbeMilkPriceChange(Sender: TObject);
+begin
+   if ((Sender as TDBEdit).Field.IsNull) then
+      (Sender as TDBEdit).Field.Value := 0;
+end;
+
+end.

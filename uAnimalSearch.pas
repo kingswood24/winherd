@@ -1,0 +1,389 @@
+{
+   25/03/19 [V5.8 R8.3] /MK Bug Fix - When FSearchAnimalType = satCalvingCows then filter out cows that have calved in the last 3 months - Dick O'Neill.
+}
+
+unit uAnimalSearch;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  uBaseForm, cxGridCustomTableView, cxGridTableView, cxGridDBTableView,
+  cxTextEdit, cxLabel, cxContainer, cxEdit, cxGroupBox, cxRadioGroup,
+  cxGridLevel, cxClasses, cxControls, cxGridCustomView, cxGrid, ExtCtrls,
+  dxBar, dxBarExtItems, ActnList, dxStatusBar, GenTypesConst, db, dbTables,
+  KRoutines, StdCtrls, cxButtons, cxCustomData, DairyData, DateUtil;
+
+type
+  TSearchAnimalType = (satCalvingCows);
+
+  TfmAnimalSearch = class(TfmBaseForm)
+    pSearchHeader: TPanel;
+    AnimalSearchGridDBTableView: TcxGridDBTableView;
+    AnimalSearchGridLevel: TcxGridLevel;
+    AnimalSearchGrid: TcxGrid;
+    rgSearchBy: TcxRadioGroup;
+    lSearchByHeader: TcxLabel;
+    teSearchText: TcxTextEdit;
+    AnimalSearchGridDBTableViewAnimalNo: TcxGridDBColumn;
+    AnimalSearchGridDBTableViewNatIDNum: TcxGridDBColumn;
+    dxBarLargeButton1: TdxBarLargeButton;
+    actSelect: TAction;
+    AnimalSearchGridDBTableViewSortAnimalNo: TcxGridDBColumn;
+    AnimalSearchGridDBTableViewSortNatID: TcxGridDBColumn;
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure teSearchTextPropertiesChange(Sender: TObject);
+    procedure actSelectExecute(Sender: TObject);
+    procedure actCloseExecute(Sender: TObject);
+    procedure rgSearchByPropertiesChange(Sender: TObject);
+    procedure AnimalSearchGridDBTableViewSortAnimalNoGetDisplayText(
+      Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
+      var AText: String);
+    procedure AnimalSearchGridDBTableViewSortNatIDGetDisplayText(
+      Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
+      var AText: String);
+  private
+    FAnimals : TTable;
+    FDSAnimals : TDataSource;
+    FSearchDate : TDateTime;
+    FSearchAnimalType : TSearchAnimalType;
+    FSearchText : String;
+    FAnimalID : Integer;
+    function GetSearchField: String;
+    { Private declarations }
+  public
+    { Public declarations }
+    class function GetAnimal(ASearchType : TSearchAnimalType; AEditEvent : Boolean;
+       const ASearchDate : TDateTime = 0; ASearchText : String = '') : Integer;
+  end;
+
+var
+  fmAnimalSearch: TfmAnimalSearch;
+
+implementation
+
+{$R *.DFM}
+
+{ TfmAnimalSearch }
+
+procedure TfmAnimalSearch.FormCreate(Sender: TObject);
+var
+   qInsertRecord : TQuery;
+begin
+   inherited;
+   FAnimalID := 0;
+
+   if ( FAnimals = nil ) then
+      FAnimals := TTable.Create(nil);
+
+   with FAnimals do
+      try
+         DatabaseName := AliasName;
+         TableName := 'tmpSearchAnimals';
+         FieldDefs.Add('ID',ftAutoInc);
+         FieldDefs.Add('AnimalID',ftInteger);
+         FieldDefs.Add('AnimalNo',ftString,10);
+         FieldDefs.Add('SortAnimalNo',ftString,10);
+         FieldDefs.Add('NatIDNum',ftString,20);
+         FieldDefs.Add('SortNatID',ftString,20);
+         FieldDefs.Add('SearchNatID',ftString,20);
+         FieldDefs.Add('DateOfBirth',ftDateTime);
+         FieldDefs.Add('LactNo',ftInteger);
+         FieldDefs.Add('BreedID',ftInteger);
+         FieldDefs.Add('HerdID',ftInteger);
+         FieldDefs.Add('Sex',ftString,10);
+         CreateTable;
+         Open;
+      except
+         on e : Exception do
+            ShowMessage(e.Message);
+      end;
+end;
+
+class function TfmAnimalSearch.GetAnimal (ASearchType : TSearchAnimalType; AEditEvent : Boolean;
+   const ASearchDate : TDateTime = 0; ASearchText : String = '') : Integer;
+var
+   qAnimals : TQuery;
+begin
+   with TfmAnimalSearch.Create(nil) do
+      try
+         FSearchAnimalType := ASearchType;
+         FSearchDate := ASearchDate;
+         FSearchText := ASearchText;
+
+         qAnimals := TQuery.Create(nil);
+         with qAnimals do
+            try
+               DatabaseName := AliasName;
+               SQL.Clear;
+               SQL.Add('INSERT INTO '+FAnimals.TableName+' ( AnimalID, AnimalNo, SortAnimalNo,');
+               SQL.Add('                                     NatIDNum, SortNatID, SearchNatID, DateOfBirth,');
+               SQL.Add('                                     LactNo, BreedID, HerdID, Sex )');
+               SQL.Add('SELECT A.ID, A.AnimalNo, A.SortAnimalNo, A.NatIDNum, A.SortNatID, A.SearchNatID, A.DateOfBirth,');
+               SQL.Add('       A.LactNo, A.PrimaryBreed, A.HerdID, A.Sex');
+               SQL.Add('FROM Animals A');
+               if ( FSearchAnimalType = satCalvingCows ) then
+                  begin
+                     SQL.Add('WHERE (A.InHerd = True)');
+                     SQL.Add('AND   (A.AnimalDeleted = False)');
+                     SQL.Add('AND   (A.Breeding = True)');
+                     SQL.Add('AND   (A.HerdID = '+IntToStr(UserDefaultHerdID)+')');
+                     SQL.Add('AND   (Upper(A.Sex) = "FEMALE")');
+                     SQL.Add('AND   (A.DateOfBirth <= "'+FormatDateTime(cUSDateStyle,IncMonth(FSearchDate,-12))+'")');
+                  end;
+               try
+                  ExecSQL;
+               except
+                  on e : Exception do
+                     ShowMessage(e.Message);
+               end;
+
+               if ( FSearchAnimalType = satCalvingCows ) then
+                  begin
+                     SQL.Clear;
+                     SQL.Add('DELETE FROM '+FAnimals.TableName+' FA');
+                     SQL.Add('WHERE FA.AnimalID IN (SELECT DISTINCT(E.AnimalID)');
+                     SQL.Add('	      	            FROM Events E');
+                     SQL.Add('		            LEFT JOIN Animals A2 ON (A2.ID = E.AnimalID)');
+                     SQL.Add('		            WHERE (E.EventType = '+IntToStr(CCalvingEvent)+')');
+                     SQL.Add('		            AND   (E.EventDate >= "'+FormatDateTime(cUSDateStyle,IncMonth(FSearchDate,-3))+'")');
+                     SQL.Add('		            AND   (E.AnimalLactNo = A2.LactNo)');
+                     SQL.Add('                      AND   (A2.InHerd = True)');
+                     SQL.Add('                      AND   (A2.AnimalDeleted = False)');
+                     SQL.Add('                      AND   (A2.HerdID = '+IntToStr(UserDefaultHerdID)+'))');
+                     try
+                        ExecSQL;
+                     except
+                        on e : Exception do
+                           ShowMessage(e.Message);
+                     end;
+                  end;
+
+            finally
+               Free;
+            end;
+
+         AnimalSearchGridDBTableView.DataController.DataSource := nil;
+         if ( FAnimals.Active ) then
+            FAnimals.Close;
+         FAnimals.Open;
+         if ( FAnimals.RecordCount = 0 ) then Exit;
+
+         if ( FDSAnimals = nil ) then
+            FDSAnimals := TDataSource.Create(nil);
+         FDSAnimals.DataSet := FAnimals;
+         AnimalSearchGridDBTableView.DataController.DataSource := FDSAnimals;
+         AnimalSearchGridDBTableViewAnimalNo.DataBinding.FieldName := 'AnimalNo';
+         AnimalSearchGridDBTableViewSortAnimalNo.DataBinding.FieldName := 'SortAnimalNo';
+         AnimalSearchGridDBTableViewNatIDNum.DataBinding.FieldName := 'NatIDNum';
+         AnimalSearchGridDBTableViewSortNatID.DataBinding.FieldName := 'SortNatID';
+
+         if ( UpperCase(GetSearchField) = 'ANIMALNO' ) then
+            rgSearchBy.ItemIndex := 0
+         else if ( UpperCase(GetSearchField) = 'NATIDNUM' ) then
+            rgSearchBy.ItemIndex := 1;
+
+         if ( AEditEvent ) then
+            teSearchText.Properties.OnChange := nil;
+         teSearchText.Text := FSearchText;
+         if ( AEditEvent ) then
+            teSearchText.Properties.OnChange := teSearchTextPropertiesChange;
+
+         ShowModal;
+      finally
+         if ( FAnimalID > 0  ) then
+            Result := FAnimalID;
+         Free;
+      end;
+end;
+
+function TfmAnimalSearch.GetSearchField : String;
+begin
+   Result := 'AnimalNo';
+   with TQuery.Create(nil) do
+      try
+         DatabaseName := AliasName;
+         SQL.Clear;
+         SQL.Add('SELECT SearchField');
+         SQL.Add('FROM Owners');
+         SQL.Add('WHERE ID = '+IntToStr(UserDefaultHerdID)+'');
+         try
+            Open;
+            if ( Fields[0].Value <> Null ) then
+               Result := Fields[0].AsString
+            else
+               begin
+                  SQL.Clear;
+                  SQL.Add('SELECT SearchField');
+                  SQL.Add('FROM Owners');
+                  SQL.Add('WHERE ID = '+IntToStr(NoneHerdID)+'');
+                  try
+                     Open;
+                     if ( Fields[0].Value <> Null ) then
+                        Result := Fields[0].AsString
+                  except
+                     on e : Exception do
+                        ShowMessage(e.Message);
+                  end;
+               end;
+         except
+            on e : Exception do
+               ShowMessage(e.Message);
+         end;
+      finally
+         Free;
+      end;
+end;
+
+procedure TfmAnimalSearch.teSearchTextPropertiesChange(Sender: TObject);
+var
+   SearchText, SearchField : string;
+   StartIndex : Integer;
+   ModifiedSearchText : string;
+   SearchColIndex : Integer;
+   SearchOnSearchField : Boolean;
+   FieldValue : Variant;
+   MessageSubText : String;
+   i : Integer;
+   Success : Boolean;
+   nRowCount : Integer;
+begin
+   inherited;
+   with AnimalSearchGridDBTableView do
+      begin
+         Screen.Cursor := crHourGlass;
+         DataController.BeginLocate;
+         Success := False;
+         try
+            SearchText := Trim(teSearchText.Text);
+            if ( SearchText <> '' ) then
+               begin
+                  SearchText := UPPERCASE(teSearchText.Text);
+                  if ( rgSearchBy.ItemIndex = 0 ) then
+                     SearchColIndex := AnimalSearchGridDBTableViewAnimalNo.Index
+                  else
+                     SearchColIndex := AnimalSearchGridDBTableViewNatIDNum.Index;
+                  SearchOnSearchField := False;
+                  StartIndex := 0;
+                  SearchText := StripAllNomNumAlpha(UPPERCASE(teSearchText.Text));
+                  if ( rgSearchBy.ItemIndex = 1 ) then
+                     begin
+                        SearchOnSearchField := not(Pos(' ', SearchText) > 0);
+                        if ( SearchOnSearchField ) then
+                           SearchColIndex := AnimalSearchGridDBTableViewNatIDNum.Index;
+                     end;
+                  if ( StartIndex < 0 ) then
+                     StartIndex := 0;
+
+                  with AnimalSearchGridDBTableView.ViewData do
+                     begin
+                        Success := False;
+                        nRowCount := RowCount;
+                        for i := StartIndex to nRowCount - 1 do
+                           begin
+                              FieldValue := VarToStr(Rows[i].Values[SearchColIndex]);
+                              if ( not(VarIsNull(FieldValue)) ) then
+                                 begin
+                                    FieldValue := UPPERCASE(FieldValue);
+                                    if ( rgSearchBy.ItemIndex = 0 ) then
+                                       begin
+                                          if (SearchText = Copy(FieldValue, 1, Length(SearchText))) then
+                                             begin
+                                                AnimalSearchGridDBTableView.DataController.FocusedRecordIndex := Rows[i].RecordIndex;
+                                                Success := True;
+                                                Break;
+                                             end;
+                                       end
+                                    else
+                                       begin
+                                          FieldValue := StripAllSpaces(FieldValue);
+                                          if ( Pos(SearchText, FieldValue) > 0 ) then
+                                             begin
+                                                AnimalSearchGridDBTableView.DataController.FocusedRecordIndex := Rows[i].RecordIndex;;
+                                                Success := True;
+                                                Break;
+                                             end;
+                                       end;
+                                 end;
+                           end;
+                     end;
+                  if ( not(Success) ) then
+                     begin
+                        if ( StartIndex > 0 ) then
+                           MessageSubText := 'further '
+                        else
+                           MessageSubText := '';
+                        AnimalSearchGridDBTableView.DataController.FocusedRowIndex := 0;
+                        MessageDlg(Format('The search for "%s" did not return any %sresults.',[teSearchText.Text,MessageSubText]),mtInformation,[mbOK],0);
+                        teSearchText.SetFocus;
+                     end;
+               end
+            else
+               DataController.DataSet.First;
+         finally
+            DataController.EndLocate;
+            Screen.Cursor := crDefault;
+         end;
+      end;
+end;
+
+procedure TfmAnimalSearch.actSelectExecute(Sender: TObject);
+begin
+   inherited;
+   FAnimalID := FAnimals.FieldByName('AnimalID').AsInteger;
+   if ( FAnimalID > 0 ) then
+      Close
+   else
+      MessageDlg('You must select an animal.',mtWarning,[mbOK],0);
+end;
+
+procedure TfmAnimalSearch.actCloseExecute(Sender: TObject);
+begin
+   inherited;
+   FAnimalID := 0;
+end;
+
+procedure TfmAnimalSearch.rgSearchByPropertiesChange(Sender: TObject);
+begin
+   inherited;
+   teSearchText.Text := '';
+   if rgSearchBy.ItemIndex = 0 then
+      AnimalSearchGridDBTableViewSortAnimalNo.SortOrder := soAscending
+   else
+      AnimalSearchGridDBTableViewSortNatID.SortOrder := soAscending
+end;
+
+procedure TfmAnimalSearch.FormDestroy(Sender: TObject);
+begin
+   inherited;
+   if ( FAnimals <> nil ) then
+      begin
+         FAnimals.Close;
+         FreeAndNil(FAnimals);
+      end;
+end;
+
+procedure TfmAnimalSearch.AnimalSearchGridDBTableViewSortAnimalNoGetDisplayText(
+  Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
+  var AText: String);
+begin
+   inherited;
+   if ARecord <> nil then
+      AText := ARecord.DisplayTexts[AnimalSearchGridDBTableViewAnimalNo.Index]
+   else
+      AText := '';
+end;
+
+procedure TfmAnimalSearch.AnimalSearchGridDBTableViewSortNatIDGetDisplayText(
+  Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
+  var AText: String);
+begin
+   inherited;
+   if ARecord <> nil then
+      AText := ARecord.DisplayTexts[AnimalSearchGridDBTableViewNatIDNum.Index]
+   else
+      AText := '';
+end;
+
+end.

@@ -1,0 +1,226 @@
+unit UKSire;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  uBeefSalesCatalogue, cxStyles, Db, dxmdaset, ActnList, dxBar,
+  dxBarExtItems, cxCheckBox, StdCtrls, cxButtons, cxTextEdit, cxLabel,
+  cxMaskEdit, cxDropDownEdit, cxContainer, cxEdit, cxGroupBox, cxGridLevel,
+  cxGridCustomTableView, cxGridTableView, cxGridDBTableView, cxClasses,
+  cxControls, cxGridCustomView, cxGrid, dxStatusBar;
+
+type
+  TfmBeefSalesCatalogue1 = class(TfmBaseFormAnimalCatalogue)
+    actAddSire: TAction;
+    procedure FormCreate(Sender: TObject);
+  private
+    { Private declarations }
+     function AnimalInUse(const AHerdBookNo : String): Integer;
+     function CountOfSires(const ABreedCode : string) : Integer;
+     procedure AddSire;
+  public
+    { Public declarations }
+     procedure BuildSearchColumnList;override;
+  end;
+
+var
+  fmBeefSalesCatalogue1: TfmBeefSalesCatalogue1;
+
+implementation
+
+{$R *.DFM}
+
+{ TfmBeefSalesCatalogue1 }
+
+procedure TfmBeefSalesCatalogue1.AddSire;
+var
+   UKSire : TAnimalRecord;
+   HerdBookNo : string;
+   bFound : Boolean;
+   AnimalID : Integer;
+begin
+  inherited;
+  // Add selected animal
+  HerdBookNo := QuerySiresHerdBookNo.AsString;
+  AnimalID := AnimalInUse(HerdBookNo);
+
+  if (AnimalID<=0) then
+     begin
+        // Add animal to database
+        UKSire := TAnimalRecord.Create;
+        try
+           UKSire.RaiseExceptions := False;
+
+           UKSire.AddToNoneHerd;
+           UKSire.HerdBookNo := HerdBookNo;
+           UKSire.Name := Trim(QuerySiresName.AsString);
+           UKSire.Sex := cSex_Bull;
+           UKSire.LactNo := 0;
+           UKSire.InHerd := True;
+           UKSire.Breeding := True;
+           UKSire.DamID  := 0;
+           UKSire.SireID := 0;
+           UKSire.AnimalDeleted := False;
+           UKSire.StrPrimBreed := Trim(QuerySiresBreedCode.AsString);
+           if not UKSire.Save then
+              UKSire.Cancel
+           else
+              begin
+
+                 // Add BullSemenStk Record
+
+                 with TQuery.Create(nil) do
+                    try
+                       DatabaseName := AliasName;
+                       SQL.Clear;
+                       SQL.Add('INSERT INTO BullExt (AnimalID)');
+                       SQL.Add('VALUES (:AnimalID)');
+                       Params[0].AsInteger := UKSire.ID;
+                       ExecSQL;
+                    finally
+                       Free;
+                    end;
+
+                 FBooleanResult := True;
+                 MessageDlg('Sire has been added to the database.',mtInformation,[mbOK],0);
+              end;
+        finally
+           FreeAndNil(UKSire);
+        end;
+     end
+  else
+     begin
+        // update animal fields in database
+        if MessageDlg('Sire has already been added, do you want to update the sire details?',mtConfirmation,[mbYes,mbNo],0) = idYes then
+           begin
+              with TQuery.Create(nil) do
+                 try
+                    DatabaseName := AliasName;
+                    SQL.Clear;
+                    SQL.Add('SELECT AnimalID FROM BullSemenStk');
+                    SQL.Add('WHERE AnimalID = :AnimalID');
+                    Params[0].AsInteger := AnimalID;
+                    Open;
+                    try
+                       First;
+                       bFound := Fields[0].AsInteger = AnimalID;
+                    finally
+                       Close;
+                    end;
+                    if not (bFound) then
+                       begin
+                          SQL.Clear;
+                          SQL.Add('INSERT INTO BullSemenStk (AnimalID)');
+                          SQL.Add('VALUES (:AnimalID)');
+                          Params[0].AsInteger := AnimalID;
+                          ExecSQL;
+                       end
+                    else
+                       begin
+                          SQL.Clear;
+                          SQL.Add('UPDATE BullSemenStk SET InUse=True');
+                          SQL.Add('WHERE AnimalID = :AnimalID');
+                          Params[0].AsInteger := AnimalID;
+                          ExecSQL;
+                       end
+                 finally
+                    Free;
+                 end;
+
+              with TQuery.Create(nil) do
+                 try
+                    DatabaseName := AliasName;
+                    SQL.Clear;
+                    SQL.Add('SELECT AnimalID FROM BullExt');
+                    SQL.Add('WHERE AnimalID = :AnimalID');
+                    Params[0].AsInteger := AnimalID;
+                    Open;
+                    try
+                       First;
+                       bFound := Fields[0].AsInteger = AnimalID;
+                    finally
+                       Close;
+                    end;
+                    if not (bFound) then
+                       begin
+                          SQL.Clear;
+                          SQL.Add('INSERT INTO BullExt (AnimalID)');
+                          SQL.Add('VALUES (:AnimalID)');
+                          Params[0].AsInteger := AnimalID;
+                          ExecSQL;
+                       end;
+                 finally
+                    Free;
+                 end;
+           end;
+     end;
+
+end;
+
+function TfmBeefSalesCatalogue1.AnimalInUse(
+  const AHerdBookNo: String): Integer;
+begin
+   with TQuery.Create(nil) do
+      try
+         DatabaseName := AliasName;
+         SQL.Clear;
+         SQL.Add('Select ID From Animals Where HerdBookNo=:AHerdBookNo');
+         Params[0].AsString := AHerdBookNo;
+
+         Open;
+         try
+            First;
+            Result := Fields[0].AsInteger;
+         finally
+            Close;
+         end;
+      finally
+         Free;
+      end;
+end;
+
+procedure TfmBeefSalesCatalogue1.BuildSearchColumnList;
+begin
+  inherited;
+  //
+end;
+
+function TfmBeefSalesCatalogue1.CountOfSires(
+  const ABreedCode: string): Integer;
+begin
+   Result := 0;
+   with TQuery.Create(nil) do
+      try
+         DatabaseName := AliasName;
+         SQL.Clear;
+         SQL.Add('SELECT Count(Name) CName FROM UKSires');
+         SQL.Add('WHERE BreedCode = :BCode');
+         Params[0].AsString := ABreedCode;
+         Open;
+         try
+            First;
+            Result := Fields[0].AsInteger;
+         finally
+            Close;
+         end;
+      finally
+         Free;
+      end;
+end;
+
+procedure TfmBeefSalesCatalogue1.FormCreate(Sender: TObject);
+begin
+  inherited;
+  QuerySires.Active := True;
+  StatusBar.Panels[1].Text := Format('Holsteins: %d',[CountOfSires('HOL')]);
+  StatusBar.Panels[2].Text := Format('Fresians: %d',[CountOfSires('FR')]);
+  StatusBar.Panels[3].Text := Format('Ayrshires: %d',[CountOfSires('AYR')]);
+  StatusBar.Panels[4].Text := Format('Jerseys: %d',[CountOfSires('JER')]);
+  StatusBar.Panels[5].Text := Format('Guernseys: %d',[CountOfSires('GU')]);
+  StatusBar.Panels[6].Text := Format('Shorthorns: %d',[CountOfSires('SIH')]);
+
+end;
+
+end.
+ 

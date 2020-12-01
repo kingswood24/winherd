@@ -1,0 +1,190 @@
+unit AnimalRemedyMedicineFixer;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  db, dbTables, MSXML2_TLB, ComObj, StdCtrls, cxButtons,uHerdSync,
+  cxControls, cxContainer, cxEdit, cxLabel;
+
+type
+  TfmAnimalRemedyMedicineFixer = class(TForm)
+    cxButton1: TcxButton;
+    cxLabel1: TcxLabel;
+    cxButton2: TcxButton;
+    procedure cxButton1Click(Sender: TObject);
+  private
+    { Private declarations }
+    FDrugListingDocument : IXMLDOMDocument;
+    DuplicateDrugs : TQuery;
+    function GetDrugFromServerListing(
+       AName: string): string;
+  public
+    { Public declarations }
+  end;
+
+var
+  fmAnimalRemedyMedicineFixer: TfmAnimalRemedyMedicineFixer;
+
+implementation
+uses
+   GenTypesConst, kroutines;
+
+{$R *.DFM}
+
+function TfmAnimalRemedyMedicineFixer.GetDrugFromServerListing(AName: string): string;
+var
+   i : Integer;
+   DrugsNode : IXMLDOMNodeList;
+   DrugNode : IXMLDOMNode;
+   ChildNode: IXMLDOMNode;
+begin
+   DrugsNode := nil;
+   DrugNode := nil;
+   ChildNode := nil;
+   try
+
+      if (FDrugListingDocument = nil) then Exit;
+
+      DrugsNode := FDrugListingDocument.getElementsByTagName('drug');
+      for i := 0 to DrugsNode.length-1 do
+         begin
+            DrugNode := DrugsNode[i];
+            if (DrugNode = nil) then continue;
+
+            ChildNode := DrugNode.selectSingleNode('name');
+            if (ChildNode = nil) then continue;
+               begin
+                  AName :=  UPPERCASE(TRIM(AName));
+                  if COPY(UPPERCASE(Trim( ChildNode.text )),1,Length(AName)) = AName then
+                     begin
+                        Result := DrugNode.selectSingleNode('vpaNumber').text;
+                        Break;
+                     end;
+               end;
+         end;
+   finally
+      DrugsNode := nil;
+      DrugNode := nil;
+      ChildNode := nil;
+   end;
+end;
+
+procedure TfmAnimalRemedyMedicineFixer.cxButton1Click(Sender: TObject);
+var
+   IdToKeep : Integer;
+   DrugName : string;
+   VPANumber : string;
+
+   IdArray : array of Integer;
+   sIdArray : string;
+
+   i, j : Integer;
+   FileList : TStringList;
+begin
+
+   cxButton1.Enabled := False;
+   cxButton1.Hide;
+   cxButton2.Hide;
+   cxLabel1.Visible := True;
+   Update;
+   Application.ProcessMessages;
+
+   if (FileExists(ApplicationPath + '\druglisting.xml')) then
+      begin
+         FDrugListingDocument := CreateOleObject('MSXML2.DOMDocument') as IXMLDOMDocument;
+         FDrugListingDocument.load(ApplicationPath + '\druglisting.xml');
+      end
+   else
+      Raise exception.Create('Drug Listing file not found.');
+
+   DuplicateDrugs := TQuery.Create(nil);
+   try
+      DuplicateDrugs.DataBaseName := Aliasname;
+      DuplicateDrugs.SQL.Text :=
+      'Select Name, Count(Name) NameCount From Medicine '+
+      'Group By Name '+
+      'Having Count(Name) > 1';
+
+      DuplicateDrugs.Active := True;
+
+      while not DuplicateDrugs.Eof do
+         begin
+            DrugName := DuplicateDrugs.Fields[0].AsString;
+            with TQuery.Create(nil) do
+               try
+                  DataBaseName := AliasName;
+
+                  // Find the Medicine to Keep
+                  SQL.Text := 'Select Min(Id) From medicine Where Name =:s';
+                  Params[0].AsString := DrugName;
+                  Open;
+
+                  IdToKeep := Fields[0].AsInteger;
+
+                  // Get the VPA Number of medicine we're keeping
+                  VPANumber := GetDrugFromServerListing(DrugName);
+
+                  // Update the VPA Number of medicine we're keeping
+                  if (VPANumber <> '') then
+                     begin
+                        SQL.Text := 'Update Medicine Set VPANo =:VPA Where Id =:id';
+                        Params[0].AsString := VPANumber;
+                        Params[1].AsInteger := IdToKeep;
+
+                        ExecSQL;
+                     end;
+
+                  // Get the erroneous Medicine Ids  into int array so we can easily update
+                  // the health table and replace all erroneous ids with the IdToKeep
+                  SQL.Text := 'Select Id From medicine Where Name =:s And Id <> :Id';
+                  Params[0].AsString := DrugName;
+                  Params[1].AsInteger := IdToKeep;
+                  Open;
+
+                  SetLength(IdArray, 0);
+                  while not eof do
+                     begin
+                        SetLength(IdArray, Length(IdArray)+1);
+                        IdArray[Length(IdArray)-1] := Fields[0].AsInteger;
+                        Next;
+                     end;
+                  sIdArray := IntArrayToSQLInString(IdArray);
+
+                  SQL.Text := 'DELETE FROM Medicine '+
+                              'WHERE Id IN '+ sIdarray;
+                  ExecSQL;
+               finally
+                  Free;
+               end;
+            DuplicateDrugs.Next;
+         end;
+   finally
+      DuplicateDrugs.Close;
+      FreeAndNil(DuplicateDrugs);
+   end;
+
+   with TQuery.Create(nil) do
+      try
+        DatabaseName := AliasName;
+        SQL.Text := 'DELETE FROM Events Where EventSource = 9 AND EventType = 6';
+        ExecSQL;
+
+        SQL.Text := 'DELETE FROM Health H Where NOT H.EventId IN (Select E.Id FROM Events E WHERE E.EventType IN (4,6))';
+        ExecSQL;
+   finally
+      Free;
+   end;
+
+   FileList := TStringList.Create;
+   GetDirectoryFiles(DataPath + '\sync', FileList, '*.xml');
+   for i := 0 to FileList.Count-1 do
+      THerdSync.ReadAnimalRemedyEvents(FileList[i]);
+
+   Close;
+   MessageDlg('Update complete',mtInformation,[mbOK],0);
+end;
+
+
+
+end.

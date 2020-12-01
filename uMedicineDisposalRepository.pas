@@ -1,0 +1,89 @@
+unit uMedicineDisposalRepository;
+
+interface
+uses
+   Classes, db, dbTables, uKingswoodRepository, SysUtils, Dialogs;
+
+type
+   TMedicineDisposalRepository = class(TKingswoodRepository)
+   public
+      function CreateMedicineDisposal (ADrugID, ADrugPurchID, AWasteReason : Integer;
+         AQtyDeducted, AQtyBeforeDeduct : Double; ADisposalDate : TDateTime; const ADisposeDesc : String = '';
+         ABatchNo : String = '') : Integer;
+      function GetMostRecentDiposalID (ADrugID, ADrugPurchID : Integer; const ABatchNo : String = '') : Integer;
+   end;
+
+implementation
+
+{ TMedicineDisposalRepository }
+
+function TMedicineDisposalRepository.CreateMedicineDisposal (ADrugID, ADrugPurchID, AWasteReason : Integer;
+   AQtyDeducted, AQtyBeforeDeduct : Double; ADisposalDate : TDateTime; const ADisposeDesc : String = '';
+   ABatchNo : String = '') : Integer;
+begin
+   Result := 0;
+   try
+      FQuery.SQL.Clear;
+      FQuery.SQL.Add('SELECT MD.ID');
+      FQuery.SQL.Add('FROM MedicineDisposal MD');
+      FQuery.SQL.Add('WHERE MD.DrugID = :DrugID');
+      FQuery.SQL.Add('AND   MD.DrugPurchID = :PurchID');
+      if ( Length(ABatchNo) > 0 ) then
+         FQuery.SQL.Add('AND   MD.DrugBatchNo = :BatchNo');
+      FQuery.Params[0].AsInteger := ADrugID;
+      FQuery.Params[1].AsInteger := ADrugPurchID;
+      if ( Length(ABatchNo) > 0 ) then
+         FQuery.Params[2].AsString := ABatchNo;
+      FQuery.Open;
+      if ( FQuery.RecordCount > 0 ) then
+         begin
+            FQuery.First;
+            Result := FQuery.FieldByName('ID').AsInteger;
+         end
+      else
+         begin
+            FQuery.Close;
+            FQuery.SQL.Clear;
+            FQuery.SQL.Add('INSERT INTO MedicineDisposal (DrugID, DrugPurchID, DrugBatchNo, QtyDeducted, QtyBeforeDeduct, DisposalDate, WasteReason, DisposalDesc)');
+            FQuery.SQL.Add('VALUES (:DrugID, :PurchID, :BatchNo, :DisposalAmt, :DisposeBefAmt, :DiposeDate, :WasteReason, :DisposeDesc)');
+            FQuery.Params[0].AsInteger := ADrugID;
+            FQuery.Params[1].AsInteger := ADrugPurchID;
+            FQuery.Params[2].AsString := ABatchNo;
+            FQuery.Params[3].AsFloat := AQtyDeducted;
+            FQuery.Params[4].AsFloat := AQtyBeforeDeduct;
+            FQuery.Params[5].AsDate := ADisposalDate;
+            FQuery.Params[6].AsInteger := AWasteReason;
+            FQuery.Params[7].AsString := ADisposeDesc;
+            FQuery.ExecSQL;
+            Result := GetMostRecentDiposalID(ADrugID, ADrugPurchID, ABatchNo);
+         end;
+   finally
+      FQuery.Close;
+   end;
+end;
+
+function TMedicineDisposalRepository.GetMostRecentDiposalID(ADrugID,
+  ADrugPurchID: Integer; const ABatchNo: String = ''): Integer;
+begin
+   FQuery.SQL.Clear;
+   FQuery.SQL.Add('SELECT MD.ID');
+   FQuery.SQL.Add('FROM MedicineDisposal MD');
+   FQuery.SQL.Add('WHERE MD.DrugID = :DrugID');
+   FQuery.SQL.Add('AND   MD.DrugPurchID = :PurchID');
+   if ( Length(ABatchNo) > 0 ) then
+      FQuery.SQL.Add('AND   MD.DrugBatchNo = :BatchNo');
+   FQuery.Params[0].AsInteger := ADrugID;
+   FQuery.Params[1].AsInteger := ADrugPurchID;
+   if ( Length(ABatchNo) > 0 ) then
+      FQuery.Params[2].AsString := ABatchNo;
+   FQuery.Open;
+   try
+      FQuery.First;
+      Result := FQuery.Fields[0].AsInteger;
+   finally
+      FQuery.Close;
+   end;
+end;
+
+end.
+ 

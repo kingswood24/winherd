@@ -1,0 +1,426 @@
+unit uNewMainScreen;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  dxBar, dxBarExtItems, StdCtrls, cxButtons, ExtCtrls, cxControls,
+  cxContainer, cxEdit, cxGroupBox, Drawing, ImgList, cxLabel,
+  uAWEventsByGroup, uEventsByGroup, uKImport, DairyData, GenTypesConst;
+
+type
+  TfmNewMainScreen = class(TForm)
+    pTopPanel: TPanel;
+    pBlockEvents: TPanel;
+    dxBarManager1: TdxBarManager;
+    dxblbExit: TdxBarLargeButton;
+    btnMovementsIn: TcxButton;
+    btnMovementsOut: TcxButton;
+    pbBlockEvents: TPaintBox;
+    pMovementsInOut: TPanel;
+    lMovementsInOut: TcxLabel;
+    pbMovementsInOut: TPaintBox;
+    pGrpAnimalWelfare: TPanel;
+    lGrpAnimalWelfare: TcxLabel;
+    pbGrpAnimalWelfare: TPaintBox;
+    pSingleEvents: TPanel;
+    pbEventArea: TPaintBox;
+    gbEventPanelDesc: TcxGroupBox;
+    lEventPanelDesc: TLabel;
+    pBreeding: TPanel;
+    pbBreeding: TPaintBox;
+    btnCalving: TcxButton;
+    btnHeatBulling: TcxButton;
+    btnService: TcxButton;
+    btnPD: TcxButton;
+    btnDryOff: TcxButton;
+    pMovements: TPanel;
+    pbMovements: TPaintBox;
+    btnPurchases: TcxButton;
+    btnSalesDeaths: TcxButton;
+    btnMartFiles: TcxButton;
+    btnFactorySales: TcxButton;
+    btnMovementPermits: TcxButton;
+    pManagement: TPanel;
+    pbManagement: TPaintBox;
+    btnWeighing: TcxButton;
+    btnMilkRec: TcxButton;
+    btnParlourLink: TcxButton;
+    btnRationCalc: TcxButton;
+    btnBulkTank: TcxButton;
+    pVetFeeds: TPanel;
+    pbVetFeeds: TPaintBox;
+    btnVetPurch: TcxButton;
+    btnVetTreats: TcxButton;
+    btnFeedPurch: TcxButton;
+    btnFeedAlloc: TcxButton;
+    pRegCalfReg: TPanel;
+    pbRegCalfReg: TPaintBox;
+    btnReconcileHerd: TcxButton;
+    btnOrderTags: TcxButton;
+    btnRegisterRemarks: TcxButton;
+    btnCalfRegistration: TcxButton;
+    btnICBFEventReg: TcxButton;
+    pGroups: TPanel;
+    pbGroups: TPaintBox;
+    btnGroupSetup: TcxButton;
+    btnGroupMovement: TcxButton;
+    btnPurchaseGroup: TcxButton;
+    btnSalesGroup: TcxButton;
+    pAnimalWelfare: TPanel;
+    pbAnimalWelfare: TPaintBox;
+    btnDisbudding: TcxButton;
+    btnMealFeeding: TcxButton;
+    btnCastration: TcxButton;
+    btnStartMealFeed: TcxButton;
+    pOnFarmEvents: TPanel;
+    pbOnFarmEvents: TPaintBox;
+    lOnFarmEvents: TcxLabel;
+    Bevel1: TBevel;
+    Bevel2: TBevel;
+    lBlockEvents: TcxLabel;
+    lSingleEvents: TcxLabel;
+    procedure dxblbExitClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure pbMovementsPaint(Sender: TObject);
+    procedure pbRegCalfRegPaint(Sender: TObject);
+    procedure pbManagementPaint(Sender: TObject);
+    procedure pbBreedingPaint(Sender: TObject);
+    procedure pbBreedingBtnPaint(Sender: TObject);
+    procedure pbMovementsBtnPaint(Sender: TObject);
+    procedure pbRegisterCalfRegBtnPaint(Sender: TObject);
+    procedure pbManagementBtnPaint(Sender: TObject);
+    procedure pbVeterinaryFeedsBtnPaint(Sender: TObject);
+    procedure pbVetFeedsPaint(Sender: TObject);
+    procedure pbGroupsPaint(Sender: TObject);
+    procedure pbGroupsBtnPaint(Sender: TObject);
+    procedure pbAnimalWelfareBtnPaint(Sender: TObject);
+    procedure pbAnimalWelfarePaint(Sender: TObject);
+    procedure lBreedingClick(Sender: TObject);
+    procedure lMovementsClick(Sender: TObject);
+    procedure lVeterinaryFeedsClick(Sender: TObject);
+    procedure lRegisterCalfRegClick(Sender: TObject);
+    procedure lManagementClick(Sender: TObject);
+    procedure lGroupsClick(Sender: TObject);
+    procedure lAnimalWelfareClick(Sender: TObject);
+    procedure pbEventAreaPaint(Sender: TObject);
+    procedure pbBlockEventsPaint(Sender: TObject);
+    procedure lOnFarmEventsClick(Sender: TObject);
+    procedure pbOnFarmEventsPaint(Sender: TObject);
+    procedure pbMovementsInOutPaint(Sender: TObject);
+    procedure lMovementsInOutClick(Sender: TObject);
+    procedure pbGrpAnimalWelfarePaint(Sender: TObject);
+    procedure lGrpAnimalWelfareClick(Sender: TObject);
+    procedure btnMovementsInClick(Sender: TObject);
+    procedure btnMovementsOutClick(Sender: TObject);
+  private
+    procedure SetMovementsButtonsVisible (AVisible : Boolean);
+    procedure HideAll;
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  fmNewMainScreen: TfmNewMainScreen;
+
+implementation
+
+{$R *.DFM}
+
+procedure TfmNewMainScreen.dxblbExitClick(Sender: TObject);
+begin
+   Close;
+end;
+
+procedure TfmNewMainScreen.FormCreate(Sender: TObject);
+begin
+   SetMovementsButtonsVisible(False);
+
+   pBreeding.Visible := True;
+   lBreeding.Style.Font.Color := clWhite;
+   pBreedingBtn.BevelOuter := bvNone;
+
+   pMovements.Visible := False;
+   pVetFeeds.Visible := False;
+   pRegCalfReg.Visible := False;
+   pManagement.Visible := False;
+   pGroups.Visible := False;
+   pAnimalWelfare.Visible := False;
+end;
+
+procedure TfmNewMainScreen.SetMovementsButtonsVisible(AVisible: Boolean);
+begin
+   if AVisible then
+      begin
+         lMovementsInOut.Style.Font.Color := clWhite;
+         pMovementsInOut.BevelOuter := bvNone;
+      end
+   else if not AVisible then
+      begin
+         lMovementsInOut.Style.Font.Color := clBlack;
+         pMovementsInOut.BevelOuter := bvNone;
+      end;
+
+   btnMovementsIn.Visible := AVisible;
+   btnMovementsOut.Visible := AVisible;
+end;
+
+procedure TfmNewMainScreen.HideAll;
+begin
+   SetMovementsButtonsVisible(False);
+   pBreeding.Visible := False;
+   pBreedingBtn.BevelOuter := bvRaised;
+   lBreeding.Style.Font.Color := clBlack;
+   pMovements.Visible := False;
+   pMovementsBtn.BevelOuter := bvRaised;
+   lMovements.Style.Font.Color := clBlack;
+   pRegCalfReg.Visible := False;
+   pRegisterCalfRegBtn.BevelOuter := bvRaised;
+   lRegisterCalfReg.Style.Font.Color := clBlack;
+   pVetFeeds.Visible := False;
+   pVeterinaryFeedsBtn.BevelOuter := bvRaised;
+   lVeterinaryFeeds.Style.Font.Color := clBlack;
+   pManagement.Visible := False;
+   pManagementBtn.BevelOuter := bvRaised;
+   lManagement.Style.Font.Color := clBlack;
+   pGroups.Visible := False;
+   pGroupsBtn.BevelOuter := bvRaised;
+   lGroups.Style.Font.Color := clBlack;
+   pAnimalWelfare.Visible := False;
+   pAnimalWelfareBtn.BevelOuter := bvRaised;
+   lAnimalWelfare.Style.Font.Color := clBlack;
+   pOnFarmEvents.BevelOuter := bvRaised;
+   lOnFarmEvents.Style.Font.Color := clBlack;
+   pMovementsInOut.BevelOuter := bvRaised;
+   lMovementsInOut.Style.Font.Color := clBlack;
+   pGrpAnimalWelfare.BevelOuter := bvRaised;
+   lGrpAnimalWelfare.Style.Font.Color := clBlack;
+end;
+
+procedure TfmNewMainScreen.pbBreedingPaint(Sender: TObject);
+begin
+   GradVertical(pbBreeding.Canvas, pbBreeding.ClientRect, $007BF4A4, $000B862C);
+end;
+
+procedure TfmNewMainScreen.pbMovementsPaint(Sender: TObject);
+begin
+   GradVertical(pbMovements.Canvas, pbMovements.ClientRect, $00FFDF9F, $00D19633);
+end;
+
+procedure TfmNewMainScreen.pbRegCalfRegPaint(Sender: TObject);
+begin
+   GradVertical(pbRegCalfReg.Canvas, pbRegCalfReg.ClientRect, $00A8DCD5, $00479A8);
+end;
+
+procedure TfmNewMainScreen.pbManagementPaint(Sender: TObject);
+begin
+   GradVertical(pbManagement.Canvas, pbManagement.ClientRect, $00B1B2EC, $00504C9E);
+end;
+
+procedure TfmNewMainScreen.pbBreedingBtnPaint(Sender: TObject);
+begin
+   GradVertical(pbBreedingBtn.Canvas, pbBreedingBtn.ClientRect, $007BF4A4, $000B862C);
+end;
+
+procedure TfmNewMainScreen.pbMovementsBtnPaint(Sender: TObject);
+begin
+   GradVertical(pbMovementsBtn.Canvas, pbMovementsBtn.ClientRect, $00FFDF9F, $00D19633);
+end;
+
+procedure TfmNewMainScreen.pbRegisterCalfRegBtnPaint(Sender: TObject);
+begin
+   GradVertical(pbRegisterCalfRegBtn.Canvas, pbRegisterCalfRegBtn.ClientRect, $00A8DCD5, $00479A8);
+end;
+
+procedure TfmNewMainScreen.pbManagementBtnPaint(Sender: TObject);
+begin
+   GradVertical(pbManagementBtn.Canvas, pbManagementBtn.ClientRect, $00B1B2EC, $00504C9E);
+end;
+
+procedure TfmNewMainScreen.pbVeterinaryFeedsBtnPaint(Sender: TObject);
+begin
+   GradVertical(pbVeterinaryFeedsBtn.Canvas, pbVeterinaryFeedsBtn.ClientRect, $0096CFBE, $00479A81);
+end;
+
+procedure TfmNewMainScreen.pbVetFeedsPaint(Sender: TObject);
+begin
+   GradVertical(pbVetFeeds.Canvas, pbVetFeeds.ClientRect, $0096CFBE, $00479A81);
+end;
+
+procedure TfmNewMainScreen.pbGroupsPaint(Sender: TObject);
+begin
+   GradVertical(pbGroups.Canvas, pbGroups.ClientRect, $00A49FAA, $0065606C);
+end;
+
+procedure TfmNewMainScreen.pbGroupsBtnPaint(Sender: TObject);
+begin
+   GradVertical(pbGroupsBtn.Canvas, pbGroupsBtn.ClientRect, $00A49FAA, $0065606C);
+end;
+
+procedure TfmNewMainScreen.pbAnimalWelfareBtnPaint(Sender: TObject);
+begin
+   GradVertical(pbAnimalWelfareBtn.Canvas, pbAnimalWelfareBtn.ClientRect, $00B0E463, $0089CD23);
+end;
+
+procedure TfmNewMainScreen.pbAnimalWelfarePaint(Sender: TObject);
+begin
+   GradVertical(pbAnimalWelfare.Canvas, pbAnimalWelfare.ClientRect, $00B0E463, $0089CD23);
+end;
+
+procedure TfmNewMainScreen.lBreedingClick(Sender: TObject);
+begin
+   HideAll;
+   pBreeding.Visible := True;
+   lBreeding.Style.Font.Color := clWhite;
+   pBreedingBtn.BevelOuter := bvNone;
+end;
+
+procedure TfmNewMainScreen.lMovementsClick(Sender: TObject);
+begin
+   HideAll;
+   pMovements.Visible := True;
+   pMovements.Top := pBreeding.Top;
+   pMovements.Left := pBreeding.Left;
+   lMovements.Style.Font.Color := clWhite;
+   pMovementsBtn.BevelOuter := bvNone;
+end;
+
+procedure TfmNewMainScreen.lVeterinaryFeedsClick(Sender: TObject);
+begin
+   HideAll;
+   pVetFeeds.Visible := True;
+   pVetFeeds.Top := pBreeding.Top;
+   pVetFeeds.Left := pBreeding.Left;
+   lVeterinaryFeeds.Style.Font.Color := clWhite;
+   pVeterinaryFeedsBtn.BevelOuter := bvNone;
+end;
+
+procedure TfmNewMainScreen.lRegisterCalfRegClick(Sender: TObject);
+begin
+   HideAll;
+   pRegCalfReg.Visible := True;
+   pRegCalfReg.Top := pBreeding.Top;
+   pRegCalfReg.Left := pBreeding.Left;
+   lRegisterCalfReg.Style.Font.Color := clWhite;
+   pRegisterCalfRegBtn.BevelOuter := bvNone;
+end;
+
+procedure TfmNewMainScreen.lManagementClick(Sender: TObject);
+begin
+   HideAll;
+   pManagement.Visible := True;
+   pManagement.Top := pBreeding.Top;
+   pManagement.Left := pBreeding.Left;
+   lManagement.Style.Font.Color := clWhite;
+   pManagementBtn.BevelOuter := bvNone;
+end;
+
+procedure TfmNewMainScreen.lGroupsClick(Sender: TObject);
+begin
+   HideAll;
+   pGroups.Visible := True;
+   pGroups.Top := pBreeding.Top;
+   pGroups.Left := pBreeding.Left;
+   lGroups.Style.Font.Color := clWhite;
+   pGroupsBtn.BevelOuter := bvNone;
+end;
+
+procedure TfmNewMainScreen.lAnimalWelfareClick(Sender: TObject);
+begin
+   HideAll;
+   pAnimalWelfare.Visible := True;
+   pAnimalWelfare.Top := pBreeding.Top;
+   pAnimalWelfare.Left := pBreeding.Left;
+   lAnimalWelfare.Style.Font.Color := clWhite;
+   pAnimalWelfareBtn.BevelOuter := bvNone;
+end;
+
+procedure TfmNewMainScreen.pbEventAreaPaint(Sender: TObject);
+begin
+   GradHorizontal(pbEventArea.Canvas, pbEventArea.ClientRect, $00EDEDDA, clTeal);
+end;
+
+procedure TfmNewMainScreen.pbBlockEventsPaint(Sender: TObject);
+begin
+   GradHorizontal(pbBlockEvents.Canvas, pbBlockEvents.ClientRect, clTeal, $00F3F3E8);
+end;
+
+procedure TfmNewMainScreen.lOnFarmEventsClick(Sender: TObject);
+begin
+   SetMovementsButtonsVisible(False);
+   uEventsByGroup.ShowTheForm(TNoEvent,True,True);
+   lOnFarmEvents.Style.Font.Color := clBlack;
+end;
+
+procedure TfmNewMainScreen.pbOnFarmEventsPaint(Sender: TObject);
+begin
+   GradVertical(pbOnFarmEvents.Canvas, pbOnFarmEvents.ClientRect, $007BF4A4, $000B862C);
+end;
+
+procedure TfmNewMainScreen.pbMovementsInOutPaint(Sender: TObject);
+begin
+   GradVertical(pbMovementsInOut.Canvas, pbMovementsInOut.ClientRect, $00FFDF9F, $00D19633);
+end;
+
+procedure TfmNewMainScreen.lMovementsInOutClick(Sender: TObject);
+begin
+   lMovementsInOut.Style.Font.Color := clWhite;
+   pMovementsInOut.BevelOuter := bvNone;
+   SetMovementsButtonsVisible(True);
+end;
+
+procedure TfmNewMainScreen.pbGrpAnimalWelfarePaint(Sender: TObject);
+begin
+   GradVertical(pbGrpAnimalWelfare.Canvas, pbGrpAnimalWelfare.ClientRect, $00B6E76D, $0089CD23);
+end;
+
+procedure TfmNewMainScreen.lGrpAnimalWelfareClick(Sender: TObject);
+begin
+   SetMovementsButtonsVisible(False);
+   TfmAWEventsByGroup.ShowAWEventsByGroup(WinData.UserDefaultHerdID, TDisbudding);
+   lGrpAnimalWelfare.Style.Font.Color := clBlack;
+end;
+
+procedure TfmNewMainScreen.btnMovementsInClick(Sender: TObject);
+var
+   DatabaseUpdated : Boolean;
+begin
+   uKImport.CreateShowForm(TPurchase, DatabaseUpdated, False);
+   Application.ProcessMessages;
+
+   if DatabaseUpdated then
+      begin
+         fmNewMainScreen.Enabled := False; // prevent any clicking during database operations
+         try
+            WinData.KingData.CloseDataSets; // Close the Dataset
+            WinData.OpenAndCheckTables;
+         finally
+            fmNewMainScreen.Enabled := True; // Release
+         end;
+
+      end;
+end;
+
+procedure TfmNewMainScreen.btnMovementsOutClick(Sender: TObject);
+var
+   DatabaseUpdated : Boolean;
+begin
+   UKImport.CreateShowForm(TSaleDeath, DatabaseUpdated, False);
+   Application.ProcessMessages;
+
+   if DatabaseUpdated then
+      begin
+
+         fmNewMainScreen.Enabled := False; // prevent any clicking during database operations
+         try
+            WinData.KingData.CloseDataSets; // Close the Dataset
+            WinData.OpenAndCheckTables;
+         finally
+            fmNewMainScreen.Enabled := True; // Release
+         end;
+
+      end;
+end;
+
+end.

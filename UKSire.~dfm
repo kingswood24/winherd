@@ -1,0 +1,83 @@
+inherited fmBeefSalesCatalogue1: TfmBeefSalesCatalogue1
+  Width = 908
+  Height = 652
+  Caption = 'fmBeefSalesCatalogue1'
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited StatusBar: TdxStatusBar
+    Top = 596
+    Width = 892
+  end
+  inherited GridCatalogueAnimals: TcxGrid
+    Width = 892
+    Height = 445
+    TabOrder = 2
+  end
+  inherited cxGroupBox1: TcxGroupBox
+    TabOrder = 5
+    Width = 892
+  end
+  inherited cxGroupBox2: TcxGroupBox
+    Width = 892
+  end
+  inherited BarManager: TdxBarManager
+    Bars = <
+      item
+        AllowClose = False
+        AllowCustomizing = False
+        AllowQuickCustomizing = False
+        AllowReset = False
+        Caption = 'Main'
+        DockedDockingStyle = dsTop
+        DockedLeft = 0
+        DockedTop = 0
+        DockingStyle = dsTop
+        FloatLeft = 353
+        FloatTop = 250
+        FloatClientWidth = 23
+        FloatClientHeight = 22
+        ItemLinks = <
+          item
+            Item = bClose
+            UserGlyph.Data = {00000000}
+            Visible = True
+          end
+          item
+            BeginGroup = True
+            Item = dxBarLargeButton1
+            UserGlyph.Data = {00000000}
+            Visible = True
+          end
+          item
+            BeginGroup = True
+            Item = bHelp
+            UserGlyph.Data = {00000000}
+            Visible = True
+          end>
+        Name = 'Main'
+        OneOnRow = True
+        Row = 0
+        ShowMark = False
+        SizeGrip = False
+        UseOwnFont = False
+        Visible = True
+        WholeRow = True
+        BackgroundBitmap.Data = {00000000}
+      end>
+    Categories.ItemsVisibles = (
+      2)
+    Categories.Visibles = (
+      True)
+    DockControlHeights = (
+      0
+      0
+      42
+      0)
+  end
+  inherited ActionList: TActionList
+    object actAddSire: TAction
+      Caption = 'Add Sire'
+      ImageIndex = 9
+    end
+  end
+end

@@ -1,0 +1,233 @@
+{
+   31/01/11 [V4.0 R7.9] /MK Bug Fix - Fixed Bug Where Report Does Not Look At AFilters.db.
+
+   24/11/11 [V5.0 R2.2] /MK Additional Feature - Added New Sort By Condition Score. 
+
+}
+
+unit uConditionScoreReport;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  uReportsBaseForm, Db, DBTables, QRExport, QRCtrls, QuickRpt, StdCtrls,
+  ComCtrls, ExtCtrls, Mask, ToolEdit, RxLookup, RXCtrls, ToolWin,
+  cxTextEdit, cxMaskEdit, cxDropDownEdit, cxControls, cxContainer, cxEdit,
+  cxLabel;
+
+type
+  TfmConditionScoreReport = class(TReportsBaseForm)
+    cxLabel9: TcxLabel;
+    cmboCSPeriod: TcxComboBox;
+    QRLabel1: TQRLabel;
+    QRLabel2: TQRLabel;
+    QRLabel3: TQRLabel;
+    QRLabel4: TQRLabel;
+    QRLabel5: TQRLabel;
+    QRLabel6: TQRLabel;
+    QRLabel7: TQRLabel;
+    QRLabel8: TQRLabel;
+    QRLabel9: TQRLabel;
+    QRLabel10: TQRLabel;
+    QRLabel11: TQRLabel;
+    QRDBText1: TQRDBText;
+    QRDBText2: TQRDBText;
+    QRDBText3: TQRDBText;
+    QRDBText4: TQRDBText;
+    QRDBText5: TQRDBText;
+    QRDBText6: TQRDBText;
+    QRDBText7: TQRDBText;
+    QRDBText8: TQRDBText;
+    QRLabel12: TQRLabel;
+    QRLabel13: TQRLabel;
+    QRDBText9: TQRDBText;
+    procedure sbViewClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+  private
+    { Private declarations }
+  protected
+    procedure SetupForm; override;
+    procedure LoadReportData;override;
+    procedure ViewReport;
+  public
+    { Public declarations }
+    class procedure ShowReport;
+  end;
+
+var
+  fmConditionScoreReport: TfmConditionScoreReport;
+
+implementation
+uses
+   GenTypesConst, DairyData;
+
+{$R *.DFM}
+
+{ TReportsBaseForm1 }
+
+procedure TfmConditionScoreReport.LoadReportData;
+var
+   PrevAnimalId : Integer;
+   RowCount : Integer;
+begin
+  inherited;
+
+  TempTable.Close;
+  TempTable.EmptyTable;
+  TempTable.Open;
+
+  with TQuery.Create(nil) do
+     try
+        DatabaseName := AliasName;
+        SQL.Clear;
+        SQL.Add('SELECT A.ID, A.AnimalNo, A.SortAnimalNo, A.DateOfBirth, A.LactNo, E.AnimalId, E.EventDate, CS.Score');
+        SQL.Add('FROM Events E');
+        SQL.Add('INNER JOIN Animals A on (A.Id=E.AnimalId)');
+        SQL.Add('INNER JOIN ConditionScore CS ON (E.Id = CS.EventId) ');
+
+        if cbUseFilter.Checked then
+           begin
+              SQL.Add('INNER JOIN ' + WinData.FilteredAnimals.TableName + ' FA ON (A.ID=FA.AID)');
+           end;
+
+        SQL.Add('WHERE (E.EventType=:EType)');
+        SQL.Add('ORDER BY AnimalId, EventDate DESC ');
+        Params[0].AsInteger := CCondScoreEvent;
+        //Params[1].AsDateTime := FromDate;
+
+        Open;
+        try
+           First;
+
+           InitProgress(0, RecordCount, 1, 'Please wait...');
+
+           PrevAnimalId := 0;
+           RowCount := 0;
+
+           while not eof do
+              begin
+                 if ( Fields[0].AsInteger <> PrevAnimalId ) then
+                    begin
+                       TempTable.Append;
+                       TempTable.FieldByName('AnimalNo').AsString := FieldByName('AnimalNo').AsString;
+                       TempTable.FieldByName('SortAnimalNo').AsString := FieldByName('SortAnimalNo').AsString;
+                       TempTable.FieldByName('DateOfBirth').AsDateTime := FieldByName('DateOfBirth').AsDateTime;
+                       TempTable.FieldByName('LactNo').AsInteger := FieldByName('LactNo').AsInteger;
+                       TempTable.FieldByName('CurrScore').AsFloat := FieldByName('Score').AsFloat;
+                       TempTable.FieldByName('CurrDate').AsDateTime := FieldByName('EventDate').AsDateTime;
+
+                       PrevAnimalId := Fields[0].AsInteger;
+                    end
+                 else if ( ( Fields[0].AsInteger = PrevAnimalId ) and ( TempTable.FieldByName('PrevDate').AsDateTime<=0) )then
+                    begin
+                       TempTable.FieldByName('PrevScore').AsFloat := FieldByName('Score').AsFloat;
+                       TempTable.FieldByName('PrevDate').AsDateTime := FieldByName('EventDate').AsDateTime;
+
+                       TempTable.FieldByName('Change').AsFloat := TempTable.FieldByName('CurrScore').AsFloat - TempTable.FieldByName('PrevScore').AsFloat;
+                       TempTable.FieldByName('Interval').AsInteger := Trunc( TempTable.FieldByName('CurrDate').AsDateTime - TempTable.FieldByName('PrevDate').AsDateTime );
+
+                       TempTable.Post;
+                     end;
+                 Next;
+                 StepProgress();
+              end;
+
+           if TempTable.State in dsEditModes then
+              TempTable.Post;
+        finally
+           Close;
+        end;
+     finally
+        Free;
+     end;
+end;
+
+procedure TfmConditionScoreReport.SetupForm;
+begin
+  inherited;
+
+  with TempTable do
+     begin
+
+        TableName := 'tmpConditionScores';
+
+        FieldDefs.Clear;
+        FieldDefs.Add('Id', ftAutoInc);
+        FieldDefs.Add('AnimalNo', ftString, 10);
+        FieldDefs.Add('SortAnimalNo', ftString, 10);
+        FieldDefs.Add('DateOfBirth', ftDateTime);
+        FieldDefs.Add('LactNo', ftInteger);
+        FieldDefs.Add('CurrScore', ftFloat);
+        FieldDefs.Add('CurrDate', ftDateTime);
+        FieldDefs.Add('PrevScore', ftFloat);
+        FieldDefs.Add('PrevDate', ftDateTime);
+        FieldDefs.Add('Change', ftFloat);
+        FieldDefs.Add('Interval', ftInteger);
+
+        CreateTable;
+     end;
+end;
+
+procedure TfmConditionScoreReport.sbViewClick(Sender: TObject);
+begin
+  inherited;
+
+  ViewReport;
+
+end;
+
+procedure TfmConditionScoreReport.ViewReport;
+begin
+   LoadReportData;
+
+   try
+      with GenQuery do
+         begin
+            SQL.Clear;
+            SQL.Add('SELECT * FROM '+ TempTable.TableName );
+            case rgSortBy.ItemIndex of
+               0 : SQL.Add('ORDER BY SortAnimalNo ');
+               1 : SQL.Add('ORDER BY DateOfBirth ');
+               2 : SQL.Add('ORDER BY LactNo ');
+               3 : SQL.Add('ORDER BY CurrScore ');
+            end;
+
+            if rgSortOrder.ItemIndex = 1 then
+               SQL.Add('DESC ');
+            Open;
+         end;
+
+      BaseReport.Preview();
+   finally
+      ResetProgress;
+      GenQuery.Close;
+      EnableViewPrintButtons(True);
+   end;
+
+end;
+
+class procedure TfmConditionScoreReport.ShowReport;
+begin
+   with TfmConditionScoreReport.Create(nil) do
+      try
+         ShowModal;
+      finally
+         Free;
+      end;
+
+end;
+
+procedure TfmConditionScoreReport.FormCreate(Sender: TObject);
+begin
+  inherited;
+   cbUseFilter.Visible := WinData.ActiveFilter;
+   if not cbUseFilter.Visible then
+      begin
+         cbUseFilter.Checked := False;
+      end
+   else
+      cbUseFilter.Checked := True;
+end;
+
+end.

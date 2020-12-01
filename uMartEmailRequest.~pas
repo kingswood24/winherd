@@ -1,0 +1,327 @@
+{
+   06/04/11 [V4.0 R9.4] /MK Bug Fix - Check To See If Herd Type Is Beef Before Prompting For Herd Identifier on Send Email.
+
+   21/04/15 [V5.4 R4.9] /MK Additional Feature - Added facility to save email addresses entered by user to TTable
+                                                 and load these into MDataSet after Form is created.   
+}
+
+unit uMartEmailRequest;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  StdCtrls, cxButtons, cxGridCustomTableView, cxGridTableView,
+  cxGridDBTableView, cxGridLevel, cxClasses, cxControls, cxGridCustomView,
+  cxGrid, LMDWebBase, LMDMapi, db, dbTables;
+
+type
+  TfmMartEmailRequest = class(TForm)
+    MartEmailRequestGridDBTableView: TcxGridDBTableView;
+    MartEmailRequestGridLevel: TcxGridLevel;
+    MartEmailRequestGrid: TcxGrid;
+    MartEmailRequestGridDBTableViewMartName: TcxGridDBColumn;
+    MartEmailRequestGridDBTableViewAddress1: TcxGridDBColumn;
+    MartEmailRequestGridDBTableViewAddress2: TcxGridDBColumn;
+    MartEmailRequestGridDBTableViewAddress3: TcxGridDBColumn;
+    MartEmailRequestGridDBTableViewAddress4: TcxGridDBColumn;
+    MartEmailRequestGridDBTableViewEmail: TcxGridDBColumn;
+    btnSendEmail: TcxButton;
+    btnClose: TcxButton;
+    MAPIMail: TLMDMapiSendMail;
+    procedure btnSendEmailClick(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+  private
+    { Private declarations }
+    FMartEmailSuppliers : TQuery;
+    procedure MartSendEmail;
+    procedure UpdateSavedMartEmailSuppliers;
+    procedure SaveNewEmailAddresses;
+  public
+    { Public declarations }
+    class procedure Execute;
+  end;
+
+var
+  fmMartEmailRequest: TfmMartEmailRequest;
+
+implementation
+
+uses DairyData, uHerdSetUp, GenTypesConst;
+
+{$R *.DFM}
+
+{ TfmMartEmailRequest }
+
+class procedure TfmMartEmailRequest.Execute;
+begin
+   with TfmMartEmailRequest.Create(nil) do
+      try
+         //   21/04/15 [V5.4 R4.8] /MK Additional Feature - Take email addresses from TTable and add to WinData.mdMarts.
+         UpdateSavedMartEmailSuppliers;
+         WinData.mdMarts.Active := True;
+         WinData.mdMarts.First;
+         ShowModal;
+      finally
+         //   21/04/15 [V5.4 R4.8] /MK Additional Feature - Take any new email addresses entered by user and save to TTable.
+         SaveNewEmailAddresses;
+         WinData.mdMarts.Active := False;
+         Free;
+      end;
+end;
+
+procedure TfmMartEmailRequest.MartSendEmail;
+const
+   LineBreak = #13#10;
+   DoubleLineBreak = LineBreak + LineBreak;
+var
+   HerdIdentity,
+   EmailName,
+   EmailAddress,
+   PostalAddress,
+   HerdIdentifier,
+   TypeOfHerd : String;
+   iAddress : packed array [1..4] of string;
+   i : Integer;
+   Result : Boolean;
+   SlaughterPlant : string;
+   MyQuery : TQuery;
+   ToAddress, CCAddress, MessageSubject, MessageBody : String;
+begin
+   Result := false;
+   ToAddress := '';
+   CCAddress := '';
+   MessageSubject := '';
+   MessageBody := '';
+
+   MyQuery := TQuery.Create(nil);
+   try
+      MyQuery.DatabaseName := AliasName;
+      MyQuery.SQL.Clear;
+      MyQuery.SQL.Add('SELECT O.Name, O.HerdIdentity, O.HerdIdentifier, G.Description, O.Address1, O.Address2, O.Address3, O.Address4,');
+      MyQuery.SQL.Add('       O."E-Mail" FROM Owners O ');
+      MyQuery.SQL.Add('LEFT JOIN Genlook G On (G.ID=O.TypeOfHerd)');
+      MyQuery.SQL.Add('Where (ID = ' + IntToStr(WinData.UserDefaultHerdID)+ ')' );
+      MyQuery.Open;
+      MyQuery.First;
+
+      EmailName := (MyQuery.Fields[0].AsString);
+      HerdIdentity:= (MyQuery.Fields[1].AsString);
+      HerdIdentifier := (MyQuery.Fields[2].AsString);
+      TypeOfHerd :=  UpperCase((MyQuery.Fields[3].AsString));
+      iAddress[1] := (Trim(MyQuery.Fields[4].AsString));
+      iAddress[2] := (Trim(MyQuery.Fields[5].AsString));
+      iAddress[3] := (Trim(MyQuery.Fields[6].AsString));
+      iAddress[4] := (Trim(MyQuery.Fields[7].AsString));
+      EmailAddress:= (MyQuery.Fields[8].AsString);
+
+      while Pos(',', iAddress[1]) > 0 do
+         Delete( iAddress[1], Pos(',', iAddress[1]), 1);
+      while Pos(',', iAddress[2]) > 0 do
+         Delete( iAddress[2], Pos(',', iAddress[2]), 1);
+      while Pos(',', iAddress[3]) > 0 do
+         Delete( iAddress[3], Pos(',', iAddress[3]), 1);
+      while Pos(',', iAddress[4]) > 0 do
+         Delete( iAddress[4], Pos(',', iAddress[4]), 1);
+
+   finally
+      MyQuery.Close;
+   end;
+
+   if ( TypeOfHerd <> cBeefHerd ) and ( Length(HerdIdentifier) <> 7 ) then
+         begin
+            MessageDlg('Your Herd Identifier '+HerdIdentifier+' is not valid. '+#13+
+                       'Please use a 7 digit number without spaces or separators',mtError,[mbOK],0);
+         end
+      else
+         begin
+            Result := True;
+            for i := 1 to Length(HerdIdentifier) do
+               begin
+                  if NOT (HerdIdentifier[i] IN (['0'..'9'])) then
+                     begin
+                        Result := False;
+                        MessageDlg('Your Herd Identifier '+HerdIdentifier+' is not valid. '+#13+
+                                   'Please use a 7 digit number without spaces or separators',mtError,[mbOK],0);
+                        uHerdSetUp.ShowTheForm( False, '' );
+                     end;
+               end;
+         end;
+
+   if Result then
+      begin
+
+         if iAddress[4] <> '' then
+            PostalAddress := iAddress[1] + ', ' + iAddress[2]  + ', ' + iAddress[3]  + ', ' + iAddress[4] + DoubleLineBreak
+         else if iAddress[3] <> '' then
+            PostalAddress := iAddress[1] + ', ' + iAddress[2]  + ', ' + iAddress[3] + DoubleLineBreak
+         else if iAddress[2] <> '' then
+            PostalAddress := iAddress[1] + ', ' + iAddress[2] + DoubleLineBreak
+         else if iAddress[1] <> '' then
+            PostalAddress := iAddress[1] + DoubleLineBreak
+         else
+            begin
+               MessageDlg('No postal address has been found.'+cCRLF+cCRLF+
+                          'Please save the postal address in Herd Setup before continuing',mtWarning,[mbOK],0);
+               uHerdSetUp.ShowTheForm( False, '');
+               Exit;
+            end;
+
+         ToAddress := Trim(WinData.mdMartsEmail.AsString);
+         CCAddress := KingswoodEmailAddress;
+         MessageSubject := 'Request Mart Movement Files';
+         MessageBody := 'Name: ' + EmailName + LineBreak + LineBreak +
+                        'Herd Number (BTE): ' + HerdIdentity + DoubleLineBreak +
+                        'Address: ' + PostalAddress +
+                        'E-Mail Address: ' + EmailAddress + DoubleLineBreak;
+
+         {with MAPIMail do
+            begin
+               Reset;
+
+               if WinData.mdMartsID.AsInteger > 0 then
+                  begin
+                     if (Trim(WinData.mdMartsEmail.AsString) = '') then
+                        MessageDlg('Please enter email address of Mart in the To box on the following email screen',mtWarning,[mbOK],0);
+
+                     ToRecipient.Text := Trim(WinData.mdMartsEmail.AsString);
+
+                     Subject := 'Request Mart Movement Files';
+                     CcRecipient.Text := 'info@kingswood.ie';
+                     MessageBody.Text := 'Name: ' + EmailName + LineBreak + LineBreak +
+                                         'Herd Number (BTE): ' + HerdIdentity + DoubleLineBreak +
+                                         'Address: ' + PostalAddress +
+                                         'E-Mail Address: ' + EmailAddress + DoubleLineBreak;
+
+                     SendMail;
+                  end;
+            end;}
+
+         if Trim(ToAddress) = '' then
+            begin
+               InputQuery('Email Address:', 'Enter email address of Mart', ToAddress);
+               try
+                  //   21/04/15 [V5.4 R4.8] /MK Additional Feature - Save email address entered by user WinData.mdMarts.
+                  WinData.mdMarts.Edit;
+                  WinData.mdMarts.FieldByName('Email').AsString := ToAddress;
+                  WinData.mdMarts.Post;
+               except
+                  on e : Exception do
+                     ShowMessage(e.Message);
+               end;
+            end;
+         WinData.SendSimpleEmail(ToAddress, CCAddress, MessageSubject, MessageBody);
+      end;
+end;
+
+procedure TfmMartEmailRequest.btnSendEmailClick(Sender: TObject);
+begin
+   MartSendEmail;
+end;
+
+procedure TfmMartEmailRequest.UpdateSavedMartEmailSuppliers;
+begin
+   FMartEmailSuppliers := TQuery.Create(nil);
+   with FMartEmailSuppliers do
+      try
+         DatabaseName := AliasName;
+         SQL.Clear;
+         SQL.Add('SELECT *');
+         SQL.Add('FROM MartEmailSuppliers');
+         try
+            Open;
+            if ( RecordCount > 0 ) then
+               begin
+                  First;
+                  while ( not(Eof) ) do
+                     begin
+                        if ( not(WinData.mdMarts.Active) ) then
+                           WinData.mdMarts.Active := True;
+                        if ( WinData.mdMarts.Locate('MartName',FMartEmailSuppliers.FieldByName('MartName').AsString,[]) ) then
+                           if ( WinData.mdMarts.FieldByName('Email').AsString <> FMartEmailSuppliers.FieldByName('Email').AsString ) then
+                              try
+                                 WinData.mdMarts.Edit;
+                                 WinData.mdMarts.FieldByName('Email').AsString := FMartEmailSuppliers.FieldByName('Email').AsString;
+                                 WinData.mdMarts.Post;
+                              except
+                                 on e : Exception do
+                                    ShowMessage(e.Message);
+                              end;
+                        Next;
+                     end;
+               end;
+         except
+            on e : Exception do
+               ShowMessage(e.Message);
+         end;
+      finally
+      end;
+end;
+
+procedure TfmMartEmailRequest.SaveNewEmailAddresses;
+var
+   ttMartEmailSuppliers : TTable;
+
+   procedure AddAllToTTable;
+   begin
+      WinData.mdMarts.First;
+      while ( not(WinData.mdMarts.Eof) ) do
+         try
+            ttMartEmailSuppliers.Append;
+            ttMartEmailSuppliers.FieldByName('MartName').AsString := WinData.mdMarts.FieldByName('MartName').AsString;
+            ttMartEmailSuppliers.FieldByName('Email').AsString := WinData.mdMarts.FieldByName('Email').AsString;
+            ttMartEmailSuppliers.Post;
+
+            WinData.mdMarts.Next;
+         except
+            on e : Exception do
+               ShowMessage(e.Message);
+         end;
+   end;
+
+   procedure EditTTable;
+   begin
+      WinData.mdMarts.First;
+      while ( not(WinData.mdMarts.Eof) ) do
+         begin
+            if ( ttMartEmailSuppliers.Locate('MartName',WinData.mdMarts.FieldByName('MartName').AsString,[]) ) then
+               if ( ttMartEmailSuppliers.FieldByName('Email').AsString <> WinData.mdMarts.FieldByName('Email').AsString ) then
+                  try
+                     ttMartEmailSuppliers.Edit;
+                     ttMartEmailSuppliers.FieldByName('Email').AsString := WinData.mdMarts.FieldByName('Email').AsString;
+                     ttMartEmailSuppliers.Post;
+                  except
+                     on e : Exception do
+                        ShowMessage(e.Message);
+                  end;
+            WinData.mdMarts.Next;
+         end;
+   end;
+
+begin
+   ttMartEmailSuppliers := TTable.Create(nil);
+   with ttMartEmailSuppliers do
+      try
+         DatabaseName := AliasName;
+         TableName := 'MartEmailSuppliers';
+         Open;
+         if ( not(WinData.mdMarts.Active) ) then
+            WinData.mdMarts.Active := True;
+         if ( ttMartEmailSuppliers.RecordCount = 0 ) then
+            AddAllToTTable
+         else
+            EditTTable;
+      finally
+         Close;
+         Free;
+      end;
+end;
+
+procedure TfmMartEmailRequest.FormDestroy(Sender: TObject);
+begin
+   if ( FMartEmailSuppliers.Active ) then
+      FMartEmailSuppliers.Close;
+   FreeAndNil(FMartEmailSuppliers);
+end;
+
+end.

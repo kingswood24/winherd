@@ -1,0 +1,149 @@
+unit uTescoExport;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  uBaseForm, dxBar, dxBarExtItems, ActnList, cxControls, dxStatusBar,
+  db, dbTables, cxContainer, cxEdit, cxTextEdit, cxMaskEdit,
+  cxDropDownEdit, cxCalendar, cxLabel;
+
+type
+  TfmTescoExport = class(TfmBaseForm)
+    SaveDialog: TSaveDialog;
+    cxLabel1: TcxLabel;
+    dxBarLargeButton1: TdxBarLargeButton;
+    actExportFile: TAction;
+    deEventDate: TcxDateEdit;
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure actExportFileExecute(Sender: TObject);
+  private
+    DataList : TStringList;
+    procedure GetData;
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  fmTescoExport: TfmTescoExport;
+
+implementation
+
+uses DairyData, GenTypesConst, KRoutines;
+
+{$R *.DFM}
+
+{ TfmTescoExport }
+
+procedure TfmTescoExport.FormCreate(Sender: TObject);
+var
+   Day, Month, Year,
+   FileDate : String;
+begin
+   inherited;
+   FileDate := DateToStr(Date);
+   Day := Copy(FileDate,1,2);
+   Month := Copy(FileDate,4,2);
+   Year := Copy(FileDate,7,4);
+   FileDate := Day+'_'+Month+'_'+Year;
+   deEventDate.Date := Date;
+   DataList := TStringList.Create;
+   SaveDialog.FileName := 'HerdScoreSheet_' + FileDate;
+   SaveDialog.DefaultExt := 'csv';
+   SaveDialog.InitialDir := ApplicationPath;
+   SaveDialog.Title := 'Tesco Herd Score Sheet';
+   DataList.Add('Ear Tag,Line Number,Scored,Mobility,Cleanliness,Condition,Abrasions');
+end;
+
+procedure TfmTescoExport.FormDestroy(Sender: TObject);
+begin
+   inherited;
+   if DataList <> nil then
+      DataList.Free;
+end;
+
+procedure TfmTescoExport.actExportFileExecute(Sender: TObject);
+begin
+   inherited;
+   deEventDate.PostEditValue;
+   GetData;
+   if DataList.Count > 1 then
+      begin
+         if SaveDialog.Execute then
+            begin
+               DataList.SaveToFile(SaveDialog.FileName);
+               MessageDlg('File "'+SaveDialog.FileName + '" successfully created.',mtInformation,[mbOK],0);
+            end;
+      end;
+end;
+
+procedure TfmTescoExport.GetData;
+var
+   qCondScoreEvents : TQuery;
+   NatIDNum, AnimalNo, Scored,
+   Mobility, Cleanliness, Condition,
+   Abrasions : Variant;
+
+   function BoolToStr ( AValue : Boolean ) : String;
+   begin
+      if AValue = True then
+         Result := 'Y'
+      else if AValue = False then
+         Result := 'N';
+   end;
+
+begin
+   qCondScoreEvents := TQuery.Create(nil);
+   with qCondScoreEvents do
+      try
+         DatabaseName := AliasName;
+         SQL.Clear;
+         SQL.Add('SELECT A.ID, A.AnimalNo, A.NatIDNum, ');
+         SQL.Add('       E.EventDate, ');
+         SQL.Add('       CS.Score, CS.Scored, CS.Mobility, ');
+         SQL.Add('       CS.Cleanliness, CS.Abrasions ');
+         SQL.Add('FROM Animals A ');
+         SQL.Add('LEFT JOIN Events E ON (E.AnimalID = A.ID) ');
+         SQL.Add('LEFT JOIN ConditionScore CS ON (CS.EventID = E.ID) ');
+         SQL.Add('WHERE E.EventType = '+IntToStr(CCondScoreEvent)+' ');
+         SQL.Add('AND E.EventDate > "'+FormatDateTime(cUSDateStyle,deEventDate.Date)+'" ');
+         Open;
+         try
+            First;
+            while not EOF do
+               begin
+                  NatIDNum := FieldByName('NatIDNum').AsString;
+                  AnimalNo := FieldByName('AnimalNo').AsString;
+                  Scored := BoolToStr(FieldByName('Scored').AsBoolean);
+
+                  Mobility := FieldByName('Mobility').AsFloat;
+                  if Mobility = '0' then
+                     Mobility := '';
+
+                  Cleanliness := FieldByName('Cleanliness').AsFloat;
+                  if Cleanliness = '0' then
+                     Cleanliness := '';
+
+                  Condition := FieldByName('Score').AsFloat;
+                  if Condition = '0' then
+                     Condition := '';
+
+                  Abrasions := BoolToStr(FieldByName('Abrasions').AsBoolean);
+
+                  DataList.Add( VarToStr(NatIDNum)+','+VarToStr(AnimalNo)+','+VarToStr(Scored)+','+VarToStr(Mobility)+
+                                ','+VarToStr(Cleanliness)+','+VarToStr(Condition)+','+VarToStr(Abrasions) );
+                  Next;
+               end;
+         finally
+            if ( RecordCount = 0 ) then
+                MessageDlg('No Herd Scoring Events found.',mtError,[mbOK],0);
+            Close;
+         end;
+      finally
+         Free;
+      end;
+end;
+
+end.

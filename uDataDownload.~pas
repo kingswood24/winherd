@@ -1,0 +1,103 @@
+unit uDataDownload;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  IniFiles, StdCtrls, cxButtons, cxControls, cxContainer, cxEdit, cxLabel,
+  FileCtrl;
+
+type
+  TfmDataDownload = class(TForm)
+    btnViewClients: TcxButton;
+    cxLabel1: TcxLabel;
+    btnCancel: TcxButton;
+    procedure btnViewClientsClick(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+    class procedure DownloadClientData;
+  end;
+
+var
+  fmDataDownload: TfmDataDownload;
+
+implementation
+uses
+   uAdvisorHelper, KRoutines, uKingswoodContoller, Def,
+   DynaZipUtils, GenTypesConst;
+
+
+{$R *.DFM}
+
+class procedure TfmDataDownload.DownloadClientData;
+begin
+
+
+   with TfmDataDownload.Create(nil) do
+      try
+         ShowModal;
+      finally
+         Free;
+      end;
+
+end;
+
+procedure TfmDataDownload.btnViewClientsClick(Sender: TObject);
+var
+   DownloadClientData : TDownloadClientData;
+   UserName : string;
+   PResult : PChar;
+   SFile : string;
+   DLLHandle : THandle;
+begin
+
+   DLLHandle := LoadLibrary(pchar(ApplicationPath + cDLLName));
+   if ( DLLHandle <> 0 ) then
+      begin
+         try
+           try
+              UserName := IntToStr(KAC.AdvisorId);
+              @DownloadClientData := GetProcAddress(DLLHandle, cFuncName_DownloadClientData);
+              if @DownloadClientData <> nil then
+                 begin
+                    Update;
+                    Hide;
+                    PResult := DownloadClientData(PChar(UserName));
+                    Update;
+                    SFile := StrPas(PResult);
+                    Update;
+                    if FileExists(SFile) then
+                       begin
+                          KAC.CurrentDBName := UPPERCASE(RemoveFileExt(SFile));
+                          // rename to allow the program to identify file and install on opening of program. {uSplash }
+                          RenameFile(SFile, IncludeTrailingBackslash( ExtractFilePath(SFile) ) + 'clientdata.zip');
+                          BringToFront;
+                          MessageDlg('The client data file successfully downloaded.'+#13#10+#13#10+
+                                     'You will need to restart the Fields program to view the client data.'+#13#10+#13#10+
+                                     'Click OK to close the Fields program.',mtInformation,[mbOK],0);
+                          Close;
+                          Application.Terminate;
+                       end
+                    else
+                       Close;
+                 end
+              else
+                 MessageDlg(cDLLCallToFunctionFailed,mtError,[mbOk],0);
+           except
+              on e : Exception do
+                 raise Exception.Create(E.Message);
+           end;
+         finally
+            FreeLibrary(DLLHandle);
+         end;
+      end
+   else
+      begin
+         MessageDlg(cDLLUnableToLoad,mtError,[mbOk],0);
+      end;
+end;
+
+
+end.

@@ -1,0 +1,263 @@
+{
+  30/09/10 [V4.0 R4.9] /MK Change - Added New Label For NatIDNum and new DBText For NatIDNum.
+                                  - Changed Left of some of the headings and DBText boxes - Pregnant, Last Birth, Last Calf, Bull and Service Type -
+                                    to make the new NatIDNum heading fit.
+
+  20/10/11 [V5.0 R1.5] /MK Change - Changed Left And Size of LastCalfType To Fit Quad Calf.
+                                  - Changed Left And Size Of LastBirtType To Fit LastCalfType.
+
+  18/01/12 [V5.0 R3.5] /MK Change - Changed Size Of Main Header Headings So All Look On The Same Line.
+                                  - Changed Height Of L4 To Show Last Birth.
+
+  11/06/12 [V5.0 R7.1] /MK Additional Feature - Changes To PrintOutBlank For New Group Box On ActionReminderFilt.
+
+  03/08/12 [V5.0 R9.7] /MK Additional Feature - Add animals in detail band to cart.
+
+  28/03/13 [V5.1 R5.4] /MK Change - Moved PDStatus to the left to stop it from being squashed against CalfType.  
+
+  18/07/13 [V5.1 R8.6] /MK Change - Removed FAnimalCartArray code as button in ActionReminderFlt Cart button adding animals to FAnimalCartArray
+
+  28/01/14 [V5.2 R7.8] /MK Change - Changed Calving Index to Calving Interval - GL request.
+
+  11/08/15 [V5.4 R7.2] /MK Additional Feature - Added * if animal appears because of Include Cows Diagnosed Not Pregnant - GL request.
+                                              - Added ** if animal appears because of Include Cows with Post Service Heat - GL request.
+                                              - Added descriptive header at the top of the report to explain above statements.
+
+  19/11/15 [V5.5 R0.8] /MK Change - qrlIncludePostServiceHeatOrPostPDInd - Changed caption of cows with post service and post pd heat to cows with Post-Service/PD Heat - GL.
+
+  27/04/17 [V5.6 R5.9] /MK Change - QRDBText6 - Increased the width of the bull to show 6 digits instead of 4.
+
+  30/10/20 [V5.9 R7.0] /MK Change - Changed the report as per email from GL 16/10/20  
+}
+
+unit DueToCalve;
+
+interface
+
+uses Windows, SysUtils, Messages, Classes, Graphics, Controls,
+  StdCtrls, ExtCtrls, Forms, Quickrpt, QRCtrls, Db, DBTables,
+  QRExport, Dialogs, GenTypesConst;
+
+type
+  TDueToCalveScr = class(TQuickRep)
+    PageFooterBand1: TQRBand;
+    MainHeader: TQRBand;
+    qDueToCalve: TQuery;
+    FBTitle1: TQRLabel;
+    L1: TQRLabel;
+    L3: TQRLabel;
+    L6: TQRLabel;
+    lCalfSex: TQRLabel;
+    L2: TQRLabel;
+    L7: TQRLabel;
+    L9: TQRLabel;
+    L10: TQRLabel;
+    L4: TQRLabel;
+    QRLabel13: TQRLabel;
+    L11: TQRLabel;
+    QRSysData1: TQRSysData;
+    QRSysData2: TQRSysData;
+    QRShape1: TQRShape;
+    Period: TQRLabel;
+    Details: TQRBand;
+    QRDBText1: TQRDBText;
+    QRDBText2: TQRDBText;
+    QRDBText3: TQRDBText;
+    QRDBText4: TQRDBText;
+    qrdbCalfSex: TQRDBText;
+    QRDBText6: TQRDBText;
+    QRDBText7: TQRDBText;
+    QRDBText8: TQRDBText;
+    QRDBText9: TQRDBText;
+    QRDBText10: TQRDBText;
+    DataHeader: TQRBand;
+    FBTitle2: TQRLabel;
+    QRShape2: TQRShape;
+    QRLabel4: TQRLabel;
+    QRLabel5: TQRLabel;
+    QRLabel6: TQRLabel;
+    QRLabel7: TQRLabel;
+    QRLabel9: TQRLabel;
+    QRLabel10: TQRLabel;
+    QRSysData3: TQRSysData;
+    QRSysData4: TQRSysData;
+    QRLabel3: TQRLabel;
+    BlankFormDate: TQRLabel;
+    FormDate: TQRLabel;
+    FormUnderline: TQRLabel;
+    VerLabel: TQRLabel;
+    SummaryBand1: TQRBand;
+    QRLabel1: TQRLabel;
+    QRExpr1: TQRExpr;
+    QRLabel2: TQRLabel;
+    QRDBText11: TQRDBText;
+    QRLabel8: TQRLabel;
+    QRDBText12: TQRDBText;
+    lNatIDNum: TQRLabel;
+    dbNatIDNum: TQRDBText;
+    qrlCowsDiagnosedNotPregInd: TQRLabel;
+    qrlIncludePostServiceHeatOrPostPDInd: TQRLabel;
+    qrlVisibleIndicator: TQRLabel;
+    procedure DueToCalveScrBeforePrint(Sender: TCustomQuickRep;
+      var PrintReport: Boolean);
+    procedure QRDBText10Print(sender: TObject; var Value: String);
+    procedure QRDBText11Print(sender: TObject; var Value: String);
+    procedure QRDBText12Print(sender: TObject; var Value: String);
+    procedure QRDBText2Print(sender: TObject; var Value: String);
+    procedure DataHeaderBeforePrint(Sender: TQRCustomBand;
+      var PrintBand: Boolean);
+    procedure DetailsBeforePrint(Sender: TQRCustomBand;
+      var PrintBand: Boolean);
+    procedure MainHeaderBeforePrint(Sender: TQRCustomBand;
+      var PrintBand: Boolean);
+    procedure QRDBText3Print(sender: TObject; var Value: String);
+    procedure dbNatIDNumPrint(sender: TObject; var Value: String);
+  private
+  public
+     PrintOutBlank : Boolean;
+  end;
+
+var
+  DueToCalveScr: TDueToCalveScr;
+
+implementation
+uses
+    DairyData, ActionReminderFilt, uAnimalCart, KRoutines;
+
+{$R *.DFM}
+
+procedure TDueToCalveScr.DueToCalveScrBeforePrint(Sender: TCustomQuickRep;
+  var PrintReport: Boolean);
+begin
+   FormDate.Enabled := False;
+   FormUnderline.Enabled := False;
+
+   if PrintOutBlank Then
+      begin
+         DueToCalveScr.MainHeader.Enabled := False;    // Data Entry
+         DueToCalveScr.DataHeader.Enabled := True;
+      end
+   else
+      begin
+         DueToCalveScr.MainHeader.Enabled := True;     // Main Rpt
+         DueToCalveScr.DataHeader.Enabled := False;
+      end;
+end;
+
+procedure TDueToCalveScr.QRDBText10Print(sender: TObject;
+  var Value: String);
+begin
+   if ( (Sender as TQRDBText).DataSet.FieldByName((Sender as TQRDBText).DataField).AsDateTime <= 0 ) or
+      ( PrintOutBlank ) then
+         Value := '';
+end;
+
+procedure TDueToCalveScr.QRDBText11Print(sender: TObject;
+  var Value: String);
+begin
+   if ( Value = '.0' ) or ( PrintOutBlank ) then
+      Value := '';
+end;
+
+procedure TDueToCalveScr.QRDBText12Print(sender: TObject;
+  var Value: String);
+begin
+   if ( PrintOutBlank ) then
+      Value := ''
+   else
+      begin
+         if ( qDueToCalve.FieldByName('HealthDate').AsDateTime > 0 ) and ( qDueToCalve.FieldByName('WithdrawalDate').AsDateTime > 0 ) then
+            Value := FormatDateTime('dd/mm/yy',qDueToCalve.FieldByName('WithdrawalDate').AsDateTime) + ' ('+FormatDateTime('dd/mm/yy',qDueToCalve.FieldByName('HealthDate').AsDateTime)+')'
+         else if ( qDueToCalve.FieldByName('HealthDate').AsDateTime <= 0 ) and  ( qDueToCalve.FieldByName('WithdrawalDate').AsDateTime > 0 ) then
+            Value := FormatDateTime('dd/mm/yy',qDueToCalve.FieldByName('WithdrawalDate').AsDateTime)
+         else if ( qDueToCalve.FieldByName('HealthDate').AsDateTime > 0 ) and ( qDueToCalve.FieldByName('WithdrawalDate').AsDateTime <= 0 ) then
+            Value := '('+FormatDateTime('dd/mm/yy',qDueToCalve.FieldByName('HealthDate').AsDateTime)+')'
+         else
+            Value := ''
+      end;
+end;
+
+procedure TDueToCalveScr.QRDBText2Print(sender: TObject;
+  var Value: String);
+begin
+   if ( PrintOutBlank ) then
+      Value := '';
+end;
+
+procedure TDueToCalveScr.DataHeaderBeforePrint(Sender: TQRCustomBand;
+  var PrintBand: Boolean);
+begin
+   if ( PrintOutBlank ) then
+      begin
+         FBTitle2.Caption := '';
+         FBTitle2.Caption := 'Cows Due To Calve - Recording Sheet';
+      end;
+end;
+
+procedure TDueToCalveScr.DetailsBeforePrint(Sender: TQRCustomBand;
+  var PrintBand: Boolean);
+begin
+   qrlVisibleIndicator.Caption := '';
+
+   if ( (UpperCase(qDueToCalve.FieldByName('PD').AsString) = 'NO') and (qDueToCalve.FieldByName('DiagnosedNotPregnant').AsBoolean) ) and
+      ( not(qDueToCalve.FieldByName('PostServiceOrPDHeat').AsBoolean) ) then
+      qrlVisibleIndicator.Caption := '*';
+
+   if ( UpperCase(qDueToCalve.FieldByName('PD').AsString) = 'NO' ) and ( qDueToCalve.FieldByName('PostServiceOrPDHeat').AsBoolean ) then
+      qrlVisibleIndicator.Caption := '**';
+end;
+
+procedure TDueToCalveScr.MainHeaderBeforePrint(Sender: TQRCustomBand; var PrintBand: Boolean);
+begin
+   with TQuery.Create(nil) do
+      try
+         DatabaseName := AliasName;
+         SQL.Clear;
+         SQL.Add('SELECT Count(AnimalID)');
+         SQL.Add('FROM DueToCalve');
+         SQL.Add('WHERE ( (Upper(PD) = "NO") AND (DiagnosedNotPregnant = TRUE) )');
+         SQL.Add('AND PostServiceOrPDHeat = FALSE');
+         try
+            Open;
+            qrlCowsDiagnosedNotPregInd.Enabled := ( RecordCount > 0 ) and ( Fields[0].AsInteger > 0 );
+            Close;
+
+            SQL.Clear;
+            SQL.Add('SELECT Count(AnimalID)');
+            SQL.Add('FROM DueToCalve');
+            SQL.Add('WHERE ( Upper(PD) = "NO" )');
+            SQL.Add('AND PostServiceOrPDHeat = TRUE');
+            Open;
+            qrlIncludePostServiceHeatOrPostPDInd.Enabled := ( RecordCount > 0 ) and ( Fields[0].AsInteger > 0 );
+            Close;
+         except
+            on e : Exception do
+               ShowMessage(e.Message);
+         end;
+      finally
+         Free;
+      end;
+   if ( not(qrlCowsDiagnosedNotPregInd.Enabled) ) then
+      qrlIncludePostServiceHeatOrPostPDInd.Top := qrlCowsDiagnosedNotPregInd.Top
+   else
+      qrlIncludePostServiceHeatOrPostPDInd.Top := 56;
+end;
+
+procedure TDueToCalveScr.QRDBText3Print(sender: TObject;
+  var Value: String);
+begin
+   if ( PrintOutBlank ) then
+      Value := ''
+   else if ( UpperCase(Value) = 'UNDEFINED' ) then
+      Value := '?';
+end;
+
+procedure TDueToCalveScr.dbNatIDNumPrint(sender: TObject; var Value: String);
+begin
+   if ( Length(Value) > 0 ) then
+     if ( Copy(Value,0,3) = 'IE ' ) or ( Copy(Value,0,3) = '372' ) or
+        ( Copy(Value,0,3) = 'UK ' ) or ( Copy(Value,0,3) = 'UK9' ) then
+        Value := Trim(Copy(Value,4,Length(Value)-3));
+end;
+
+end.

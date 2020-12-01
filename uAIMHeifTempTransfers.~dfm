@@ -1,0 +1,255 @@
+object fmAIMHeifTempTransfers: TfmAIMHeifTempTransfers
+  Left = 570
+  Top = 268
+  BorderStyle = bsDialog
+  Caption = 'Heifer Movements'
+  ClientHeight = 377
+  ClientWidth = 679
+  Color = clBtnFace
+  Font.Charset = ANSI_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -13
+  Font.Name = 'Segoe UI'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poMainFormCenter
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  PixelsPerInch = 96
+  TextHeight = 17
+  object AIMContractHerdsGrid: TcxGrid
+    Left = 27
+    Top = 35
+    Width = 620
+    Height = 274
+    TabOrder = 0
+    LookAndFeel.Kind = lfFlat
+    object AIMContractHerdsGridDBTableView: TcxGridDBTableView
+      NavigatorButtons.ConfirmDelete = False
+      DataController.Summary.DefaultGroupSummaryItems = <>
+      DataController.Summary.FooterSummaryItems = <>
+      DataController.Summary.SummaryGroups = <>
+      OptionsData.CancelOnExit = False
+      OptionsData.Deleting = False
+      OptionsData.DeletingConfirmation = False
+      OptionsData.Inserting = False
+      OptionsView.GroupByBox = False
+      OptionsView.HeaderHeight = 30
+      OptionsView.Indicator = True
+      object AIMContractHerdsGridDBTableViewSelected: TcxGridDBColumn
+        DataBinding.FieldName = 'Selected'
+        PropertiesClassName = 'TcxCheckBoxProperties'
+        Visible = False
+        HeaderAlignmentVert = vaCenter
+        Options.Filtering = False
+        Options.IncSearch = False
+        Options.Grouping = False
+        Options.Moving = False
+        Width = 30
+        IsCaptionAssigned = True
+      end
+      object AIMContractHerdsGridDBTableViewNatIDNo: TcxGridDBColumn
+        Caption = 'National ID No.'
+        DataBinding.FieldName = 'NatIDNo'
+        Visible = False
+        HeaderAlignmentVert = vaCenter
+        Options.Editing = False
+        Options.Filtering = False
+        Options.Focusing = False
+        Options.IncSearch = False
+        Options.Grouping = False
+        Options.Moving = False
+        Width = 160
+      end
+      object AIMContractHerdsGridDBTableViewSortNatID: TcxGridDBColumn
+        Caption = 'National ID No.'
+        DataBinding.FieldName = 'SortNatID'
+        OnGetDisplayText = AIMContractHerdsGridDBTableViewSortNatIDGetDisplayText
+        HeaderAlignmentVert = vaCenter
+        Options.Editing = False
+        Options.Filtering = False
+        Options.FilteringMRUItemsList = False
+        Options.Focusing = False
+        Options.IncSearch = False
+        Options.Grouping = False
+        SortIndex = 0
+        SortOrder = soAscending
+        Width = 160
+      end
+      object AIMContractHerdsGridDBTableViewDateOfBirth: TcxGridDBColumn
+        Caption = 'Date Of Birth'
+        DataBinding.FieldName = 'DateOfBirth'
+        HeaderAlignmentVert = vaCenter
+        Options.Editing = False
+        Options.Filtering = False
+        Options.FilteringMRUItemsList = False
+        Options.Focusing = False
+        Options.IncSearch = False
+        Options.Grouping = False
+        Width = 100
+      end
+      object AIMContractHerdsGridDBTableViewNewHerdID: TcxGridDBColumn
+        Caption = 'New Herd ID'
+        DataBinding.FieldName = 'NewHerdID'
+        HeaderAlignmentVert = vaCenter
+        Options.Editing = False
+        Options.Filtering = False
+        Options.Focusing = False
+        Options.IncSearch = False
+        Options.Grouping = False
+        Options.Moving = False
+        Width = 100
+      end
+      object AIMContractHerdsGridDBTableViewMoveDate: TcxGridDBColumn
+        Caption = 'Movement Date'
+        DataBinding.FieldName = 'MoveDate'
+        HeaderAlignmentVert = vaCenter
+        Options.Editing = False
+        Options.Filtering = False
+        Options.Focusing = False
+        Options.IncSearch = False
+        Options.Grouping = False
+        Options.Moving = False
+        Width = 100
+      end
+    end
+    object AIMContractHerdsGridView: TcxGridTableView
+      NavigatorButtons.ConfirmDelete = False
+      DataController.Summary.DefaultGroupSummaryItems = <>
+      DataController.Summary.FooterSummaryItems = <>
+      DataController.Summary.SummaryGroups = <>
+      OptionsView.DataRowHeight = 30
+      OptionsView.GroupByBox = False
+      OptionsView.HeaderHeight = 40
+      OptionsView.Indicator = True
+      OptionsView.IndicatorWidth = 15
+      Styles.Header = cxStyle1
+      object AIMContractHerdsGridViewHerdNumber: TcxGridColumn
+        Caption = 'Moved To'
+        PropertiesClassName = 'TcxTextEditProperties'
+        Properties.Alignment.Horz = taLeftJustify
+        Properties.Alignment.Vert = taVCenter
+        HeaderAlignmentVert = vaCenter
+        MinWidth = 110
+        Options.Editing = False
+        Options.Filtering = False
+        Options.FilteringMRUItemsList = False
+        Options.Focusing = False
+        Options.IncSearch = False
+        Options.Grouping = False
+        Options.HorzSizing = False
+        Options.Moving = False
+        Width = 110
+      end
+      object AIMContractHerdsGridViewHeiferCount: TcxGridColumn
+        Caption = 'No. Heifers Moved'
+        PropertiesClassName = 'TcxTextEditProperties'
+        Properties.Alignment.Horz = taCenter
+        Properties.Alignment.Vert = taVCenter
+        HeaderAlignmentHorz = taCenter
+        HeaderAlignmentVert = vaCenter
+        MinWidth = 100
+        Options.Editing = False
+        Options.Filtering = False
+        Options.FilteringMRUItemsList = False
+        Options.Focusing = False
+        Options.IncSearch = False
+        Options.Grouping = False
+        Options.HorzSizing = False
+        Options.Moving = False
+        Width = 100
+      end
+      object AIMContractHerdsGridViewMovementType: TcxGridColumn
+        Caption = 'Movement Type'
+        PropertiesClassName = 'TcxComboBoxProperties'
+        Properties.Alignment.Horz = taLeftJustify
+        Properties.Alignment.Vert = taVCenter
+        Properties.DropDownListStyle = lsFixedList
+        Properties.Items.Strings = (
+          'Contract Rearing (Retain On Kingswood Profile)'
+          'Contract Rearing (Move off Kingswood Profile)'
+          'Normal Farm to Farm Movement (Create Sale Record)')
+        HeaderAlignmentHorz = taCenter
+        HeaderAlignmentVert = vaCenter
+        MinWidth = 350
+        Options.Filtering = False
+        Options.FilteringMRUItemsList = False
+        Options.IncSearch = False
+        Options.Grouping = False
+        Options.HorzSizing = False
+        Options.Moving = False
+        Width = 350
+      end
+    end
+    object AIMContractHerdsGridLevel: TcxGridLevel
+      GridView = AIMContractHerdsGridView
+    end
+  end
+  object btnSaveMovements: TcxButton
+    Left = 494
+    Top = 321
+    Width = 156
+    Height = 40
+    Action = actSave
+    TabOrder = 1
+    Glyph.Data = {
+      36030000424D3603000000000000360000002800000010000000100000000100
+      18000000000000030000C30E0000C30E00000000000000000000FF00FFFF00FF
+      FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00
+      FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF2B9348FF00FFFF00FFFF
+      00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF
+      FF00FF2B934831A6482B9348FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00
+      FFFF00FFFF00FFFF00FFFF00FFFF00FF399B6131A64831A64831A6482B9348FF
+      00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF
+      2B934831A64837B75533A15831A6482B9348FF00FFFF00FFFF00FFFF00FFFF00
+      FFFF00FFFF00FFFF00FFFF00FF3F946631A64837B7552F8D582F8D5837B75543
+      A14637B755FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF2B9348
+      37B7552F8D58FF00FFFF00FF2F8D5837B7552B9348FF00FFFF00FFFF00FFFF00
+      FFFF00FFFF00FFFF00FFFF00FFFF00FF2F8D58FF00FFFF00FFFF00FFFF00FF2F
+      8D5837B7552B9348FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF
+      FF00FFFF00FFFF00FFFF00FFFF00FFFF00FF2F8D5837B75537B755FF00FFFF00
+      FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
+      00FFFF00FF2F8D5831A648FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF
+      FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF2F8D5831A648FF00
+      FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
+      00FFFF00FFFF00FFFF00FF2F8D5831A648FF00FFFF00FFFF00FFFF00FFFF00FF
+      FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF2F8D
+      5831A648FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
+      00FFFF00FFFF00FFFF00FFFF00FFFF00FF2F8D5831A648FF00FFFF00FFFF00FF
+      FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00
+      FFFF00FF2F8D58FF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF
+      00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FFFF00FF}
+    LookAndFeel.Kind = lfOffice11
+  end
+  object lHeader: TcxLabel
+    Left = 26
+    Top = 6
+    AutoSize = False
+    Caption = 
+      'We have detected the following %s have moved to the following he' +
+      'rd(s).'
+    Style.TextStyle = [fsBold]
+    Height = 21
+    Width = 623
+  end
+  object ActionList1: TActionList
+    Left = 424
+    Top = 326
+    object actSave: TAction
+      Caption = 'Save Movements'
+      OnExecute = actSaveExecute
+    end
+  end
+  object cxStyleRepository1: TcxStyleRepository
+    Left = 458
+    Top = 325
+    object cxStyle1: TcxStyle
+      AssignedValues = [svFont]
+      Font.Charset = ANSI_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Segoe UI Semibold'
+      Font.Style = [fsBold]
+    end
+  end
+end

@@ -1,0 +1,652 @@
+{
+   04/08/17 [V5.7 R1.1] /MK Change - GetSelectedItem - If there is only one record in the grid then focus that so user only has to click Select - GL request.
+
+   16/08/17 [V5.7 R1.2] /MK Bug Fix - Search - Strip out characters that are not spaces, or numbers or letters.
+
+   21/08/17 [V5.7 R2.0] /MK Additional Feature - New group column added.
+                                               - Bring down group from XML file.
+                                               - If group is antibiotic, dose or vaccine then dose and purchase units should be millilitres,
+                                                 if the group is tube then the dose and purchase unit should be tube and if the group is other
+                                                 then the dose and purchase unit is nothing - GL/SP request.
+                            Change - Default sort of grid to the name of the drug.
+
+   25/09/17 [V5.7 R3.0] /MK Change - Added btnClearSearch button to eSearchText to allow user to quickly clear search term entered.
+                                   - actClearSearchExecute - Enable eSearchText.
+
+   06/11/17 [V5.7 R4.3] /MK Additional Feature - Added second class function for FindDrugItemByVPA that allows VetLink to find the VPANumber provided by
+                                                 the vet to see if this VPANumber is on our list of medicines.
+
+   16/08/18 [V5.8 R2.4] /MK Additional Feature - Added the milk and meat columns to the grid.
+                                               - When reading the XML file bring in the withdrawal details as well.
+                                               - When returning the selected item, return the withdrawal details also.
+
+   26/02/19 [V5.8 R8.0] /MK Change - Search - Need to check for length of withdrawal ChildNode text because it was causing a hidden delphi exception.
+
+   29/04/19 [V5.8 R9.0] /MK Change - GetSelectedItem - Use variables to store value as invisible exceptions were appearing if Null Meat or Milk Days.
+}
+
+unit uDrugFinder;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  cxGridCustomTableView, cxGridTableView, cxGridDBTableView, StdCtrls,
+  cxGridLevel, cxClasses, cxControls, cxGridCustomView, cxGrid, cxButtons,
+  ExtCtrls, LMDWebBase, LMDWebConfig, LMDWebHTTPGet, LMDDownload, MSXML2_TLB,
+  ActnList, GenTypesConst, db, dbTables, uHerdLookup, kRoutines, uXMLDOMHelper;
+
+type
+  TDrugItem = class
+  private
+     FMilkWDDays: integer;
+     FMeatWDDays: integer;
+     FVPANumber: string;
+     FDrugName: string;
+     FMedicineGroup: Integer;
+     FUnitUsed: Integer;
+  public
+     constructor create;
+     property DrugName : String read FDrugName write FDrugName;
+     property VPANumber : String read FVPANumber write FVPANumber;
+     property MeatWDDays : Integer read FMeatWDDays write FMeatWDDays;
+     property MilkWDDays : Integer read FMilkWDDays write FMilkWDDays;
+     property MedicineGroup : Integer read FMedicineGroup write FMedicineGroup;
+     property UnitUsed : Integer read FUnitUsed write FUnitUsed;
+  end;
+
+  TfmDrugFinder = class(TForm)
+    BottomPanel: TPanel;
+    btnOK: TcxButton;
+    btnCancel: TcxButton;
+    DrugSearchGridLevel: TcxGridLevel;
+    DrugSearchGrid: TcxGrid;
+    TopPanel: TPanel;
+    eSearchText: TEdit;
+    Label1: TLabel;
+    lSearchResultStatus: TLabel;
+    ShowTimer: TTimer;
+    DrugSearchGridTableView: TcxGridTableView;
+    GetDrugListing: TLMDWebHTTPGet;
+    DrugSearchGridTableViewDrugName: TcxGridColumn;
+    DrugSearchGridTableViewVPANumber: TcxGridColumn;
+    ActionList: TActionList;
+    actSearch: TAction;
+    cbUseExactMatch: TCheckBox;
+    btnRefreshDrugListing: TcxButton;
+    actRefreshDrugListing: TAction;
+    DrugSearchGridTableViewGroup: TcxGridColumn;
+    btnClearSearch: TcxButton;
+    actClearSearch: TAction;
+    DrugSearchGridTableViewMeatWD: TcxGridColumn;
+    DrugSearchGridTableViewMilkWD: TcxGridColumn;
+    procedure FormCreate(Sender: TObject);
+    procedure ShowTimerTimer(Sender: TObject);
+    procedure GetDrugListingProcessed(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure actSearchExecute(Sender: TObject);
+    procedure actSearchUpdate(Sender: TObject);
+    procedure DrugSearchGridTableViewFocusedRecordChanged(
+      Sender: TcxCustomGridTableView; APrevFocusedRecord,
+      AFocusedRecord: TcxCustomGridRecord;
+      ANewItemRecordFocusingChanged: Boolean);
+    procedure actRefreshDrugListingExecute(Sender: TObject);
+    procedure eSearchTextChange(Sender: TObject);
+    procedure actClearSearchExecute(Sender: TObject);
+    procedure DrugSearchGridTableViewWithdGetDisplayText(
+      Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
+      var AText: String);
+  private
+    function GetDrugXMLUpdateRequired: Boolean;
+    procedure SetDrugXMLUpdateRequired(const Value: Boolean);
+  private
+    { Private declarations }
+    FSourceFilePath : string;
+    FDocument : IXMLDOMDocument;
+    FManualSearch : Boolean;
+    FSelectedItem : TDrugItem;
+    FShowDownloadCompleteMsg : Boolean;
+    procedure LoadSourceFile();
+    procedure Search(const ASearchText: string);
+    procedure DownloadSourceFile;
+    procedure SearchByVPANumber (const AVPANumber : String);
+    function GetSelectedItem() : TDrugItem;
+    function GetMedicineGroupIDByName ( AGroupName : String ) : Integer;
+    function GetUnitIDByGroupType (AGroupType : TMedicineGroupType) : Integer;
+    property DrugXMLUpdateRequired : Boolean read GetDrugXMLUpdateRequired write SetDrugXMLUpdateRequired;
+  public
+    { Public declarations }
+    class function Find(const ASearchText : string) : TDrugItem;
+    class function FindDrugItemByVPA ( const AVPANumber : string; const AShowDownloadCompleteMsg : Boolean = True) : TDrugItem;
+  end;
+
+var
+  fmDrugFinder: TfmDrugFinder;
+
+implementation
+
+{$R *.DFM}
+
+class function TfmDrugFinder.Find(const ASearchText: string): TDrugItem;
+begin
+   Result := nil;
+   with TfmDrugFinder.Create(nil) do
+      try
+         cbUseExactMatch.Checked := False;
+
+         FManualSearch := ( Length(Trim(ASearchText)) = 0 );
+         if ( not(FManualSearch) ) then
+            begin
+               eSearchText.Enabled := False;
+               eSearchText.Text := ASearchText;
+            end;
+
+         if ( ShowModal = mrOK ) and ( FSelectedItem <> nil ) then
+            Result := FSelectedItem;
+      finally
+         Free;
+      end;
+end;
+
+class function TfmDrugFinder.FindDrugItemByVPA(const AVPANumber: string;
+   const AShowDownloadCompleteMsg : Boolean = True): TDrugItem;
+begin
+   with TfmDrugFinder.Create(nil) do
+      try
+         FShowDownloadCompleteMsg := AShowDownloadCompleteMsg;
+         if ( Length(AVPANumber) > 0 ) then
+            begin
+               SearchByVPANumber(AVPANumber);
+               Result := FSelectedItem;
+            end;
+      finally
+         Free;
+      end;
+end;
+
+procedure TfmDrugFinder.SearchByVPANumber (const AVPANumber : String);
+var
+   DrugsNode : IXMLDOMNodeList;
+   DrugNode : IXMLDOMNode;
+   ChildNode : IXMLDOMNode;
+   IsMatch : Boolean;
+   i, j : Integer;
+begin
+   if ( Length(AVPANumber) = 0 ) then Exit;
+
+   if ( FDocument = nil ) then
+      begin
+         MessageDlg('The drug listing file cannot be found - the search has been cancelled.',mtWarning,[mbOk],0);
+         Exit;
+      end;
+
+   DrugsNode := nil;
+   DrugNode  := nil;
+   ChildNode := nil;
+
+   try
+      DrugsNode := FDocument.selectNodes('/drugListing/drug');
+      FSelectedItem := nil;
+      for i := 0 to DrugsNode.length-1 do
+         begin
+            DrugNode := DrugsNode[i];
+            IsMatch := ( UpperCase(DrugNode.childNodes[1].text) = Uppercase(AVPANumber) );
+            if ( IsMatch ) then
+               begin
+                  FSelectedItem := TDrugItem.Create();
+                  for j := 0 to DrugNode.childNodes.length-1 do
+                     begin
+                        ChildNode := DrugNode.childNodes[j];
+                        if ( ChildNode.nodeName = 'name' ) then
+                           FSelectedItem.FDrugName := UpperCase(ChildNode.text);
+                        if ( ChildNode.nodeName = 'vpaNumber' ) then
+                           FSelectedItem.FVPANumber := UpperCase(ChildNode.text);
+                        if ( ChildNode.nodeName = 'drugGroup' ) then
+                           begin
+                              FSelectedItem.FMedicineGroup := GetMedicineGroupIDByName(ChildNode.text);
+                              if ( ChildNode.text = cAntibiotic ) then
+                                 FSelectedItem.UnitUsed := GetUnitIDByGroupType(mgAntibiotic)
+                              else if ( ChildNode.text = cVaccine ) then
+                                 FSelectedItem.UnitUsed := GetUnitIDByGroupType(mgVaccine)
+                              else if ( ChildNode.text = cDose ) then
+                                 FSelectedItem.UnitUsed := GetUnitIDByGroupType(mgDose)
+                              else if ( ChildNode.text = cTube ) then
+                                 FSelectedItem.UnitUsed := GetUnitIDByGroupType(mgTube)
+                              else if ( ChildNode.text = cOther ) then
+                                 FSelectedItem.UnitUsed := GetUnitIDByGroupType(mgOther);
+                           end;
+                        if ( ChildNode.nodeName = 'milkWithdrawalDays' ) then
+                           if ( Length(ChildNode.text) > 0 ) then
+                              FSelectedItem.MilkWDDays := StrToInt(ChildNode.text);
+                        if ( ChildNode.nodeName = 'meatWithdrawalDays' ) then
+                           if ( Length(ChildNode.text) > 0 ) then
+                              FSelectedItem.MeatWDDays := StrToInt(ChildNode.text);
+                     end;
+                  if ( FSelectedItem <> nil ) then Break;
+               end;
+         end;
+   finally
+      DrugsNode := nil;
+      DrugNode := nil;
+      ChildNode := nil;
+   end;
+end;
+
+procedure TfmDrugFinder.FormCreate(Sender: TObject);
+begin
+   eSearchText.Text := '';
+   lSearchResultStatus.Caption := '';
+   FSourceFilePath := ApplicationPath + 'druglisting.xml';
+   FManualSearch := False;
+   btnClearSearch.Visible := False;
+   LoadSourceFile();
+end;
+
+procedure TfmDrugFinder.LoadSourceFile;
+begin
+   DrugSearchGridTableView.DataController.RecordCount := 0;
+   if ( not(FileExists(FSourceFilePath)) ) then
+      DownloadSourceFile;
+   FDocument := TXMLDOMHelper.LoadDocument(FSourceFilePath);
+   if ( FDocument = nil ) then
+      begin
+         MessageDlg(Format('Failed to load file %s',[FSourceFilePath]),mtError,[mbOK],0);
+         Close();
+      end;
+end;
+
+procedure TfmDrugFinder.Search(const ASearchText: string);
+var
+   i, j, Index : Integer;
+   DrugsNode : IXMLDOMNodeList;
+   DrugNode,
+   ChildNode : IXMLDOMNode;
+   QueryString : string;
+   TempString : string;
+   IsMatch,
+   MedicineGroupNodeNotFound,
+   WithdrawalDetailNotFound : Boolean;
+begin
+   MedicineGroupNodeNotFound := False;
+   WithdrawalDetailNotFound := False;
+
+   lSearchResultStatus.Caption := '';
+   DrugSearchGridTableView.DataController.RecordCount := 0;
+
+   if ( FDocument = nil ) then
+      begin
+         MessageDlg('The drug listing file cannot be found - the search has been cancelled.',mtWarning,[mbOk],0);
+         Exit;
+      end;
+
+   if Length(Trim(ASearchText)) = 0 then
+      Exit;
+
+   DrugsNode := nil;
+   DrugNode  := nil;
+   ChildNode := nil;
+
+   try
+      DrugsNode := FDocument.selectNodes('/drugListing/drug');
+
+      Index := 0;
+      DrugSearchGridTableView.DataController.BeginUpdate;
+      if ( DrugXMLUpdateRequired ) then
+         begin
+            MessageDlg('You are using an old version of our online drug database.'+cCRLF+
+                       'The system will now download a new online drug database.',mtInformation,[mbOK],0);
+            DownloadSourceFile;
+         end;
+
+      for i := 0 to DrugsNode.length-1 do
+         begin
+             DrugNode := DrugsNode[i];
+             MedicineGroupNodeNotFound := ( DrugNode.childNodes.length = 2 );
+             if MedicineGroupNodeNotFound then Break;
+
+             WithdrawalDetailNotFound := ( DrugNode.childNodes.length = 3 );
+             if WithdrawalDetailNotFound then Break;
+
+             if cbUseExactMatch.Checked then
+                IsMatch := (UpperCase(DrugNode.childNodes[0].text) = Uppercase(eSearchText.Text))
+             else
+                begin
+                   if ( Length(ASearchText) > 4 ) and ( not(FManualSearch) ) then
+                      TempString := Copy(ASearchText, 1, 4)
+                   else
+                      TempString := ASearchText;
+
+                   //   16/08/17 [V5.7 R1.2] /MK Bug Fix - Strip out characters that are not spaces, or numbers or letters.
+                   TempString := StripAllNonSpace_Num_Alpha(TempString);
+
+                   IsMatch := UpperCase(TempString) = UpperCase(Copy(DrugNode.childNodes[0].text, 1, Length(TempString)))
+                end;
+
+             if IsMatch then
+                begin
+                   DrugSearchGridTableView.DataController.RecordCount := DrugSearchGridTableView.DataController.RecordCount+1;
+
+                   for j := 0 to DrugNode.childNodes.length-1 do
+                      try
+                         ChildNode := DrugNode.childNodes[j];
+                         if ( ChildNode.nodeName = 'name' ) then
+                            DrugSearchGridTableView.DataController.Values[Index,DrugSearchGridTableViewDrugName.Index] := UpperCase(ChildNode.text);
+                         if ( ChildNode.nodeName = 'vpaNumber' ) then
+                            DrugSearchGridTableView.DataController.Values[Index,DrugSearchGridTableViewVPANumber.Index] := UpperCase(ChildNode.text);
+                         if ( ChildNode.nodeName = 'drugGroup' ) then
+                            DrugSearchGridTableView.DataController.Values[Index,DrugSearchGridTableViewGroup.Index] := ChildNode.text;
+                         //   26/02/19 [V5.8 R8.0] /MK Change - Need to check for lenght of withdrawal ChildNode text because it was causing a hidden delphi exception.
+                         if ( ChildNode.nodeName = 'milkWithdrawalDays' ) and ( Length(ChildNode.text) > 0 ) then
+                            DrugSearchGridTableView.DataController.Values[Index,DrugSearchGridTableViewMilkWD.Index] := ChildNode.text;
+                         if ( ChildNode.nodeName = 'meatWithdrawalDays' ) and ( Length(ChildNode.text) > 0 ) then
+                            DrugSearchGridTableView.DataController.Values[Index,DrugSearchGridTableViewMeatWD.Index] := ChildNode.text;
+                      except
+                      end;
+
+                   Inc(Index);
+                end;
+          end;
+
+      if ( MedicineGroupNodeNotFound ) or ( WithdrawalDetailNotFound ) then
+         begin
+            MessageDlg('An old medicine file has been found.'+cCRLF+
+                       'The program will now download a new medicine file.',mtInformation,[mbOK],0);
+            DownloadSourceFile;
+         end;
+   finally
+      if ( DrugSearchGridTableView.DataController.RecordCount = 0 ) then
+         TempString := 'No medicines found matching name.'
+      else
+         TempString := Format('%d medicines found.', [DrugSearchGridTableView.DataController.RecordCount]);
+
+      lSearchResultStatus.Caption := TempString;
+      DrugSearchGridTableView.DataController.EndUpdate;
+
+      DrugsNode := nil;
+      DrugNode := nil;
+      ChildNode := nil;
+
+      btnOK.Default := False;
+      btnCancel.Default := True;
+   end;
+end;
+
+procedure TfmDrugFinder.ShowTimerTimer(Sender: TObject);
+begin
+   ShowTimer.Enabled := False;
+   if not FileExists(FSourceFilePath) then
+      DownloadSourceFile()
+   else if (Length(Trim(eSearchText.Text)) > 0) then
+      actSearch.Execute();
+end;
+
+procedure TfmDrugFinder.GetDrugListingProcessed(Sender: TObject);
+begin
+   if FileExists(FSourceFilePath) then
+      try
+         LoadSourceFile();
+         if ( FShowDownloadCompleteMsg ) then
+            MessageDlg('File was successfully downloaded and installed.',mtInformation,[mbOK],0);
+         DrugXMLUpdateRequired := False;
+         if ( Length(Trim(eSearchText.Text)) > 0 ) then
+            actSearch.Execute();
+      except
+         DrugXMLUpdateRequired := True;
+      end
+   else
+      begin
+         MessageDlg('File download has failed.',mtError,[mbOK],0);
+         Close();
+      end;
+end;
+
+procedure TfmDrugFinder.FormDestroy(Sender: TObject);
+begin
+   if (FDocument <> nil) then
+      FDocument := nil;
+end;
+
+procedure TfmDrugFinder.FormShow(Sender: TObject);
+begin
+   ShowTimer.Enabled := True;
+   if ( Length(eSearchText.Text) = 0 ) then
+      eSearchText.SetFocus;
+end;
+
+procedure TfmDrugFinder.FormCloseQuery(Sender: TObject;
+  var CanClose: Boolean);
+begin
+   FSelectedItem := nil;
+   if ( ModalResult = mrOK ) then
+      begin
+         FSelectedItem := GetSelectedItem();
+         CanClose := FSelectedItem<>nil;
+         if not(CanClose) then
+            MessageDlg('You must select a medicine.',mtError,[mbOK],0);
+      end;
+end;
+
+procedure TfmDrugFinder.DownloadSourceFile;
+begin
+   if not IsNetConnected then
+      begin
+         MessageDlg(cINTERNET_CONNECTION_NOT_ESTABLISHED,mtError,[mbOK],0);
+         Close;
+         Exit;
+      end;
+
+   Screen.Cursor := crHourGlass;
+   Update;
+   try
+      Application.ProcessMessages;
+      GetDrugListing.Process(False, False);
+   finally
+      Screen.Cursor := crDefault;
+      Update;
+   end;
+end;
+
+procedure TfmDrugFinder.actSearchExecute(Sender: TObject);
+begin
+   Search(eSearchText.Text);
+end;
+
+procedure TfmDrugFinder.actSearchUpdate(Sender: TObject);
+begin
+   actSearch.Enabled := (FDocument <> nil) and (Length(Trim(eSearchText.Text)) > 0);
+end;
+
+procedure TfmDrugFinder.DrugSearchGridTableViewFocusedRecordChanged(
+  Sender: TcxCustomGridTableView; APrevFocusedRecord,
+  AFocusedRecord: TcxCustomGridRecord;
+  ANewItemRecordFocusingChanged: Boolean);
+begin
+   btnOK.Default := ( AFocusedRecord <> nil);
+   btnCancel.Default := not btnOK.Default;
+end;
+
+function TfmDrugFinder.GetSelectedItem: TDrugItem;
+var
+   vDrugGroup,
+   vMeatWithd,
+   vMilkWithd : Variant;
+   DrugGroupType : TMedicineGroupType;
+begin
+   Result := nil;
+   //   04/08/17 [V5.7 R1.1] /MK Change - If there is only one record in the grid then focus that so user only has to click Select - GL request.
+   if ( DrugSearchGridTableView.DataController.RecordCount = 1 ) then
+      DrugSearchGridTableView.DataController.FocusedRecordIndex := 0;
+   if ( DrugSearchGridTableView.DataController.FocusedRecordIndex > -1 ) then
+      begin
+         Result := TDrugItem.Create;
+
+         Result.DrugName := DrugSearchGridTableView.DataController
+                 .Values[DrugSearchGridTableView.DataController.FocusedRecordIndex, DrugSearchGridTableViewDrugName.Index];
+         Result.VPANumber := DrugSearchGridTableView.DataController
+                 .Values[DrugSearchGridTableView.DataController.FocusedRecordIndex, DrugSearchGridTableViewVPANumber.Index];
+
+         vDrugGroup := DrugSearchGridTableView.DataController.Values[DrugSearchGridTableView.DataController.FocusedRecordIndex, DrugSearchGridTableViewGroup.Index];
+         Result.MedicineGroup := GetMedicineGroupIDByName(vDrugGroup);
+
+         if ( vDrugGroup = cAntibiotic ) then
+            Result.UnitUsed := GetUnitIDByGroupType(mgAntibiotic)
+         else if ( vDrugGroup = cVaccine ) then
+            Result.UnitUsed := GetUnitIDByGroupType(mgVaccine)
+         else if ( vDrugGroup = cDose ) then
+            Result.UnitUsed := GetUnitIDByGroupType(mgDose)
+         else if ( vDrugGroup = cTube ) then
+            Result.UnitUsed := GetUnitIDByGroupType(mgTube)
+         else if ( vDrugGroup = cOther ) then
+            Result.UnitUsed := GetUnitIDByGroupType(mgOther);
+
+         try
+            //   29/04/19 [V5.8 R9.0] /MK Change - Use variables to store value as invisible exceptions were appearing if Null Meat or Milk Days.
+            vMilkWithd := DrugSearchGridTableView.DataController
+                             .Values[DrugSearchGridTableView.DataController.FocusedRecordIndex, DrugSearchGridTableViewMilkWD.Index];
+            if ( not(VarIsNull(vMilkWithd)) ) then
+               Result.MilkWDDays := vMilkWithd;
+            vMeatWithd := DrugSearchGridTableView.DataController
+                             .Values[DrugSearchGridTableView.DataController.FocusedRecordIndex, DrugSearchGridTableViewMeatWD.Index];
+            if ( not(VarIsNull(vMeatWithd)) ) then
+                Result.MeatWDDays := vMeatWithd;
+         except
+         end;
+      end;
+end;
+
+procedure TfmDrugFinder.actRefreshDrugListingExecute(Sender: TObject);
+begin
+   FDocument := nil;
+   DeleteFile(FSourceFilePath);
+   DownloadSourceFile();
+end;
+
+procedure TfmDrugFinder.eSearchTextChange(Sender: TObject);
+begin
+   if ( Length(Trim(eSearchText.Text)) >= 3 ) then
+      Search(eSearchText.Text);
+   btnClearSearch.Visible := ( Length(Trim(eSearchText.Text)) > 0 );
+end;
+
+function TfmDrugFinder.GetDrugXMLUpdateRequired: Boolean;
+begin
+   Result := False;
+   with TQuery.Create(nil) do
+      try
+         DatabaseName := AliasName;
+         SQL.Clear;
+         SQL.Add('SELECT DrugXMLUpdateRequired');
+         SQL.Add('FROM Defaults');
+         try
+            Open;
+            if ( RecordCount = 0 ) then Exit;
+            Result := Fields[0].AsBoolean;
+         except
+         end;
+      finally
+         Free;
+      end;
+end;
+
+procedure TfmDrugFinder.SetDrugXMLUpdateRequired(const Value: Boolean);
+begin
+   with TQuery.Create(nil) do
+      try
+         DatabaseName := AliasName;
+         SQL.Clear;
+         SQL.Add('UPDATE Defaults');
+         SQL.Add('SET DrugXMLUpdateRequired = :AValue');
+         Params[0].AsBoolean := Value;
+         try
+            ExecSQL;
+         except
+         end;
+      finally
+         Free;
+      end;
+end;
+
+function TfmDrugFinder.GetMedicineGroupIDByName(AGroupName: String): Integer;
+begin
+   Result := 0;
+   if ( Length(AGroupName) = 0 ) then Exit;
+   AGroupName := UpperCase(AGroupName);
+   with TQuery.Create(nil) do
+      try
+         DatabaseName := AliasName;
+         SQL.Clear;
+         SQL.Add('SELECT ID');
+         SQL.Add('FROM GenLook');
+         SQL.Add('WHERE (Upper(Description) = :AGroupName)');
+         SQL.Add('AND   (ListType = :ListType)');
+         Params[0].AsString := AGroupName;
+         Params[1].AsInteger := LMedicineGroup;
+         try
+            Open;
+            if ( RecordCount <> 1 ) then Exit;
+            Result := Fields[0].AsInteger;
+         except
+         end;
+      finally
+         Free;
+      end;
+end;
+
+function TfmDrugFinder.GetUnitIDByGroupType(AGroupType: TMedicineGroupType): Integer;
+var
+   sSearchTerm : String;
+begin
+   Result := 0;
+   case AGroupType of
+      mgAntibiotic,
+      mgDose,
+      mgVaccine,
+      mgOther : sSearchTerm := 'MILLILITRES';
+      mgTube : sSearchTerm := 'TUBE';
+   end;
+   if ( Length(sSearchTerm) = 0 ) then Exit;
+   with TQuery.Create(nil) do
+      try
+         DatabaseName := AliasName;
+         SQL.Clear;
+         SQL.Add('SELECT ID');
+         SQL.Add('FROM Units');
+         SQL.Add('WHERE Upper(Name) = :SearchTerm');
+         Params[0].AsString := sSearchTerm;
+         try
+            Open;
+            if ( RecordCount = 0 ) then Exit;
+            Result := Fields[0].AsInteger;
+         except
+         end;
+      finally
+         Free;
+      end;
+end;
+
+procedure TfmDrugFinder.actClearSearchExecute(Sender: TObject);
+begin
+   eSearchText.Enabled := True;
+   eSearchText.Clear;
+   eSearchText.SetFocus;
+   DrugSearchGridTableView.DataController.RecordCount := 0;
+end;
+
+procedure TfmDrugFinder.DrugSearchGridTableViewWithdGetDisplayText(
+  Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
+  var AText: String);
+begin
+   if ( AText = '0' ) then
+      AText := 'N/A';
+end;
+
+{ TDrugItem }
+
+constructor TDrugItem.create;
+begin
+
+end;
+
+end.

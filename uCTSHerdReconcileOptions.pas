@@ -1,0 +1,166 @@
+{
+   09/08/11 [V4.1 R4.5] /MK Bug Fix - Default To All Herds Ticked.
+
+   07/09/18 [V5.8 R2.7] /MK Change - FormCreate - Pass in holding number to get databases of this herds holding number only.
+}
+
+unit uCTSHerdReconcileOptions;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  cxGridCustomTableView, cxGridTableView, cxControls, cxGridCustomView,
+  cxClasses, cxGridLevel, cxGrid, StdCtrls, cxButtons, ExtCtrls,
+  cxContainer, cxEdit, cxLabel, uHerd, Db, dxmdaset, cxGridDBTableView,
+  FileCtrl, uHerdLookup;
+
+type
+  TfmCTSHerdReconcileOptions = class(TForm)
+    HerdDatabaseGridLevel: TcxGridLevel;
+    HerdDatabaseGrid: TcxGrid;
+    cxLabel1: TcxLabel;
+    Bevel1: TBevel;
+    btnOK: TcxButton;
+    btnCancel: TcxButton;
+    mdReconcileHerdOptions: TdxMemData;
+    mdReconcileHerdOptionsSelected: TBooleanField;
+    mdReconcileHerdOptionsHerdNo: TStringField;
+    mdReconcileHerdOptionsDatabaseName: TStringField;
+    mdReconcileHerdOptionsDatabasePath: TStringField;
+    mdReconcileHerdOptionsHerdId: TIntegerField;
+    HerdDatabaseGridDBTableView: TcxGridDBTableView;
+    DataSource1: TDataSource;
+    HerdDatabaseGridDBTableViewSelected: TcxGridDBColumn;
+    HerdDatabaseGridDBTableViewHerdId: TcxGridDBColumn;
+    HerdDatabaseGridDBTableViewHerdNo: TcxGridDBColumn;
+    HerdDatabaseGridDBTableViewDatabasePath: TcxGridDBColumn;
+    HerdDatabaseGridDBTableViewDatabaseName: TcxGridDBColumn;
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+  private
+    { Private declarations }
+    FHerds : THerds;
+    FHerd : THerd;
+    FFileName : String;
+    function GetReconciliationHerds : THerds;
+  public
+    { Public declarations }
+    class function GetHerdsToReconcile(const ShowOptions : Boolean = False) : THerds;
+  end;
+
+var
+  fmCTSHerdReconcileOptions: TfmCTSHerdReconcileOptions;
+
+implementation
+
+uses DairyData, KDBRoutines, KRoutines;
+
+{$R *.DFM}
+
+{ TfmCTSHerdReconcileOptions }
+
+function TfmCTSHerdReconcileOptions.GetReconciliationHerds : THerds;
+var
+   i : Integer;
+   v : Variant;
+   Herd : THerd;
+begin
+   Result := THerds.Create;
+
+   mdReconcileHerdOptions.First;
+
+   while not mdReconcileHerdOptions.Eof do
+      begin
+         if mdReconcileHerdOptionsSelected.AsBoolean then
+            begin
+               Herd := THerd.Create;
+               Herd.ID := mdReconcileHerdOptionsHerdId.AsInteger;
+               Herd.HerdIdentity := mdReconcileHerdOptionsHerdNo.AsString;
+               Herd.DatabasePath := mdReconcileHerdOptionsDatabasePath.AsString;
+               Result.Add(Herd);
+            end;
+         mdReconcileHerdOptions.Next;
+      end;
+end;
+
+class function TfmCTSHerdReconcileOptions.GetHerdsToReconcile(
+ const ShowOptions : Boolean) : THerds;
+var
+  Herds : THerds;
+begin
+   with TfmCTSHerdReconcileOptions.Create(nil) do
+      try
+         if ( ShowOptions ) then
+            begin
+               if ( ShowModal = mrOK ) then
+                  begin
+                     Result := GetReconciliationHerds;
+                     if Result.Count = 0 then
+                        FreeAndNil(Result);
+                  end
+               else
+                  Result := nil;
+            end
+         else
+            Result := GetReconciliationHerds;
+      finally
+         Free;
+      end;
+end;
+
+procedure TfmCTSHerdReconcileOptions.FormCreate(Sender: TObject);
+var
+   i : Integer;
+   FileDirStore : string;
+begin
+   //   07/09/18 [V5.8 R2.7] /MK Change - Pass in holding number to get databases of this herds holing number.
+   FHerds := GetHerdsFromDatabases(GetHerdDatabases, HerdLookup.HerdOwnerData.HoldingLoc);
+
+   FileDirStore := IncludeTrailingBackslash(ApplicationPath) + 'CTS Webservices\';
+   if not DirectoryExists(FileDirStore) then
+      CreateDir(FileDirStore);
+
+   FFileName := FileDirStore + 'HerdReconcile.config';
+
+   mdReconcileHerdOptions.Active := True;
+   if FileExists( FFileName ) then
+      mdReconcileHerdOptions.LoadFromBinaryFile(FFileName);
+
+   mdReconcileHerdOptions.First;
+   while not mdReconcileHerdOptions.Eof do
+      begin
+         if not FHerds.FindHerd(mdReconcileHerdOptionsHerdId.AsInteger, mdReconcileHerdOptionsDatabaseName.AsString) then
+            mdReconcileHerdOptions.Delete // remove herds/databases no longer in use.
+         else
+            mdReconcileHerdOptions.Next;
+      end;
+
+   //   09/08/11 [V4.1 R4.5] /MK Bug Fix - Default To All Herds Ticked.
+   for i := 0 to FHerds.Count-1 do
+      begin
+         FHerd := THerd(FHerds[i]);
+         if not mdReconcileHerdOptions.Locate('HerdId;DatabaseName', VarArrayOf([FHerd.ID,FHerd.DatabaseName]),[]) then
+            begin
+               mdReconcileHerdOptions.Append;
+               mdReconcileHerdOptionsSelected.AsBoolean := True;
+               mdReconcileHerdOptionsHerdId.AsInteger := FHerd.ID;
+               mdReconcileHerdOptionsHerdNo.AsString := FHerd.HerdIdentity;
+               mdReconcileHerdOptionsDatabaseName.AsString := FHerd.DatabaseName;
+               mdReconcileHerdOptionsDatabasePath.AsString := FHerd.DatabasePath;
+               mdReconcileHerdOptions.Post;
+            end;
+      end;
+end;
+
+procedure TfmCTSHerdReconcileOptions.FormDestroy(Sender: TObject);
+begin
+   if mdReconcileHerdOptions.Active then
+      begin
+         mdReconcileHerdOptions.SaveToBinaryFile(FFileName);
+         mdReconcileHerdOptions.Active := False;
+      end;
+   SafeFreeAndNil(FHerds);
+end;
+
+end.

@@ -1,0 +1,144 @@
+{
+ 08/04/09 [V3.9 R6.7] /MK Additional Feature - Changed Fax No. on form.
+}
+
+unit uNBASRep31A;
+
+interface
+
+uses
+  SysUtils, Windows, Messages, Classes, Graphics, Controls,
+  StdCtrls, ExtCtrls, Forms, QuickRpt, QRCtrls;
+
+type
+  TNBASRep31A = class(TForm)
+    NBAS31A: TQuickRep;
+    TitleBand1: TQRBand;
+    QRLabel3: TQRLabel;
+    QRLabel4: TQRLabel;
+    QRShape2: TQRShape;
+    QRShape3: TQRShape;
+    QRLabel5: TQRLabel;
+    QRLabel6: TQRLabel;
+    QRLabel7: TQRLabel;
+    QRLabel8: TQRLabel;
+    QRLabel9: TQRLabel;
+    lSellerHerdNo: TQRLabel;
+    lSellerName: TQRLabel;
+    lSellerAdd1: TQRLabel;
+    lSellerAdd2: TQRLabel;
+    lSellerTelNo: TQRLabel;
+    QRLabel11: TQRLabel;
+    QRLabel12: TQRLabel;
+    QRLabel13: TQRLabel;
+    QRLabel14: TQRLabel;
+    QRLabel15: TQRLabel;
+    lBuyerherdNo: TQRLabel;
+    lBuyerName: TQRLabel;
+    lBuyerAdd1: TQRLabel;
+    lBuyerAdd2: TQRLabel;
+    lBuyerTelNo: TQRLabel;
+    QRLabel10: TQRLabel;
+    QRShape4: TQRShape;
+    QRLabel16: TQRLabel;
+    QRShape13: TQRShape;
+    QRLabel17: TQRLabel;
+    QRShape14: TQRShape;
+    QRLabel18: TQRLabel;
+    QRLabel19: TQRLabel;
+    QRLabel1: TQRLabel;
+    QRLabel2: TQRLabel;
+    QRImage11: TQRImage;
+    DetailBand1: TQRBand;
+    QRLabel20: TQRLabel;
+    QRDBText1: TQRDBText;
+    PageFooterBand1: TQRBand;
+    QRShape15: TQRShape;
+    QRMemo1: TQRMemo;
+    QRShape16: TQRShape;
+    QRShape17: TQRShape;
+    QRLabel30: TQRLabel;
+    QRLabel31: TQRLabel;
+    QRLabel32: TQRLabel;
+    QRShape1: TQRShape;
+    QRShape5: TQRShape;
+    QRSysData1: TQRSysData;
+    QRLabel43: TQRLabel;
+    QRLabel44: TQRLabel;
+    QRLabel47: TQRLabel;
+    QRLabel48: TQRLabel;
+    QRLabel49: TQRLabel;
+    QRLabel50: TQRLabel;
+    QRShape18: TQRShape;
+    QRLabel35: TQRLabel;
+    QRLabel36: TQRLabel;
+    QRLabel37: TQRLabel;
+    procedure lSellerTelNoPrint(sender: TObject; var Value: String);
+    procedure lSellerHerdNoPrint(sender: TObject; var Value: String);
+    procedure QRLabel20Print(sender: TObject; var Value: String);
+    procedure DetailBand1AfterPrint(Sender: TQRCustomBand;
+      BandPrinted: Boolean);
+    procedure NBAS31AStartPage(Sender: TCustomQuickRep);
+  private
+  end;
+
+var
+  NBASRep31A: TNBASRep31A;
+
+implementation
+ uses
+    uCMMSPermits;
+{$R *.DFM}
+
+procedure TNBASRep31A.lSellerTelNoPrint(sender: TObject; var Value: String);
+begin
+   if Value <> '' then
+      Value := '( ' + Value + ' )';
+end;
+
+procedure TNBASRep31A.lSellerHerdNoPrint(sender: TObject; var Value: String);
+var
+   TempValue : String;
+   Iterator : Integer;
+begin
+   if Value <> '' then
+      begin
+         for Iterator := 1 to Length(Value) do
+            begin
+               if Iterator <> Length(Value) then
+                  TempValue := TempValue + Value[Iterator] + ' '
+               else
+                  TempValue := TempValue + Value[Iterator];
+
+            end;
+         Value := TempValue;
+      end;
+end;
+
+procedure TNBASRep31A.QRLabel20Print(sender: TObject; var Value: String);
+begin
+   Value := InttoStr(DetailBand1.Tag);
+end;
+
+procedure TNBASRep31A.DetailBand1AfterPrint(Sender: TQRCustomBand;
+  BandPrinted: Boolean);
+begin
+   if DetailBand1.Tag = 10 then
+      Begin
+         NBAS31A.DataSet.Next;
+         if not NBAS31A.DataSet.eof then
+            begin
+               NBAS31A.DataSet.Prior;
+               NBAS31A.NewPage;
+            end;
+      end
+   else
+      DetailBand1.Tag:= DetailBand1.Tag + 1;
+end;
+
+procedure TNBASRep31A.NBAS31AStartPage(Sender: TCustomQuickRep);
+begin
+   DetailBand1.Tag := 1;
+end;
+
+end.

@@ -1,0 +1,466 @@
+{
+   04/04/13 [V5.1 R6.1] /MK Additional Feature - Added button to import last weight from last weighing event.
+}
+
+unit uPreSale;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  uListAnimals, ExtCtrls, kwDBNavigator, RXCtrls, ComCtrls, ToolWin,
+  StdCtrls, DBCtrls, ToolEdit, RXDBCtrl, RxLookup, Mask, buttons,db,dbtables,
+  cxControls, cxContainer, cxEdit, cxTextEdit, cxCurrencyEdit, cxDBEdit;
+
+type
+  TAddOrAmendPreSale = (AddPreSale, AmendPreSale);
+  TfmPreSale = class(TkwEventForm)
+    lNo: TLabel;
+    SearchForAnimal: TComboEdit;
+    Label2: TLabel;
+    Customers: TRxDBLookupCombo;
+    Label3: TLabel;
+    DateOfPreSale: TDBDateEdit;
+    SaleWtLabel: TLabel;
+    Weight: TDBEdit;
+    lSalesGrp: TLabel;
+    cbSalesGrp: TComboBox;
+    CommentLabel: TLabel;
+    dbComment: TDBEdit;
+    lWgtDate: TLabel;
+    dbeWgtDate: TDBDateEdit;
+    ToolBar1: TToolBar;
+    ToolButton2: TToolButton;
+    sbExit: TRxSpeedButton;
+    ToolButton1: TToolButton;
+    SaleDeathNav: TKwDBNavigator;
+    ToolButton3: TToolButton;
+    sbHelp: TRxSpeedButton;
+    Bevel1: TBevel;
+    btnImportWeight: TRxSpeedButton;
+    ToolButton4: TToolButton;
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure SaleDeathNavBeforeAction(Sender: TObject;
+      Button: TKNavigateBtn);
+    procedure SearchForAnimalExit(Sender: TObject);
+    procedure CustomersCloseUp(Sender: TObject);
+    procedure DateOfPreSaleExit(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure SaleDeathNavClick(Sender: TObject; Button: TKNavigateBtn);
+    procedure sbExitClick(Sender: TObject);
+    procedure SearchForAnimalButtonClick(Sender: TObject);
+    procedure SearchForAnimalChange(Sender: TObject);
+    procedure FormActivate(Sender: TObject);
+    procedure CustomersChange(Sender: TObject);
+    procedure DateOfPreSaleChange(Sender: TObject);
+    procedure WeightChange(Sender: TObject);
+    procedure cbSalesGrpChange(Sender: TObject);
+    procedure dbCommentChange(Sender: TObject);
+    procedure dbeWgtDateChange(Sender: TObject);
+    procedure btnImportWeightClick(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+  private
+    function GetLastWeight: Double;
+  private
+    { Private declarations }
+    CurrentAnimalID : Integer;
+    nOriginalGroupID : Integer;
+
+    DefCustID : Integer;
+    DefEventDate : TDateTime;
+    procedure CheckPreSaleEvent;
+    property FLastWeight : Double read GetLastWeight;
+  public
+    { Public declarations }
+  end;
+
+  procedure ShowPreSale(AddOrAmend : TAddOrAmendPreSale);
+
+var
+  fmPreSale: TfmPreSale;
+
+implementation
+uses
+   DairyData, GenTypesConst, Def, uCustomers;
+
+{$R *.DFM}
+
+  procedure ShowPreSale(AddOrAmend : TAddOrAmendPreSale);
+  begin
+
+     with TfmPreSale.Create(nil) do
+        try
+           try
+              WinData.EventType := TPreSale;
+              DefCustID := 0;
+              DefEventDate := 0;
+              CurrentAnimalID := WinData.AnimalFileByIDID.AsInteger;
+              ThisCombo := SearchForAnimal;
+              ThisNav := SaleDeathNav;
+              ThisComment := dbComment;
+              pSexToList := '';
+
+              // Set the Animal Number to the one on the Grid
+              SetSearchField(SearchForAnimal);
+
+              if (AddorAmend = AddPreSale) then
+                 begin
+                    SaleDeathNav.VisibleButtons := [kwnbPost,kwnbCancel];
+                    WinData.ModifyingEvent := False;
+                    SearchForAnimal.Enabled := True;
+                    if cbSalesGrp.Text = '' then
+                       begin
+                          cbSalesGrp.ItemIndex := cbSalesGrp.Items.IndexOf(WinData.sGroupDef);
+                          cbSalesGrp.Refresh;
+                       end;
+                 end
+              else
+                 begin
+                    SaleDeathNav.VisibleButtons := [kwnbPost,kwnbCancel, kwnbDelete];
+                    SearchForAnimal.Enabled := False;
+                    WinData.ModifyingEvent := True;
+                 end;
+           except
+              raise Exception.Create(cFormCreateError+#13#10+cErrorContact);
+           end;
+           CheckPreSaleEvent;
+           ShowModal;
+        finally
+           Free;
+        end;
+  end;
+
+procedure TfmPreSale.FormCloseQuery(Sender: TObject;
+  var CanClose: Boolean);
+begin
+   CanClose := WinData.DataSetApplyUpdates(Windata.Events, ModalResult = mrOK, FModified );
+end;
+
+procedure TfmPreSale.SaleDeathNavBeforeAction(Sender: TObject;
+  Button: TKNavigateBtn);
+begin
+   if Button = kwnbCancel then Close;
+   if Button = kwnbPost then
+      begin
+         // Save Defaults
+         DefCustID := WinData.CustomersID.AsInteger;
+         DefEventDate := WinData.EventsEventDate.AsDateTime;
+      end;
+end;
+
+procedure TfmPreSale.SearchForAnimalExit(Sender: TObject);
+begin
+   // If the User presses the Exit Button don't set the Dataset into Edit Mode
+   CurrentAnimalID := WinData.AnimalFileByIDID.AsInteger;
+   if ( not WinData.AnimalFileByIDInHerd.AsBoolean ) then
+      begin     // Can not process a non InHerd animal in the PreSale Screen
+         MessageDlg('This animal is not in Herd, use Sale/Death Screen',mtInformation,[mbOK],0);
+         SearchForAnimal.SetFocus;
+         SaleDeathNav.Enabled := FALSE;
+      end
+end;
+
+procedure TfmPreSale.CheckPreSaleEvent;
+begin
+   if WinData.CheckEvents.Locate('AnimalId;EventType',VarArrayOf([CurrentAnimalID, cSaleDeathEvent]),[] ) then
+      WinData.Events.Edit      // Existing event
+   else
+      AddEvent;
+end;
+
+procedure TfmPreSale.CustomersCloseUp(Sender: TObject);
+var
+   CustID : Integer;
+begin
+   if Customers.Value = '0' then
+      begin // SP
+         uCustomers.ShowTheForm(TRUE, CustID);
+         Customers.KeyValue := CustID;
+      end;
+end;
+
+procedure TfmPreSale.DateOfPreSaleExit(Sender: TObject);
+begin
+   if DateOfPreSale.Date > 0 then
+      begin
+         if dbeWgtDate.Date <= 0 then
+            if dbeWgtDate.DataSource.DataSet.State in dsEditModes then
+               dbeWgtDate.Date := DateOfPreSale.Date;
+      end;
+end;
+
+procedure TfmPreSale.FormCreate(Sender: TObject);
+var
+   nIndex : Integer;
+begin
+   // only use if beef management module present
+   if (def.definition.dUseBeefMan) then
+      begin
+         // get animal sales user group
+         cbSalesGrp.Items.Clear;
+         with tquery.create(self) do
+            // get list of available sales groups
+            try
+               databasename:='Kingswd';
+               sql.text:='select g.id, g.description'+
+                         'from grps g'+ 
+                         'where g.grouptype = :grouptype '+
+                         'order by description';
+               params[0].asString:=cSalesGroup;
+               open;
+               // create list
+               while not eof do
+                  begin
+                     cbSalesGrp.Items.AddObject(fields[1].asString,pointer(fields[0].asInteger));
+                     Next;
+                  end;
+               close;
+               // find animal's Sales group - if it exists
+               sql.text:='select g.id from grps g, grplinks gl '+
+                         'where (g.id = gl.groupid) and (gl.animalid = :animalid) and '+
+                         '      (g.grouptype = :grouptype)';
+               params[0].asInteger:=WinData.AnimalFileByIDID.AsInteger;
+               params[1].asString:=cSalesGroup;
+               open;
+               // compare SQL to combo list
+               if not (eof and bof) then
+                  // if found
+                  begin
+                     nIndex :=cbSalesGrp.Items.IndexOfObject(pointer(fields[0].asInteger));
+                     if nIndex<>-1 then
+                        begin
+                           // if match, assign as display/index
+                           cbSalesGrp.ItemIndex:=nIndex;
+                           nOriginalGroupID:=fields[0].asInteger;
+                        end;
+                  end
+               else
+                  nOriginalGroupID:=-1;
+               close;
+            finally
+               free;
+            end;
+      end;
+
+   Weight.DataSource.DataSet.Fields[Weight.DataSource.DataSet.FindField(Weight.DataField).Index].Alignment := taLeftJustify;
+end;
+
+procedure TfmPreSale.SaleDeathNavClick(Sender: TObject;
+  Button: TKNavigateBtn);
+var
+   CurrentAnimalID, nCurrentGroupID : Integer;
+   AnimalSold : Boolean;
+begin
+   if Button = kwnbPost then
+      begin
+         if (def.definition.dUseBeefMan) then
+            // check if empty
+            if cbSalesGrp.ItemIndex <> -1 then
+               begin
+
+                  // assign group chosen to variable
+                  nCurrentGroupId:= Integer(cbSalesGrp.Items.Objects[cbSalesGrp.ItemIndex]);
+
+                  // check new value is different from old
+                  if nCurrentGroupID<>nOriginalGroupID then
+                     begin
+                        with tquery.create(self) do
+                           try
+                              databasename:='Kingswd';
+                              // create new record
+                              if nOriginalGroupID = -1 then
+                                 begin
+                                    sql.text:='insert into grplinks (animalid, groupid, datejoined) '+
+                                              'values (:animalid, :groupid, :datejoined);';
+                                    params[0].asInteger:=WinData.AnimalFileByIDID.AsInteger;
+                                    params[1].asInteger:=nCurrentGroupId;
+                                    params[2].asDateTime:=now;
+                                 end
+                              // alter existing record
+                              else
+                                 begin
+                                    sql.text:='update grplinks '+
+                                              'set animalid   = :animalid,'+
+                                              '    groupid    = :groupid,'+
+                                              '    datejoined = :datejoined '+
+                                              'where animalid = :animalid '+
+                                              '   and groupid = :originalgroupid';
+                                    params[0].asInteger  := WinData.AnimalFileByIDID.AsInteger;
+                                    params[1].asInteger  := integer(cbSalesGrp.Items.Objects[cbSalesGrp.ItemIndex]);
+                                    params[2].asDateTime := now;
+                                    params[3].asInteger  := params[0].asInteger;
+                                    params[4].asInteger  := nOriginalGroupID;
+                                 end;
+                              execsql;
+                           finally
+                              free;
+                           end;
+                     end;
+               end;
+
+          if not WinData.AnimalFileByID.Eof then
+             begin
+                if MessageDLG('Event Saved - Record Another',mtInformation,[mbYes,mbNo],0) = mrYes then
+                   begin
+                     WinData.AnimalFileByID.Next;
+                      CurrentAnimalID := WinData.AnimalFileByIDID.AsInteger;
+                      repeat
+                         AnimalSold := WinData.CheckEvents.Locate('AnimalID;EventType',VarArrayOf([CurrentAnimalID, cSaleDeathEvent]),[]);
+                         if AnimalSold = True then
+                            begin
+                               WinData.AnimalFileByID.Next;
+                               CurrentAnimalID := WinData.AnimalFileByIDID.AsInteger;
+                               AnimalSold := WinData.CheckEvents.Locate('AnimalID;EventType',VarArrayOf([CurrentAnimalID, cSaleDeathEvent]),[]);
+                            end
+                      until
+                         AnimalSold = False;
+
+
+                      WinData.Events.Append;
+                      WinData.SaleDeath.Edit;
+
+                      WinData.EventsEventDate.AsDateTime := DefEventDate;
+                      WinData.SaleDeathCustomer.AsInteger := DefCustID;
+                      WinData.SaleDeath.FieldByName('Sold').Value := True;
+                      WinData.SaleDeath.FieldByName('PreSale').Value := True;
+
+                      // Check if nat id or animal no used
+                      if (WinData.OwnerFile.FieldByName('SearchField').AsString = 'AnimalNo') then
+                         SearchForAnimal.Text := WinData.AnimalFileByIDAnimalNo.AsString
+                      else
+                         SearchForAnimal.Text := WinData.AnimalFileByIDNatIDNum.AsString;
+
+                      //SearchForAnimal.SetFocus;
+                   end
+                else
+                   Close;
+             end
+          else
+             Close;
+      end;
+end;
+
+procedure TfmPreSale.sbExitClick(Sender: TObject);
+begin
+   Close;
+end;
+
+procedure TfmPreSale.SearchForAnimalButtonClick(Sender: TObject);
+begin
+   SearchButtonClick(Sender, nil);
+   { Assigns current Store CurrentID as OldAnimalID }
+
+   if CurrentID > 0 then // Ok only if the SeachDlg returns an animal in the system should we try locate it.
+                         // if not, stay on current animal.
+      begin
+         CurrentAnimalID :=  CurrentID;
+
+         try
+            WinData.AnimalFileByID.DisableControls;
+            if not WinData.AnimalFileByID.Locate('ID', CurrentAnimalID, []) then
+               begin
+                  SaleDeathNav.Enabled := False;
+                  raise ErrorMsg.Create('Animal does not exist on main grid, contact Kingswood');
+               end
+            else
+               SaleDeathNav.Enabled := True;
+         finally
+            WinData.AnimalFileByID.EnableControls;
+         end;
+
+      end;
+   CheckPreSaleEvent;
+end;
+
+procedure TfmPreSale.SearchForAnimalChange(Sender: TObject);
+begin
+   SetModifiedFlag;
+   SearchAnimalChange(Sender);
+end;
+
+procedure TfmPreSale.FormActivate(Sender: TObject);
+begin
+   inherited
+   FormActivate(Sender);
+   btnImportWeight.Enabled := ( FLastWeight > 0 );
+end;
+
+procedure TfmPreSale.CustomersChange(Sender: TObject);
+begin
+   SetModifiedFlag;
+end;
+
+procedure TfmPreSale.DateOfPreSaleChange(Sender: TObject);
+begin
+   SetModifiedFlag;
+end;
+
+procedure TfmPreSale.WeightChange(Sender: TObject);
+begin
+   SetModifiedFlag;
+end;
+
+procedure TfmPreSale.cbSalesGrpChange(Sender: TObject);
+begin
+   SetModifiedFlag;
+end;
+
+procedure TfmPreSale.dbCommentChange(Sender: TObject);
+begin
+   SetModifiedFlag;
+end;
+
+procedure TfmPreSale.dbeWgtDateChange(Sender: TObject);
+begin
+   SetModifiedFlag;
+end;
+
+function TfmPreSale.GetLastWeight: Double;
+var
+   TempQuery : TQuery;
+begin
+   if ( WinData.CheckEventExists(WinData.AnimalFileByIDID.AsInteger,
+                                 WinData.AnimalFileByIDLactNo.AsInteger,
+                                 CWeightEvent) ) then
+      begin
+         TempQuery := TQuery.Create(nil);
+         with TempQuery do
+            try
+               DatabaseName := AliasName;
+               SQL.Clear;
+               SQL.Add('SELECT E.EventDate, W.Weight');
+               SQL.Add('FROM Weights W');
+               SQL.Add('LEFT JOIN Events E On (E.ID = W.EventID)');
+               SQL.Add('WHERE (E.AnimalID = :AnimalID)');
+               SQL.Add('AND   (E.AnimalLactNo = :ALactNo)');
+               SQL.Add('AND   (E.EventType = :EventType)');
+               SQL.Add('ORDER By E.EventDate Desc');
+               Params[0].AsInteger := WinData.AnimalFileByIDID.AsInteger;
+               Params[1].AsInteger := WinData.AnimalFileByIDLactNo.AsInteger;
+               Params[2].AsInteger := CWeightEvent;
+               Open;
+               try
+                  First;
+                  Result := Fields[1].AsInteger;
+               finally
+                  Close;
+               end;
+            finally
+               Free;
+            end;
+      end
+   else
+      Result := 0;
+end;
+
+procedure TfmPreSale.btnImportWeightClick(Sender: TObject);
+begin
+   Weight.DataSource.DataSet.FieldByName(Weight.DataField).AsFloat := FLastWeight;
+end;
+
+procedure TfmPreSale.FormDestroy(Sender: TObject);
+begin
+   Weight.DataSource.DataSet.Fields[Weight.DataSource.DataSet.FindField(Weight.DataField).Index].Alignment := taRightJustify;
+end;
+
+end.

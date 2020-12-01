@@ -1,0 +1,1001 @@
+unit uReproductiveSummary;
+
+interface
+
+uses
+   Classes, Db, DBTables, SysUtils, dxmdaset, Dialogs;
+
+const
+   cBullingEvent = 1;
+   cServiceEvent = 2;
+   cCalvingEvent = 5;
+   cPregDiagEvent = 3;
+
+type
+
+  TBreedingEvents = (beBulling, beService, bePregDiag, beDryOff, beCalving);
+  TBreedingEventOptions = Set of TBreedingEvents;
+  TVWPRange = ( ZeroToVWP, VWPTo100, Over100 );
+  TIncludeAnimals = (iaAll, iaInHerd, iaLeftHerd);
+
+  TLactationRange = record
+     LactationStart, LactationEnd : Integer;
+  end;
+
+  TEventDateRange = record
+     EventDateStart, EventDateEnd : TDateTime;
+  end;
+
+  TCowByRange = record
+    ByLactation : Boolean;
+    EventType : Integer;
+    EventDateRange : TEventDateRange;
+  end;
+
+  THeatServiceIntervals = record
+    IntervalLessThan18 : Integer;
+    Interval18To24 : Integer;
+    Interval36To48 : Integer;
+    IntervalOther : Integer;
+  end;
+
+  TServicesRecord = record
+     NoFirstServices : Integer;
+     NoFirstServicesSuccessRatePerc : Double;
+     NoSecondServices : Integer;
+     NoSecondServicesSuccessRatePerc : Double;
+     NoThirdPlusServices : Integer;
+     NoThirdPlusServicesSuccessRatePerc : Double;
+     NoTotalServices : Integer;
+     NoTotalServicesServicesSuccessRatePerc : Double;
+  end;
+
+  TReproductiveSummary = class(TObject)
+  private
+    FCowByRange : TCowByRange;
+    FIncludeAnimals : TIncludeAnimals;
+    FLactationRange : TLactationRange;
+    FQueryHerdID : Integer;
+    SummaryDataSet : TTable;
+    TempQuery : TQuery;
+    SummaryEvents : TTable;
+    FBreedingEventOptions: TBreedingEventOptions;
+    FVoluntaryWaitingPeriod: Integer;
+    FRecordCount : Integer;
+    FDefaultGestation : Integer;
+    procedure SetBreedingEventOptions(const Value: TBreedingEventOptions);
+    procedure SetLactationRange(const Value: TLactationRange);
+  protected
+     procedure CreateTempVars;virtual;
+     procedure ResetVars;virtual;abstract;
+     procedure ReleaseTempVars;virtual;
+     procedure LoadCows;virtual;
+     procedure LoadBreedingInfo;virtual;
+     procedure LoadRawData;virtual;
+     procedure DoCalcs;virtual;abstract;
+     procedure SetCowByRange(const Value: TCowByRange);
+     function MinEventDate(const AID, ALactNo, AEvent : Integer ) : TDateTime;
+     function MaxEventDate(const AID, ALactNo, AEvent : Integer ) : TDateTime;
+     function NoOfFirstServed : Integer;
+     procedure AddFieldToSummary(FieldName, FieldType : string);
+  public
+     SummaryDataSource : TDataSource;
+     constructor Create;
+     destructor Destroy; override;
+     procedure CalcSummary;
+     property CowByRange : TCowByRange read FCowByRange write SetCowByRange;
+     property IncludeAnimals : TIncludeAnimals read FIncludeAnimals write FIncludeAnimals;
+     property LactationRange : TLactationRange read FLactationRange write SetLactationRange;
+     property BreedingEvents : TBreedingEventOptions read FBreedingEventOptions write SetBreedingEventOptions;
+     property QueryHerdID : Integer read FQueryHerdID write FQueryHerdID;
+     property RecordCount : Integer read FRecordCount;
+     property VoluntaryWaitingPeriod : Integer read FVoluntaryWaitingPeriod write FVoluntaryWaitingPeriod;
+     property DefaultGestation : Integer read FDefaultGestation write FDefaultGestation;
+  end;
+
+  TTotalHerdReproductiveSummary = class(TReproductiveSummary)
+  private
+    FAllLactOver100: Integer;
+    FSecondLactVWPto100: Integer;
+    FSecondLactFewerThanVWP: Integer;
+    FFirstLactOver100: Integer;
+    FAllLactFewerThanVWP: Integer;
+    FThirdPlusLactOver100: Integer;
+    FAllLactVWPto100: Integer;
+    FFirstLactFewerThanVWP: Integer;
+    FThirdPlusLactFewerThanVWP: Integer;
+    FFirstLactVWPto100: Integer;
+    FThirdPlusLactVWPto100: Integer;
+    FSecondLactOver100: Integer;
+    FFirstLactAvgDaysToFirstService: Integer;
+    FSecondLactAvgDaysToFirstService: Integer;
+    FAllLactAvgDaysToFirstService: Integer;
+    FThirdPlusLactAvgDaysToFirstService: Integer;
+    FThirdPlusLactServesPerAllCows: Integer;
+    FAllLactServesPerAllCows: Integer;
+    FFirstLactServesPerAllCows: Integer;
+    FSecondLactServesPerPregCows: Integer;
+    FAllLactServesPerPregCows: Integer;
+    FSecondLactServesPerAllCows: Integer;
+    FFirstLactServesPerPregCows: Integer;
+    FThirdPlusLactServesPerPregCows: Integer;
+
+    FPercOfFirstServiceVWPto100: Double;
+    FPercOfFirstServiceFewerThanVWP: Double;
+    FPercOfFirstServiceOver100: Double;
+
+    FHeatServiceIntervals : THeatServiceIntervals;
+    FServiceCalcAnimals: TIncludeAnimals;
+    FServicesRecord: TServicesRecord;
+    FTotalFirstServiceAllLacts: Double;
+    FCurrentActualCalvingInterval: Integer;
+    FFirstLactCalvingInterval: Integer;
+    FSecondLactCalvingInterval: Integer;
+    FThirdPlusCalvingInterval: Integer;
+    FAllLactCalvingInterval: Integer;
+    FThirdPlusLactDaysOpen: Integer;
+    FFirstLactDaysOpen: Integer;
+    FSecondLactDaysOpen: Integer;
+    FAllLactDaysOpen: Integer;
+  protected
+     procedure ResetVars;override;
+     procedure DoCalcs;override;
+     function GetAnimalsVWP( ALR : TLactationRange; AVWPRange : TVWPRange) : Integer;
+     function GetAvg1stService( ALR : TLactationRange ) : Integer;
+     function NoOfServices(ALR : TLactationRange; CheckIsPreg : Boolean ) : Integer;
+     procedure CalcHeatServiceIntervals(var AHeatServiceIntervals : THeatServiceIntervals );
+     procedure CalcServicesForPeriod(AFromDate, AToDate : TDateTime;
+        var AServicesRecord : TServicesRecord);
+     function GetProjectedCalvingInterval( ALR : TLactationRange ) : Integer;
+     function GetActualCalvingInterval : Integer;
+     function GetDaysOpen( ALR : TLactationRange ) : Integer;
+  public
+    constructor Create;
+    destructor Destroy; override;
+
+    property ServiceCalcAnimals : TIncludeAnimals read FServiceCalcAnimals write FServiceCalcAnimals;
+
+    property FirstLactFewerThanVWP : Integer read FFirstLactFewerThanVWP;
+    property FirstLactVWPto100 : Integer read FFirstLactVWPto100;
+    property FirstLactOver100 : Integer read FFirstLactOver100;
+    property FirstLactAvgDaysToFirstService : Integer read FFirstLactAvgDaysToFirstService;
+    property FirstLactServesPerPregCows : Integer read FFirstLactServesPerPregCows;
+    property FirstLactServesPerAllCows : Integer read FFirstLactServesPerAllCows;
+    property FirstLactDaysOpen : Integer read FFirstLactDaysOpen;
+
+    property SecondLactFewerThanVWP : Integer read FSecondLactFewerThanVWP;
+    property SecondLactVWPto100 : Integer read FSecondLactVWPto100;
+    property SecondLactOver100 : Integer read FSecondLactOver100;
+    property SecondLactAvgDaysToFirstService : Integer read FSecondLactAvgDaysToFirstService;
+    property SecondLactServesPerPregCows : Integer read FSecondLactServesPerPregCows;
+    property SecondLactServesPerAllCows : Integer read FSecondLactServesPerAllCows;
+    property SecondLactDaysOpen : Integer read FSecondLactDaysOpen;
+
+    property ThirdPlusLactFewerThanVWP : Integer read FThirdPlusLactFewerThanVWP;
+    property ThirdPlusLactVWPto100 : Integer read FThirdPlusLactVWPto100;
+    property ThirdPlusLactOver100 : Integer read FThirdPlusLactOver100;
+    property ThirdPlusLactAvgDaysToFirstService : Integer read FThirdPlusLactAvgDaysToFirstService;
+    property ThirdPlusLactServesPerPregCows : Integer read FThirdPlusLactServesPerPregCows;
+    property ThirdPlusLactServesPerAllCows : Integer read FThirdPlusLactServesPerAllCows;
+    property ThirdPlusLactDaysOpen : Integer read FThirdPlusLactDaysOpen;
+
+    property AllLactFewerThanVWP : Integer read FAllLactFewerThanVWP;
+    property AllLactVWPto100 : Integer read FAllLactVWPto100;
+    property AllLactOver100 : Integer read FAllLactOver100;
+    property AllLactAvgDaysToFirstService : Integer read FAllLactAvgDaysToFirstService;
+    property AllLactServesPerPregCows : Integer read FAllLactServesPerPregCows;
+    property AllLactServesPerAllCows : Integer read FAllLactServesPerAllCows;
+    property AllLactDaysOpen : Integer read FAllLactDaysOpen;
+
+    property TotalFirstServiceAllLacts : Double read FTotalFirstServiceAllLacts;
+
+    property PercOfFirstServiceFewerThanVWP : Double read FPercOfFirstServiceFewerThanVWP;
+    property PercOfFirstServiceVWPto100 : Double read FPercOfFirstServiceVWPto100;
+    property PercOfFirstServiceOver100 : Double read FPercOfFirstServiceOver100;
+
+    property HeatsServicesIntervals : THeatServiceIntervals read FHeatServiceIntervals;
+    property ServicesRecord : TServicesRecord read FServicesRecord;
+
+    property FirstLactCalvingInterval : Integer read FFirstLactCalvingInterval;
+    property SecondLactCalvingInterval : Integer read FSecondLactCalvingInterval;
+    property ThirdPlusLactCalvingInterval : Integer read FThirdPlusCalvingInterval;
+    property AllLactCalvingInterval : Integer read FAllLactCalvingInterval;
+
+    property CurrentActualCalvingInterval : Integer read FCurrentActualCalvingInterval;
+  end;
+
+implementation
+uses
+   KRoutines; //uReproductiveSummaryHelper,
+
+{ TReproductiveSummary }
+
+constructor TReproductiveSummary.Create;
+begin
+   SummaryDataSource := TDataSource.Create(nil);
+
+   FLactationRange.LactationStart := 0;
+   FLactationRange.LactationEnd := 30;
+
+   FCowByRange.ByLactation := True;
+   FCowByRange.EventType := 0;
+   FCowByRange.EventDateRange.EventDateStart := 0;
+   FCowByRange.EventDateRange.EventDateEnd := 0;
+
+   FVoluntaryWaitingPeriod := 60;
+
+   FIncludeAnimals := iaInHerd;
+
+   FBreedingEventOptions := [beService, bePregDiag, beCalving];
+   FDefaultGestation := 283;
+end;
+
+destructor TReproductiveSummary.Destroy;
+begin
+  SummaryDataSource.DataSet := nil;
+  FreeAndNil(SummaryDataSource);
+  inherited;
+end;
+
+procedure TReproductiveSummary.CreateTempVars;
+begin
+   SummaryDataSet := TTable.Create(nil);
+   with SummaryDataSet do
+      begin
+         DatabaseName := 'kingswd';
+         TableName := 'tReproSum';
+
+         if Exists then DeleteTable;
+
+         with FieldDefs do
+            begin
+               BeginUpdate;
+               Clear;
+               Add('ID',ftAutoInc);
+               Add('AnimalID',ftInteger);
+               Add('AnimalCode',ftString,10);
+               Add('LactNo',ftInteger);
+               Add('CalvingDate',ftDateTime);
+               Add('FirstServiceDate',ftDateTime);
+               Add('LastServiceDate',ftDateTime);
+               Add('PregDiagDate',ftDateTime);
+               Add('DaysToFirstService',ftInteger);
+               Add('ProjCalvingDate',ftDateTime);
+               Add('ProjCalvingInterval',ftInteger);
+               Add('CurrentCalvingInterval',ftInteger);
+               Add('DaysOpen',ftInteger);
+               EndUpdate;
+            end;
+
+         with IndexDefs do
+            begin
+               BeginUpdate;
+               Clear;
+               Add('iID', 'ID', [ixPrimary]);
+               Add('iAIDLactNo', 'AnimalID;LactNo', [ixUnique,ixDescending]);
+               Add('iAIDLactNoCDSDDP', 'AnimalID;LactNo;CalvingDate;FirstServiceDate;PregDiagDate', [ixUnique,ixDescending]);
+               EndUpdate;
+            end;
+         CreateTable;
+      end;
+
+   SummaryEvents := TTable.Create(nil);
+   with SummaryEvents do
+      begin
+         DatabaseName := 'kingswd';
+         TableName := 'tReproSumEvents';
+
+         if Exists then DeleteTable;
+
+         with FieldDefs do
+            begin
+               BeginUpdate;
+               Clear;
+               Add('ID',ftInteger);
+               Add('AnimalID',ftInteger);
+               Add('AnimalLactNo',ftInteger);
+               Add('EventDate',ftDate);
+               Add('EventType',ftInteger);
+               Add('HerdID',ftInteger);
+               EndUpdate;
+            end;
+
+         with IndexDefs do
+            begin
+               BeginUpdate;
+               Clear;
+               Add('iID', 'ID', [ixUnique,ixPrimary]);
+               Add('iAIDLactNo', 'AnimalID;AnimalLactNo', [ixDescending]);
+               Add('iAIDAnimalLactNoED', 'AnimalID;AnimalLactNo;EventDate', [ixDescending]);
+               EndUpdate;
+            end;
+         CreateTable;
+      end;
+   SummaryDataSource.DataSet := SummaryDataset;
+
+   TempQuery := TQuery.Create(nil);
+   TempQuery.DatabaseName := 'kingswd';
+end;
+
+procedure TReproductiveSummary.LoadCows;
+begin
+   SummaryDataSet.Close;
+   SummaryDataSet.EmptyTable;
+
+   with TempQuery do
+      begin
+         SQL.Clear;
+         SQL.Add('Insert Into '+SummaryDataSet.TableName+' ( AnimalID , AnimalCode, LactNo )');
+         SQL.Add('Select ID , AnimalNo, LactNo From Animals');
+         SQL.Add('Where (Sex="Female")     ');
+         if FIncludeAnimals = iaLeftHerd then
+            SQL.Add('And (Inherd=False)    ')
+         else if FIncludeAnimals = iaInHerd then
+            SQL.Add('And (Inherd=True)     ');
+         SQL.Add(Format('And LactNo Between  %d And %d ',[FLactationRange.LactationStart,FLactationRange.LactationEnd]));
+         if ( FQueryHerdID > 0 ) then
+            SQL.Add(Format('And HerdID = %d',[FQueryHerdID]));
+         with FCowByRange do
+            begin
+               if not ByLactation then
+                  begin
+                     SQL.Add('And ID IN ( Select Distinct(ID) From Events');
+                     SQL.Add(Format('Where ( EventType = %d )' ,[EventType]));
+                     SQL.Add(Format('And EventDate Between ( %s and %s )',[FormatDate(EventDateRange.EventDateStart, dsUS),
+                                                                           FormatDate(EventDateRange.EventDateEnd, dsUS)]));
+                  end;
+            end;
+         ExecSQL;
+         SummaryDataSet.Open;
+         FRecordCount := SummaryDataSet.RecordCount;
+      end;
+
+   SummaryEvents.Close;
+   SummaryEvents.EmptyTable;
+   with TempQuery do
+      begin
+         SQL.Clear;
+         SQL.Add('Insert Into '+SummaryEvents.TableName+' ( ID, AnimalID, AnimalLactNo, EventType, EventDate, HerdID )');
+         SQL.Add('Select ID, AnimalID, AnimalLactNo, EventType, EventDate, HerdID ');
+         SQL.Add('From Events');
+         SQL.Add('Where AnimalID IN (Select S.AnimalID From  '+SummaryDataSet.TableName+' S )');
+         SQL.Add('And EventType in (1,2,3,4,5)');
+         ExecSQL;
+         SummaryEvents.Open;
+      end;
+end;
+
+procedure TReproductiveSummary.LoadBreedingInfo;
+var
+   dEventDate : TDateTime;
+   TempInt : Integer;
+
+begin
+   SummaryDataSet.First;
+   while not SummaryDataSet.Eof do
+      begin
+         if beService in BreedingEvents then
+            begin
+               dEventDate := MinEventDate(SummaryDataSet.FieldByName('AnimalID').AsInteger,
+                                          SummaryDataSet.FieldByName('LactNo').AsInteger,
+                                          cServiceEvent );
+               if ( dEventDate > 0 ) then
+                  begin
+                     SummaryDataSet.Edit;
+                     SummaryDataSet.FieldByName('FirstServiceDate').AsDateTime := dEventDate;
+                     SummaryDataSet.Post;
+                  end;
+
+               dEventDate := MaxEventDate(SummaryDataSet.FieldByName('AnimalID').AsInteger,
+                                          SummaryDataSet.FieldByName('LactNo').AsInteger,
+                                          cServiceEvent );
+               if ( dEventDate > 0 ) then
+                  begin
+                     SummaryDataSet.Edit;
+                     SummaryDataSet.FieldByName('LastServiceDate').AsDateTime := dEventDate;
+                     SummaryDataSet.FieldByName('ProjCalvingDate').AsDateTime := dEventDate + FDefaultGestation;
+                     SummaryDataSet.Post;
+                  end;
+            end;
+
+         if beCalving in BreedingEvents then
+            begin
+               dEventDate := MinEventDate(SummaryDataSet.FieldByName('AnimalID').AsInteger,
+                                          SummaryDataSet.FieldByName('LactNo').AsInteger,
+                                          cCalvingEvent );
+               if ( dEventDate > 0 ) then
+                  begin
+                     SummaryDataSet.Edit;
+                     // Last Calving Date
+                     SummaryDataSet.FieldByName('CalvingDate').AsDateTime := dEventDate;
+
+                     if ( SummaryDataSet.FieldByName('CalvingDate').AsDateTime > 0 ) then
+                        begin
+                           TempInt := Trunc(SummaryDataSet.FieldByName('LastServiceDate').AsDateTime-SummaryDataSet.FieldByName('CalvingDate').AsDateTime);
+                           if ( TempInt > 0 ) then
+                               SummaryDataSet.FieldByName('DaysOpen').AsInteger := TempInt;
+                        end;
+
+                     // Projected Calving Interval - Get Projected Calving Date
+                     TempInt := Trunc( SummaryDataSet.FieldByName('ProjCalvingDate').AsDateTime - SummaryDataSet.FieldByName('CalvingDate').AsDateTime);
+                     if ( TempInt > 0 ) then
+                        SummaryDataSet.FieldByName('ProjCalvingInterval').AsInteger := TempInt;
+
+                     TempInt := Trunc( Date - SummaryDataSet.FieldByName('CalvingDate').AsDateTime);
+                     if ( TempInt > 0 ) then
+                        SummaryDataSet.FieldByName('CurrentCalvingInterval').AsInteger := TempInt;
+                     SummaryDataSet.Post;
+                  end;
+            end;
+
+         if bePregDiag in BreedingEvents then
+            begin
+               dEventDate := MinEventDate(SummaryDataSet.FieldByName('AnimalID').AsInteger,
+                                          SummaryDataSet.FieldByName('LactNo').AsInteger,
+                                          CPregDiagEvent );
+               if ( dEventDate > 0 ) then
+                  begin
+                     SummaryDataSet.Edit;
+                     SummaryDataSet.FieldByName('PregDiagDate').AsDateTime := dEventDate;
+                     SummaryDataSet.Post;
+                  end;
+            end;
+         SummaryDataSet.Next;
+      end;
+   SummaryDataSet.Refresh;
+end;
+
+procedure TReproductiveSummary.LoadRawData;
+begin
+   FRecordCount := 0;
+   ResetVars;
+   CreateTempVars;
+   LoadCows;
+   LoadBreedingInfo;
+   DoCalcs;
+   ReleaseTempVars;
+end;
+
+procedure TReproductiveSummary.CalcSummary;
+begin
+   LoadRawData;
+end;
+
+procedure TReproductiveSummary.SetCowByRange(const Value: TCowByRange);
+begin
+   FCowByRange := Value;
+end;
+
+function TReproductiveSummary.MinEventDate(const AID, ALactNo,
+  AEvent: Integer): TDateTime;
+var
+   tDate : TDateTime;
+begin
+   tDate := 0;
+   SummaryEvents.Filter := Format('( AnimalID = %d ) And ( AnimalLactNo = %d ) And ( EventType = %d )',[AID,ALactNo,AEvent]);
+   SummaryEvents.Filtered := True;
+   try
+      if SummaryEvents.FindFirst then
+         begin
+            tDate := SummaryEvents.FieldByName('EventDate').AsDateTime;
+            while SummaryEvents.FindNext do
+               begin
+                  if SummaryEvents.FieldByName('EventDate').AsDateTime < tDate then
+                     tDate := SummaryEvents.FieldByName('EventDate').AsDateTime;
+               end;
+         end;
+   finally
+      SummaryEvents.Filtered := False;
+      SummaryEvents.Filter := '';
+      Result := tDate;
+   end;
+end;
+
+
+procedure TReproductiveSummary.AddFieldToSummary(FieldName,
+  FieldType: string);
+begin
+   with TempQuery do
+      begin
+         SQL.Clear;
+         SQL.Add(Format('ALTER TABLE %s Add %s %s',[SummaryDataSet.TableName, FieldName, FieldType]));
+         ExecSQL;
+      end;
+   SummaryDataSet.FieldDefs.Update;
+end;
+
+procedure TReproductiveSummary.SetBreedingEventOptions(
+  const Value: TBreedingEventOptions);
+begin
+  FBreedingEventOptions := Value;
+end;
+
+function TReproductiveSummary.NoOfFirstServed: Integer;
+begin
+   Result := 0;
+   SummaryDataSet.First;
+   while not SummaryDataSet.Eof do
+      begin
+         if SummaryDataSet.FieldByName('FirstServiceDate').AsDateTime > 0 then
+            Inc(Result);
+         SummaryDataSet.Next;
+      end;
+end;
+
+procedure TReproductiveSummary.SetLactationRange(
+  const Value: TLactationRange);
+begin
+   FLactationRange := Value;
+end;
+
+procedure TReproductiveSummary.ReleaseTempVars;
+begin
+  SummaryEvents.Close;
+  SummaryEvents.DeleteTable;
+  FreeAndNil(SummaryEvents);
+
+  FreeAndNil(TempQuery);
+
+  SummaryDataSet.Close;
+  SummaryDataSet.DeleteTable;
+  FreeAndNil(SummaryDataSet);
+end;
+
+function TReproductiveSummary.MaxEventDate(const AID, ALactNo,
+  AEvent: Integer): TDateTime;
+var
+   tDate : TDateTime;
+begin
+   tDate := 0;
+   SummaryEvents.Filter := Format('( AnimalID = %d ) And ( AnimalLactNo = %d ) And ( EventType = %d )',[AID,ALactNo,AEvent]);
+   SummaryEvents.Filtered := True;
+   try
+      if SummaryEvents.FindLast then
+         begin
+            tDate := SummaryEvents.FieldByName('EventDate').AsDateTime;
+            while SummaryEvents.FindPrior do
+               begin
+                  if SummaryEvents.FieldByName('EventDate').AsDateTime > tDate then
+                     tDate := SummaryEvents.FieldByName('EventDate').AsDateTime;
+               end;
+         end;
+   finally
+      SummaryEvents.Filtered := False;
+      SummaryEvents.Filter := '';
+      Result := tDate;
+   end;
+end;
+
+{ TTotalHerdReproductiveSummary }
+
+constructor TTotalHerdReproductiveSummary.Create;
+begin
+  inherited;
+  //AddFieldToSummary('NoOfServes', 'INTEGER');
+end;
+
+destructor TTotalHerdReproductiveSummary.Destroy;
+begin
+  inherited;
+
+end;
+
+procedure TTotalHerdReproductiveSummary.DoCalcs;
+var
+  LR : TLactationRange;
+begin
+   SummaryDataSet.First;
+   while not SummaryDataSet.Eof do
+      begin
+         if ( SummaryDataSet.FieldByName('CalvingDate').AsDateTime > 0 ) and ( SummaryDataSet.FieldByName('FirstServiceDate').AsDateTime > 0 ) then
+            begin
+               SummaryDataSet.Edit;
+               SummaryDataSet.FieldByName('DaysToFirstService').AsInteger := Trunc( SummaryDataSet.FieldByName('FirstServiceDate').AsDateTime -
+                                                                                    SummaryDataSet.FieldByName('CalvingDate').AsDateTime );
+               SummaryDataSet.Post;
+            end;
+         SummaryDataSet.Next;
+      end;
+
+   LR.LactationStart := FLactationRange.LactationStart;
+   LR.LactationEnd := FLactationRange.LactationStart;
+
+   FFirstLactFewerThanVWP := GetAnimalsVWP( LR, ZeroToVWP );
+   FFirstLactVWPto100 := GetAnimalsVWP( LR, VWPTo100 );
+   FFirstLactOver100 := GetAnimalsVWP( LR, Over100 );
+   FFirstLactAvgDaysToFirstService := GetAvg1stService( LR );
+   FFirstLactServesPerPregCows := NoOfServices(LR, True);
+   FFirstLactServesPerAllCows :=  NoOfServices(LR, False);
+   FFirstLactCalvingInterval := GetProjectedCalvingInterval(LR);
+   FFirstLactDaysOpen := GetDaysOpen(LR);
+
+   LR.LactationStart := 2;
+   LR.LactationEnd := 2;
+
+   FSecondLactFewerThanVWP := GetAnimalsVWP( LR, ZeroToVWP );
+   FSecondLactVWPto100 := GetAnimalsVWP( LR, VWPTo100 );
+   FSecondLactOver100 := GetAnimalsVWP( LR, Over100 );
+   FSecondLactAvgDaysToFirstService := GetAvg1stService( LR );
+   FSecondLactServesPerPregCows := NoOfServices(LR, True);
+   FSecondLactServesPerAllCows :=  NoOfServices(LR, False);
+   FSecondLactCalvingInterval := GetProjectedCalvingInterval(LR);
+   FSecondLactDaysOpen := GetDaysOpen(LR);
+
+   LR.LactationStart := 3;
+   LR.LactationEnd := 100;
+
+   FThirdPlusLactFewerThanVWP := GetAnimalsVWP( LR, ZeroToVWP );
+   FThirdPlusLactVWPto100 := GetAnimalsVWP( LR, VWPTo100 );
+   FThirdPlusLactOver100 := GetAnimalsVWP( LR, Over100 );
+   FThirdPlusLactAvgDaysToFirstService := GetAvg1stService( LR );
+   FThirdPlusLactServesPerPregCows := NoOfServices(LR, True);
+   FThirdPlusLactServesPerAllCows :=  NoOfServices(LR, False);
+   FThirdPlusCalvingInterval := GetProjectedCalvingInterval(LR);
+   FThirdPlusLactDaysOpen := GetDaysOpen(LR);
+
+   LR.LactationStart := FLactationRange.LactationStart;
+   LR.LactationEnd := FLactationRange.LactationEnd;
+
+   FAllLactFewerThanVWP := GetAnimalsVWP( LR, ZeroToVWP );
+   FAllLactVWPto100 := GetAnimalsVWP( LR, VWPTo100 );
+   FAllLactOver100 := GetAnimalsVWP( LR, Over100 );
+   FAllLactAvgDaysToFirstService := GetAvg1stService( LR );
+   FAllLactServesPerPregCows := NoOfServices(LR, True);
+   FAllLactServesPerAllCows :=  NoOfServices(LR, False);
+   FAllLactCalvingInterval := GetProjectedCalvingInterval(LR);
+   FAllLactDaysOpen := GetDaysOpen(LR);
+
+   FCurrentActualCalvingInterval := GetActualCalvingInterval;
+
+   FTotalFirstServiceAllLacts := FAllLactFewerThanVWP +  FAllLactVWPto100 + FAllLactOver100;
+
+   FPercOfFirstServiceFewerThanVWP    := Perc( FAllLactFewerThanVWP, FTotalFirstServiceAllLacts);
+   FPercOfFirstServiceVWPto100        := Perc( FAllLactVWPto100, FTotalFirstServiceAllLacts);
+   FPercOfFirstServiceOver100         := Perc( FAllLactOver100, FTotalFirstServiceAllLacts);
+
+   CalcHeatServiceIntervals(FHeatServiceIntervals);
+   CalcServicesForPeriod( IncMonth(Date, -12), Date, FServicesRecord );
+end;
+
+function TTotalHerdReproductiveSummary.GetAnimalsVWP(ALR: TLactationRange;
+  AVWPRange: TVWPRange): Integer;
+{  TVWPRange = ( ZeroToVWP, VWPTo100, Over100 ); }
+begin
+   with TempQuery do
+      begin
+         SQL.Clear;
+         SQL.Add('Select Count(AnimalID) CountOfAnimals From '+SummaryDataSet.TableName+'');
+         SQL.Add(Format('Where LactNo Between %d and %d ',[ALR.LactationStart, ALR.LactationEnd]));
+         case AVWPRange of
+            ZeroToVWP : SQL.Add(Format('And DaysToFirstService Between %d and %d ',[0,VoluntaryWaitingPeriod]));
+            VWPTo100  : SQL.Add(Format('And DaysToFirstService Between %d and %d ',[VoluntaryWaitingPeriod,100]));
+            Over100   : SQL.Add(Format('And DaysToFirstService > %d ',[100]));
+         else
+            raise Exception.Create('Invalid VWP Range');
+         end;
+         Open;
+         try
+            Result := Fields[0].AsInteger;
+         finally
+            Close;
+         end;
+      end;
+end;
+
+function TTotalHerdReproductiveSummary.GetAvg1stService(
+  ALR: TLactationRange): Integer;
+begin
+   with TempQuery do
+      begin
+         SQL.Clear;
+         SQL.Add('Select Avg(DaysToFirstService) AvgDaysToFirstService From '+SummaryDataSet.TableName+'');
+         SQL.Add(Format('Where LactNo Between %d and %d ',[ALR.LactationStart, ALR.LactationEnd]));
+         SQL.Add('And DaysToFirstService > 0');
+         Open;
+         try
+            Result := Fields[0].AsInteger;
+         finally
+            Close;
+         end;
+      end;
+end;
+
+function TTotalHerdReproductiveSummary.NoOfServices(ALR: TLactationRange;
+  CheckIsPreg: Boolean): Integer;
+begin
+   with TempQuery do
+      begin
+         SQL.Clear;
+         SQL.Add('Select Count(S.AnimalID) From tReproSumEvents E, '+SummaryDataSet.TableName+' S');
+         if CheckIsPreg then
+            begin
+               SQL.Add('LEFT JOIN tReproSumEvents E2 ON (S.AnimalID=E2.AnimalID)');
+               SQL.Add('LEFT JOIN PregnancyDiag P ON (P.EventID=E2.ID)');
+            end;
+         SQL.Add('Where (S.AnimalID=E.AnimalID) ');
+         SQL.Add('And ( E.AnimalLactNo = S.LactNo ) ');
+         SQL.Add(Format('And ( E.AnimalLactNo Between %d and %d ) ',[ALR.LactationStart, ALR.LactationEnd]));
+         SQL.Add(Format('And ( E.EventType = %d )',[cServiceEvent]));
+         if ( CheckIsPreg ) then
+            begin
+               SQL.Add('And ( E2.AnimalLactNo = S.LactNo ) ');
+               SQL.Add(Format('And ( E2.EventType = %d )',[cPregDiagEvent]));
+               SQL.Add('And ( P.PregnancyStatus = True )');
+            end;
+         Open;
+         try
+            Result := Fields[0].AsInteger;
+         finally
+            Close;
+         end;
+      end;
+end;
+
+procedure TTotalHerdReproductiveSummary.CalcHeatServiceIntervals(
+  var AHeatServiceIntervals: THeatServiceIntervals);
+var
+   tDate : TDateTime;
+   Interval : Integer;
+begin
+   FillChar(AHeatServiceIntervals, SizeOf(THeatServiceIntervals), 0);
+   SummaryEvents.IndexName := 'iAIDAnimalLactNoED';
+   with SummaryDataSet do
+      begin
+         First;
+         while not eof do
+            begin
+               SummaryEvents.Filter :=
+               Format('( AnimalID = %d ) And ( AnimalLactNo = %d ) And (( EventType = %d ) OR ( EventType = %d ))',
+               [FieldByName('AnimalID').AsInteger,FieldByName('LactNo').AsInteger, cBullingEvent, cServiceEvent]);
+               SummaryEvents.Filtered := True;
+               try
+                  if SummaryEvents.FindFirst then
+                     begin
+                        tDate := SummaryEvents.FieldByName('EventDate').AsDateTime;
+                        while SummaryEvents.FindNext do
+                           begin
+                              Interval := Trunc(tDate - SummaryEvents.FieldByName('EventDate').AsDateTime);
+                              // store this event date, compare if next event found
+                              tDate := SummaryEvents.FieldByName('EventDate').AsDateTime;
+                              if ( Interval < 18 ) then
+                                 inc(AHeatServiceIntervals.IntervalLessThan18)
+                              else if ( Interval >= 18 ) and ( Interval <= 24 ) then
+                                 inc(AHeatServiceIntervals.Interval18To24)
+                              else if ( Interval >= 36 ) and ( Interval <= 48 ) then
+                                 inc(AHeatServiceIntervals.Interval36To48)
+                              else
+                                 inc(AHeatServiceIntervals.IntervalOther);
+                           end;
+                     end;
+               finally
+                  SummaryEvents.Filtered := False;
+                  SummaryEvents.Filter := '';
+               end;
+               SummaryDataSet.Next;
+            end;
+      end;
+end;
+
+procedure TTotalHerdReproductiveSummary.CalcServicesForPeriod(AFromDate,
+  AToDate: TDateTime; var AServicesRecord: TServicesRecord);
+
+var
+   ServiceCountQuery : TQuery;
+   CalvedQuery : TQuery;
+   ServiceSuccess : Boolean;
+
+  function ServiceSuccessful(const AID, ALactNo : Integer) : Boolean;
+  begin
+     with CalvedQuery do
+        begin
+           Close;
+           ParamByName('AID').AsInteger := TempQuery.FieldByName('AnimalID').AsInteger;
+           ParamByName('LactNo').AsInteger := TempQuery.FieldByName('AnimalLactNo').AsInteger+1;
+           Prepare;
+           Open;
+           try
+              ServiceSuccessful := ( Fields[0].AsInteger > 0 );
+           finally
+              Close;
+           end;
+        end;
+  end;
+
+begin
+   FillChar(AServicesRecord, SizeOf(TServicesRecord), 0);
+
+   ServiceCountQuery := TQuery.Create(nil);
+   with ServiceCountQuery do
+      begin
+         DatabaseName := 'kingswd';
+         SQL.Clear;
+         SQL.Add('Select Count(E.ID) CEID        ');
+         SQL.Add('From Events E                  ');
+         SQL.Add('Where (E.AnimalID = :EAnimalID)');
+         SQL.Add('And   (E.AnimalLactNo = :LactNo)');
+         SQL.Add('And   (E.EventType = '+IntToStr(CServiceEvent)+')');
+         if ( AFromDate > 0 ) and ( AToDate > 0 ) then
+            SQL.ADD('AND   (E.EventDate BETWEEN ' + '''' + FormatDateTime(cUSDateStyle,AFromDate) + '''' + ' And ' + '''' + FormatDateTime(cUSDateStyle,AToDate) + '''' + ')')
+         else if ( AFromDate > 0 ) and ( AToDate = 0 ) then
+            SQL.ADD('AND   (E.EventDate >= ' + '''' + FormatDateTime(cUSDateStyle,AFromDate) + ''')')
+         else if ( AFromDate <= 0 ) and ( AToDate > 0 ) then
+            SQL.ADD('AND   (E.EventDate <= ' + '''' + FormatDateTime(cUSDateStyle,AToDate) + ''')');
+      end;
+
+   CalvedQuery := TQuery.Create(nil);
+   with CalvedQuery do
+      begin
+         DatabaseName := 'kingswd';
+         SQL.Clear;
+         SQL.Add('Select Distinct(E.ID) From '+SummaryEvents.TableName+' E');
+         SQL.Add('Where E.AnimalID =:AID');
+         SQL.Add('And E.AnimalLactNo =:LactNo');
+         SQL.Add(Format('And E.EventType = %d',[cCalvingEvent]));
+      end;
+
+   with TempQuery do
+      begin
+         SQL.Clear;
+         SQL.Add('SELECT E.ID, E.AnimalID, E.AnimalLactNo ');
+         SQL.Add('FROM '+SummaryEvents.TableName +' E ');
+         if ( FServiceCalcAnimals = iaInHerd ) then
+            SQL.Add('LEFT JOIN Animals A ON (A.ID=E.AnimalID) ');
+         SQL.Add(Format('WHERE (E.HerdId = %d)',[QueryHerdID]));
+         if ( FServiceCalcAnimals = iaInHerd ) then
+            SQL.Add('AND InHerd=True');
+         SQL.Add('AND   (E.EventType = '+IntToStr(cServiceEvent)+')');
+         if ( AFromDate > 0 ) and ( AToDate > 0 ) then
+            SQL.ADD('AND   (E.EventDate BETWEEN ' + '''' + FormatDateTime(cUSDateStyle,AFromDate) + '''' + ' And ' + '''' + FormatDateTime(cUSDateStyle,AToDate) + '''' + ')')
+         else if ( AFromDate > 0 ) and ( AToDate = 0 ) then
+            SQL.ADD('AND   (E.EventDate >= ' + '''' + FormatDateTime(cUSDateStyle,AFromDate) + ''')')
+         else if ( AFromDate <= 0 ) and ( AToDate > 0 ) then
+            SQL.ADD('AND   (E.EventDate <= ' + '''' + FormatDateTime(cUSDateStyle,AToDate) + ''')');
+         SQL.ADD('GROUP BY E.ID, E.AnimalID, E.AnimalLactNo ');
+         Prepare;
+         Open;
+
+         While not TempQuery.EOF do
+            begin
+               ServiceSuccess := False;
+               ServiceCountQuery.Close;
+               ServiceCountQuery.ParamByName('EAnimalID').AsInteger := TempQuery.FieldByName('AnimalID').AsInteger;
+               ServiceCountQuery.ParamByName('LactNo').AsInteger := TempQuery.FieldByName('AnimalLactNo').AsInteger;
+               ServiceCountQuery.Prepare;
+               ServiceCountQuery.Open;
+               try
+                  if ServiceCountQuery.FieldByName('CEID').AsInteger = 1 then
+                     begin
+                        Inc(AServicesRecord.NoFirstServices);
+                        ServiceSuccess := ServiceSuccessful(TempQuery.FieldByName('AnimalID').AsInteger, TempQuery.FieldByName('AnimalLactNo').AsInteger+1);
+                        if ServiceSuccess then
+                           AServicesRecord.NoFirstServicesSuccessRatePerc := AServicesRecord.NoFirstServicesSuccessRatePerc+1;
+                     end
+                  else if ServiceCountQuery.FieldByName('CEID').AsInteger = 2 then
+                     begin
+                        Inc(AServicesRecord.NoSecondServices);
+                        ServiceSuccess := ServiceSuccessful(TempQuery.FieldByName('AnimalID').AsInteger, TempQuery.FieldByName('AnimalLactNo').AsInteger+1);
+                        if ServiceSuccess then
+                           AServicesRecord.NoSecondServicesSuccessRatePerc := AServicesRecord.NoSecondServicesSuccessRatePerc+1;
+                     end
+                  else if ServiceCountQuery.FieldByName('CEID').AsInteger >= 3 then
+                     begin
+                        Inc(AServicesRecord.NoThirdPlusServices);
+                        ServiceSuccess := ServiceSuccessful(TempQuery.FieldByName('AnimalID').AsInteger, TempQuery.FieldByName('AnimalLactNo').AsInteger+1);
+                        if ServiceSuccess then
+                           AServicesRecord.NoThirdPlusServicesSuccessRatePerc := AServicesRecord.NoThirdPlusServicesSuccessRatePerc+1;
+                     end;
+
+                  if ServiceCountQuery.FieldByName('CEID').AsInteger > 0 then
+                     begin
+                        Inc(AServicesRecord.NoTotalServices);
+                        if ServiceSuccess then
+                           AServicesRecord.NoTotalServicesServicesSuccessRatePerc := AServicesRecord.NoTotalServicesServicesSuccessRatePerc+1;
+                     end;
+               finally
+                  ServiceCountQuery.Close;
+               end;
+               TempQuery.Next;
+            end;
+
+         AServicesRecord.NoFirstServicesSuccessRatePerc := Perc(AServicesRecord.NoFirstServicesSuccessRatePerc, AServicesRecord.NoFirstServices);
+         AServicesRecord.NoSecondServicesSuccessRatePerc := Perc(AServicesRecord.NoSecondServicesSuccessRatePerc, AServicesRecord.NoSecondServices);
+         AServicesRecord.NoThirdPlusServicesSuccessRatePerc := Perc(AServicesRecord.NoThirdPlusServicesSuccessRatePerc, AServicesRecord.NoThirdPlusServices);
+         AServicesRecord.NoTotalServicesServicesSuccessRatePerc := Perc(AServicesRecord.NoTotalServicesServicesSuccessRatePerc, AServicesRecord.NoTotalServices);
+      end;
+   FreeAndNil(ServiceCountQuery);
+   FreeAndNil(CalvedQuery);
+end;
+
+
+procedure TTotalHerdReproductiveSummary.ResetVars;
+begin
+    FAllLactOver100                    := 0;
+    FSecondLactVWPto100                := 0;
+    FSecondLactFewerThanVWP            := 0;
+    FFirstLactOver100                  := 0;
+    FAllLactFewerThanVWP               := 0;
+    FThirdPlusLactOver100              := 0;
+    FAllLactVWPto100                   := 0;
+    FFirstLactFewerThanVWP             := 0;
+    FThirdPlusLactFewerThanVWP         := 0;
+    FFirstLactVWPto100                 := 0;
+    FThirdPlusLactVWPto100             := 0;
+    FSecondLactOver100                 := 0;
+    FFirstLactAvgDaysToFirstService    := 0;
+    FSecondLactAvgDaysToFirstService   := 0;
+    FAllLactAvgDaysToFirstService      := 0;
+    FThirdPlusLactAvgDaysToFirstService:= 0;
+    FThirdPlusLactServesPerAllCows     := 0;
+    FAllLactServesPerAllCows           := 0;
+    FFirstLactServesPerAllCows         := 0;
+    FSecondLactServesPerPregCows       := 0;
+    FAllLactServesPerPregCows          := 0;
+    FSecondLactServesPerAllCows        := 0;
+    FFirstLactServesPerPregCows        := 0;
+    FThirdPlusLactServesPerPregCows    := 0;
+    FServiceCalcAnimals                := iaAll;
+    FPercOfFirstServiceVWPto100        := 0;
+    FPercOfFirstServiceFewerThanVWP    := 0;
+    FPercOfFirstServiceOver100         := 0;
+    FCurrentActualCalvingInterval      := 0;
+    FFirstLactCalvingInterval          := 0;
+    FSecondLactCalvingInterval         := 0;
+    FThirdPlusCalvingInterval          := 0;
+    FAllLactCalvingInterval            := 0;
+    FillChar(FHeatServiceIntervals, SizeOf(THeatServiceIntervals), 0);
+    FillChar(FServicesRecord, SizeOf(TServicesRecord), 0);
+end;
+
+function TTotalHerdReproductiveSummary.GetProjectedCalvingInterval(
+  ALR: TLactationRange): Integer;
+begin
+   with TempQuery do
+      begin
+         SQL.Clear;
+         SQL.Add('Select Avg(ProjCalvingInterval) AvgProjCalvingInterval From '+SummaryDataSet.TableName+'');
+         SQL.Add(Format('Where LactNo Between %d and %d ',[ALR.LactationStart, ALR.LactationEnd]));
+         SQL.Add('And ProjCalvingInterval > 0');
+         Open;
+         try
+            Result := Fields[0].AsInteger;
+         finally
+            Close;
+         end;
+      end;
+end;
+
+function TTotalHerdReproductiveSummary.GetActualCalvingInterval: Integer;
+begin
+   with TempQuery do
+      begin
+         SQL.Clear;
+         SQL.Add('Select Avg(CurrentCalvingInterval) AvgCalvingInterval From '+SummaryDataSet.TableName+'');
+         SQL.Add('Where CurrentCalvingInterval > 0');
+         Open;
+         try
+            Result := Fields[0].AsInteger;
+         finally
+            Close;
+         end;
+      end;
+end;
+
+function TTotalHerdReproductiveSummary.GetDaysOpen(
+  ALR: TLactationRange): Integer;
+begin
+   with TempQuery do
+      begin
+         SQL.Clear;
+         SQL.Add('Select Avg(DaysOpen) AvgDaysOpen From '+SummaryDataSet.TableName+'');
+         SQL.Add(Format('Where LactNo Between %d and %d ',[ALR.LactationStart, ALR.LactationEnd]));
+         SQL.Add('And DaysOpen > 0');
+         Open;
+         try
+            Result := Fields[0].AsInteger;
+         finally
+            Close;
+         end;
+      end;
+end;
+
+end.

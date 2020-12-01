@@ -1,0 +1,105 @@
+unit uDownloadExternalProgram;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  cxControls, cxContainer, cxEdit, cxProgressBar, LMDWebBase, LMDWebConfig,
+  LMDWebHTTPGet, LMDDownload, KRoutines, GenTypesConst;
+
+type
+  TDownloadType = (dtTeamViewer);
+  TfmDownloadExternalProgram = class(TForm)
+    pbDownloadAttachment: TcxProgressBar;
+    GetDownloadAttachment: TLMDWebHTTPGet;
+    procedure GetDownloadAttachmentProcessed(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure GetDownloadAttachmentProgress(Sender: TLMDWebHTTPGet;
+      Item: TLMDDownloadItem);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+    class procedure DownloadExternalProgram (ADownloadType : TDownloadType);
+  end;
+
+var
+  fmDownloadExternalProgram: TfmDownloadExternalProgram;
+
+implementation
+
+{$R *.DFM}
+
+{ TfmDownloadExternalProgram }
+
+class procedure TfmDownloadExternalProgram.DownloadExternalProgram(ADownloadType : TDownloadType);
+begin
+   with TfmDownloadExternalProgram.Create(nil) do
+      try
+         if ( ADownloadType = dtTeamViewer ) then
+            begin
+               GetDownloadAttachment.DestinationName := cTeamViewerDownloadFileName;
+               Caption := 'Download TeamViewer';
+            end;
+         pbDownloadAttachment.Properties.Max := 100;
+         GetDownloadAttachment.DownloadDir := IncludeTrailingBackslash(ApplicationPath);
+         GetDownloadAttachment.URL := cDownloadDir + GetDownloadAttachment.DestinationName;
+         ShowModal;
+      finally
+         Free;
+      end;
+end;
+
+procedure TfmDownloadExternalProgram.FormShow(Sender: TObject);
+begin
+   if IsNetConnected then
+      begin
+         Screen.Cursor := crHourGlass;
+         Update;
+         try
+            Application.ProcessMessages;
+            pbDownloadAttachment.Position := 0;
+            pbDownloadAttachment.Visible := True;
+            GetDownloadAttachment.Process(False, True);
+         finally
+            Screen.Cursor := crDefault;
+            Update;
+         end;
+      end
+   else
+      MessageDlg(cINTERNET_CONNECTION_NOT_ESTABLISHED,mtError,[mbOK],0);
+end;
+
+procedure TfmDownloadExternalProgram.GetDownloadAttachmentProcessed(
+  Sender: TObject);
+var
+   MsgText, FileName : string;
+begin
+   FileName := IncludeTrailingBackslash(GetDownloadAttachment.DownloadDir) + GetDownloadAttachment.DestinationName;
+   if FileExists(FileName) then
+      begin
+         MsgText := 'File was successfully downloaded and installed.';
+         if ( MessageDlg(MsgText,mtInformation,[mbOK],0) = mrOK ) then
+            Close;
+      end
+   else
+      begin
+         MsgText := 'File download has failed.';
+         if ( MessageDlg(MsgText,mtInformation,[mbOK],0) = mrOK ) then
+            Close;
+      end;
+end;
+
+procedure TfmDownloadExternalProgram.GetDownloadAttachmentProgress(
+  Sender: TLMDWebHTTPGet; Item: TLMDDownloadItem);
+begin
+  pbDownloadAttachment.Position := Item.Progress;
+  if pbDownloadAttachment.Position >= 100 then
+     begin
+        pbDownloadAttachment.Visible := False;
+        pbDownloadAttachment.Position := 0;
+     end;
+  Update;
+end;
+
+end.

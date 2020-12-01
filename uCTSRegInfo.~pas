@@ -1,0 +1,94 @@
+{
+   01/06/11 [V4.1 R1.8] /MK Additional Feature - New Unit To Show CTS Birth And Movement Count on MenuUnit Form Show/Close.
+}
+
+unit uCTSRegInfo;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  db, DBTables, ActnList, cxControls, cxContainer, cxEdit,
+  cxLabel, StdCtrls, cxButtons, ExtCtrls, DairyData, uCTSBirthReg,
+  uCTSMovementReg, GenTypesConst, cxTextEdit, cxMaskEdit, dxBar,
+  dxBarExtItems;
+
+type
+  TfmCTSRegInfo = class(TForm)
+    ActionList: TActionList;
+    actExit: TAction;
+    actBirthReg: TAction;
+    actMovementReg: TAction;
+    dxBarManager: TdxBarManager;
+    dxlbExit: TdxBarLargeButton;
+    lMovementReg: TcxLabel;
+    lBirthReg: TcxLabel;
+    cxeBirthRegCount: TcxMaskEdit;
+    cxeMovementRegCount: TcxMaskEdit;
+    btnMoveRegNow: TcxButton;
+    btnBirthRegNow: TcxButton;
+    lRegInfo: TcxLabel;
+    procedure actMovementRegExecute(Sender: TObject);
+    procedure actBirthRegExecute(Sender: TObject);
+    procedure actExitExecute(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure actMovementRegUpdate(Sender: TObject);
+    procedure actBirthRegUpdate(Sender: TObject);
+  private
+    FBirthRegCount : Integer;
+    FMovementRegCount : Integer;
+    procedure CheckRegistrations;
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  fmCTSRegInfo: TfmCTSRegInfo;
+
+implementation
+
+{$R *.DFM}
+
+procedure TfmCTSRegInfo.actMovementRegExecute(Sender: TObject);
+begin
+   TfmCTSWSMovementReg.Execute;
+   CheckRegistrations;
+end;
+
+procedure TfmCTSRegInfo.actBirthRegExecute(Sender: TObject);
+begin
+   TfmCTSWSBirthReg.Execute;
+   CheckRegistrations;
+end;
+
+procedure TfmCTSRegInfo.actExitExecute(Sender: TObject);
+begin
+   Close;
+end;
+
+procedure TfmCTSRegInfo.FormCreate(Sender: TObject);
+begin
+   CheckRegistrations;
+end;
+
+procedure TfmCTSRegInfo.CheckRegistrations;
+begin
+   FMovementRegCount := WinData.CTSMovementRegCount;
+   FBirthRegCount := WinData.CTSBirthRegCount;
+
+   cxeBirthRegCount.EditValue := FBirthRegCount;
+   cxeMovementRegCount.EditValue := FMovementRegCount;
+end;
+
+procedure TfmCTSRegInfo.actMovementRegUpdate(Sender: TObject);
+begin
+   actMovementReg.Enabled := (FMovementRegCount>0);
+end;
+
+procedure TfmCTSRegInfo.actBirthRegUpdate(Sender: TObject);
+begin
+   actBirthReg.Enabled := (FBirthRegCount>0);
+end;
+
+end.

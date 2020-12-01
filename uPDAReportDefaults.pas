@@ -1,0 +1,316 @@
+unit uPDAReportDefaults;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  StdCtrls, Mask, ToolEdit, Registry,FileCtrl, CheckLst, ExtCtrls, RXCtrls,
+  ComCtrls, ToolWin, Buttons, GenTypesConst, PDALink, Def;
+
+type
+  TPDAReportDefaults = class(TForm)
+    ToolBar1: TToolBar;
+    ToolButton2: TToolButton;
+    sbExit: TRxSpeedButton;
+    ToolButton1: TToolButton;
+    GroupBox3: TGroupBox;
+    pButtons: TPanel;
+    sbHerdReports: TSpeedButton;
+    sbSalesEligibility: TSpeedButton;
+    sbQualityAssurance: TSpeedButton;
+    sbCowRec: TSpeedButton;
+    sbBreedingFert: TSpeedButton;
+    sbMilkAnalysis: TSpeedButton;
+    sbPedigreeReports: TSpeedButton;
+    sbBeefMan: TSpeedButton;
+    gbFileProperties: TGroupBox;
+    lFileName: TLabel;
+    eFileName: TEdit;
+    lFileType: TLabel;
+    cbFileType: TComboBox;
+    btnUpdate: TButton;
+    gbPedigree: TGroupBox;
+    cbPedigreeReports: TCheckListBox;
+    gbMilkAnalysis: TGroupBox;
+    cbMilkAnalysis: TCheckListBox;
+    gbBreedingFert: TGroupBox;
+    cbBreedingFert: TCheckListBox;
+    gbBeefMan: TGroupBox;
+    cbBeefMan: TCheckListBox;
+    gbCowRec: TGroupBox;
+    cbCowRec: TCheckListBox;
+    gbQualityAssurance: TGroupBox;
+    cbQualityAssurance: TCheckListBox;
+    gbSalesAnalysis: TGroupBox;
+    cbSalesAnalysis: TCheckListBox;
+    gbHerdReports: TGroupBox;
+    cbHerdReports: TCheckListBox;
+    sbHelp: TRxSpeedButton;
+    Button1: TButton;
+    Label1: TLabel;
+    OutputDir: TDirectoryEdit;
+    Bevel1: TBevel;
+    GroupBox1: TGroupBox;
+    CheckBox1: TCheckBox;
+    CheckBox2: TCheckBox;
+    CheckBox3: TCheckBox;
+    CheckBox4: TCheckBox;
+    CheckBox5: TCheckBox;
+    Button2: TButton;
+    procedure FormCreate(Sender: TObject);
+    procedure btnUpdateClick(Sender: TObject);
+    procedure sbHerdReportsClick(Sender: TObject);
+    procedure cbHerdReportsClick(Sender: TObject);
+    procedure OutputDirAfterDialog(Sender: TObject; var Name: String;
+      var Action: Boolean);
+    procedure FormDestroy(Sender: TObject);
+    procedure OutputDirDblClick(Sender: TObject);
+    procedure CheckBox1Click(Sender: TObject);
+    procedure CheckBox2Click(Sender: TObject);
+    procedure CheckBox3Click(Sender: TObject);
+    procedure CheckBox4Click(Sender: TObject);
+    procedure CheckBox5Click(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
+  private
+    { Private declarations }
+
+    ActiveListBox : TCheckListBox;
+
+    PDALinkReportInfo : TPDALinkReportInfo;
+    LastCategory : Integer;
+    LastIndex : Integer;
+
+    // TmpDef : TDef;
+
+    procedure LoadPDALinkActiveReports;
+    function GetReportCheckListBox(index: Integer): TCheckListBox;
+    function GetPDAReportGroupBox(index: Integer): TGroupBox;
+    procedure SetupForm;
+    procedure AnalyzeModules;
+  public
+    { Public declarations }
+  end;
+
+var
+  PDAReportDefaults: TPDAReportDefaults;
+
+implementation
+uses
+   DairyData, kRoutines;
+
+{$R *.DFM}
+
+procedure TPDAReportDefaults.FormCreate(Sender: TObject);
+begin
+   WinData.PDALinkExport := TPDALink.Create(DataDir);
+   WinData.PDALinkExport.Active := True;
+   WinData.LoadBtnImage(WinData.Images,sbExit.Glyph,cBtnImgExit);
+   if not DirectoryExists ( OutputDir.InitialDir ) then
+      CreateDir( OutputDir.InitialDir );
+   SetupForm;
+//   TmpDef := Def.Definition;
+end;
+
+procedure TPDAReportDefaults.btnUpdateClick(Sender: TObject);
+begin
+   ActiveListBox := GetReportCheckListBox(LastCategory);
+   if ActiveListBox <> nil then
+      begin
+         PDALinkReportInfo.FileName     := Trim(eFileName.Text);
+         PDALinkReportInfo.FileType     := cbFileType.ItemIndex;
+         PDALinkReportInfo.ReportActive := ActiveListBox.Checked[ ActiveListBox.ItemIndex ];
+         if WinData.PDALinkExport.SaveReportInfo(ActiveListBox.Items[ActiveListBox.ItemIndex], PDALinkReportInfo) then
+            MessageDlg('File export properties successful updated',mtInformation,[mbOK],0);
+      end;
+end;
+
+procedure TPDAReportDefaults.LoadPDALinkActiveReports;
+var
+   i, j : Integer;
+begin
+   for i := 0 to 7 do
+      begin
+         ActiveListBox := GetReportCheckListBox(i);
+         for j := 0 to ActiveListBox.Items.Count-1 do
+            begin
+               WinData.PDALinkExport.ReadReportInfo(ActiveListBox.Items[j]);
+               ActiveListBox.Checked[j] := WinData.PDALinkExport.PDALinkReportInfo.ReportActive;
+            end;
+      end;
+end;
+
+function TPDAReportDefaults.GetReportCheckListBox(index: Integer): TCheckListBox;
+begin
+   Result := nil;
+   case index of
+      0 : Result := cbHerdReports;
+      1 : Result := cbSalesAnalysis;
+      2 : Result := cbQualityAssurance;
+      3 : Result := cbCowRec;
+      4 : Result := cbBreedingFert;
+      5 : Result := cbMilkAnalysis;
+      6 : Result := cbPedigreeReports;
+      7 : Result := cbBeefMan;
+   end;
+end;
+
+procedure TPDAReportDefaults.sbHerdReportsClick(Sender: TObject);
+var
+  i : Integer;
+begin
+  for i := 0 to 7 do
+     begin
+         GetPDAReportGroupBox( i ).Visible := GetPDAReportGroupBox( i ).Tag = (Sender as TSpeedButton).Tag;
+         if GetPDAReportGroupBox( i ).Visible then
+            begin
+               LastCategory := ( Sender as TSpeedButton ).Tag;
+               GetReportCheckListBox( i ).ItemIndex := 0;
+               LastIndex := 0;
+               cbHerdReportsClick(GetReportCheckListBox( i ));
+            end;
+     end;
+end;
+
+function TPDAReportDefaults.GetPDAReportGroupBox(
+  index: Integer): TGroupBox;
+begin
+   Result := nil;
+   case index of
+      0 : Result := gbHerdReports;
+      1 : Result := gbSalesAnalysis;
+      2 : Result := gbQualityAssurance;
+      3 : Result := gbCowRec;
+      4 : Result := gbBreedingFert;
+      5 : Result := gbMilkAnalysis;
+      6 : Result := gbPedigree;
+      7 : Result := gbBeefMan;
+   end;
+end;
+
+procedure TPDAReportDefaults.SetupForm;
+begin
+   OutputDir.InitialDir := WinData.PDALinkExport.OutputDirectory;
+   OutputDir.Text := OutputDir.InitialDir;
+   LoadPDALinkActiveReports;
+   cbHerdReports.ItemIndex := 0;
+   sbHerdReportsClick(sbHerdReports); // default to herd reports.
+   cbHerdReportsClick(cbHerdReports);
+   AnalyzeModules;
+end;
+
+procedure TPDAReportDefaults.cbHerdReportsClick(Sender: TObject);
+begin
+   gbFileProperties.Caption := ( ( Sender as TCheckListBox ).Parent as TGroupBox).Caption +
+                         ' - ' + ( Sender as TCheckListBox ).Items[( Sender as TCheckListBox ).ItemIndex];
+
+  { --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- --- }
+
+   LastIndex := ( Sender as TCheckListBox ).ItemIndex;
+   if ( Sender as TCheckListBox ).Checked[ LastIndex ] then
+      begin
+         eFileName.Enabled := True;
+         cbFileType.Enabled := True;
+         eFileName.Color := clWindow;
+         cbFileType.Color := clWindow;
+         WinData.PDALinkExport.ReadReportInfo( ( Sender as TCheckListBox ).Items[LastIndex] );
+         eFileName.Text := WinData.PDALinkExport.PDALinkReportInfo.FileName;
+         cbFileType.ItemIndex := WinData.PDALinkExport.PDALinkReportInfo.FileType;
+      end
+   else
+      begin
+         eFileName.Text := '';
+         cbFileType.ItemIndex := -1;
+         eFileName.Color := clBtnFace;
+         cbFileType.Color := clBtnFace;
+         eFileName.Enabled := False;
+         cbFileType.Enabled := False;
+      end;
+end;
+
+procedure TPDAReportDefaults.OutputDirAfterDialog(Sender: TObject;
+  var Name: String; var Action: Boolean);
+begin
+   if not DirectoryExists(Name) then
+      raise Exception.Create('Invalid Directory');
+   WinData.PDALinkExport.OutputDirectory := Name;
+end;
+
+procedure TPDAReportDefaults.FormDestroy(Sender: TObject);
+begin
+   if ( WinData.PDALinkExport <> nil ) then
+      FreeAndNil(WinData.PDALinkExport);
+end;
+
+procedure TPDAReportDefaults.OutputDirDblClick(Sender: TObject);
+begin
+   OutputDir.DoClick;
+end;
+
+procedure TPDAReportDefaults.AnalyzeModules;
+var
+   i, NextTop : Integer;
+begin
+{   sbCowRec.Visible := TmpDef.dUseManCal;
+   sbBreedingFert.Visible := TmpDef.dUseQuotaMan;
+   sbMilkAnalysis.Visible := TmpDef.dUseMilkRec;
+   sbPedigreeReports.Visible := TmpDef.dUsePedigree;
+   sbBeefMan.Visible := TmpDef.dUseBeefMan;
+   if not (TmpDef.dUseManCal) AND (TmpDef.dUseBeefMan) then
+      begin
+         cbCowRec.Items.Delete( cbCowRec.Items.Count -1 );
+         cbBeefMan.Items.Add('Weighing Report');
+      end;
+}
+   sbCowRec.Visible := Def.Definition.dUseManCal;
+   sbBreedingFert.Visible := Def.Definition.dUseQuotaMan;
+   sbMilkAnalysis.Visible := Def.Definition.dUseMilkRec;
+   sbPedigreeReports.Visible := Def.Definition.dUsePedigree;
+   sbBeefMan.Visible := Def.Definition.dUseBeefMan;
+   if not (Def.Definition.dUseManCal) and (Def.Definition.dUseBeefMan) then
+      begin
+         cbCowRec.Items.Delete( cbCowRec.Items.Count -1 );
+         cbBeefMan.Items.Add('Weighing Report');
+      end;
+
+   NextTop := 6;
+   for i := 0 to pButtons.ControlCount-1 do
+      begin
+         if ( pButtons.Controls[i] as TSpeedButton ).Visible then
+            begin
+               ( pButtons.Controls[i] as TSpeedButton ).Top := NextTop;
+               Inc(NextTop, 30);
+            end
+      end;
+end;
+
+procedure TPDAReportDefaults.CheckBox1Click(Sender: TObject);
+begin
+   //TmpDef.dUseManCal := CheckBox1.Checked;
+end;
+
+procedure TPDAReportDefaults.CheckBox2Click(Sender: TObject);
+begin
+   //TmpDef.dUseQuotaMan := CheckBox2.Checked;
+end;
+
+procedure TPDAReportDefaults.CheckBox3Click(Sender: TObject);
+begin
+  // TmpDef.dUseMilkRec := CheckBox3.Checked;
+end;
+
+procedure TPDAReportDefaults.CheckBox4Click(Sender: TObject);
+begin
+   //TmpDef.dUsePedigree := CheckBox4.Checked;
+end;
+
+procedure TPDAReportDefaults.CheckBox5Click(Sender: TObject);
+begin
+  // TmpDef.dUseBeefMan := CheckBox5.Checked;
+end;
+
+procedure TPDAReportDefaults.Button2Click(Sender: TObject);
+begin
+   //AnalyzeModules;
+end;
+
+end.

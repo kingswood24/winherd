@@ -1,0 +1,273 @@
+inherited fmFertProgramAdmin: TfmFertProgramAdmin
+  Left = 365
+  Top = 241
+  Width = 520
+  Height = 479
+  Caption = 'Fertility Program Administration'
+  OldCreateOrder = True
+  PixelsPerInch = 96
+  TextHeight = 13
+  inherited StatusBar: TdxStatusBar
+    Top = 425
+    Width = 512
+  end
+  object cxGroupBox1: TcxGroupBox [1]
+    Left = 20
+    Top = 65
+    Caption = 'New Program Details'
+    Style.LookAndFeel.Kind = lfFlat
+    Style.TextStyle = [fsBold]
+    StyleDisabled.LookAndFeel.Kind = lfFlat
+    StyleFocused.LookAndFeel.Kind = lfFlat
+    StyleHot.LookAndFeel.Kind = lfFlat
+    TabOrder = 5
+    Height = 103
+    Width = 460
+    object deStartDate: TcxDateEdit
+      Left = 301
+      Top = 40
+      Properties.ImmediatePost = True
+      Style.LookAndFeel.Kind = lfFlat
+      StyleDisabled.LookAndFeel.Kind = lfFlat
+      StyleFocused.LookAndFeel.Kind = lfFlat
+      StyleHot.LookAndFeel.Kind = lfFlat
+      TabOrder = 0
+      Width = 138
+    end
+    object erFertProgramList: TcxLookupComboBox
+      Left = 32
+      Top = 40
+      RepositoryItem = HerdLookup.erFertProgramsLookup
+      Properties.ListColumns = <>
+      Properties.OnEditValueChanged = cxLookupComboBox1PropertiesEditValueChanged
+      Style.LookAndFeel.Kind = lfFlat
+      StyleDisabled.LookAndFeel.Kind = lfFlat
+      StyleFocused.LookAndFeel.Kind = lfFlat
+      StyleHot.LookAndFeel.Kind = lfFlat
+      TabOrder = 1
+      Width = 251
+    end
+    object cxLabel1: TcxLabel
+      Left = 31
+      Top = 18
+      Caption = 'Program'
+    end
+    object cxLabel2: TcxLabel
+      Left = 301
+      Top = 18
+      Caption = 'Start Date'
+    end
+    object cxButton2: TcxButton
+      Left = 348
+      Top = 70
+      Width = 90
+      Height = 25
+      Action = actSave
+      TabOrder = 4
+      LookAndFeel.Kind = lfOffice11
+      LookAndFeel.NativeStyle = False
+    end
+  end
+  object cxGroupBox2: TcxGroupBox [2]
+    Left = 20
+    Top = 177
+    Caption = 'Program History Details'
+    Style.LookAndFeel.Kind = lfFlat
+    Style.TextStyle = [fsBold]
+    StyleDisabled.LookAndFeel.Kind = lfFlat
+    StyleFocused.LookAndFeel.Kind = lfFlat
+    StyleHot.LookAndFeel.Kind = lfFlat
+    TabOrder = 6
+    Height = 223
+    Width = 460
+    object cxGrid1: TcxGrid
+      Left = 10
+      Top = 22
+      Width = 435
+      Height = 159
+      TabOrder = 0
+      LookAndFeel.Kind = lfFlat
+      LookAndFeel.NativeStyle = False
+      object cxGrid1DBTableView1: TcxGridDBTableView
+        NavigatorButtons.ConfirmDelete = False
+        DataController.DataSource = HerdLookup.dsQueryFertProgramHistory
+        DataController.KeyFieldNames = 'ID'
+        DataController.Summary.DefaultGroupSummaryItems = <>
+        DataController.Summary.FooterSummaryItems = <>
+        DataController.Summary.SummaryGroups = <>
+        OptionsCustomize.ColumnFiltering = False
+        OptionsCustomize.ColumnGrouping = False
+        OptionsCustomize.ColumnHidingOnGrouping = False
+        OptionsCustomize.ColumnHorzSizing = False
+        OptionsCustomize.ColumnMoving = False
+        OptionsData.CancelOnExit = False
+        OptionsData.Deleting = False
+        OptionsData.DeletingConfirmation = False
+        OptionsData.Editing = False
+        OptionsData.Inserting = False
+        OptionsSelection.CellSelect = False
+        OptionsSelection.InvertSelect = False
+        OptionsView.DataRowHeight = 21
+        OptionsView.GridLines = glHorizontal
+        OptionsView.GroupByBox = False
+        OptionsView.HeaderHeight = 21
+        object cxGrid1DBTableView1StartDate: TcxGridDBColumn
+          Caption = 'Start Date'
+          DataBinding.FieldName = 'StartDate'
+          Width = 80
+        end
+        object cxGrid1DBTableView1Code: TcxGridDBColumn
+          DataBinding.FieldName = 'Code'
+        end
+        object cxGrid1DBTableView1Description: TcxGridDBColumn
+          DataBinding.FieldName = 'Description'
+          Width = 240
+        end
+        object cxGrid1DBTableView1ID: TcxGridDBColumn
+          DataBinding.FieldName = 'ID'
+          Visible = False
+          Hidden = True
+        end
+      end
+      object cxGrid1Level1: TcxGridLevel
+        GridView = cxGrid1DBTableView1
+      end
+    end
+    object cxButton1: TcxButton
+      Left = 348
+      Top = 186
+      Width = 90
+      Height = 25
+      Caption = 'Delete Program'
+      TabOrder = 1
+      OnClick = cxButton1Click
+      LookAndFeel.Kind = lfOffice11
+    end
+  end
+  inherited ActionList: TActionList
+    Left = 386
+    Top = 12
+    inherited actClose: TAction
+      Caption = '&Exit'
+      ShortCut = 16453
+    end
+    inherited actHelp: TAction
+      OnExecute = actHelpExecute
+    end
+    object actSave: TAction
+      Caption = '&Save Program'
+      OnExecute = actSaveExecute
+    end
+    object actCancel: TAction
+      Caption = 'Cancel'
+      OnExecute = actCancelExecute
+    end
+    object actFertProgramSetup: TAction
+      Caption = '&Fertility Program Setup'
+      ImageIndex = 22
+      OnExecute = actFertProgramSetupExecute
+    end
+    object actFertilityChart: TAction
+      Caption = 'Fertility Chart'
+      ImageIndex = 19
+      OnExecute = actFertilityChartExecute
+    end
+  end
+  inherited BarManager: TdxBarManager
+    Bars = <
+      item
+        AllowClose = False
+        AllowCustomizing = False
+        AllowQuickCustomizing = False
+        AllowReset = False
+        Caption = 'Main'
+        DockedDockingStyle = dsTop
+        DockedLeft = 0
+        DockedTop = 0
+        DockingStyle = dsTop
+        FloatLeft = 353
+        FloatTop = 250
+        FloatClientWidth = 23
+        FloatClientHeight = 22
+        ItemLinks = <
+          item
+            Item = bClose
+            UserGlyph.Data = {00000000}
+            Visible = True
+          end
+          item
+            BeginGroup = True
+            Item = blbSetupProgram
+            UserGlyph.Data = {00000000}
+            Visible = True
+          end
+          item
+            BeginGroup = True
+            Item = blbFertililtyChart
+            UserGlyph.Data = {00000000}
+            Visible = True
+          end
+          item
+            BeginGroup = True
+            Item = bHelp
+            UserGlyph.Data = {00000000}
+            Visible = True
+          end>
+        Name = 'Main'
+        OneOnRow = True
+        Row = 0
+        ShowMark = False
+        SizeGrip = False
+        UseOwnFont = False
+        Visible = True
+        WholeRow = True
+        BackgroundBitmap.Data = {00000000}
+      end>
+    Categories.ItemsVisibles = (
+      2)
+    Categories.Visibles = (
+      True)
+    Left = 356
+    Top = 12
+    DockControlHeights = (
+      0
+      0
+      52
+      0)
+    inherited bClose: TdxBarLargeButton
+      Height = 48
+    end
+    inherited bHelp: TdxBarLargeButton
+      Height = 48
+    end
+    object dxBarLargeButton1: TdxBarLargeButton
+      Action = actSave
+      Category = 0
+      HotImageIndex = 8
+      Width = 75
+      SyncImageIndex = False
+      ImageIndex = 8
+    end
+    object dxBarLargeButton2: TdxBarLargeButton
+      Action = actCancel
+      Category = 0
+      HotImageIndex = 21
+      Width = 55
+      SyncImageIndex = False
+      ImageIndex = 21
+    end
+    object blbSetupProgram: TdxBarLargeButton
+      Action = actFertProgramSetup
+      Category = 0
+      Height = 48
+      HotImageIndex = 22
+      SyncImageIndex = False
+      ImageIndex = 22
+    end
+    object blbFertililtyChart: TdxBarLargeButton
+      Action = actFertilityChart
+      Category = 0
+      Height = 48
+    end
+  end
+end

@@ -1,0 +1,281 @@
+object fmAnimalCartView: TfmAnimalCartView
+  Left = 348
+  Top = 199
+  Width = 480
+  Height = 316
+  Caption = 'Animal Cart - View'
+  Color = clBtnFace
+  Font.Charset = ANSI_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poMainFormCenter
+  Scaled = False
+  OnCreate = FormCreate
+  PixelsPerInch = 96
+  TextHeight = 13
+  object Bevel1: TBevel
+    Left = 20
+    Top = 228
+    Width = 431
+    Height = 5
+    Shape = bsTopLine
+  end
+  object AnimalCartGrid: TcxGrid
+    Left = 20
+    Top = 16
+    Width = 431
+    Height = 189
+    TabOrder = 0
+    LookAndFeel.Kind = lfFlat
+    object AnimalCartGridDBTableView: TcxGridDBTableView
+      NavigatorButtons.ConfirmDelete = False
+      DataController.DataSource = dsAnimalCartData
+      DataController.KeyFieldNames = 'ID'
+      DataController.Summary.DefaultGroupSummaryItems = <>
+      DataController.Summary.FooterSummaryItems = <
+        item
+          Kind = skCount
+          FieldName = 'AnimalNo'
+          Column = AnimalCartGridDBTableViewSortAnimalNo
+        end>
+      DataController.Summary.SummaryGroups = <
+        item
+          Links = <>
+          SummaryItems = <>
+        end>
+      OptionsCustomize.ColumnFiltering = False
+      OptionsData.CancelOnExit = False
+      OptionsData.Deleting = False
+      OptionsData.DeletingConfirmation = False
+      OptionsData.Editing = False
+      OptionsData.Inserting = False
+      OptionsSelection.CellSelect = False
+      OptionsView.Footer = True
+      OptionsView.GridLines = glHorizontal
+      OptionsView.GroupByBox = False
+      object AnimalCartGridDBTableViewRecId: TcxGridDBColumn
+        DataBinding.FieldName = 'RecId'
+        Visible = False
+        Hidden = True
+        Options.Filtering = False
+      end
+      object AnimalCartGridDBTableViewID: TcxGridDBColumn
+        DataBinding.FieldName = 'ID'
+        Visible = False
+        Hidden = True
+        Options.Filtering = False
+      end
+      object AnimalCartGridDBTableViewSortAnimalNo: TcxGridDBColumn
+        Caption = 'Animal No.'
+        DataBinding.FieldName = 'SortAnimalNo'
+        OnGetDisplayText = AnimalCartGridDBTableViewSortAnimalNoGetDisplayText
+      end
+      object AnimalCartGridDBTableViewAnimalNo: TcxGridDBColumn
+        Caption = 'Animal No.'
+        DataBinding.FieldName = 'AnimalNo'
+        Visible = False
+        Options.Filtering = False
+        Width = 71
+      end
+      object AnimalCartGridDBTableViewSortNatID: TcxGridDBColumn
+        Caption = 'Nat. Id. No.'
+        DataBinding.FieldName = 'SortNatID'
+        OnGetDisplayText = AnimalCartGridDBTableViewSortNatIDGetDisplayText
+      end
+      object AnimalCartGridDBTableViewNatIDNum: TcxGridDBColumn
+        Caption = 'Nat. Id. No.'
+        DataBinding.FieldName = 'NatIDNum'
+        Visible = False
+        Options.Filtering = False
+        Width = 133
+      end
+      object AnimalCartGridDBTableViewSex: TcxGridDBColumn
+        DataBinding.FieldName = 'Sex'
+        Width = 64
+      end
+      object AnimalCartGridDBTableViewDateofBirth: TcxGridDBColumn
+        Caption = 'Date of Birth'
+        DataBinding.FieldName = 'DateofBirth'
+        Width = 78
+      end
+      object AnimalCartGridDBTableViewCode: TcxGridDBColumn
+        Caption = 'Breed Code'
+        DataBinding.FieldName = 'Code'
+      end
+      object AnimalCartGridDBTableViewComment: TcxGridDBColumn
+        Caption = 'Comment'
+        DataBinding.FieldName = 'Comments'
+        Visible = False
+        Width = 325
+      end
+    end
+    object AnimalCartGridLevel: TcxGridLevel
+      GridView = AnimalCartGridDBTableView
+    end
+  end
+  object btnClose: TcxButton
+    Left = 376
+    Top = 240
+    Width = 75
+    Height = 25
+    Caption = 'Close'
+    Default = True
+    ModalResult = 1
+    TabOrder = 4
+    LookAndFeel.Kind = lfOffice11
+  end
+  object btnRemoveFromCart: TcxButton
+    Left = 106
+    Top = 240
+    Width = 75
+    Height = 25
+    Caption = 'Remove'
+    TabOrder = 2
+    OnClick = btnRemoveFromCartClick
+    LookAndFeel.Kind = lfOffice11
+  end
+  object btnGoTo: TcxButton
+    Left = 20
+    Top = 240
+    Width = 75
+    Height = 25
+    Caption = 'Go To '
+    TabOrder = 1
+    DropDownMenu = PopupMenu1
+    Kind = cxbkDropDown
+    LookAndFeel.Kind = lfOffice11
+  end
+  object cxLabel1: TcxLabel
+    Left = 20
+    Top = 208
+    Caption = 'Animals in Cart'
+  end
+  object lAnimalsInCart: TcxLabel
+    Left = 96
+    Top = 208
+    Caption = '0'
+  end
+  object btnPrintCart: TcxButton
+    Left = 193
+    Top = 240
+    Width = 75
+    Height = 25
+    Caption = 'Print Cart'
+    TabOrder = 3
+    OnClick = btnPrintCartClick
+    LookAndFeel.Kind = lfOffice11
+  end
+  object AnimalCartData: TdxMemData
+    Indexes = <>
+    SortOptions = []
+    SortedField = 'SortAnimalNo'
+    Left = 385
+    Top = 46
+    object AnimalCartDataID: TIntegerField
+      FieldName = 'ID'
+    end
+    object AnimalCartDataSortAnimalNo: TStringField
+      FieldName = 'SortAnimalNo'
+      Visible = False
+      Size = 10
+    end
+    object AnimalCartDataAnimalNo: TStringField
+      FieldName = 'AnimalNo'
+      Size = 10
+    end
+    object AnimalCartDataSortNatID: TStringField
+      FieldName = 'SortNatID'
+      Visible = False
+    end
+    object AnimalCartDataNatIDNum: TStringField
+      FieldName = 'NatIDNum'
+    end
+    object AnimalCartDataDateofBirth: TDateField
+      FieldName = 'DateofBirth'
+    end
+    object AnimalCartDataSex: TStringField
+      FieldName = 'Sex'
+    end
+    object AnimalCartDataCode: TStringField
+      FieldName = 'Code'
+      Size = 10
+    end
+    object AnimalCartDataComments: TMemoField
+      FieldName = 'Comments'
+      BlobType = ftMemo
+    end
+  end
+  object dsAnimalCartData: TDataSource
+    DataSet = AnimalCartData
+    Left = 385
+    Top = 78
+  end
+  object PopupMenu1: TPopupMenu
+    OnPopup = PopupMenu1Popup
+    Left = 416
+    Top = 78
+    object OnfarmEvents1: TMenuItem
+      Caption = 'On-Farm Events'
+    end
+    object MovementsOut1: TMenuItem
+      Caption = 'Movements Out'
+      OnClick = MovementsOut1Click
+    end
+    object TagReplacementForm1: TMenuItem
+      Caption = 'Tag Replacement Form'
+      OnClick = TagReplacementForm1Click
+    end
+    object GroupSetup1: TMenuItem
+      Caption = 'Group Setup'
+      OnClick = GroupSetup1Click
+    end
+    object N1: TMenuItem
+      Caption = '-'
+    end
+    object AIM31AComplianceCertRequest1: TMenuItem
+      Action = MenuForm.actAIM31ARequest
+    end
+    object AIMQueryCartAnimalHistory1: TMenuItem
+      Action = MenuForm.actQueryAimAnimalDetailByBatch
+    end
+  end
+  object ComponentPrinter: TdxComponentPrinter
+    CurrentLink = AnimalCartPrint
+    CustomizeDlgOptions = []
+    PreviewOptions.EnableOptions = [peoPageBackground, peoPrint]
+    PreviewOptions.VisibleOptions = [pvoPrint]
+    PrintTitle = 'Kingswood Grid Print'
+    Version = 0
+    Left = 416
+    Top = 46
+    object AnimalCartPrint: TdxGridReportLink
+      Active = True
+      Component = AnimalCartGrid
+      PrinterPage.DMPaper = 1
+      PrinterPage.Footer = 6400
+      PrinterPage.Header = 7400
+      PrinterPage.Margins.Bottom = 12700
+      PrinterPage.Margins.Left = 12700
+      PrinterPage.Margins.Right = 12700
+      PrinterPage.Margins.Top = 11100
+      PrinterPage.PageFooter.LeftTitle.Strings = (
+        '[Time Printed]')
+      PrinterPage.PageSize.X = 215900
+      PrinterPage.PageSize.Y = 279400
+      PrinterPage._dxMeasurementUnits_ = 0
+      PrinterPage._dxLastMU_ = 2
+      ReportDocument.CreationDate = 43703.43176125
+      ReportTitle.Text = 'Animal Cart Print'
+      OptionsOnEveryPage.Caption = False
+      OptionsOnEveryPage.FilterBar = False
+      OptionsView.Caption = False
+      OptionsView.ExpandButtons = False
+      OptionsView.FilterBar = False
+      OptionsView.GroupFooters = False
+      BuiltInReportLink = True
+    end
+  end
+end

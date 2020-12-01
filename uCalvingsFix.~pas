@@ -1,0 +1,658 @@
+{
+   03/03/15 [V5.4 R2.9] /MK Bug Fix - IsEventToDeleteFromCalvings - When checking for null fields use "or" instead of "and"
+
+   24/04/15 [V5.4 R4.0] /MK Change - Delete a second calving event for the same cow with the same calf.
+}
+
+unit uCalvingsFix;
+
+interface
+
+uses
+  Classes, db, dbTables, GenTypesConst, SysUtils, Dialogs, KRoutines, uSPParser,
+  ComObj, XML_Generator, MSXML2_TLB;
+
+type
+   TFixType = (ftDuplicateCalvings, ftBullCalving);
+   TCalvingsFix = class
+   private
+      FSLDeletedCalvings : TStringList;
+   public
+      class procedure RunCalvingsFix(ADatabasePath : String);
+      class function HasMaleCalvings (ADatabasePath : String) : Boolean;
+      class procedure AddToXMLLogFile (AFixType : TFixType; ATempFileList : TStringList;
+         ADatabasePath : String);
+   end;
+
+implementation
+
+var
+   FCalvingsFix : TCalvingsFix;
+
+class procedure TCalvingsFix.RunCalvingsFix(ADatabasePath : String);
+var
+   i : Integer;
+   iaEventIDs : array of Integer;
+   slFixList : TStringList;
+
+   procedure GetCalvingRecords ( ACalfID : Integer );
+   var
+      dCalfDateOfBirth : TDateTime;
+
+      procedure RemoveDuplicateCalvingIDs ( AEventIDArray : array of Integer);
+      var
+         j, iOtherEventID, iCalvingEventID1, iCalvingEventID2 : Integer;
+
+         function IsEventToDeleteFromCalvings ( AEventID : Integer ) : Boolean;
+         begin
+            Result := False;
+            with TQuery.Create(nil) do
+               try
+                  DatabaseName := AliasName;
+                  SQL.Clear;
+                  SQL.Add('SELECT *');
+                  SQL.Add('FROM Calvings');
+                  SQL.Add('WHERE EventID = '+IntToStr(AEventID)+'');
+                  try
+                     Open;
+                     if ( FieldByName('ID'+IntToStr(i)).AsInteger > 0 ) then
+                        begin
+                           //   03/03/15 [V5.4 R2.9] /MK Bug Fix - When checking for null fields use "or" instead of "and"
+                           if ( i = 1 ) then
+                              Result := ( (FieldByName('ID2').AsVariant = Null) or (FieldByName('ID3').AsVariant = Null) or
+                                          (FieldByName('ID4').AsVariant = Null) )
+                           else if ( i = 2 ) then
+                              Result := ( (FieldByName('ID1').AsVariant = Null) or (FieldByName('ID3').AsVariant = Null) or
+                                          (FieldByName('ID4').AsVariant = Null) )
+                           else if ( i = 3 ) then
+                              Result := ( (FieldByName('ID1').AsVariant = Null) or (FieldByName('ID2').AsVariant = Null) or
+                                          (FieldByName('ID4').AsVariant = Null) )
+                           else if ( i = 4 ) then
+                              Result := ( (FieldByName('ID1').AsVariant = Null) or (FieldByName('ID3').AsVariant = Null) or
+                                          (FieldByName('ID3').AsVariant = Null) );
+                        end;
+                  except
+                     on e : Exception do
+                        ShowMessage(e.Message);
+                  end;
+               finally
+                  Free;
+               end;
+         end;
+
+      begin
+         with TQuery.Create(nil) do
+            try
+               DatabaseName := AliasName;
+               SQL.Clear;
+               SQL.Add('SELECT *');
+               SQL.Add('FROM Events');
+               SQL.Add('WHERE ID IN '+IntArrayToSQLInString(AEventIDArray)+'');
+               try
+                  Open;
+                  if ( RecordCount = 0 ) or ( RecordCount = 1 ) or ( RecordCount > 2 ) then Exit;
+                  iCalvingEventID1 := 0;
+                  iCalvingEventID2 := 0;
+                  iOtherEventID := 0;
+                  First;
+                  while ( not(Eof) ) do
+                     begin
+                        if ( FieldByName('EventType').AsInteger = cCalvingEvent ) then
+                           begin
+                              if ( iCalvingEventID1 = 0 ) then
+                                 iCalvingEventID1 := FieldByName('ID').AsInteger
+                              else
+                                 iCalvingEventID2 := FieldByName('ID').AsInteger;
+                           end
+                        else if ( FieldByName('EventType').AsInteger <> cCalvingEvent ) then
+                           iOtherEventID := FieldByName('ID').AsInteger;
+                        Next;
+                     end;
+
+                  if ( iCalvingEventID1 > 0 ) and ( iOtherEventID > 0 ) then
+                     // OtherEventID has all calving event fields filled in where CalvingEventID doesn't.
+                     if ( IsEventToDeleteFromCalvings(iCalvingEventID1) ) then
+                        begin
+                           SQL.Clear;
+                           SQL.Add('DELETE FROM Calvings WHERE EventID = '+IntToStr(iCalvingEventID1)+'');
+                           try
+                              ExecSQL;
+                           except
+                              on e : Exception do
+                                 ShowMessage(e.Message);
+                           end;
+
+                           SQL.Clear;
+                           SQL.Add('UPDATE Calvings SET EventID = '+IntToStr(iCalvingEventID1)+' WHERE EventID = '+IntToStr(iOtherEventID)+'');
+                           try
+                              ExecSQL;
+                           except
+                              on e : Exception do
+                                 ShowMessage(e.Message);
+                           end;
+
+                           if ( slFixList = nil ) then
+                              slFixList := TStringList.Create();
+                           slFixList.Add('Calving and Other EventType'+IntToStr(iCalvingEventID1)+','+IntToStr(iOtherEventID));
+
+                        end;
+
+                  //   24/04/15 [V5.4 R4.0] /MK Change - Delete a second calving event for the same cow with the same calf.
+                  if ( iCalvingEventID1 > 0 ) and ( (iCalvingEventID2 > 0) and (dCalfDateOfBirth > 0) ) then
+                     begin
+                        SQL.Clear;
+                        SQL.Add('DELETE FROM Calvings WHERE EventID = '+IntToStr(iCalvingEventID2)+'');
+                        try
+                           ExecSQL;
+                        except
+                           on e : Exception do
+                              ShowMessage(e.Message);
+                        end;
+
+                        SQL.Clear;
+                        SQL.Add('DELETE FROM Events WHERE ID = '+IntToStr(iCalvingEventID2)+'');
+                        try
+                           ExecSQL;
+                        except
+                           on e : Exception do
+                              ShowMessage(e.Message);
+                        end;
+
+                        if ( slFixList = nil ) then
+                           slFixList := TStringList.Create();
+                        slFixList.Add('Duplicate Calving Types :'+IntToStr(iCalvingEventID1)+','+IntToStr(iOtherEventID));
+                     end;
+               except
+                  on e : Exception do
+                     ShowMessage(e.Message);
+               end;
+            finally
+               Free;
+            end;
+      end;
+
+   begin
+      with TQuery.Create(nil) do
+         try
+            DatabaseName := AliasName;
+            SQL.Clear;
+            SQL.Add('SELECT *');
+            SQL.Add('FROM Calvings');
+            SQL.Add('WHERE ID'+IntToStr(i)+' = "'+IntToStr(ACalfID)+'"');
+            begin
+               Open;
+               if ( RecordCount = 0 ) or ( RecordCount = 1 ) then Exit;
+               First;
+               SetLength(iaEventIDs,0);
+               while ( not(Eof) ) do
+                  begin
+                     SetLength(iaEventIDs,Length(iaEventIDs)+1);
+                     iaEventIDs[Length(iaEventIDs)-1] := Fields[0].AsInteger;
+                     Next;
+                  end;
+
+               Close;
+               SQL.Clear;
+               SQL.Add('SELECT DateOfBirth');
+               SQL.Add('FROM Animals');
+               SQL.Add('WHERE ID = '+IntToStr(ACalfID)+'');
+               Open;
+               dCalfDateOfBirth := 0;
+               dCalfDateOfBirth := Fields[0].AsDateTime;
+
+               if ( Length(iaEventIDs) > 0 ) then
+                  RemoveDuplicateCalvingIDs(iaEventIDs);
+            end;
+         finally
+            Free;
+         end;
+   end;
+
+begin
+   with TQuery.Create(nil) do
+      try
+         DatabaseName := AliasName;
+         for i := 1 to cMaxCalves do
+            begin
+               SQL.Clear;
+               SQL.Add('SELECT ID'+IntToStr(i)+', Count(ID'+IntToStr(i)+')');
+               SQL.Add('FROM Calvings');
+               SQL.Add('GROUP BY ID'+IntToStr(i)+'');
+               SQL.Add('HAVING COUNT (ID'+IntToStr(i)+') > 1');
+               try
+                  Open;
+                  if ( RecordCount = 0 ) then Exit;
+                  First;
+                  while ( not(Eof) ) do
+                     begin
+                        if ( Fields[0].AsInteger > 0 ) then
+                           GetCalvingRecords(Fields[0].AsInteger);
+                        Next;
+                     end;
+               except
+               end;
+            end;
+
+          if slFixList <> nil then
+             begin
+                AddToXMLLogFile(ftDuplicateCalvings,slFixList,ADatabasePath);
+                FreeAndNil(slFixList);
+             end;
+
+      finally
+         Free;
+      end;
+end;
+
+class function TCalvingsFix.HasMaleCalvings (ADatabasePath : String) : Boolean;
+var
+   i, iBullCalvingEventID, iBullDamID : Integer;
+   slDeletedCalvings,
+   slCalfInfo,
+   slSireInfo : TStringList;
+   sLine, sDOB, sCalfInfoText, sDeleteCalfSQLText, sSQLText : String;
+   Parser : TSPParser;
+   qMaleCalvings : TQuery;
+   dDOB : TDateTime;
+begin
+   Result := False;
+   qMaleCalvings := TQuery.Create(nil);
+   with qMaleCalvings do
+      try
+         DatabaseName := AliasName;
+         SQL.Clear;
+         SQL.Add('SELECT A.ID, E.EventDate');
+         SQL.Add('FROM Animals A');
+         SQL.Add('LEFT JOIN Events E ON (E.AnimalID = A.ID)');
+         SQL.Add('WHERE ( (UPPER(A.Sex) = "STEER") or (UPPER(A.Sex) = "BULL") )');
+         SQL.Add('AND   (A.InHerd = True)');
+         SQL.Add('AND   (A.AnimalDeleted = False)');
+         SQL.Add('AND   (A.HerdID IN (SELECT DefaultHerdID FROM Defaults))');
+         SQL.Add('AND   (E.EventType = '+IntToStr(cCalvingEvent)+')');
+         try
+            // Get male animals that have calving evnets.
+            Open;
+            Result := ( RecordCount > 0 );
+            if ( not(Result) ) then Exit;
+            First;
+            slSireInfo := TStringList.Create();
+            while ( not(Eof) ) do
+               begin
+                  // Add each of these male animal ids and calving date to string list.
+                  slSireInfo.Add(IntToStr(Fields[0].AsInteger)+','+DateToStr(Fields[1].AsDateTime));
+                  Next;
+               end;
+
+            if ( slSireInfo = nil ) then Exit;
+            for i := 0 to slSireInfo.Count-1 do
+               begin
+                  sLine := slSireInfo.Strings[0];
+                  if ( Parser = nil ) then
+                     Parser := TSPParser.Create(nil);
+                  Parser.Sepchar := ',';
+                  Parser.Parse(sLine);
+                  SQL.Clear;
+                  SQL.Add('SELECT A.ID, A.DateOfBirth, D.LactNo DamLactNo');
+                  SQL.Add('FROM Animals A');
+                  SQL.Add('LEFT JOIN Animals D On (D.ID = A.DamID)');
+                  SQL.Add('WHERE (DamID = '+Parser.Fields[1]+')');
+                  SQL.Add('AND   (A.DateOfBirth = "'+FormatDateTime(cUSDateStyle,StrToDate(Parser.Fields[2]))+'")');
+                  try
+                     // For each of these BullDams get CalfID, DateOfBirth and BullDamLactNo and add it to a StringList.
+                     Open;
+                     Result := ( RecordCount > 0 );
+                     if ( Result ) then
+                        begin
+                           if ( slCalfInfo = nil ) then
+                              slCalfInfo := TStringList.Create();
+                           if ( RecordCount > 1 ) then
+                              begin
+                                 First;
+                                 while ( not(Eof) ) do
+                                    begin
+                                       if ( RecNo = 1 ) then
+                                          sCalfInfoText := IntToStr(Fields[0].AsInteger)
+                                       else if ( RecNo >= 2 ) then
+                                          sCalfInfoText := sCalfInfoText+','+IntToStr(Fields[0].AsInteger);
+                                       Next;
+                                    end;
+                                 slCalfInfo.Add(sCalfInfoText+','+DateToStr(Fields[1].AsDateTime)+','+Parser.Fields[1]+','+IntToStr(Fields[2].AsInteger))
+                              end
+                           else
+                              slCalfInfo.Add(IntToStr(Fields[0].AsInteger)+','+DateToStr(Fields[1].AsDateTime)+','+Parser.Fields[1]+','+IntToStr(Fields[2].AsInteger));
+                        end;
+                  except
+                     on e : Exception do
+                        ShowMessage(e.Message);
+                  end;
+               end;
+
+            if ( slCalfInfo = nil ) then Exit;
+            if ( slCalfInfo.Count > 0 ) then
+               begin
+                  if ( Parser = nil ) then
+                     Parser := TSPParser.Create(nil);
+                  Parser.Sepchar := ',';
+                  sLine := '';
+                  for i := 0 to slCalfInfo.Count-1 do
+                     begin
+                        sLine := slCalfInfo.Strings[i];
+                        Parser.Parse(sLine);
+                        SQL.Clear;
+                        SQL.Add('SELECT ID');
+                        SQL.Add('FROM Events');
+                        SQL.Add('WHERE (EventType = '+IntToStr(cCalvingEvent)+')');
+                        SQL.Add('AND   (AnimalID = '+Parser.Fields[Parser.Count-1]+')');
+                        try
+                           Open;
+                           // For each BullDamID get the CalvingEventID.
+                           iBullCalvingEventID := 0;
+                           iBullCalvingEventID := Fields[0].AsInteger;
+
+                           // Delete the calving for the bull.
+                           SQL.Clear;
+                           SQL.Add('DELETE FROM Events WHERE ID = '+IntToStr(iBullCalvingEventID)+'');
+                           try
+                              ExecSQL;
+                           except
+                              on e : Exception do
+                                 ShowMessage(e.Message);
+                           end;
+
+                           // Update LactNo of Bull back to zero.
+                           SQL.Clear;
+                           SQL.Add('UPDATE Animals SET LactNo = 0 WHERE ID = '+Parser.Fields[Parser.Count-1]+'');
+                           try
+                              ExecSQL;
+                           except
+                              on e : Exception do
+                                 ShowMessage(e.Message);
+                           end;
+
+                           sSQLText := '';
+                           if ( Parser.Count > 4 ) then
+                              begin
+                                 case Parser.Count of
+                                    5 : sSQLText := 'UPDATE Animals SET DamID = NULL, HerdID = NULL, AnimalDeleted = True, AimRegStatus = NULL WHERE ID IN'+cCRLF+
+                                                    '('+Parser.Fields[1]+','+Parser.Fields[2]+')';
+                                    6 : sSQLText := 'UPDATE Animals SET DamID = NULL, HerdID = NULL, AnimalDeleted = True, AimRegStatus = NULL WHERE ID IN'+cCRLF+
+                                                    '('+Parser.Fields[1]+','+Parser.Fields[2]+','+Parser.Fields[3]+')';
+                                    7 : sSQLText := 'UPDATE Animals SET DamID = NULL, HerdID = NULL, AnimalDeleted = True, AimRegStatus = NULL WHERE ID IN'+cCRLF+
+                                                    '('+Parser.Fields[1]+','+Parser.Fields[2]+','+Parser.Fields[3]+','+Parser.Fields[4]+')';
+                                 end;
+                              end
+                           else
+                              sSQLText := 'UPDATE Animals SET DamID = NULL, HerdID = NULL, AnimalDeleted = True, AimRegStatus = NULL WHERE ID = '+Parser.Fields[1];
+
+                           SQL.Clear;
+                           SQL.Text := sSQLText;
+                           try
+                              ExecSQL;
+                           except
+                              on e : Exception do
+                                 ShowMessage(e.Message);
+                           end;
+
+                        except
+                           on e : Exception do
+                              ShowMessage(e.Message);
+                        end;
+
+                        // Get possible Dams of these calves.
+                        dDOB := 0;
+                        dDOB := StrToDate(Parser.Fields[Parser.Count-2]);
+                        SQL.Clear;
+                        SQL.Add('SELECT A.ID');
+                        SQL.Add('FROM Animals A');
+                        SQL.Add('LEFT JOIN Events E ON (A.ID = E.AnimalID)');
+                        SQL.Add('WHERE (A.InHerd = True)');
+                        SQL.Add('AND   (A.AnimalDeleted = False)');
+                        SQL.Add('AND   (A.HerdID In (Select DefaultHerdID From Defaults))');
+                        SQL.Add('AND   (Upper(Sex) = "FEMALE")');
+                        SQL.Add('AND   ((E.EventType = '+IntToStr(cCalvingEvent)+') AND (E.AnimalLactNo > A.LactNo)');
+                        SQL.Add('        AND (E.EventDate = "'+FormatDateTime(cUSDateStyle,dDOB)+'"))');
+                        try
+                           Open;
+                           if ( slDeletedCalvings = nil ) then
+                              slDeletedCalvings := TStringList.Create();
+                           slDeletedCalvings.Add(IntToStr(Fields[0].AsInteger)+','+IntToStr(iBullCalvingEventID)+','+slCalfInfo.Strings[i]);
+                        except
+                           on e : Exception do
+                              ShowMessage(e.Message);
+                        end;
+                     end;
+               end;
+
+            if ( slDeletedCalvings.Count > 0 ) then
+               begin
+                  if ( Parser = nil ) then
+                     Parser := TSPParser.Create(nil);
+                  Parser.Sepchar := ',';
+                  sLine := '';
+                  for i := 0 to slDeletedCalvings.Count-1 do
+                     begin
+                        sLine := slDeletedCalvings.Strings[i];
+                        Parser.Parse(sLine);
+                        sDeleteCalfSQLText := '';
+                        if ( Parser.Count = 6 ) then
+                           // slDeletedCalvings Structure(PossibleDamID,EventID,CalfID,CalvingDate,BullDamID,BullDamLactNo).
+                           sDeleteCalfSQLText := 'INSERT INTO DeletedCalvings (EventID, DamID, DamLactNo, CalfID1, DeleteDate)'+cCRLF+
+                                                 'VALUES ('+Parser.Fields[2]+','+Parser.Fields[5]+','+Parser.Fields[6]+','+Parser.Fields[3]+',"'+FormatDateTime(cUSDateStyle,Date)+'")'
+                        else
+                           begin
+                              if ( Parser.Count > 6 ) then
+                                 begin
+                                    case Parser.Count of
+                                       // slDeletedCalvings Structure(PossibleDamID,EventID,CalfID1,CalfID2,CalvingDate,BullDamID,BullDamLactNo).
+                                       7 : sDeleteCalfSQLText := 'INSERT INTO DeletedCalvings (EventID, DamID, DamLactNo, CalfID1, CalfID2, DeleteDate)'+cCRLF+
+                                                                 'VALUES ('+Parser.Fields[2]+','+Parser.Fields[6]+','+Parser.Fields[7]+','+Parser.Fields[3]+','+Parser.Fields[4]+
+                                                                 ',"'+FormatDateTime(cUSDateStyle,Date)+'")';
+                                       // slDeletedCalvings Structure(PossibleDamID,EventID,CalfID1,CalfID2,CalfId3,CalvingDate,BullDamID,BullDamLactNo).
+                                       8 : sDeleteCalfSQLText := 'INSERT INTO DeletedCalvings (EventID, DamID, DamLactNo, CalfID1, CalfID2, CalfID3, DeleteDate)'+cCRLF+
+                                                                 'VALUES ('+Parser.Fields[2]+','+Parser.Fields[7]+','+Parser.Fields[8]+','+Parser.Fields[3]+','+Parser.Fields[4]+
+                                                                 ','+Parser.Fields[5]+',"'+FormatDateTime(cUSDateStyle,Date)+'")';
+                                       // slDeletedCalvings Structure(PossibleDamID,EventID,CalfID1,CalfID2,CalfId3,CalfID4,CalvingDate,BullDamID,BullDamLactNo).
+                                       9 : sDeleteCalfSQLText := 'INSERT INTO DeletedCalvings (EventID, DamID, DamLactNo, CalfID1, CalfID2, CalfID3, DeleteDate)'+cCRLF+
+                                                                 'VALUES ('+Parser.Fields[2]+','+Parser.Fields[8]+','+Parser.Fields[9]+','+Parser.Fields[3]+','+Parser.Fields[4]+
+                                                                 ','+Parser.Fields[5]+','+Parser.Fields[6]+',"'+FormatDateTime(cUSDateStyle,Date)+'")';
+                                    end;
+                                 end;
+                           end;
+                        if ( sDeleteCalfSQLText <> '' ) then
+                           begin
+                              SQL.Clear;
+                              SQL.Text := sDeleteCalfSQLText;
+                              try
+                                 ExecSQL;
+                              except
+                                 on e : Exception do
+                                    ShowMessage(e.Message);
+                              end;
+                           end;
+                     end;
+                  AddToXMLLogFile(ftBullCalving,slDeletedCalvings,ADatabasePath);
+               end;
+
+         except
+            on e : Exception do
+               ShowMessage(e.Message);
+         end;
+      finally
+         FreeAndNil(Parser);
+         FreeAndNil(slCalfInfo);
+         FreeAndNil(slDeletedCalvings);
+         qMaleCalvings.Close;
+         qMaleCalvings.Free;
+      end;
+end;
+
+class procedure TCalvingsFix.AddToXMLLogFile (AFixType : TFixType; ATempFileList : TStringList;
+   ADatabasePath : String);
+var
+   LogFileDocument : IXMLDOMDocument;
+   LogFileRootNode, HeaderNode, ChildNode : IXMLDOMNode;
+   ProcInstr : IXMLDOMProcessingInstruction;
+   i, j, iBullDamID, iBullDamLactNo : Integer;
+   dCalvingDate : TDateTime;
+   iaCalfArray : array of Integer;
+   XMLParser : TSPParser;
+   ErrorListLine : String;
+begin
+   try
+      LogFileDocument := nil;
+      LogFileDocument := CreateOleObject('MSXML2.DOMDocument') as IXMLDOMDocument;
+      ProcInstr := nil;
+      ProcInstr := LogFileDocument.createProcessingInstruction('xml', 'version="1.0" encoding="UTF-8"');
+      LogFileDocument.appendChild(ProcInstr);
+      LogFileRootNode := nil;
+      LogFileRootNode := LogFileDocument.createElement('CalvingFixLog');
+      LogFileDocument.appendChild(LogFileRootNode);
+   except
+      raise Exception.Create('Error creating MSXML2.DOMDocument. Please contact Kingswood.');
+   end;
+
+   try
+      HeaderNode := nil;
+      ChildNode := nil;
+
+      if ( AFixType = ftBullCalving ) then
+         begin
+            HeaderNode := LogFileDocument.createElement('BullCalvingProb');
+            LogFileRootNode.appendChild(HeaderNode);
+            for i := 0 to ATempFileList.Count-1 do
+               begin
+                  SetLength(iaCalfArray,0);
+                  if ( XMLParser = nil ) then
+                     XMLParser := TSPParser.Create(nil);
+                  ErrorListLine := ATempFileList.Strings[i];
+                  XMLParser.Sepchar := ',';
+                  XMLParser.Parse(ErrorListLine);
+
+                  ChildNode := LogFileDocument.createElement('PossibleDamID');
+                  ChildNode.Set_Text(XMLParser.Fields[1]);
+                  HeaderNode.appendChild(ChildNode);
+
+                  iBullDamID := 0;
+                  iBullDamLactNo := 0;
+                  dCalvingDate := 0;
+                  if ( XMLParser.Count = 6 ) then
+                     begin
+                        // slDeletedCalvings Structure(PossibleDamID,EventID,CalfID1,CalvingDate,BullDamID,BullDamLactNo).
+                        SetLength(iaCalfArray,Length(iaCalfArray)+1);
+                        iaCalfArray[Length(iaCalfArray)-1] := StrToInt(XMLParser.Fields[3]);
+                        dCalvingDate := StrToDate(XMLParser.Fields[4]);
+                        iBullDamID := StrToInt(XMLParser.Fields[5]);
+                        iBullDamLactNo := StrToInt(XMLParser.Fields[6]);
+                     end
+                  else
+                     begin
+                        if ( XMLParser.Count > 6 ) then
+                           begin
+                              case XMLParser.Count of
+                                 // slDeletedCalvings Structure(PossibleDamID,EventID,CalfID1,CalfID2,CalvingDate,BullDamID,BullDamLactNo).
+                                 7 : begin
+                                        SetLength(iaCalfArray,Length(iaCalfArray)+1);
+                                        iaCalfArray[Length(iaCalfArray)-1] := StrToInt(XMLParser.Fields[3]);
+                                        SetLength(iaCalfArray,Length(iaCalfArray)+1);
+                                        iaCalfArray[Length(iaCalfArray)-1] := StrToInt(XMLParser.Fields[4]);
+                                        dCalvingDate := StrToDate(XMLParser.Fields[5]);
+                                        iBullDamID := StrToInt(XMLParser.Fields[6]);
+                                        iBullDamLactNo := StrToInt(XMLParser.Fields[7]);
+                                     end;
+                                 // slDeletedCalvings Structure(PossibleDamID,EventID,CalfID1,CalfID2,CalfId3,CalvingDate,BullDamID,BullDamLactNo).
+                                 8 : begin
+                                        SetLength(iaCalfArray,Length(iaCalfArray)+1);
+                                        iaCalfArray[Length(iaCalfArray)-1] := StrToInt(XMLParser.Fields[3]);
+                                        SetLength(iaCalfArray,Length(iaCalfArray)+1);
+                                        iaCalfArray[Length(iaCalfArray)-1] := StrToInt(XMLParser.Fields[4]);
+                                        SetLength(iaCalfArray,Length(iaCalfArray)+1);
+                                        iaCalfArray[Length(iaCalfArray)-1] := StrToInt(XMLParser.Fields[5]);
+                                        dCalvingDate := StrToDate(XMLParser.Fields[6]);
+                                        iBullDamID := StrToInt(XMLParser.Fields[7]);
+                                        iBullDamLactNo := StrToInt(XMLParser.Fields[8]);
+                                     end;
+                                 // slDeletedCalvings Structure(PossibleDamID,EventID,CalfID1,CalfID2,CalfId3,CalfID4,CalvingDate,BullDamID,BullDamLactNo).
+                                 9 : begin
+                                        SetLength(iaCalfArray,Length(iaCalfArray)+1);
+                                        iaCalfArray[Length(iaCalfArray)-1] := StrToInt(XMLParser.Fields[3]);
+                                        SetLength(iaCalfArray,Length(iaCalfArray)+1);
+                                        iaCalfArray[Length(iaCalfArray)-1] := StrToInt(XMLParser.Fields[4]);
+                                        SetLength(iaCalfArray,Length(iaCalfArray)+1);
+                                        iaCalfArray[Length(iaCalfArray)-1] := StrToInt(XMLParser.Fields[5]);
+                                        SetLength(iaCalfArray,Length(iaCalfArray)+1);
+                                        iaCalfArray[Length(iaCalfArray)-1] := StrToInt(XMLParser.Fields[6]);
+                                        dCalvingDate := StrToDate(XMLParser.Fields[7]);
+                                        iBullDamID := StrToInt(XMLParser.Fields[8]);
+                                        iBullDamLactNo := StrToInt(XMLParser.Fields[9]);
+                                     end;
+                              end;
+                           end;
+                     end;
+
+                  for j := 0 to Length(iaCalfArray)-1 do
+                     begin
+                        ChildNode := LogFileDocument.createElement('CalfID'+IntToStr(j+1));
+                        ChildNode.Set_Text(IntToStr(iaCalfArray[j]));
+                        HeaderNode.appendChild(ChildNode);
+                     end;
+
+                  ChildNode := LogFileDocument.createElement('EventID');
+                  ChildNode.Set_Text(XMLParser.Fields[2]);
+                  HeaderNode.appendChild(ChildNode);
+
+                  ChildNode := LogFileDocument.createElement('EventDate');
+                  ChildNode.Set_Text(DateToStr(dCalvingDate));
+                  HeaderNode.appendChild(ChildNode);
+
+                  ChildNode := LogFileDocument.createElement('BullDamID');
+                  ChildNode.Set_Text(IntToStr(iBullDamID));
+                  HeaderNode.appendChild(ChildNode);
+
+                  ChildNode := LogFileDocument.createElement('BullDamLactNo');
+                  ChildNode.Set_Text(IntToStr(iBullDamLactNo));
+                  HeaderNode.appendChild(ChildNode);
+
+                  LogFileDocument.documentElement.appendChild(HeaderNode);
+               end;
+         end
+      else if ( AFixType = ftDuplicateCalvings ) then
+         begin
+            //slFixList Struction = CorrectCalvingEventID,Incorrect/OtherEventID
+            HeaderNode := LogFileDocument.createElement('DuplicateCalvings');
+            LogFileRootNode.appendChild(HeaderNode);
+            for i := 0 to ATempFileList.Count-1 do
+               begin
+                  SetLength(iaCalfArray,0);
+                  if ( XMLParser = nil ) then
+                     XMLParser := TSPParser.Create(nil);
+                  ErrorListLine := ATempFileList.Strings[i];
+                  XMLParser.Sepchar := ',';
+                  XMLParser.Parse(ErrorListLine);
+
+                  //slFixList Struction = CorrectCalvingEventID,Incorrect/OtherEventID
+                  ChildNode := LogFileDocument.createElement('CorrectEventID');
+                  ChildNode.Set_Text(XMLParser.Fields[1]);
+                  HeaderNode.appendChild(ChildNode);
+
+                  ChildNode := LogFileDocument.createElement('IncorrectEventID');
+                  ChildNode.Set_Text(XMLParser.Fields[2]);
+                  HeaderNode.appendChild(ChildNode);
+
+                  LogFileDocument.documentElement.appendChild(HeaderNode);
+               end;
+         end;
+
+      if ( ADatabasePath <> '' ) then
+         LogFileDocument.save(ADatabasePath+'CalvingsFixLog.xml');
+
+   finally
+      LogFileDocument := nil;
+      ProcInstr := nil;
+      LogFileRootNode := nil;
+      HeaderNode := nil;
+      ChildNode := nil;
+      FreeAndNil(XMLParser);
+   end;
+end;
+
+end.

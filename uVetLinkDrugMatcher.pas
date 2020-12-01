@@ -1,0 +1,297 @@
+unit uVetLinkDrugMatcher;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  cxCheckBox, cxCurrencyEdit, StdCtrls, cxButtons, cxTextEdit, cxMaskEdit,
+  cxDropDownEdit, cxLookupEdit, cxDBLookupEdit, cxDBLookupComboBox,
+  cxGroupBox, cxPC, cxControls, cxContainer, cxEdit, cxLabel, uHerdLookup,
+  ActnList;
+
+type
+  TfmVetLinkDrugMatcher = class(TForm)
+    lMedicineName: TcxLabel;
+    PageControl: TcxPageControl;
+    cxTabSheet1: TcxTabSheet;
+    cxTabSheet2: TcxTabSheet;
+    gbExistingDrug: TcxGroupBox;
+    cmboExistingDrugs: TcxLookupComboBox;
+    btnClearSelect: TcxButton;
+    btnProceed: TcxButton;
+    btnCantFindMatch: TcxButton;
+    Label1: TLabel;
+    ceMilkWithdrawal: TcxCurrencyEdit;
+    ceMeatWithdrawal: TcxCurrencyEdit;
+    lMilk: TcxLabel;
+    lMeat: TcxLabel;
+    cbNotApplicable: TcxCheckBox;
+    lInfo: TcxLabel;
+    cmboMediGroup: TcxLookupComboBox;
+    lGroup: TcxLabel;
+    btnAbort: TcxButton;
+    lWithdrawalDesc: TcxLabel;
+    ActionList1: TActionList;
+    actAcceptMatch: TAction;
+    actCantFindMatch: TAction;
+    procedure ceMilkWithdrawalPropertiesChange(Sender: TObject);
+    procedure ceMeatWithdrawalPropertiesChange(Sender: TObject);
+    procedure ceMilkWithdrawalExit(Sender: TObject);
+    procedure ceMeatWithdrawalExit(Sender: TObject);
+    procedure cbNotApplicablePropertiesChange(Sender: TObject);
+    procedure cmboMediGroupPropertiesChange(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure cmboExistingDrugsPropertiesChange(Sender: TObject);
+    procedure btnClearSelectClick(Sender: TObject);
+    procedure actAcceptMatchUpdate(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure actCantFindMatchUpdate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure actCantFindMatchExecute(Sender: TObject);
+  private
+    { Private declarations }
+    FHerdType : THerdType;
+    function HasDecimal(AValue: String): Boolean;
+  public
+    { Public declarations }
+    class procedure ShowTheForm (AMedicineName, AWithdrawalStr : String; AHerdID : Integer;
+                                 const AMedCount, ATotMedCount : Integer; var AMedicineID : Integer);
+  end;
+
+var
+  fmVetLinkDrugMatcher: TfmVetLinkDrugMatcher;
+
+implementation
+
+{$R *.DFM}
+
+{ TfmVetLinkDrugMatcher }
+
+class procedure TfmVetLinkDrugMatcher.ShowTheForm(AMedicineName,
+  AWithdrawalStr: String; AHerdID: Integer; const AMedCount,
+  ATotMedCount: Integer; var AMedicineID: Integer);
+begin
+   with TfmVetLinkDrugMatcher.Create(nil) do
+      try
+         FHerdType := HerdLookup.GetHerdType(AHerdID);
+         HerdLookup.FWithdrawalRec.MilkWithdrawal := 0;
+         HerdLookup.FWithdrawalRec.MeatWithdrawal := 0;
+         ceMilkWithdrawal.Properties.ReadOnly := False;
+         ceMeatWithdrawal.Properties.ReadOnly := False;
+
+         //   24/09/15 [V5.4 R8.7] /MK Change - Set the font colour to white for the component using the teal colour.
+         if ( FHerdType = htDairy ) then
+            begin
+               ceMilkWithdrawal.Style.Color := clTeal;
+               ceMilkWithdrawal.Style.Font.Color := clWhite;
+               ceMeatWithdrawal.Style.Color := clWhite;
+               ceMeatWithdrawal.Style.Font.Color := clBlack;
+            end
+         else if ( FHerdType in [htSuckler, htBeef] ) then
+            begin
+               ceMeatWithdrawal.Style.Color := clTeal;
+               ceMeatWithdrawal.Style.Font.Color := clWhite;
+               ceMilkWithdrawal.Style.Color := clWhite;
+               ceMilkWithdrawal.Style.Font.Color := clBlack;
+            end;
+
+         //   24/09/15 [V5.4 R8.7] /MK Change - Now that the update drug group box has been moved aboved New Drug form caption now shows drug name.
+         lMedicineName.Caption := AMedicineName;
+         // Caption := Caption + ' - ('+IntToStr(AMedCount)+' of '+IntToStr(ATotMedCount)+')';
+         lWithdrawalDesc.Caption := ' Withdrawal Information From File : '+AWithdrawalStr;
+         btnClearSelect.Visible := False;
+         ShowModal;
+      finally
+         if ( cmboExistingDrugs.EditValue <> Null ) and ( not(cmboExistingDrugs.EditValue = 0) ) then
+            AMedicineID := cmboExistingDrugs.EditValue;
+         Free;
+      end;
+end;
+
+procedure TfmVetLinkDrugMatcher.ceMilkWithdrawalPropertiesChange(
+  Sender: TObject);
+begin
+   ceMilkWithdrawal.PostEditValue;
+   if ( ceMilkWithdrawal.EditValue >= 0 ) then
+      HerdLookup.FWithdrawalRec.MilkWithdrawal := ceMilkWithdrawal.EditValue;
+end;
+
+procedure TfmVetLinkDrugMatcher.ceMeatWithdrawalPropertiesChange(
+  Sender: TObject);
+begin
+   ceMeatWithdrawal.PostEditValue;
+   if ( ceMeatWithdrawal.EditValue >= 0 ) then
+      HerdLookup.FWithdrawalRec.MeatWithdrawal := ceMeatWithdrawal.EditValue;
+end;
+
+function TfmVetLinkDrugMatcher.HasDecimal(AValue: String): Boolean;
+var
+   i : Integer;
+begin
+   if ( AValue = Null ) then Exit;
+   Result := False;
+   for i := 0 to Length(AValue) do
+      begin
+         if AValue[i] = '.' then
+            begin
+               Result := True;
+               Break;
+            end;
+      end;
+end;
+
+procedure TfmVetLinkDrugMatcher.ceMilkWithdrawalExit(Sender: TObject);
+var
+   NewValue : String;
+   NewWithdrawal : Integer;
+begin
+   if ( not(ceMilkWithdrawal.EditValue = Null) ) then
+      if ( HasDecimal(FloatToStr(ceMilkWithdrawal.EditValue)) ) then
+         begin
+            MessageDlg('Decimal values will be rounded up to next withdrawal period.',mtWarning,[mbOK],0);
+            NewValue := Copy(FloatToStr(ceMilkWithdrawal.EditValue),0,Length(FloatToStr(ceMilkWithdrawal.EditValue))-2);
+            NewWithdrawal := StrToInt(NewValue);
+            Inc(NewWithdrawal);
+            HerdLookup.FWithdrawalRec.MilkWithdrawal := NewWithdrawal;
+         end;
+end;
+
+procedure TfmVetLinkDrugMatcher.ceMeatWithdrawalExit(Sender: TObject);
+var
+   NewValue : String;
+   NewWithdrawal : Integer;
+begin
+   if ( not(ceMeatWithdrawal.EditValue = Null) ) then
+      if ( HasDecimal(FloatToStr(ceMeatWithdrawal.EditValue)) ) then
+         begin
+            MessageDlg('Decimal values will be rounded up to next withdrawal period.',mtWarning,[mbOK],0);
+            NewValue := Copy(FloatToStr(ceMeatWithdrawal.EditValue),0,Length(FloatToStr(ceMeatWithdrawal.EditValue))-2);
+            NewWithdrawal := StrToInt(NewValue);
+            Inc(NewWithdrawal);
+            HerdLookup.FWithdrawalRec.MeatWithdrawal := NewWithdrawal;
+         end;
+end;
+
+procedure TfmVetLinkDrugMatcher.cbNotApplicablePropertiesChange(
+  Sender: TObject);
+begin
+   ceMilkWithdrawal.Properties.ReadOnly := cbNotApplicable.Checked;
+   ceMeatWithdrawal.Properties.ReadOnly := cbNotApplicable.Checked;
+   HerdLookup.FWithdrawalRec.N_A_Drug := cbNotApplicable.Checked;
+   if ( cbNotApplicable.Checked ) then
+      begin
+         if ( FHerdType in [htDairy, htSuckler] ) then
+            HerdLookup.FWithdrawalRec.MilkWithdrawal := 9999
+         else
+            HerdLookup.FWithdrawalRec.MeatWithdrawal := 9999;
+      end;
+end;
+
+procedure TfmVetLinkDrugMatcher.cmboMediGroupPropertiesChange(Sender: TObject);
+begin
+   if ( cmboMediGroup.EditValue >= 0 ) then
+      HerdLookup.FWithdrawalRec.MediGroup := cmboMediGroup.EditValue;
+end;
+
+procedure TfmVetLinkDrugMatcher.FormCloseQuery(Sender: TObject;
+  var CanClose: Boolean);
+begin
+   if ( HerdLookup.qDrugList.Active ) then
+      HerdLookup.qDrugList.Close;
+
+   {
+   HerdLookup.FWithdrawalRec.CancelImport := ( ModalResult = mrCancel );
+   HerdLookup.FWithdrawalRec.AbortImport := ( ModalResult = mrAbort );
+   }
+
+   {
+   //   31/07/17 [V5.7 R1.1] /MK Change - No need to do these checks any more just process the drug. Validation of drug is now based on VPA only - SP/GL request.
+   if ( ModalResult = mrOK ) then
+      begin
+         CanClose := ( cmboExistingDrugs.EditValue > 0 );
+         if ( not(CanClose) ) then
+            begin
+               if ( not(cbNotApplicable.Checked) ) then
+                  begin
+                     if ( FHerdType = htDairy ) then
+                        begin
+                           CanClose := ( ceMilkWithdrawal.EditValue >= 0 );
+                           if ( not(CanClose) ) then
+                              begin
+                                 MessageDlg('Milk Withdrawal Period must be specified'+cCRLF+
+                                            'or "N/A" box must be ticked.',mtError,[mbOK],0);
+                                 SysUtils.Abort;
+                              end;
+                        end
+                     else if ( FHerdType in [htSuckler, htBeef] ) then
+                        begin
+                           CanClose := ( ceMeatWithdrawal.EditValue >= 0 );
+                           if ( not(CanClose) ) then
+                              begin
+                                 MessageDlg('Meat Withdrawal Period must be specified'+cCRLF+
+                                            'or "N/A" box must be ticked.',mtError,[mbOK],0);
+                                 SysUtils.Abort;
+                              end;
+                        end;
+                  end;
+               CanClose := ( cmboMediGroup.EditValue > 0 );
+               if ( not(CanClose) ) then
+                  begin
+                     MessageDlg('Group must be specified.',mtError,[mbOK],0);
+                     SysUtils.Abort;
+                  end;
+            end;
+      end;
+   }
+end;
+
+procedure TfmVetLinkDrugMatcher.cmboExistingDrugsPropertiesChange(
+  Sender: TObject);
+begin
+   cmboExistingDrugs.PostEditValue;
+   btnClearSelect.Visible := ( not(cmboExistingDrugs.EditValue = Null) ) and ( not(cmboExistingDrugs.EditValue = 0) );
+end;
+
+procedure TfmVetLinkDrugMatcher.btnClearSelectClick(Sender: TObject);
+begin
+   cmboExistingDrugs.EditValue := Null;
+   btnClearSelect.Visible := False;
+end;
+
+procedure TfmVetLinkDrugMatcher.actAcceptMatchUpdate(Sender: TObject);
+begin
+   actAcceptMatch.Enabled := not(VarIsNull(cmboExistingDrugs.EditValue));
+end;
+
+procedure TfmVetLinkDrugMatcher.FormShow(Sender: TObject);
+begin
+   HerdLookup.qDrugList.Active := False;
+   HerdLookup.qDrugList.Filter := '';
+   HerdLookup.qDrugList.Filtered := False;
+   HerdLookup.qDrugList.Filter := 'VPANo IS NULL';
+   HerdLookup.qDrugList.Filtered := True;
+   cmboExistingDrugs.Properties.ListSource := HerdLookup.dsDrugList;
+   cmboExistingDrugs.Properties.KeyFieldNames := 'ID';
+   cmboExistingDrugs.Properties.ListFieldNames := 'Name';
+   PageControl.ActivePageIndex := 0;
+   HerdLookup.qDrugList.Active := True;
+end;
+
+procedure TfmVetLinkDrugMatcher.actCantFindMatchUpdate(Sender: TObject);
+begin
+   actCantFindMatch.Enabled := VarIsNull(cmboExistingDrugs.EditValue);
+end;
+
+procedure TfmVetLinkDrugMatcher.FormDestroy(Sender: TObject);
+begin
+   HerdLookup.qDrugList.Close;
+   HerdLookup.qDrugList.Filter := '';
+   HerdLookup.qDrugList.Filtered := False;
+end;
+
+procedure TfmVetLinkDrugMatcher.actCantFindMatchExecute(Sender: TObject);
+begin
+   MessageDlg('This drug will be added to your existing Kingswood medicine file.',mtInformation,[mbOK],0);
+end;
+
+end.

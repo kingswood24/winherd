@@ -1,0 +1,206 @@
+{
+
+  Unit Created : 17/02/2009 V3.8 R 6.2 /SP
+
+}
+unit uConditionScoreEventForm;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  uEventForm, cxSpinEdit, cxContainer, cxEdit, dxBar, dxBarExtItems,
+  ActnList, cxLabel, cxTextEdit, cxMaskEdit, cxDropDownEdit, cxCalendar,
+  ExtCtrls, cxControls, dxStatusBar, EventRecording, cxLookupEdit,
+  cxDBLookupEdit, cxDBLookupComboBox;
+
+type
+  TfmConditionScoreEvent = class(TfmEventForm)
+    seConditionScore: TcxSpinEdit;
+    cxLabel3: TcxLabel;
+    cmboAssociatedEventType: TcxLookupComboBox;
+    cxLabel4: TcxLabel;
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure actSaveExecute(Sender: TObject);
+  private
+    function GetConditionScore: double;
+    procedure SetConditionScore(const Value: double);
+    function GetAssociatedEventType: Integer;
+    procedure SetAssociatedEventType(const Value: Integer);
+    class function GetDefaultAssociatedEventType: Integer;
+    class procedure SetClassAssociatedEventType(const Value: Integer);
+    class function GetDefaultAssociatedEventID: Integer;
+    class procedure SetClassAssociatedEventID(const Value: Integer);
+  protected
+    { Private declarations }
+    FConditionScoreEvent : TConditionScoreEvent;
+    FAssociatedEventType : Integer;
+    procedure ValidateInput;override;
+    procedure SaveEventToDB;override;
+    procedure LoadEventFromDB;override;
+    property ConditionScore : double read GetConditionScore write SetConditionScore;
+    property AssociatedEventType : Integer read GetAssociatedEventType write SetAssociatedEventType;
+  public
+    { Public declarations }
+    property ClassDefaultAssociatedEventType : Integer read GetDefaultAssociatedEventType write SetClassAssociatedEventType;
+    property ClassDefaultAssociatedEventID : Integer read GetDefaultAssociatedEventID write SetClassAssociatedEventID;
+  end;
+
+var
+  fmConditionScoreEvent: TfmConditionScoreEvent;
+
+implementation
+uses
+   GenTypesConst, uHerdLookup;
+
+const
+   TfmConditionScoreEvent_AssociatedEventType : Integer = 0;
+   TfmConditionScoreEvent_AssociatedEventID : Integer = 0;
+
+{$R *.DFM}
+
+{ TfmConditionScoreEvent }
+
+procedure TfmConditionScoreEvent.SaveEventToDB;
+begin
+  inherited;
+  FConditionScoreEvent.Append;
+  try
+     FConditionScoreEvent.AnimalID := FAnimalID;
+     if FOverrideLactNo > 0 then
+        FConditionScoreEvent.AnimalLactNo := FOverrideLactNo
+     else
+        FConditionScoreEvent.AnimalLactNo := FLactNo;
+     FConditionScoreEvent.AnimalHerdID := FHerdID;
+     FConditionScoreEvent.EventDate := EventDate;
+     FConditionScoreEvent.EventSource := sInternal;
+     FConditionScoreEvent.EventComment := EventComment;
+     FConditionScoreEvent.Score := ConditionScore;
+     FConditionScoreEvent.AssociatedEventType := AssociatedEventType;
+     FConditionScoreEvent.AssociatedEventID := ClassAssociatedEventID;
+     FConditionScoreEvent.Post;
+
+     MessageDlg('Condition Score event successfully saved.',mtInformation,[mbOK],0);
+  except
+     FConditionScoreEvent.Cancel;
+     MessageDlg('Condition Score event could not be saved!',mtError,[mbOK],0);
+  end;
+  Close;
+end;
+
+procedure TfmConditionScoreEvent.ValidateInput;
+begin
+  inherited;
+  if ((ConditionScore<=0) or (ConditionScore>5)) then
+     begin
+        MessageDlg('The condition score value must be between 1 and 5.'+cCRLF+
+                   'Please re-enter condition score value.',mtError,[mbOK],0);
+        Abort;
+     end;
+end;
+
+procedure TfmConditionScoreEvent.FormCreate(Sender: TObject);
+begin
+  inherited;
+  FEventType := CCondScoreEvent;
+  FConditionScoreEvent := TConditionScoreEvent.Create('AConDB');
+  HerdLookup.mdConditionScoreAssociatedEvents.Active := True;
+  cmboAssociatedEventType.RepositoryItem := HerdLookup.erConditionScoreAssociatedEvents;
+  if (FEventID <= 0) then
+     begin
+        if (FDefaultEventDate<=0) then
+           FDefaultEventDate := Date;
+
+        EventDate := FDefaultEventDate;
+        EventComment := 'Condition Score';
+        if (ClassDefaultAssociatedEventType > -1) then
+           begin
+              AssociatedEventType := ClassDefaultAssociatedEventType;
+              cmboAssociatedEventType.Enabled := False;
+           end
+        else
+           begin
+              AssociatedEventType := 0;
+              cmboAssociatedEventType.Enabled := True;
+           end;
+
+        ActiveControl := seConditionScore;
+     end;
+end;
+
+procedure TfmConditionScoreEvent.FormDestroy(Sender: TObject);
+begin
+  inherited;
+  if ( FConditionScoreEvent <> nil ) then
+     FreeAndNil(FConditionScoreEvent);
+  HerdLookup.mdConditionScoreAssociatedEvents.Active := False;
+end;
+
+function TfmConditionScoreEvent.GetConditionScore: double;
+begin
+   Result := seConditionScore.Value;
+end;
+
+procedure TfmConditionScoreEvent.SetConditionScore(const Value: double);
+begin
+   seConditionScore.Value := Value;
+end;
+
+procedure TfmConditionScoreEvent.FormShow(Sender: TObject);
+begin
+  inherited;
+  AddFilter('Inherd=True');
+  AddFilter('Sex="Female"');
+  ActivateSearchListing;
+  cmboAnimalID.EditValue := FAnimalListQuery.Fields[0].AsInteger;
+  cmboAnimalID.Enabled := FEnableAnimalListing;
+end;
+
+procedure TfmConditionScoreEvent.actSaveExecute(Sender: TObject);
+begin
+  inherited;
+//
+end;
+
+procedure TfmConditionScoreEvent.LoadEventFromDB;
+begin
+   inherited;
+   //
+end;
+
+function TfmConditionScoreEvent.GetAssociatedEventType: Integer;
+begin
+   Result := cmboAssociatedEventType.EditValue;
+end;
+
+procedure TfmConditionScoreEvent.SetAssociatedEventType(
+  const Value: Integer);
+begin
+   cmboAssociatedEventType.EditValue := Value;
+end;
+
+class function TfmConditionScoreEvent.GetDefaultAssociatedEventType: Integer;
+begin
+   Result := TfmConditionScoreEvent_AssociatedEventType;
+end;
+
+class procedure TfmConditionScoreEvent.SetClassAssociatedEventType(
+  const Value: Integer);
+begin
+   TfmConditionScoreEvent_AssociatedEventType := Value;
+end;
+
+function TfmConditionScoreEvent.GetDefaultAssociatedEventID: Integer;
+begin
+   Result := TfmConditionScoreEvent_AssociatedEventID;
+end;
+
+procedure TfmConditionScoreEvent.SetClassAssociatedEventID(
+  const Value: Integer);
+begin
+   TfmConditionScoreEvent_AssociatedEventID := Value
+end;
+
+end.

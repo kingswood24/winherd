@@ -1,0 +1,174 @@
+{
+   28/08/14 [V5.3 R5.7] /MK Additional Feature - ShowMovementsInHealthDefaultGrid - New Column and field added for CrushTreatment.
+                            Change - ShowMovementsInHealthDefaultGrid - Only show ApplicRate if not a Crush user.
+                                                                      - Change width of screen depending on whether a crush user or not.
+}
+
+unit uMovementsInHealthDefaultsGrid;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  uBaseForm, cxGridCustomTableView, cxGridTableView, cxGridDBTableView, Db,
+  dxmdaset, cxGridLevel, cxClasses, cxControls, cxGridCustomView, cxGrid,
+  ActnList, dxBar, dxBarExtItems, dxStatusBar, DBTables, cxDropDownEdit, Def;
+
+type
+  TfmMovementsInHealthDefaultsGrid = class(TfmBaseForm)
+    HealthDefaultsGrid: TcxGrid;
+    HealthDefaultsGridDBTableView: TcxGridDBTableView;
+    HealthDefaultsGridLevel: TcxGridLevel;
+    dxBarLargeButton1: TdxBarLargeButton;
+    dxBarLargeButton2: TdxBarLargeButton;
+    dxBarLargeButton3: TdxBarLargeButton;
+    actAdd: TAction;
+    actRemove: TAction;
+    actEdit: TAction;
+    dsmdDefaultVeterinary: TDataSource;
+    HealthDefaultsGridDBTableViewDrugID: TcxGridDBColumn;
+    HealthDefaultsGridDBTableViewApplicRate: TcxGridDBColumn;
+    HealthDefaultsGridDBTableViewDefaultDrugDescComment: TcxGridDBColumn;
+    HealthDefaultsGridDBTableViewKgsApplicRate: TcxGridDBColumn;
+    DefaultHealthEvents: TTable;
+    DefaultHealthEventsID: TAutoIncField;
+    DefaultHealthEventsDrugID: TIntegerField;
+    DefaultHealthEventsApplicRate: TFloatField;
+    DefaultHealthEventsApplicRatePerKgs: TFloatField;
+    DefaultHealthEventsUseDrugNameForComment: TBooleanField;
+    DefaultHealthEventsCrushTreatment: TBooleanField;
+    HealthDefaultsGridDBTableViewCrushTreatment: TcxGridDBColumn;
+    procedure actAddExecute(Sender: TObject);
+    procedure actEditExecute(Sender: TObject);
+    procedure actRemoveExecute(Sender: TObject);
+    procedure actEditUpdate(Sender: TObject);
+    procedure actRemoveUpdate(Sender: TObject);
+    procedure HealthDefaultsGridDBTableViewDblClick(Sender: TObject);
+    procedure DefaultHealthEventsNewRecord(DataSet: TDataSet);
+    procedure DefaultHealthEventsAfterDelete(DataSet: TDataSet);
+    procedure DefaultHealthEventsAfterPost(DataSet: TDataSet);
+    procedure FormActivate(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+    class procedure ShowMovementsInHealthDefaultGrid;
+  end;
+
+var
+  fmMovementsInHealthDefaultsGrid: TfmMovementsInHealthDefaultsGrid;
+
+implementation
+
+uses uHerdLookup, KRoutines, uMovementsInHealthDefaults, DairyData,
+     KDBRoutines, GenTypesConst;
+
+{$R *.DFM}
+
+{ TfmMovementsInHealthDefaultsGrid }
+
+class procedure TfmMovementsInHealthDefaultsGrid.ShowMovementsInHealthDefaultGrid;
+begin
+   with TfmMovementsInHealthDefaultsGrid.Create(nil) do
+      try
+         DefaultHealthEvents.Open;
+         //   28/08/14 [V5.3 R5.7] /MK Additional Feature - New Column and field added for CrushTreatment.
+         HealthDefaultsGridDBTableViewCrushTreatment.Visible := Def.Definition.dUseCrush;
+         //   28/08/14 [V5.3 R5.7] /MK Change - Only show ApplicRate if not a Crush user.
+         HealthDefaultsGridDBTableViewKgsApplicRate.Visible := ( not(Def.Definition.dUseCrush) );
+         //   28/08/14 [V5.3 R5.7] /MK Change - Change width of screen depending on whether a crush user or not.
+         if ( Def.Definition.dUseCrush ) then
+            Width := 532
+         else
+            Width := 552;
+         ShowModal;
+      finally
+         DefaultHealthEvents.Close;
+         Free;
+      end;
+end;
+
+procedure TfmMovementsInHealthDefaultsGrid.actAddExecute(Sender: TObject);
+begin
+  inherited;
+  DefaultHealthEvents.Append;
+  TfmMovementsInHealthDefaults.ShowHealthDefaultEditor(dsmdDefaultVeterinary);
+end;
+
+procedure TfmMovementsInHealthDefaultsGrid.actEditExecute(Sender: TObject);
+begin
+  inherited;
+  if (DefaultHealthEventsID.AsInteger>0) then
+     begin
+        DefaultHealthEvents.Edit;
+        TfmMovementsInHealthDefaults.ShowHealthDefaultEditor(dsmdDefaultVeterinary);
+     end;
+end;
+
+procedure TfmMovementsInHealthDefaultsGrid.actRemoveExecute(
+  Sender: TObject);
+begin
+  inherited;
+  if MessageDlg('Delete record?', mtConfirmation, [mbYes,mbNo],0) = idYes then
+     DefaultHealthEvents.Delete;
+end;
+
+procedure TfmMovementsInHealthDefaultsGrid.actEditUpdate(Sender: TObject);
+begin
+  inherited;
+  actEdit.Enabled := (DefaultHealthEventsID.AsInteger>0);
+end;
+
+procedure TfmMovementsInHealthDefaultsGrid.actRemoveUpdate(
+  Sender: TObject);
+begin
+  inherited;
+  actRemove.Enabled := (DefaultHealthEventsID.AsInteger>0);
+end;
+
+procedure TfmMovementsInHealthDefaultsGrid.HealthDefaultsGridDBTableViewDblClick(
+  Sender: TObject);
+begin
+  inherited;
+  actEdit.Execute;
+end;
+
+procedure TfmMovementsInHealthDefaultsGrid.DefaultHealthEventsNewRecord(
+  DataSet: TDataSet);
+begin
+  inherited;
+  DefaultHealthEventsUseDrugNameForComment.AsBoolean := True;
+  DefaultHealthEventsCrushTreatment.AsBoolean := Def.Definition.dUseCrush;
+end;
+
+procedure TfmMovementsInHealthDefaultsGrid.DefaultHealthEventsAfterDelete(
+  DataSet: TDataSet);
+begin
+  inherited;
+  DBIForceWrite(DefaultHealthEvents);
+end;
+
+procedure TfmMovementsInHealthDefaultsGrid.DefaultHealthEventsAfterPost(
+  DataSet: TDataSet);
+begin
+  inherited;
+  DBIForceWrite(DefaultHealthEvents);
+end;
+
+procedure TfmMovementsInHealthDefaultsGrid.FormActivate(Sender: TObject);
+begin
+  inherited;
+  if ( not(HerdLookup.qDrugList.Active) ) then
+     HerdLookup.qDrugList.Active := True;
+end;
+
+procedure TfmMovementsInHealthDefaultsGrid.FormCloseQuery(Sender: TObject;
+  var CanClose: Boolean);
+begin
+  inherited;
+  if ( HerdLookup.qDrugList.Active ) then
+     HerdLookup.qDrugList.Active := False;
+end;
+
+end.

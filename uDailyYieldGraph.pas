@@ -1,0 +1,680 @@
+{
+   14/04/12 [V5.0 R4.9] /MK Additional Feature - Favourite Button Added.
+}
+
+unit uDailyYieldGraph;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  Db, Grids, DBGrids, RXDBCtrl, DBTables, TeEngine, Series, ExtCtrls,
+  TeeProcs, Chart, DBChart, StdCtrls, Buttons, RXCtrls, ComCtrls, ToolWin,
+  cxControls, cxContainer, cxEdit, cxCheckBox;
+
+
+type
+
+  TCavingStartMonth = record
+     StartYear : Word;
+     StartMonth : Byte;
+  end;
+  TTimeFrame = record
+    Index,
+    Month,
+    Year : Word;
+  end;
+  TTimeFrameArray = array [1..12] of TTimeFrame; // sortt his one out
+  TGraphType = (gtHerd, gtCalvingMonth);
+
+
+  TfDailyYieldGraph = class(TForm)
+    qDailyYield: TQuery;
+    qAnimals: TQuery;
+    dsAnimals: TDataSource;
+    t1: TTable;
+    UpdateTable: TQuery;
+    ToolBar1: TToolBar;
+    ToolButton3: TToolButton;
+    sbExit: TRxSpeedButton;
+    ToolButton1: TToolButton;
+    sbHelp: TRxSpeedButton;
+    PageControl1: TPageControl;
+    TabSheet1: TTabSheet;
+    AnimalYieldGrid: TRxDBGrid;
+    Splitter1: TSplitter;
+    Panel1: TPanel;
+    ChartYield: TDBChart;
+    bPrint: TBitBtn;
+    YieldZoomIn: TBitBtn;
+    YieldZoomOut: TBitBtn;
+    YieldReSet: TBitBtn;
+    Series1: TLineSeries;
+    ChartBFatProt: TDBChart;
+    BitBtn1: TBitBtn;
+    Zoomin: TBitBtn;
+    ZoomOut: TBitBtn;
+    Reset: TBitBtn;
+    LineSeries2: TLineSeries;
+    LineSeries3: TLineSeries;
+    TabSheet2: TTabSheet;
+    TabSheet3: TTabSheet;
+    rgMonthIndex: TRadioGroup;
+    progbar: TProgressBar;
+    TimerTab2: TTimer;
+    TimerTab3: TTimer;
+    pFavourite: TPanel;
+    cbFavourite: TcxCheckBox;
+    procedure qAnimalsAfterScroll(DataSet: TDataSet);
+    procedure bExitClick(Sender: TObject);
+    procedure bPrintClick(Sender: TObject);
+    procedure BitBtn1Click(Sender: TObject);
+    procedure ZoominClick(Sender: TObject);
+    procedure ZoomOutClick(Sender: TObject);
+    procedure ResetClick(Sender: TObject);
+    procedure YieldReSetClick(Sender: TObject);
+    procedure YieldZoomInClick(Sender: TObject);
+    procedure YieldZoomOutClick(Sender: TObject);
+    procedure TabSheet2Show(Sender: TObject);
+    procedure TabSheet3Show(Sender: TObject);
+    procedure TabSheet1Show(Sender: TObject);
+    procedure rgMonthIndexClick(Sender: TObject);
+    procedure TimerTab2Timer(Sender: TObject);
+    procedure TimerTab3Timer(Sender: TObject);
+    procedure cbFavouritePropertiesChange(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+  private
+    { Private declarations }
+    ZoomPerc : Integer;
+    GraphTable,
+    CurrentIDs : TTable;
+    HerdGraphTable : TTable;
+    FormCreated : Boolean;
+
+    FTimeFrameArray : TTimeFrameArray;
+    FCavingStartMonth : TCavingStartMonth;
+    FCalvedAnimals : String;
+    function GetMonthName(MonthIndex:Integer) : String;
+    procedure ProduceYieldGraph(GraphType : TGraphType);
+    function GetTimeFrame(GraphType : TGraphType) : TTimeFrameArray;
+    function GetCalvedAnimalsForMonthIndex(AMonth, AYear : Integer) : String;
+    function GetCalvingStartMonth: TCavingStartMonth;
+    procedure ShowHerdGraph(GraphType : TGraphType);
+    procedure SetTitles;
+  public
+    { Public declarations }
+  end;
+
+  procedure ShowForm;
+
+implementation
+uses
+    DairyData, GenTypesConst, KdbRoutines;
+
+{$R *.DFM}
+
+procedure ShowForm;
+begin
+    with TfDailyYieldGraph.Create(nil) do
+       try
+          ZoomPerc := 100;
+          GraphTable := TTable.Create(nil);
+          with GraphTable do
+             begin
+                DatabaseName := WinData.KingData.DatabaseName;
+                TableType := ttParadox;
+                TableName := 'GraphYield';
+                FieldDefs.Add('ID',ftAutoInc,0, True);
+                FieldDefs.Add('AnimalId',ftInteger,0, False);
+                FieldDefs.Add('LactNo',ftInteger,0, False);
+                FieldDefs.Add('MonthRec',ftInteger,0, False);
+                FieldDefs.Add('YearRec',ftInteger,0, False);
+                FieldDefs.Add('DailyYield',ftFloat,0, False);
+                FieldDefs.Add('DailyBFatPerc',ftFloat,0, False);
+                FieldDefs.Add('DailyProtPerc',ftFloat,0, False);
+                FieldDefs.Add('MonthIndex',ftInteger,0, False);
+                FieldDefs.Add('MonthIndexName',ftString,3, False);
+
+                IndexDefs.Add('','ID',[ixUnique,ixPrimary]);
+                IndexDefs.Add('iMonth','MonthIndex',[ixCaseInSensitive]);
+                IndexDefs.Add('iMonthRec','MonthRec',[ixCaseInSensitive]);
+
+                CreateTable;
+                Open;
+             end;
+
+          HerdGraphTable := TTable.Create(nil);
+          with HerdGraphTable do
+             begin
+                DatabaseName := WinData.KingData.DatabaseName;
+                TableType := ttParadox;
+                TableName := 'HerdGraphYield';
+                FieldDefs.Add('ID',ftAutoInc,0, True);
+                FieldDefs.Add('MonthRec',ftInteger,0, False);
+                FieldDefs.Add('YearRec',ftInteger,0, False);
+                FieldDefs.Add('DailyYield',ftFloat,0, False);
+                FieldDefs.Add('DailyBFatPerc',ftFloat,0, False);
+                FieldDefs.Add('DailyProtPerc',ftFloat,0, False);
+                FieldDefs.Add('MonthIndex',ftInteger,0, False);
+                FieldDefs.Add('MonthIndexName',ftString,3, False);
+
+                IndexDefs.Add('','ID',[ixUnique,ixPrimary]);
+                IndexDefs.Add('iMonth','MonthIndex',[ixCaseInSensitive]);
+                IndexDefs.Add('iMonthRec','MonthRec',[ixCaseInSensitive]);
+
+                CreateTable;
+                Open;
+             end;
+
+          qDailyYield.Close;
+          FormCreated := True;
+          qAnimals.Open;
+          ShowModal;
+       finally
+          HerdGraphTable.Close;
+          HerdGraphTable.DeleteTable;
+          HerdGraphTable.Free;
+          GraphTable.Close;
+          GraphTable.DeleteTable;
+          GraphTable.Free;
+          Free;
+       end;
+end;
+
+function TfDailyYieldGraph.GetMonthName(MonthIndex:Integer) : String;
+begin
+     Case MonthIndex of
+         1 : Result := 'Jan';
+         2 : Result := 'Feb';
+         3 : Result := 'Mar';
+         4 : Result := 'Apr';
+         5 : Result := 'May';
+         6 : Result := 'Jun';
+         7 : Result := 'Jul';
+         8 : Result := 'Aug';
+         9 : Result := 'Sep';
+        10 : Result := 'Oct';
+        11 : Result := 'Nov';
+        12 : Result := 'Dec';
+     end;
+end;
+
+procedure TfDailyYieldGraph.qAnimalsAfterScroll(DataSet: TDataSet);
+Var
+   x,
+   LastMonth,
+   CurrMonth,
+   NextMonth,
+   NextIndex,
+   MoveIndex,
+   MonthCount : Integer;
+   GraphBookMark : TBookMark;
+   CurrYield,
+   CurrProt,
+   CurrBFat,
+   NextYield,
+   NextProt,
+   NextBFat  : Double;
+
+begin
+   if ( FormCreated ) then
+   if ( qAnimals.RecordCount > 0 ) then
+      with qDailyYield do
+        begin
+           GraphTable.Close;
+           SQL.Clear;
+           SQL.Add('SELECT AnimalID, LactNo, Extract( Month From DateOfRecording) MonthRec,');
+           SQL.Add('Extract( Year From DateOfRecording) YearRec,DailyYield, DailyBFatPerc, DailyProtPerc');
+           SQL.Add('FROM MilkDiskTrans');
+           SQL.Add('WHERE ( AnimalID= ' + qAnimals.FieldByName('ID').AsString + ') AND ( LactNo= ' + qAnimals.FieldByName('LactNo').AsString +')');
+           SQL.Add('AND ( DailyYield > 0 )');
+           SQL.Add('ORDER BY YearRec, MonthRec');
+           Open;
+           // Move the Contents of the Query into the Table
+           with qDailyYield do
+              begin
+                  GraphTable.Close;
+                  GraphTable.EmptyTable;
+                  GraphTable.Open;
+                  MonthCount := 1;
+                  LastMonth := 1;
+                  First;
+                  while NOT EOF do
+                     begin
+                        GraphTable.Insert;
+                        GraphTable.FieldByName('AnimalId').Value := FieldByName('AnimalId').Value;
+                        GraphTable.FieldByName('LactNo').Value := FieldByName('LactNo').Value;
+                        GraphTable.FieldByName('MonthRec').Value := FieldByName('MonthRec').Value;
+                        GraphTable.FieldByName('YearRec').Value := FieldByName('YearRec').Value;
+                        GraphTable.FieldByName('DailyYield').Value := FieldByName('DailyYield').Value;
+                        GraphTable.FieldByName('DailyBFatPerc').Value := FieldByName('DailyBFatPerc').Value;
+                        GraphTable.FieldByName('DailyProtPerc').Value := FieldByName('DailyProtPerc').Value;
+                        GraphTable.FieldByName('MonthIndex').Value := MonthCount;
+                        GraphTable.FieldByName('MonthIndexName').Value := GetMonthName(FieldByName('MonthRec').AsInteger);
+                        LastMonth := FieldByName('MonthRec').AsInteger;
+                        GraphTable.Post;
+                        Inc(MonthCount);
+                        Next;
+                     end;
+                  GraphTable.First;
+                  // Check for Missing figures and average the prior and next
+                  GraphTable.IndexFieldNames := 'MonthRec';
+                  while NOT GraphTable.EOF do
+                     begin
+                         CurrMonth := GraphTable.FieldbyName('MonthRec').Value;
+                         CurrYield := GraphTable.FieldbyName('DailyYield').Value;
+                         CurrBFat  := GraphTable.FieldbyName('DailyBFatPerc').Value;
+                         CurrProt  := GraphTable.FieldbyName('DailyProtPerc').Value;
+                         GraphTable.Next;
+                         GraphBookMark := GraphTable.GetBookmark;
+                         if NOT GraphTable.EOF then
+                            begin
+                               NextMonth := GraphTable.FieldbyName('MonthRec').Value;
+                               NextYield := GraphTable.FieldbyName('DailyYield').Value;
+                               NextBFat  := GraphTable.FieldbyName('DailyBFatPerc').Value;
+                               NextProt  := GraphTable.FieldbyName('DailyProtPerc').Value;
+                               NextIndex := GraphTable.FieldbyName('MonthIndex').Value;
+                               MoveIndex := NextMonth-CurrMonth;
+                               if ( MoveIndex > 1 ) then // need to add record
+                                  begin
+                                     // Update the Next Record
+                                     GraphTable.Edit;
+                                     GraphTable.FieldbyName('MonthIndex').Value := (GraphTable.FieldbyName('MonthIndex').Value+MoveIndex)-1;
+                                     //GraphTable.FieldbyName('MonthIndex').Value := GraphTable.FieldbyName('MonthIndex').Value+1;
+                                     GraphTable.Post;
+                                     (*
+                                     // From This Record Forward Increment the Index by 1
+                                     UpdateTable.SQL.Clear;
+                                     UpdateTable.SQL.Add('UPDATE GraphYield Set MonthIndex = MonthIndex + ' + IntToStr(MoveIndex-1));
+                                     UpdateTable.SQL.Add('WHERE ( MonthIndex > ' + IntToStr(GraphTable.FieldbyName('MonthIndex').AsInteger) +')');
+                                     UpdateTable.Prepare;
+                                     UpdateTable.ExecSQL;
+                                     *)
+                                     GraphTable.Insert;
+                                     GraphTable.FieldByName('AnimalId').Value := FieldByName('AnimalId').Value;
+                                     GraphTable.FieldByName('LactNo').Value := FieldByName('LactNo').Value;
+                                     GraphTable.FieldByName('MonthRec').Value := NextMonth-1;
+                                     GraphTable.FieldByName('YearRec').Value := FieldByName('YearRec').Value;
+                                     GraphTable.FieldByName('DailyYield').Value := (NextYield+CurrYield) / 2;
+                                     GraphTable.FieldByName('DailyBFatPerc').Value := (NextBFat+CurrBFat) / 2;
+                                     GraphTable.FieldByName('DailyProtPerc').Value := (NextProt+CurrProt) / 2;
+                                     GraphTable.FieldByName('MonthIndex').Value := NextIndex;
+                                     GraphTable.FieldByName('MonthIndexName').Value := GetMonthName(NextMonth-1);
+                                     GraphTable.Post;
+                                     Inc(MonthCount);
+                                  end;
+                               GraphTable.GotoBookmark(GraphBookMark);
+                               GraphTable.FreeBookmark(GraphBookMark);
+                            end;
+                     end;
+                  GraphTable.FreeBookmark(GraphBookMark);
+                  GraphTable.IndexFieldNames := 'MonthIndex';
+                  GraphTable.First;
+                  Inc(LastMonth);
+                  while MonthCount <= 12 do
+                     begin
+                        if (GraphTable.LookUp('MonthRec',LastMonth,'MonthRec' ) <> LastMonth ) then
+                           begin
+                              GraphTable.Append;
+                              GraphTable.FieldByName('MonthIndex').Value := MonthCount;
+                              GraphTable.FieldByName('MonthIndexName').Value := GetMonthName(LastMonth);
+                           end;
+                        Inc(LastMonth);
+                        if LastMonth > 12 then LastMonth := 1;
+                        Inc(MonthCount);
+                        GraphTable.Next;
+                     end;
+              end;
+
+          ChartYield.Series[0].DataSource := GraphTable;
+          ChartBFatProt.Series[0].DataSource := GraphTable;
+          ChartBFatProt.Series[1].DataSource := GraphTable;
+
+        end;
+end;
+
+procedure TfDailyYieldGraph.bExitClick(Sender: TObject);
+begin
+     Close;
+end;
+
+procedure TfDailyYieldGraph.bPrintClick(Sender: TObject);
+begin
+     ChartYield.PrintLandscape;
+end;
+
+procedure TfDailyYieldGraph.BitBtn1Click(Sender: TObject);
+begin
+     ChartBFatProt.PrintLandscape;
+end;
+
+procedure TfDailyYieldGraph.ZoominClick(Sender: TObject);
+begin
+     ChartBFatProt.AnimatedZoom := True;
+     Inc(ZoomPerc,5);
+     if ZoomPerc < 100 then ZoomPerc := 100;
+     ChartBFatProt.ZoomPercent(ZoomPerc);
+end;
+
+procedure TfDailyYieldGraph.ZoomOutClick(Sender: TObject);
+begin
+     ChartBFatProt.AnimatedZoom := True;
+     Dec(ZoomPerc,5);
+     if ZoomPerc > 100 then ZoomPerc := 100;
+     ChartBFatProt.ZoomPercent(ZoomPerc);
+end;
+
+procedure TfDailyYieldGraph.ResetClick(Sender: TObject);
+begin
+     ZoomPerc := 100;
+     ChartBFatProt.UndoZoom;
+end;
+
+procedure TfDailyYieldGraph.YieldReSetClick(Sender: TObject);
+begin
+     ZoomPerc := 100;
+     ChartYield.UndoZoom;
+end;
+
+procedure TfDailyYieldGraph.YieldZoomInClick(Sender: TObject);
+begin
+     ChartYield.AnimatedZoom := True;
+     Inc(ZoomPerc,5);
+     if ZoomPerc < 100 then ZoomPerc := 100;
+     ChartYield.ZoomPercent(ZoomPerc);
+end;
+
+procedure TfDailyYieldGraph.YieldZoomOutClick(Sender: TObject);
+begin
+     ChartYield.AnimatedZoom := True;
+     Dec(ZoomPerc,5);
+     if ZoomPerc > 100 then ZoomPerc := 100;
+     ChartYield.ZoomPercent(ZoomPerc);
+end;
+
+procedure TfDailyYieldGraph.ProduceYieldGraph(GraphType : TGraphType);
+var
+   NewIndex, i : Byte;
+begin
+
+   HerdGraphTable.Close;
+   HerdGraphTable.EmptyTable;
+   progbar.Position := 0;
+
+   //progbar.Max := 12;
+   for i := Low(FTimeFrameArray) to High(FTimeFrameArray) do
+      begin
+         {if FTimeFrameArray[i].Index <= 0 then
+            begin
+               progbar.Max := progbar.Max-1;
+               Continue;
+            end; }
+
+         with qDailyYield do
+            try
+               HerdGraphTable.Close;
+               SQL.Clear;
+               SQL.Add('SELECT Avg(M.DailyYield) AvgDY, Avg(M.DailyBFatPerc) AvgDBFP, Avg(M.DailyProtPerc) AvgDPP');
+               SQL.Add('FROM MilkDiskTrans M ');
+               SQL.Add('WHERE ( M.DailyYield > 0 )');
+               SQL.Add('AND Extract( Month From M.DateOfRecording) = '+IntToStr(FTimeFrameArray[i].Month)+'');
+               SQL.Add('AND Extract( Year From M.DateOfRecording)  = '+IntToStr(FTimeFrameArray[i].Year)+'');
+               if GraphType = gtCalvingMonth then
+                  SQL.Add('AND (M.AnimalID IN '+FCalvedAnimals+')');
+               Open;
+               First;
+
+               HerdGraphTable.Open;
+               HerdGraphTable.Insert;
+               HerdGraphTable.FieldByName('MonthRec').Value := FTimeFrameArray[i].Month;
+               HerdGraphTable.FieldByName('YearRec').Value := FTimeFrameArray[i].Year;
+               HerdGraphTable.FieldByName('DailyYield').Value := FieldByName('AvgDY').Value;
+               HerdGraphTable.FieldByName('DailyBFatPerc').Value := FieldByName('AvgDBFP').Value;
+               HerdGraphTable.FieldByName('DailyProtPerc').Value := FieldByName('AvgDPP').Value;
+               HerdGraphTable.FieldByName('MonthIndex').Value := FTimeFrameArray[i].Index;
+               HerdGraphTable.FieldByName('MonthIndexName').Value := GetMonthName(FTimeFrameArray[i].Month);
+               HerdGraphTable.Post;
+               //progbar.Position := i;
+            finally
+               Close;
+            end;
+    end;
+  // progbar.Position := 0;
+   ChartYield.Series[0].DataSource := HerdGraphTable;
+   ChartBFatProt.Series[0].DataSource := HerdGraphTable;
+   ChartBFatProt.Series[1].DataSource := HerdGraphTable;
+end;
+
+procedure TfDailyYieldGraph.TabSheet2Show(Sender: TObject);
+begin
+   SetTitles;
+   progbar.Parent := TabSheet2;
+   Panel1.Parent := TabSheet2;
+   TimerTab2.Enabled := True;
+end;
+
+procedure TfDailyYieldGraph.TabSheet3Show(Sender: TObject);
+begin
+   SetTitles;
+   progbar.Parent := TabSheet3;
+   Panel1.Parent := TabSheet3;
+   TimerTab3.Enabled := True;
+end;
+
+function TfDailyYieldGraph.GetCalvedAnimalsForMonthIndex(AMonth, AYear : Integer) : String;
+var
+   bFirst : Boolean;
+begin
+   bFirst := True;
+   with qDailyYield do
+      try
+         SQL.Clear;
+         SQL.Add('SELECT DISTINCT E.AnimalID FROM Events E WHERE (E.EventType = '+IntToStr(cCalvingEvent)+')');
+         SQL.Add('AND Extract( Month From E.EventDate) = '+IntToStr(AMonth)+'');
+         SQL.Add('AND Extract( Year From E.EventDate)  = '+IntToStr(AYear)+'');
+         SQL.Add('AND E.AnimalID IN  ( ');
+         SQL.Add('SELECT DISTINCT A.ID ');
+         SQL.Add('FROM Animals A       ');
+         SQL.Add('WHERE (A.Sex="Female") AND (A.Inherd=True) AND (A.LactNo > 0) AND (A.AnimalDeleted=FALSE)');
+         SQL.Add('                   ) ');
+         Open;
+
+         First;
+         while not eof do
+            begin
+               if not bFirst then
+                  Result := Result + ',' + FieldByName('AnimalID').AsString
+               else
+                  begin
+                     bFirst := False;
+                     Result := FieldByName('AnimalID').AsString;
+                  end;
+               Next;
+            end;
+      finally
+         Close;
+      end;
+   Result := '(' + Result + ')';
+end;
+
+function TfDailyYieldGraph.GetCalvingStartMonth: TCavingStartMonth;
+var
+   WorkingDate : TDateTime;
+   i, nDay, nMonth, nYear : Word;
+   ThisYearIndex, PrevYearIndex : Integer;
+begin
+   with Result do
+      begin
+         DecodeDate(Date, nYear, nMonth, nDay);
+         StartMonth := Succ(rgMonthIndex.ItemIndex);
+         if StartMonth >= nMonth then
+            StartYear := nYear-1
+         else
+            StartYear := nYear;
+      end;
+end;
+
+function TfDailyYieldGraph.GetTimeFrame(GraphType : TGraphType) : TTimeFrameArray;
+var
+   WorkingDate : TDateTime;
+   i, Day, Month, Year : Word;
+   ThisYearIndex, PrevYearIndex, Index : Integer;
+   StartMonth : Integer;
+begin
+   FillChar(Result, SizeOf(Result), 0);
+   WorkingDate := Date;
+   DecodeDate(WorkingDate, Year, Month, Day);
+
+   if GraphType = gtCalvingMonth then
+      begin
+         Index := 1;
+         if FCavingStartMonth.StartMonth >= Month then
+            begin
+               for i := Month to 12 do
+                  begin
+                     Result[i].Index := Index;
+                     Result[i].Month := i;
+                     Result[i].Year := Year - 1;
+                     Inc(Index);
+                  end;
+
+               for i := 1 to Month-1 do
+                  begin
+                     Result[i].Index := Index;
+                     Result[i].Month := i;
+                     Result[i].Year := Year;
+                     Inc(Index);
+                  end;
+            end
+         else
+            begin
+               for i := 1 to Month do
+                  begin
+                     Result[i].Index := Index;
+                     Result[i].Month := i;
+                     Result[i].Year := Year;
+                     Inc(Index);
+                  end;
+            end;
+      end
+
+   else
+      begin
+         PrevYearIndex := 1;
+         ThisYearIndex := 12;
+
+         for i := Month to 12 do
+            begin
+               Result[i].Index := PrevYearIndex;
+               Inc(PrevYearIndex);
+               Result[i].Month := i;
+               Result[i].Year := Year - 1;
+            end;
+
+         for i := Month-1 downto 1 do
+            begin
+               Result[i].Index := ThisYearIndex;
+               Dec(ThisYearIndex);
+               Result[i].Month := i;
+               Result[i].Year := Year;
+            end;
+      end;
+end;
+
+procedure TfDailyYieldGraph.TabSheet1Show(Sender: TObject);
+begin
+   if qAnimals.State = dsBrowse then
+      qAnimals.First;
+   ChartYield.Title.Text.Clear;
+   ChartYield.Title.Text.Add('Daily Yield');
+
+   ChartBFatProt.Title.Text.Clear;
+   ChartBFatProt.Title.Text.Add('Daily Protein and ButterFat Percentages');
+
+   ChartYield.Series[0].DataSource := GraphTable;
+   ChartBFatProt.Series[0].DataSource := GraphTable;
+   ChartBFatProt.Series[1].DataSource := GraphTable;
+   Panel1.Parent := TabSheet1;
+end;
+
+procedure TfDailyYieldGraph.rgMonthIndexClick(Sender: TObject);
+begin
+   ShowHerdGraph(gtCalvingMonth);
+end;
+
+procedure TfDailyYieldGraph.ShowHerdGraph(GraphType: TGraphType);
+begin
+   try
+      Screen.Cursor := crHourGlass;
+      SQLEmptyTable(HerdGraphTable.TableName);
+      if GraphType = gtCalvingMonth then
+         begin
+            FCavingStartMonth := GetCalvingStartMonth;
+            FCalvedAnimals := GetCalvedAnimalsForMonthIndex(FCavingStartMonth.StartMonth, FCavingStartMonth.StartYear);
+            FTimeFrameArray := GetTimeFrame(GraphType);
+            if FCalvedAnimals <> '()' then
+               ProduceYieldGraph(GraphType)
+            else
+               MessageDlg('No calving events found for time period',mtInformation,[mbOk],0);
+         end
+      else
+         begin
+            FTimeFrameArray := GetTimeFrame(GraphType);
+            ProduceYieldGraph(GraphType)
+         end;
+   finally
+      Screen.Cursor := crDefault;
+   end;
+end;
+
+procedure TfDailyYieldGraph.TimerTab2Timer(Sender: TObject);
+begin
+   TimerTab2.Enabled := False;
+   ShowHerdGraph(gtCalvingMonth);
+end;
+
+procedure TfDailyYieldGraph.TimerTab3Timer(Sender: TObject);
+begin
+   TimerTab3.Enabled := False;
+   ShowHerdGraph(gtHerd);
+end;
+
+procedure TfDailyYieldGraph.SetTitles;
+begin
+   ChartYield.Title.Text.Clear;
+   ChartYield.Title.Text.Add('Average Daily Yield');
+   ChartYield.Series[0].DataSource := nil;
+
+   ChartBFatProt.Title.Text.Clear;
+   ChartBFatProt.Title.Text.Add('Average Daily Protein and ButterFat Percentages');
+   ChartBFatProt.Series[0].DataSource := nil;
+   ChartBFatProt.Series[1].DataSource := nil;
+end;
+
+//   14/04/12 [V5.0 R4.9] /MK Additional Feature - Favourite Button Added.
+procedure TfDailyYieldGraph.cbFavouritePropertiesChange(Sender: TObject);
+begin
+   if cbFavourite.Checked then
+      begin
+         WinData.SetReportAsFavourite(cMilkProdGraphRep,True);
+         cbFavourite.Style.TextColor := clBlue;
+         cbFavourite.StyleHot.TextColor := clBlue;
+      end
+   else
+      begin
+         WinData.SetReportAsFavourite(cMilkProdGraphRep,False);
+         cbFavourite.Style.TextColor := clBlack;
+         cbFavourite.StyleHot.TextColor := clBlack;
+      end;
+   Application.ProcessMessages;
+   Update;
+end;
+
+//   14/04/12 [V5.0 R4.9] /MK Additional Feature - Favourite Button Added.
+procedure TfDailyYieldGraph.FormShow(Sender: TObject);
+begin
+   cbFavourite.Checked := WinData.IsReportFavourite(cMilkProdGraphRep);
+   WinData.UpdateRecentReportUsage(cMilkProdGraphRep);
+end;
+
+end.

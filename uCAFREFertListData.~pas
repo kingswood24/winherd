@@ -1,0 +1,918 @@
+{
+   01/06/11 [V4.1 R1.8] /MK Additional Feature - On ShowParams Set ShowCheckBox To False.
+
+   08/05/15 [V5.4 R5.5] /MK Bug Fix - PreviewListData - FreeAndNil WinData.FreeBreedingDataHelper as it TBreedingData uses TBreedingDataHelper aswell - GL/P.Geraghty report.
+
+   02/06/17 [V5.6 R8.7] /MK Bug Fix - PreviewListData - Breeding Data was just being free'd and not being set to nil so report would not view a second time.
+}
+
+unit uCAFREFertListData;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  uReportsBaseForm, cxControls, cxContainer, cxEdit, cxCheckBox, Db,
+  DBTables, QRExport, QRCtrls, QuickRpt, StdCtrls, ComCtrls, ExtCtrls,
+  Mask, ToolEdit, RxLookup, RXCtrls, ToolWin, uActionWarningReminders,
+  cxLabel, cxTextEdit, cxMaskEdit, cxSpinEdit, uSPParser, ReportDefaults,
+  uActionWarningReminderParams, GenTypesConst, uApplicationLog;
+
+type
+  TfmCAFREFertListData = class(TReportsBaseForm)
+    cbActionList: TcxCheckBox;
+    cbWarningList: TcxCheckBox;
+    cbReminderList: TcxCheckBox;
+    qrCAFREFertListData: TQuickRep;
+    QRBand1: TQRBand;
+    QRLabel1: TQRLabel;
+    LoopBandFirstServiceWith4Days: TQRLoopBand;
+    DataLabel: TQRLabel;
+    LineDivide: TQRShape;
+    LoopBandRepeatServiceWith4Days: TQRLoopBand;
+    Parser: TSPParser;
+    QRSysData1: TQRSysData;
+    NoAnimalsListed: TQRLabel;
+    QRLoopBand10: TQRLoopBand;
+    QRLoopBand1: TQRLoopBand;
+    LoopBandNoHeatService61DaysCalved: TQRLoopBand;
+    LoopBandNoHeatService42To60DaysCalved: TQRLoopBand;
+    LoopBand3MoreServicesRecorded: TQRLoopBand;
+    LoopBandsMissedHeatUnusualCycle: TQRLoopBand;
+    LoopBandCowsCalvedLessThanVWP: TQRLoopBand;
+    LoopBandConsiderPDAfterServiceXDays: TQRLoopBand;
+    LoopBandCowsNotPregnant: TQRLoopBand;
+    RxSpeedButton1: TRxSpeedButton;
+    sbListParams: TRxSpeedButton;
+    cbFavourite: TcxCheckBox;
+    procedure cbActionListPropertiesChange(Sender: TObject);
+    procedure sbViewClick(Sender: TObject);
+    procedure LoopBandFirstServiceWith4DaysBeforePrint(
+      Sender: TQRCustomBand; var PrintBand: Boolean);
+    procedure LoopBandRepeatServiceWith4DaysBeforePrint(
+      Sender: TQRCustomBand; var PrintBand: Boolean);
+    procedure LoopBandNoHeatService61DaysCalvedBeforePrint(
+      Sender: TQRCustomBand; var PrintBand: Boolean);
+    procedure LoopBandNoHeatService42To60DaysCalvedBeforePrint(
+      Sender: TQRCustomBand; var PrintBand: Boolean);
+    procedure LoopBand3MoreServicesRecordedBeforePrint(
+      Sender: TQRCustomBand; var PrintBand: Boolean);
+    procedure LoopBandsMissedHeatUnusualCycleBeforePrint(
+      Sender: TQRCustomBand; var PrintBand: Boolean);
+    procedure LoopBandCowsCalvedLessThanVWPBeforePrint(
+      Sender: TQRCustomBand; var PrintBand: Boolean);
+    procedure LoopBandConsiderPDAfterServiceXDaysBeforePrint(
+      Sender: TQRCustomBand; var PrintBand: Boolean);
+    procedure LoopBandCowsNotPregnantBeforePrint(Sender: TQRCustomBand;
+      var PrintBand: Boolean);
+    procedure sbPrintClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure QRLoopBand10BeforePrint(Sender: TQRCustomBand;
+      var PrintBand: Boolean);
+    procedure QRLoopBand1BeforePrint(Sender: TQRCustomBand;
+      var PrintBand: Boolean);
+    procedure FormDestroy(Sender: TObject);
+    procedure sbListParamsClick(Sender: TObject);
+    procedure FormActivate(Sender: TObject);
+    procedure sbViewMouseLeave(Sender: TObject);
+    procedure cbFavouritePropertiesChange(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+
+  private
+    { Private declarations }
+    slFirstServiceWith4Days : TStringList;
+    slRepeatServiceWith4Days : TStringList;
+    slNoHeatServiceXDaysCalved : TStringList;
+    slNoHeatServiceXToYDaysCalved : TStringList;
+    slXOrMoreServicesRecorded : TStringList;
+    slMissedHeatUnusualCycle : TStringList;
+    slCowsCalvedLessThanVWP : TStringList;
+    slConsiderPDAfterServiceXDays : TStringList;
+    slCowsNotPregnant  : TStringList;
+    slDueForDryOffWithinXDays : TStringList;
+    slDueToCalveWithinXDays : TStringList;
+
+    DueWithinDays : Integer;
+    DaysForFirstService : Integer;
+    DaysforDryingOff : Integer;
+
+    BreedingData : TBreedingData;
+    procedure PrepareStringOutput(var Asl : TStringList; RawOutput : String; SpaceCount : Integer = 10);
+    procedure LoadParams;
+  public
+    { Public declarations }
+    procedure PreviewListData(const APreview : Boolean);
+  end;
+
+var
+  fmCAFREFertListData: TfmCAFREFertListData;
+
+implementation
+uses
+   kRoutines, DairyData;
+{$R *.DFM}
+
+procedure TfmCAFREFertListData.cbActionListPropertiesChange(
+  Sender: TObject);
+begin
+  inherited;
+//  seDueWithinDays.Visible := cbActionList.Checked;
+//  lServiceWithin.Visible := cbActionList.Checked;
+end;
+
+procedure TfmCAFREFertListData.PrepareStringOutput(var Asl: TStringList;
+  RawOutput: String; SpaceCount : Integer = 10);
+var
+   i : Integer;
+   s : String;
+   c : Integer;
+   RowDataSize : Integer;
+begin
+   Asl.Clear;
+   Parser.Parse(RawOutput);
+   c := 0;
+   if SpaceCount = 10 then
+      RowDataSize := 7
+   else
+      RowDataSize := 5;
+
+   for i := 0 to Parser.Count-1 do
+      begin
+         if s = '' then
+            begin
+               s := s + Parser.Fields[i+1];
+               Inc(c);
+            end
+         else
+            begin
+               Inc(c);
+               s := s + ' ' +PadLeft(Parser.Fields[i+1], ' ', SpaceCount);
+            end;
+
+         if ( c = RowDataSize ) then
+           begin
+              Asl.Add( s );
+              s := '';
+              c := 0;
+           end;
+
+      end;
+
+   if s <> '' then
+      Asl.Add( s );
+end;
+
+procedure TfmCAFREFertListData.PreviewListData(const APreview: Boolean);
+var
+  sNoHeatServiceXDaysCalved,
+  sNoHeatServiceXToYDaysCalved,
+  sXOrMoreServicesRecorded,
+  sMissedHeatUnusualCycle : String;
+  sFirstServiceWithXDays,
+  sRepeatServiceWithXDays : String;
+  sDueForDryOffWithinXDays : String;
+  sDueToCalveWithinXDays : String;
+
+  sCalvedLessThanVWP,
+  sConsiderPDAfterServiceXDays,
+  sCowsNotPregnant : String;
+
+  i : Integer;
+begin
+   //   08/05/15 [V5.4 R5.5] /MK Bug Fix - FreeAndNil WinData.FreeBreedingDataHelper as it TBreedingData uses TBreedingDataHelper aswell - GL/P.Geraghty report.
+   if ( WinData.FBreedingDataHelper <> nil ) then
+      FreeAndNil(WinData.FBreedingDataHelper);
+
+   if ( BreedingData <> nil ) then
+      FreeAndNil(BreedingData);
+   BreedingData := TBreedingData.Create;
+
+   BreedingData.FromDate := Date;
+   BreedingData.ToDate := Date + DueWithinDays;
+   BreedingData.DaysFirstService := DaysForFirstService;
+   BreedingData.DaysforDryingOff := DaysforDryingOff;
+   BreedingData.ShowProgress := True;
+   BreedingData.IncludeOverDue := True;
+   BreedingData.HerdID := HerdID;
+   BreedingData.ProgressBar := ProgBar;
+
+   InitProgress(0,0,1,'Compiling list data, please wait...');
+   BreedingData.Execute;
+   ResetProgress;
+
+   if cbActionList.Checked then
+      begin
+         slFirstServiceWith4Days := TStringList.Create;
+         sFirstServiceWithXDays := BreedingData.OutputResult(alFirstServiceWith4Days);
+         PrepareStringOutput(slFirstServiceWith4Days, sFirstServiceWithXDays, 20);
+         LoopBandFirstServiceWith4Days.PrintCount := slFirstServiceWith4Days.Count+2;
+
+         slRepeatServiceWith4Days := TStringList.Create;
+         sRepeatServiceWithXDays := BreedingData.OutputResult(alRepeatServiceWith4Days);
+         PrepareStringOutput(slRepeatServiceWith4Days, sRepeatServiceWithXDays, 20);
+         LoopBandRepeatServiceWith4Days.PrintCount := slRepeatServiceWith4Days.Count+1;
+
+         slDueForDryOffWithinXDays := TStringList.Create;
+         sDueForDryOffWithinXDays := BreedingData.OutputResult(alDueToDryOff);
+         PrepareStringOutput(slDueForDryOffWithinXDays, sDueForDryOffWithinXDays, 20);
+         QRLoopBand10.PrintCount := slDueForDryOffWithinXDays.Count+1;
+
+         slDueToCalveWithinXDays := TStringList.Create;
+         sDueToCalveWithinXDays := BreedingData.OutputResult(alDueToCalve);
+         PrepareStringOutput(slDueToCalveWithinXDays, sDueToCalveWithinXDays, 20);
+         QRLoopBand1.PrintCount := slDueToCalveWithinXDays.Count+1;
+      end;
+
+   if cbWarningList.Checked then
+      begin
+         slNoHeatServiceXDaysCalved := TStringList.Create;
+         sNoHeatServiceXDaysCalved := BreedingData.OutputResult(wlNoHeatServiceXDaysCalved);
+         PrepareStringOutput(slNoHeatServiceXDaysCalved, sNoHeatServiceXDaysCalved);
+         LoopBandNoHeatService61DaysCalved.PrintCount := slNoHeatServiceXDaysCalved.Count+2;
+
+         slNoHeatServiceXToYDaysCalved := TStringList.Create;
+         sNoHeatServiceXToYDaysCalved := BreedingData.OutputResult(wlNoHeatServiceXPeriodDaysCalved);
+         PrepareStringOutput(slNoHeatServiceXToYDaysCalved, sNoHeatServiceXToYDaysCalved);
+         LoopBandNoHeatService42To60DaysCalved.PrintCount := slNoHeatServiceXToYDaysCalved.Count+1;
+
+         slXOrMoreServicesRecorded := TStringList.Create;
+         sXOrMoreServicesRecorded := BreedingData.OutputResult(wlCheckNoServicesRecorded);
+         PrepareStringOutput(slXOrMoreServicesRecorded, sXOrMoreServicesRecorded);
+         LoopBand3MoreServicesRecorded.PrintCount := slXOrMoreServicesRecorded.Count+1;
+
+         slMissedHeatUnusualCycle := TStringList.Create;
+         sMissedHeatUnusualCycle := BreedingData.OutputResult(wlMissedHeatUnusualCycle);
+         PrepareStringOutput(slMissedHeatUnusualCycle, sMissedHeatUnusualCycle);
+         LoopBandsMissedHeatUnusualCycle.PrintCount := slMissedHeatUnusualCycle.Count+1;
+      end;
+
+   if cbReminderList.Checked then
+      begin
+         slCowsCalvedLessThanVWP := TStringList.Create;
+         sCalvedLessThanVWP := BreedingData.OutputResult(rlCalvedLessThanVWP);
+         PrepareStringOutput(slCowsCalvedLessThanVWP, sCalvedLessThanVWP);
+         LoopBandCowsCalvedLessThanVWP.PrintCount := slCowsCalvedLessThanVWP.Count+2;
+
+         slConsiderPDAfterServiceXDays := TStringList.Create;
+         sConsiderPDAfterServiceXDays := BreedingData.OutputResult(rlConsiderPDAfterServiceXDays);
+         PrepareStringOutput(slConsiderPDAfterServiceXDays, sConsiderPDAfterServiceXDays);
+         LoopBandConsiderPDAfterServiceXDays.PrintCount := slConsiderPDAfterServiceXDays.Count+1;
+
+         slCowsNotPregnant := TStringList.Create;
+         sCowsNotPregnant := BreedingData.OutputResult(rlCowsNotPregnant);
+         PrepareStringOutput(slCowsNotPregnant, sCowsNotPregnant);
+         LoopBandCowsNotPregnant.PrintCount := slCowsNotPregnant.Count+1;
+      end;
+
+   try
+      if APreview then
+         qrCAFREFertListData.Preview
+      else
+         qrCAFREFertListData.Print;
+   finally
+      if slFirstServiceWith4Days <> nil then
+         FreeAndNil(slFirstServiceWith4Days);
+      if slRepeatServiceWith4Days <> nil then
+         FreeAndNil(slRepeatServiceWith4Days);
+      if slRepeatServiceWith4Days <> nil then
+         FreeAndNil(slRepeatServiceWith4Days);
+      if slNoHeatServiceXDaysCalved <> nil then
+         FreeAndNil(slNoHeatServiceXDaysCalved);
+      if slNoHeatServiceXToYDaysCalved <> nil then
+         FreeAndNil(slNoHeatServiceXToYDaysCalved);
+      if slNoHeatServiceXToYDaysCalved <> nil then
+         FreeAndNil(slNoHeatServiceXToYDaysCalved);
+      if slXOrMoreServicesRecorded <> nil then
+         FreeAndNil(slXOrMoreServicesRecorded);
+      if slXOrMoreServicesRecorded <> nil then
+         FreeAndNil(slXOrMoreServicesRecorded);
+      if slMissedHeatUnusualCycle <> nil then
+         FreeAndNil(slMissedHeatUnusualCycle);
+      if slCowsCalvedLessThanVWP <> nil then
+         FreeAndNil(slCowsCalvedLessThanVWP);
+      if slConsiderPDAfterServiceXDays <> nil then
+         FreeAndNil(slConsiderPDAfterServiceXDays);
+      if slCowsNotPregnant <> nil then
+         FreeAndNil(slCowsNotPregnant);
+      //   02/06/17 [V5.6 R8.7] /MK Bug Fix - Breeding Data was just being free'd and not being set to nil so report would not view a second time.
+      if ( BreedingData <> nil ) then
+         FreeAndNil(BreedingData);
+   end;
+end;
+
+procedure TfmCAFREFertListData.sbViewClick(Sender: TObject);
+var
+   StartTime,
+   EndTime : Integer;
+begin
+   inherited;
+   WinData.cxHint.HideHint;
+   WinData.CanShowStandardReportHint := False;
+   StartTime := GetTickCount;
+   PreviewListData(True);
+   ApplicationLog.LogDebugTickCountTimer(
+   EnableViewPrintButtons(True);
+end;
+
+procedure TfmCAFREFertListData.LoopBandFirstServiceWith4DaysBeforePrint(
+  Sender: TQRCustomBand; var PrintBand: Boolean);
+begin
+   inherited;
+   DataLabel.Parent := Sender;
+   LineDivide.Parent := Sender;
+   LineDivide.Visible := False;
+   LineDivide.Enabled := False;
+   NoAnimalsListed.Enabled := False;
+   NoAnimalsListed.Visible := False;
+   NoAnimalsListed.Top := 36;
+   if (Sender as TQRLoopBand).Count = 0 then
+      begin
+         DataLabel.Font.Size := 13;
+         DataLabel.Font.Style := [fsBold];
+         DataLabel.Caption := 'Action List:';
+         (Sender as TQRLoopBand).Height := 40;
+      end
+   else
+      begin
+         DataLabel.Font.Style := [fsBold];
+
+         if (Sender as TQRLoopBand).Count = 1 then
+            begin
+               DataLabel.Font.Size := 11;
+               DataLabel.Caption := '1. Cows ready for service within the next '+IntToStr(DueWithinDays)+' days';
+               if (Sender as TQRLoopBand).PrintCount = 2 then
+                  begin
+                     LineDivide.Visible := True;
+                     LineDivide.Enabled := True;
+
+                     NoAnimalsListed.Top := 36;
+                     NoAnimalsListed.Parent := Sender;
+                     NoAnimalsListed.Enabled := True;
+                     NoAnimalsListed.Visible := True;
+
+                     (Sender as TQRLoopBand).Height := 80;
+                     LineDivide.Top := 78;
+                  end;
+            end
+         else
+            begin
+               DataLabel.Font.Style := [];
+               DataLabel.Font.Size := 12;
+               DataLabel.Caption := slFirstServiceWith4Days.Strings[ (Sender as TQRLoopBand).Count-2 ]; //QRMemo1.Lines.Add(  );
+               LineDivide.Top := 38;
+               LineDivide.Visible := (Sender as  TQRLoopBand).Count+1 = (Sender as  TQRLoopBand).PrintCount;
+               LineDivide.Enabled := LineDivide.Visible;
+            end;
+      end;
+   PrintBand := True;
+end;
+
+procedure TfmCAFREFertListData.LoopBandRepeatServiceWith4DaysBeforePrint(
+  Sender: TQRCustomBand; var PrintBand: Boolean);
+begin
+  inherited;
+
+   DataLabel.Parent := Sender;
+   LineDivide.Parent := Sender;
+   LineDivide.Visible := False;
+   LineDivide.Enabled := False;
+   NoAnimalsListed.Enabled := False;
+   NoAnimalsListed.Visible := False;
+   NoAnimalsListed.Top := 36;
+   if (Sender as  TQRLoopBand).Count = 0 then
+      begin
+         DataLabel.Font.Style := [fsBold];
+         DataLabel.Font.Size := 11;
+         DataLabel.Caption := '2. Cows which may repeat within the next '+IntToStr(DueWithinDays)+' days';
+               if (Sender as TQRLoopBand).PrintCount = 1 then
+                  begin
+                     LineDivide.Visible := True;
+                     LineDivide.Enabled := True;
+
+                     NoAnimalsListed.Top := 36;
+                     NoAnimalsListed.Parent := Sender;
+                     NoAnimalsListed.Enabled := True;
+                     NoAnimalsListed.Visible := True;
+                     (Sender as  TQRLoopBand).Height := 80;
+                     LineDivide.Top := 78;
+                  end;
+      end
+   else
+      begin
+         DataLabel.Font.Style := [];
+         DataLabel.Font.Size := 12;
+         DataLabel.Caption := slRepeatServiceWith4Days.Strings[ (Sender as  TQRLoopBand).Count-1 ];
+         LineDivide.Top := 38;
+         LineDivide.Visible := (Sender as  TQRLoopBand).Count+1 = (Sender as  TQRLoopBand).PrintCount;
+         LineDivide.Enabled := LineDivide.Visible;
+      end;
+   PrintBand := True;
+end;
+
+procedure TfmCAFREFertListData.LoopBandNoHeatService61DaysCalvedBeforePrint(
+  Sender: TQRCustomBand; var PrintBand: Boolean);
+begin
+  inherited;
+   DataLabel.Parent := Sender;
+   LineDivide.Parent := Sender;
+   LineDivide.Visible := False;
+   LineDivide.Enabled := False;
+   NoAnimalsListed.Enabled := False;
+   NoAnimalsListed.Visible := False;
+   NoAnimalsListed.Top := 36;
+   if (Sender as  TQRLoopBand).Count = 0 then
+      begin
+         DataLabel.Font.Size := 13;
+         DataLabel.Font.Style := [fsBold];
+         DataLabel.Caption := 'Warning List:';
+      end
+   else
+      begin
+         DataLabel.Font.Style := [fsBold];
+         DataLabel.Font.Size := 11;
+         if (Sender as  TQRLoopBand).Count = 1 then
+            begin
+               DataLabel.Caption := '1. Cows with no previous heat or service recorded (greater than 60 days calved)';
+               if (Sender as TQRLoopBand).PrintCount = 2 then
+                  begin
+                     LineDivide.Visible := True;
+                     LineDivide.Enabled := True;
+
+                     NoAnimalsListed.Top := 36;
+                     NoAnimalsListed.Parent := Sender;
+                     NoAnimalsListed.Enabled := True;
+                     NoAnimalsListed.Visible := True;
+
+                     (Sender as TQRLoopBand).Height := 80;
+                     LineDivide.Top := 78;
+                  end;
+            end
+         else
+            begin
+               DataLabel.Font.Style := [];
+               DataLabel.Font.Size := 12;
+               DataLabel.Caption := slNoHeatServiceXDaysCalved.Strings[ (Sender as  TQRLoopBand).Count-2 ];
+               LineDivide.Top := 38;
+               LineDivide.Visible := (Sender as  TQRLoopBand).Count+1 = (Sender as  TQRLoopBand).PrintCount;
+               LineDivide.Enabled := LineDivide.Visible;
+            end;
+      end;
+   PrintBand := True;
+
+end;
+
+procedure TfmCAFREFertListData.LoopBandNoHeatService42To60DaysCalvedBeforePrint(
+  Sender: TQRCustomBand; var PrintBand: Boolean);
+begin
+  inherited;
+   DataLabel.Parent := Sender;
+   LineDivide.Parent := Sender;
+   LineDivide.Visible := False;
+   LineDivide.Enabled := False;
+   NoAnimalsListed.Enabled := False;
+   NoAnimalsListed.Visible := False;
+   NoAnimalsListed.Top := 36;
+   if (Sender as  TQRLoopBand).Count = 0 then
+      begin
+         DataLabel.Font.Style := [fsBold];
+         DataLabel.Font.Size := 11;
+         DataLabel.Caption := '2. Cows with no previous heat or service recorded (42-60 days calved)';
+
+         if (Sender as TQRLoopBand).PrintCount = 1 then
+            begin
+               LineDivide.Visible := True;
+               LineDivide.Enabled := True;
+
+               NoAnimalsListed.Top := 36;
+               NoAnimalsListed.Parent := Sender;
+               NoAnimalsListed.Enabled := True;
+               NoAnimalsListed.Visible := True;
+               (Sender as TQRLoopBand).Height := 80;
+               LineDivide.Top := 78;
+            end;
+      end
+   else
+      begin
+         DataLabel.Font.Style := [];
+         DataLabel.Font.Size := 12;
+         DataLabel.Caption := slNoHeatServiceXToYDaysCalved.Strings[ (Sender as  TQRLoopBand).Count-1 ];
+         LineDivide.Top := 38;
+         LineDivide.Visible := (Sender as  TQRLoopBand).Count+1 = (Sender as  TQRLoopBand).PrintCount;
+         LineDivide.Enabled := LineDivide.Visible;
+      end;
+   PrintBand := True;
+
+end;
+
+procedure TfmCAFREFertListData.LoopBand3MoreServicesRecordedBeforePrint(
+  Sender: TQRCustomBand; var PrintBand: Boolean);
+begin
+  inherited;
+   DataLabel.Parent := Sender;
+   LineDivide.Parent := Sender;
+   LineDivide.Visible := False;
+   LineDivide.Enabled := False;
+   NoAnimalsListed.Enabled := False;
+   NoAnimalsListed.Visible := False;
+   NoAnimalsListed.Top := 36;
+   if (Sender as  TQRLoopBand).Count = 0 then
+      begin
+         DataLabel.Font.Style := [fsBold];
+         DataLabel.Font.Size := 11;
+         DataLabel.Caption := '3. Cows with three or more services to date';
+         if (Sender as TQRLoopBand).PrintCount = 1 then
+            begin
+               LineDivide.Visible := True;
+               LineDivide.Enabled := True;
+
+               NoAnimalsListed.Top := 36;
+               NoAnimalsListed.Parent := Sender;
+               NoAnimalsListed.Enabled := True;
+               NoAnimalsListed.Visible := True;
+               (Sender as TQRLoopBand).Height := 80;
+               LineDivide.Top := 78;
+            end;
+      end
+   else
+      begin
+         DataLabel.Font.Style := [];
+         DataLabel.Font.Size := 12;
+         DataLabel.Caption := slXOrMoreServicesRecorded.Strings[ (Sender as  TQRLoopBand).Count-1 ];
+         LineDivide.Top := 38;
+         LineDivide.Visible := (Sender as  TQRLoopBand).Count+1 = (Sender as  TQRLoopBand).PrintCount;
+         LineDivide.Enabled := LineDivide.Visible;
+      end;
+   PrintBand := True;
+end;
+
+procedure TfmCAFREFertListData.LoopBandsMissedHeatUnusualCycleBeforePrint(
+  Sender: TQRCustomBand; var PrintBand: Boolean);
+begin
+  inherited;
+   DataLabel.Parent := Sender;
+   LineDivide.Parent := Sender;
+   LineDivide.Visible := False;
+   LineDivide.Enabled := False;
+   NoAnimalsListed.Enabled := False;
+   NoAnimalsListed.Visible := False;
+   NoAnimalsListed.Top := 36;
+   if (Sender as  TQRLoopBand).Count = 0 then
+      begin
+         DataLabel.Font.Style := [fsBold];
+         DataLabel.Font.Size := 11;
+         DataLabel.Caption := '4. Cows with missed heat or unusual cycle length';
+         if (Sender as TQRLoopBand).PrintCount = 1 then
+            begin
+               LineDivide.Visible := True;
+               LineDivide.Enabled := True;
+
+               NoAnimalsListed.Top := 36;
+               NoAnimalsListed.Parent := Sender;
+               NoAnimalsListed.Enabled := True;
+               NoAnimalsListed.Visible := True;
+               (Sender as TQRLoopBand).Height := 80;
+               LineDivide.Top := 78;
+            end;
+      end
+   else
+      begin
+         DataLabel.Font.Style := [];
+         DataLabel.Font.Size := 12;
+         DataLabel.Caption := slMissedHeatUnusualCycle.Strings[ (Sender as  TQRLoopBand).Count-1 ];
+         LineDivide.Top := 38;
+         LineDivide.Visible := (Sender as  TQRLoopBand).Count+1 = (Sender as  TQRLoopBand).PrintCount;
+         LineDivide.Enabled := LineDivide.Visible;
+      end;
+   PrintBand := True;
+
+end;
+
+procedure TfmCAFREFertListData.LoopBandCowsCalvedLessThanVWPBeforePrint(
+  Sender: TQRCustomBand; var PrintBand: Boolean);
+begin
+  inherited;
+   DataLabel.Parent := Sender;
+   LineDivide.Parent := Sender;
+   LineDivide.Visible := False;
+   LineDivide.Enabled := False;
+   NoAnimalsListed.Enabled := False;
+   NoAnimalsListed.Visible := False;
+   NoAnimalsListed.Top := 36;
+   if (Sender as  TQRLoopBand).Count = 0 then
+      begin
+         DataLabel.Font.Size := 13;
+         DataLabel.Font.Style := [fsBold];
+         DataLabel.Caption := 'Reminder List:';
+      end
+   else
+      begin
+         DataLabel.Font.Style := [fsBold];
+
+         if (Sender as  TQRLoopBand).Count = 1 then
+            begin
+               DataLabel.Font.Size := 11;
+               DataLabel.Caption := '1. Cows calved less than your voluntary waiting period (and not ready for service)';
+
+               if (Sender as TQRLoopBand).PrintCount = 2 then
+                  begin
+                     LineDivide.Visible := True;
+                     LineDivide.Enabled := True;
+
+                     NoAnimalsListed.Top := 36;
+                     NoAnimalsListed.Parent := Sender;
+                     NoAnimalsListed.Enabled := True;
+                     NoAnimalsListed.Visible := True;
+
+                     (Sender as TQRLoopBand).Height := 80;
+                     LineDivide.Top := 78;
+                  end;
+            end
+         else
+            begin
+               DataLabel.Font.Style := [];
+               DataLabel.Font.Size := 12;
+               DataLabel.Caption := slCowsCalvedLessThanVWP.Strings[ (Sender as  TQRLoopBand).Count-2 ]; //QRMemo1.Lines.Add(  );
+               LineDivide.Top := 38;
+               LineDivide.Visible := (Sender as  TQRLoopBand).Count+1 = (Sender as  TQRLoopBand).PrintCount;
+               LineDivide.Enabled := LineDivide.Visible;
+            end;
+      end;
+   PrintBand := True;
+
+end;
+
+procedure TfmCAFREFertListData.LoopBandConsiderPDAfterServiceXDaysBeforePrint(
+  Sender: TQRCustomBand; var PrintBand: Boolean);
+begin
+  inherited;
+   DataLabel.Parent := Sender;
+   LineDivide.Parent := Sender;
+   LineDivide.Visible := False;
+   LineDivide.Enabled := False;
+   NoAnimalsListed.Enabled := False;
+   NoAnimalsListed.Visible := False;
+   NoAnimalsListed.Top := 36;
+   if (Sender as  TQRLoopBand).Count = 0 then
+      begin
+         DataLabel.Font.Style := [fsBold];
+         DataLabel.Font.Size := 11;
+         DataLabel.Caption := '2. Cows more than 6 weeks since last AI (consider for pregnancy diagnosis)';
+         if (Sender as TQRLoopBand).PrintCount = 1 then
+            begin
+               LineDivide.Visible := True;
+               LineDivide.Enabled := True;
+
+               NoAnimalsListed.Top := 36;
+               NoAnimalsListed.Parent := Sender;
+               NoAnimalsListed.Enabled := True;
+               NoAnimalsListed.Visible := True;
+               (Sender as TQRLoopBand).Height := 80;
+               LineDivide.Top := 78;
+            end;
+      end
+   else
+      begin
+         DataLabel.Font.Style := [];
+         DataLabel.Font.Size := 12;
+         DataLabel.Caption := slConsiderPDAfterServiceXDays.Strings[ (Sender as  TQRLoopBand).Count-1 ];
+         LineDivide.Top := 38;
+         LineDivide.Visible := (Sender as  TQRLoopBand).Count+1 = (Sender as  TQRLoopBand).PrintCount;
+         LineDivide.Enabled := LineDivide.Visible;
+      end;
+   PrintBand := True;
+end;
+
+procedure TfmCAFREFertListData.LoopBandCowsNotPregnantBeforePrint(
+  Sender: TQRCustomBand; var PrintBand: Boolean);
+begin
+  inherited;
+   DataLabel.Parent := Sender;
+   LineDivide.Parent := Sender;
+   LineDivide.Visible := False;
+   LineDivide.Enabled := False;
+   NoAnimalsListed.Enabled := False;
+   NoAnimalsListed.Visible := False;
+   NoAnimalsListed.Top := 36;
+   if (Sender as  TQRLoopBand).Count = 0 then
+      begin
+         DataLabel.Font.Style := [fsBold];
+         DataLabel.Font.Size := 11;
+         DataLabel.Caption := '3. Cows with negative pregnancy test';
+         if (Sender as TQRLoopBand).PrintCount = 1 then
+            begin
+               LineDivide.Visible := True;
+               LineDivide.Enabled := True;
+
+               NoAnimalsListed.Top := 36;
+               NoAnimalsListed.Parent := Sender;
+               NoAnimalsListed.Enabled := True;
+               NoAnimalsListed.Visible := True;
+               (Sender as TQRLoopBand).Height := 80;
+               LineDivide.Top := 78;
+            end;
+      end
+   else
+      begin
+         DataLabel.Font.Style := [];
+         DataLabel.Font.Size := 12;
+         DataLabel.Caption := slCowsNotPregnant.Strings[ (Sender as  TQRLoopBand).Count-1 ];
+         LineDivide.Top := 38;
+         LineDivide.Visible := (Sender as  TQRLoopBand).Count+1 = (Sender as  TQRLoopBand).PrintCount;
+         LineDivide.Enabled := LineDivide.Visible;
+      end;
+   PrintBand := True;
+end;
+
+procedure TfmCAFREFertListData.sbPrintClick(Sender: TObject);
+begin
+  inherited;
+  PreviewListData(False);
+end;
+
+procedure TfmCAFREFertListData.FormCreate(Sender: TObject);
+begin
+  inherited;
+//  sbListParams.Left := 202;
+   WinData.CanShowStandardReportHint := True;
+   LoadParams;
+   qrCAFREFertListData.Visible := False;
+end;
+
+procedure TfmCAFREFertListData.QRLoopBand10BeforePrint(
+  Sender: TQRCustomBand; var PrintBand: Boolean);
+begin
+  inherited;
+   DataLabel.Parent := Sender;
+   LineDivide.Parent := Sender;
+   LineDivide.Visible := False;
+   LineDivide.Enabled := False;
+   NoAnimalsListed.Enabled := False;
+   NoAnimalsListed.Visible := False;
+   NoAnimalsListed.Top := 36;
+   if (Sender as TQRLoopBand).Count = 0 then
+      begin
+         DataLabel.Font.Style := [fsBold];
+         DataLabel.Font.Size := 11;
+         DataLabel.Caption := '3. Cows due for dry off within the next '+IntToStr(DueWithinDays)+' days';
+         if (Sender as TQRLoopBand).PrintCount = 1 then
+            begin
+               LineDivide.Visible := True;
+               LineDivide.Enabled := True;
+
+               NoAnimalsListed.Top := 36;
+               NoAnimalsListed.Parent := Sender;
+               NoAnimalsListed.Enabled := True;
+               NoAnimalsListed.Visible := True;
+               (Sender as TQRLoopBand).Height := 80;
+               LineDivide.Top := 78;
+            end;
+      end
+   else
+      begin
+         DataLabel.Font.Style := [];
+         DataLabel.Font.Size := 12;
+         DataLabel.Caption := slDueForDryOffWithinXDays.Strings[ (Sender as TQRLoopBand).Count-1 ];
+         LineDivide.Top := 38;
+         LineDivide.Visible := (Sender as  TQRLoopBand).Count+1 = (Sender as  TQRLoopBand).PrintCount;
+         LineDivide.Enabled := LineDivide.Visible;
+      end;
+   PrintBand := True;
+end;
+
+procedure TfmCAFREFertListData.QRLoopBand1BeforePrint(
+  Sender: TQRCustomBand; var PrintBand: Boolean);
+begin
+  inherited;
+   DataLabel.Parent := Sender;
+   LineDivide.Parent := Sender;
+   LineDivide.Visible := False;
+   LineDivide.Enabled := False;
+   NoAnimalsListed.Enabled := False;
+   NoAnimalsListed.Visible := False;
+   NoAnimalsListed.Top := 36;
+   if (Sender as TQRLoopBand).Count = 0 then
+      begin
+         DataLabel.Font.Style := [fsBold];
+         DataLabel.Font.Size := 11;
+         DataLabel.Caption := '4. Cows due to calve within the next '+IntToStr(DueWithinDays)+' days';
+         if (Sender as TQRLoopBand).PrintCount = 1 then
+            begin
+               LineDivide.Visible := True;
+               LineDivide.Enabled := True;
+
+               NoAnimalsListed.Top := 36;
+               NoAnimalsListed.Parent := Sender;
+               NoAnimalsListed.Enabled := True;
+               NoAnimalsListed.Visible := True;
+               (Sender as TQRLoopBand).Height := 80;
+               LineDivide.Top := 78;
+            end;
+      end
+   else
+      begin
+         DataLabel.Font.Style := [];
+         DataLabel.Font.Size := 12;
+         DataLabel.Caption := slDueToCalveWithinXDays.Strings[ (Sender as TQRLoopBand).Count-1 ];
+         LineDivide.Top := 38;
+         LineDivide.Visible := (Sender as  TQRLoopBand).Count+1 = (Sender as  TQRLoopBand).PrintCount;
+         LineDivide.Enabled := LineDivide.Visible;
+      end;
+   PrintBand := True;
+end;
+
+procedure TfmCAFREFertListData.LoadParams;
+var
+   DueServiceDefaults : TDueServiceDefaults;
+   DuePregDiagDefaults : TDuePregDiagDefaults;
+   DueDryOffDefaults : TDueDryOffDefaults;
+   DueCalvingDefaults : TDueCalvingDefaults;
+begin
+    DueServiceDefaults := TDueServiceDefaults.Create(cRD_DueService);
+    try
+       DaysForFirstService := DueServiceDefaults.NoDays;
+       DueWithinDays := DueServiceDefaults.DueWithin;
+    finally
+       FreeAndNil(DueServiceDefaults);
+    end;
+    DueDryOffDefaults := TDueDryOffDefaults.Create(cRD_DueDryOff);
+    try
+       if DueDryOffDefaults.NoDays = 0 then
+          DaysforDryingOff := 70
+       else
+          DaysforDryingOff := DueDryOffDefaults.NoDays;
+    finally
+       FreeAndNil(DueDryOffDefaults);
+    end;
+
+end;
+
+procedure TfmCAFREFertListData.FormDestroy(Sender: TObject);
+var
+   DueServiceDefaults : TDueServiceDefaults;
+begin
+  inherited;
+   WinData.cxHint.HideHint;
+
+   DueServiceDefaults := TDueServiceDefaults.Create(cRD_DueService);
+   try
+      DueServiceDefaults.DueWithin := DueWithinDays;
+   finally
+      FreeAndNil(DueServiceDefaults);
+   end;
+end;
+
+procedure TfmCAFREFertListData.sbListParamsClick(Sender: TObject);
+begin
+  inherited;
+  TfmActionWarningReminderParams.ShowParams(False);
+  LoadParams;
+end;
+
+procedure TfmCAFREFertListData.FormActivate(Sender: TObject);
+var
+   pt : TPoint;
+begin
+   // 05/05/10 [V4.0 R3.5] /MK Additional Feature - Added Hint to View
+   if WinData.CanShowStandardReportHint then
+      begin
+         WinData.CallHintStyle;
+         pt.x := 0;
+         pt.y := 0;
+         pt := sbView.ClientToScreen(pt);
+         WinData.cxHint.ShowHint( pt.x , pt.y , 'View Report', 'Click here to view standard report');
+      end;
+end;
+
+procedure TfmCAFREFertListData.sbViewMouseLeave(Sender: TObject);
+begin
+   WinData.cxHint.HideHint;
+end;
+
+procedure TfmCAFREFertListData.cbFavouritePropertiesChange(
+  Sender: TObject);
+begin
+   inherited;
+   if cbFavourite.Checked then
+      begin
+         WinData.SetReportAsFavourite(cActWarnRemRep,True);
+         cbFavourite.Style.TextColor := clBlue;
+         cbFavourite.StyleHot.TextColor := clBlue;
+      end
+   else
+      begin
+         WinData.SetReportAsFavourite(cActWarnRemRep,False);
+         cbFavourite.Style.TextColor := clBlack;
+         cbFavourite.StyleHot.TextColor := clBlack;
+      end;
+   Application.ProcessMessages;
+   Update;
+end;
+
+procedure TfmCAFREFertListData.FormShow(Sender: TObject);
+begin
+   inherited;
+   cbFavourite.Checked := WinData.IsReportFavourite(cActWarnRemRep);
+   WinData.UpdateRecentReportUsage(cActWarnRemRep);
+end;
+
+end.

@@ -1,0 +1,875 @@
+{
+   15/04/11 [V4.0 R9.6] /MK Additional Feature - Added New Radio Group To Select Either General Or Feed Events
+                                               - Allow user to do mass delete of Feed Events.
+                                               - If Feed Events to be deleted have Feed Regime then after Feed Events are deleted
+                                                 check that if there are no other Feed Events with this Feed Regime then delete the Feed Regime.
+
+   12/12/11 [V5.0 R2.8] /MK Change - Added Extra Message Before Deleting Of Feed Events.
+
+}
+
+unit uEventFilterNew;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  dxDockControl, dxDockPanel, ActnList, dxBar, dxBarExtItems, cxGridLevel,
+  cxClasses, cxControls, cxGridCustomView, cxGridCustomTableView,
+  cxGridTableView, cxGridDBTableView, cxGrid, Db, DBTables, cxLabel,
+  cxContainer, cxEdit, cxTextEdit, cxMaskEdit, cxDropDownEdit,
+  cxLookupEdit, cxDBLookupEdit, cxDBLookupComboBox, ExtCtrls,
+  cxCheckComboBox, dxPSCore, dxPScxCommon, dxPScxGridLnk, cxStyles,
+  cxGraphics, StdCtrls, cxCalendar, cxButtons, Menus, cxCheckBox,
+  dxStatusBar, cxFilter, GenTypesConst, cxCustomData, dxmdaset, cxGroupBox,
+  cxRadioGroup;
+
+type
+  TEventFilterNew = class(TForm)
+    EventGridTableView: TcxGridDBTableView;
+    EventGridLevel: TcxGridLevel;
+    EventGrid: TcxGrid;
+    BarManager: TdxBarManager;
+    ActionList1: TActionList;
+    actExit: TAction;
+    blbExit: TdxBarLargeButton;
+    blbHelp: TdxBarLargeButton;
+    actHelp: TAction;
+    EventsQuery: TQuery;
+    EventsQuerySource: TDataSource;
+    EventGridTableViewAnimalLactNo: TcxGridDBColumn;
+    EventGridTableViewEventDate: TcxGridDBColumn;
+    EventGridTableViewEventDesc: TcxGridDBColumn;
+    EventGridTableViewEventType: TcxGridDBColumn;
+    pHerdId: TPanel;
+    HerdCombo: TcxLookupComboBox;
+    cxLabel1: TcxLabel;
+    dxBarControlContainerItem1: TdxBarControlContainerItem;
+    dxBarControlContainerItem2: TdxBarControlContainerItem;
+    pEventTypes: TPanel;
+    cbEventTypes: TcxCheckComboBox;
+    cxLabel2: TcxLabel;
+    dxBarLargeButton1: TdxBarLargeButton;
+    ComponentPrinter: TdxComponentPrinter;
+    EventGridPrinterLink: TdxGridReportLink;
+    actPrintGrid: TAction;
+    EventGridTableViewAnimalNo: TcxGridDBColumn;
+    EventGridTableViewNatIDNum: TcxGridDBColumn;
+    EventGridTableViewHiddenAnimalNo: TcxGridDBColumn;
+    EventGridTableViewHiddenNatIDNum: TcxGridDBColumn;
+    cxStyleRepository1: TcxStyleRepository;
+    cxStyle1: TcxStyle;
+    EventsQueryID: TIntegerField;
+    EventsQueryEventType: TSmallintField;
+    EventsQueryEventDate: TDateField;
+    EventsQueryEventDesc: TStringField;
+    EventsQueryAnimalLactNo: TSmallintField;
+    EventsQueryAnimalNo: TStringField;
+    EventsQueryNatIDNum: TStringField;
+    EventsQuerySortAnimalNo: TStringField;
+    EventsQuerySortNatID: TStringField;
+    EventsQueryEventTypeDesc: TStringField;
+    EventsQueryAnimalID: TIntegerField;
+    pDateFilter: TPanel;
+    dxBarControlContainerItem3: TdxBarControlContainerItem;
+    deDateFrom: TcxDateEdit;
+    deDateTo: TcxDateEdit;
+    Label1: TLabel;
+    Label2: TLabel;
+    btnFilterByDate: TcxButton;
+    blbExport: TdxBarLargeButton;
+    dxBarPopupMenu1: TdxBarPopupMenu;
+    actExportToExcelFile: TAction;
+    bbExportToExcelFile: TdxBarButton;
+    SaveDialog: TSaveDialog;
+    pMultipleEventDeletion: TPanel;
+    btnDeleteAllDiaryEvents: TcxButton;
+    cxLabel7: TcxLabel;
+    cxLabel8: TcxLabel;
+    deEventDate: TcxDateEdit;
+    lbMulitpleDeleteInstruction: TcxLabel;
+    cbAllowGroupDeletion: TcxCheckBox;
+    btnResetDiaryFilter: TcxButton;
+    actDeleteDiaryEvents: TAction;
+    pEventActions: TPanel;
+    btnDeleteSelectedEvents: TcxButton;
+    cxLabel34: TcxLabel;
+    dxStatusBar1: TdxStatusBar;
+    actDeleteEvents: TAction;
+    EventGridTableViewID: TcxGridDBColumn;
+    cmboDeletableEventTypes: TcxComboBox;
+    EventGridTableViewHerdId: TcxGridDBColumn;
+    EventsQueryHerdID: TIntegerField;
+    FeedEventsQuery: TQuery;
+    actFeedEvents: TAction;
+    actGeneralEvents: TAction;
+    dxBarControlContainerItem4: TdxBarControlContainerItem;
+    rgSelectEventType: TcxRadioGroup;
+    FeedEventsQueryID: TIntegerField;
+    FeedEventsQueryAllocDate: TDateField;
+    FeedEventsQueryFeedRegimeID: TIntegerField;
+    FeedEventsQueryFeedName: TStringField;
+    FeedEventsQueryLactNo: TSmallintField;
+    FeedEventsQueryAnimalNo: TStringField;
+    FeedEventsQueryNatIDNum: TStringField;
+    FeedEventsQuerySortAnimalNo: TStringField;
+    FeedEventsQuerySortNatID: TStringField;
+    FeedEventsQueryAnimalID: TIntegerField;
+    FeedEventsQueryHerdID: TIntegerField;
+    EventGridTableViewFeedRegimeID: TcxGridDBColumn;
+    cmboDeletableFeedGroups: TcxComboBox;
+    EventGridTableViewFeedGroupID: TcxGridDBColumn;
+    FeedEventsQueryFeedGroupID: TIntegerField;
+    FeedEventsGrid: TcxGrid;
+    FeedEventsGridDBTableView: TcxGridDBTableView;
+    cxGridDBEventDate: TcxGridDBColumn;
+    cxGridDBComment: TcxGridDBColumn;
+    cxGridDBAnimalLactNo: TcxGridDBColumn;
+    cxGridDBAnimalNo: TcxGridDBColumn;
+    cxGridDBNatIDNum: TcxGridDBColumn;
+    cxGridDBHiddenAnimalNo: TcxGridDBColumn;
+    cxGridDBHiddenNatIDNum: TcxGridDBColumn;
+    cxGridDBID: TcxGridDBColumn;
+    cxGridDBHerdID: TcxGridDBColumn;
+    cxGridDBFeedRegimeID: TcxGridDBColumn;
+    cxGridDBFeedGroupID: TcxGridDBColumn;
+    FeedEventsGridLevel: TcxGridLevel;
+    dsFeedEvents: TDataSource;
+    procedure actExitExecute(Sender: TObject);
+    procedure EventsQueryBeforeOpen(DataSet: TDataSet);
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure HerdComboPropertiesChange(Sender: TObject);
+    procedure cbEventTypesPropertiesCloseUp(Sender: TObject);
+    procedure actPrintGridExecute(Sender: TObject);
+    procedure EventsQuerySortNatIDGetText(Sender: TField; var Text: String;
+      DisplayText: Boolean);
+    procedure EventsQuerySortAnimalNoGetText(Sender: TField;
+      var Text: String; DisplayText: Boolean);
+    procedure EventGridTableViewDblClick(Sender: TObject);
+    procedure btnFilterByDateClick(Sender: TObject);
+    procedure actExportToExcelFileExecute(Sender: TObject);
+    procedure cbAllowGroupDeletionPropertiesChange(Sender: TObject);
+    procedure btnResetDiaryFilterClick(Sender: TObject);
+    procedure btnDeleteAllDiaryEventsClick(Sender: TObject);
+    procedure actDeleteEventsExecute(Sender: TObject);
+    procedure btnDeleteSelectedEventsClick(Sender: TObject);
+    procedure deEventDatePropertiesChange(Sender: TObject);
+    procedure cmboDeletableEventTypesPropertiesChange(Sender: TObject);
+    procedure FeedEventsQueryBeforeOpen(DataSet: TDataSet);
+    procedure FeedEventsQuerySortNatIDGetText(Sender: TField;
+      var Text: String; DisplayText: Boolean);
+    procedure rgSelectEventTypeClick(Sender: TObject);
+    procedure FeedEventsQuerySortAnimalNoGetText(Sender: TField;
+      var Text: String; DisplayText: Boolean);
+    procedure cmboDeletableFeedGroupsPropertiesChange(Sender: TObject);
+    procedure FeedEventsGridDBTableViewDblClick(Sender: TObject);
+  private
+    { Private declarations }
+    FDeletableEventTypes,
+    FDeletableFeedGroups : array of Integer;
+
+    FNoOfRecordsDeleted : Integer;
+    FDiaryDeleteType : TDiaryDeleteType;
+    LastEventID : Integer;
+    FFeedRegimeIDs : array of Integer;
+    procedure SetupEventTypes;
+    procedure SetupFeedGroupTypes;
+    function GetEventTypes : String;
+    procedure FilterDiaryGrid();
+    procedure DeleteEvent(ARowIndex: Integer; ARowInfo: TcxRowInfo);
+    procedure AddToFeedRegimeArray (AFeedRegimeID : Integer);
+    procedure DeleteFeedRegimes;
+  public
+    { Public declarations }
+  end;
+
+var
+  EventFilterNew: TEventFilterNew;
+
+implementation
+
+uses uImageStore, DairyData, uHerdLookup, MenuUnit, KRoutines,
+     Bullings, Services, PregDiag, UHealth, uCalvings, Weighing,
+     uSalesDeaths, uPurchases, uTempMovements, uMPEvents,  cxExport,  cxExportGrid4Link,
+     uDataBackup, uFeedAllocEdit;
+
+{$R *.DFM}
+
+procedure TEventFilterNew.actExitExecute(Sender: TObject);
+begin
+   Close;
+end;
+
+procedure TEventFilterNew.EventsQueryBeforeOpen(DataSet: TDataSet);
+begin
+   Screen.Cursor := crHourGlass;
+   EventGridTableView.DataController.BeginFullUpdate;
+   try
+      EventsQuery.SQL.Clear;
+      EventsQuery.SQL.Add('Select E.ID, E.AnimalID, E.EventType, E.EventDate, E.EventDesc, E.AnimalLactNo, E.HerdID,');
+      EventsQuery.SQL.Add('A.AnimalNo, A.NatIDNum, A.SortAnimalNo, A.SortNatID from Events E');
+      EventsQuery.SQL.Add('Left Join Animals A ON (A.ID=E.AnimalID)');
+      EventsQuery.SQL.Add('Where E.HerdID = :AHerdID');
+      EventsQuery.SQL.Add('And EventType in '+GetEventTypes+'');
+      if ( deDateFrom.Date > 0 ) and ( deDateTo.Date > 0 ) then
+         EventsQuery.SQL.Add('And ( EventDate Between ' + '''' + FormatDateTime(cUSDateStyle,deDateFrom.Date) + '''' + ' And ' + '''' + FormatDateTime(cUSDateStyle,deDateTo.Date) + '''' + ')')
+      else if ( deDateFrom.Date > 0 ) and ( deDateTo.Date <= 0 ) then
+         EventsQuery.SQL.Add('And ( EventDate >= ' + '''' + FormatDateTime(cUSDateStyle,deDateFrom.Date) + ''')')
+      else if ( deDateFrom.Date <= 0 ) and ( deDateTo.Date > 0 ) then
+         EventsQuery.SQL.Add('And ( EventDate <= ' + '''' + FormatDateTime(cUSDateStyle,deDateTo.Date) + ''')' );
+      EventsQuery.SQL.Add('Order By E.ID DESC');
+      EventsQuery.Params[0].AsInteger := HerdCombo.EditValue;
+   finally
+      EventGridTableView.DataController.EndFullUpdate;
+      Screen.Cursor := crDefault;
+   end;
+end;
+
+procedure TEventFilterNew.FormCreate(Sender: TObject);
+begin
+   ImageStore := TImageStore.Create(nil);
+
+   SetupEventTypes;
+   HerdCombo.RepositoryItem := MenuForm.riHerdCombo;
+   EventGridTableViewEventType.RepositoryItem := MenuForm.riEventTypes;
+   HerdCombo.EditValue := WinData.UserDefaultHerdID;
+   pHerdId.Visible := False; // hide the herd, it is not needed
+   cbAllowGroupDeletion.Checked := False;
+   FilterDiaryGrid();
+   pEventActions.Visible := False;
+   EventsQuery.Open;
+//   FeedEventsQuery.Open;
+
+   rgSelectEventType.ItemIndex := 0;
+//   SetLength(FFeedRegimeIDs, 0);
+end;
+
+procedure TEventFilterNew.FormDestroy(Sender: TObject);
+begin
+   FDeletableEventTypes := nil;
+   FFeedRegimeIDs := nil;
+   if ( EventsQuery.Active ) then
+      EventsQuery.Active := False;
+//   if ( FeedEventsQuery.Active ) then
+//      FeedEventsQuery.Active := False;
+   FreeAndNil(ImageStore);
+end;
+
+procedure TEventFilterNew.HerdComboPropertiesChange(Sender: TObject);
+begin
+   WinData.UserDefaultHerdID := HerdCombo.EditValue;
+end;
+
+procedure TEventFilterNew.SetupEventTypes;
+begin
+   { Set Up constants to control the Events - Used to set EventType }
+   cmboDeletableEventTypes.Properties.Items.Clear;
+   cmboDeletableEventTypes.Properties.Items.AddObject('<Select Event Type>', pointer(-1));
+
+   SetLength(FDeletableEventTypes, 0);
+
+   with HerdLookup.mdEventTypes do
+      begin
+         First;
+         while not Eof do
+            begin
+               if FieldByName('UserVisible').AsBoolean then
+                  begin
+                     cbEventTypes.Properties.Items.Add;
+                     cbEventTypes.Properties.Items[cbEventTypes.Properties.Items.Count-1].Description := FieldByName('Description').AsString;
+                     cbEventTypes.Properties.Items[cbEventTypes.Properties.Items.Count-1].Tag := FieldByName('EventType').AsInteger;
+                     if not (FieldByName('EventType').AsInteger in [8,9,10,16,17,29,30]) then
+                        cbEventTypes.SetItemState(cbEventTypes.Properties.Items.Count-1,cbsChecked)
+                     else
+                        cbEventTypes.SetItemState(cbEventTypes.Properties.Items.Count-1,cbsUnchecked);
+
+                     if FieldByName('AllowBlockDeletion').AsBoolean then
+                        begin
+                           cmboDeletableEventTypes.Properties.Items.AddObject(FieldByName('Description').AsString, Pointer(FieldByName('EventType').AsInteger));
+                           SetLength(FDeletableEventTypes, Length(FDeletableEventTypes) +1);
+                           FDeletableEventTypes[Length(FDeletableEventTypes)-1] := FieldByName('EventType').AsInteger;
+                        end;
+                  end;
+               Next;
+            end;
+      end;
+end;
+
+procedure TEventFilterNew.SetupFeedGroupTypes;
+begin
+   {cmboDeletableFeedGroups.Properties.Items.Clear;
+   cmboDeletableFeedGroups.Properties.Items.AddObject('<Select Feed Group>', pointer(-1));
+
+   SetLength(FDeletableFeedGroups, 0);
+
+   if not (WinData.Groups.Active) then
+      WinData.Groups.Active := True;
+
+   with WinData.Groups do
+      begin
+         First;
+         while not Eof do
+            begin
+               if ( FieldByName('GroupType').AsString = 'Feed' ) then
+                  begin
+                     cmboDeletableFeedGroups.Properties.Items.AddObject(FieldByName('Description').AsString, Pointer(FieldByName('ID').AsInteger));
+                     SetLength(FDeletableFeedGroups, Length(FDeletableFeedGroups) +1);
+                     FDeletableFeedGroups[Length(FDeletableFeedGroups)-1] := FieldByName('ID').AsInteger;
+                  end;
+               Next;
+            end;
+      end;}
+end;
+
+function TEventFilterNew.GetEventTypes: String;
+var
+   i : Integer;
+   intArray : Array of Integer;
+begin
+   Result := '()';
+
+   if not cbAllowGroupDeletion.Checked then
+      begin
+         SetLength( intArray, 30);
+         for i := 0 to 30 do
+            begin
+      //         inc(j);
+        //        SetLength( intArray, j);
+               if cbEventTypes.States[i] = cbsChecked then
+                  begin
+                     intArray[i] := cbEventTypes.Properties.Items[i].Tag;
+                  end;
+            end;
+         if Length(IntArray) > 0 then
+            Result := IntArrayToSQLInString( IntArray );
+      end
+   else
+      begin
+         Result := IntArrayToSQLInString(FDeletableEventTypes);
+      end;
+end;
+
+procedure TEventFilterNew.cbEventTypesPropertiesCloseUp(Sender: TObject);
+begin
+   cbEventTypes.Text := 'Select Events';
+   EventsQuery.Close;
+   EventsQuery.Open;
+end;
+
+procedure TEventFilterNew.actPrintGridExecute(Sender: TObject);
+begin
+   EventGridPrinterLink.Preview;
+end;
+
+procedure TEventFilterNew.EventsQuerySortNatIDGetText(Sender: TField;
+  var Text: String; DisplayText: Boolean);
+begin
+   if ( Sender <> nil ) and (Sender.Dataset <> nil) then
+      Text := Sender.DataSet.FieldByName('NatIDNum').AsString;
+end;
+
+procedure TEventFilterNew.EventsQuerySortAnimalNoGetText(Sender: TField;
+  var Text: String; DisplayText: Boolean);
+begin
+   if ( Sender <> nil ) and (Sender.Dataset <> nil) then
+      Text := Sender.DataSet.FieldByName('AnimalNo').AsString;
+end;
+
+procedure TEventFilterNew.EventGridTableViewDblClick(Sender: TObject);
+var
+  P: TPoint;
+  AHitTest: TcxCustomGridHitTest;
+begin
+   GetCursorPos(P);
+   P := TcxGridSite(Sender).ScreenToClient(P);
+   AHitTest := EventGridTableView.ViewInfo.GetHitTest(P);
+   if AHitTest.HitTestCode = htNavigator then  //check if a navigator button has been clicked
+     Exit;
+
+   EventGridTableView.DataController.BeginFullUpdate;
+   if rgSelectEventType.ItemIndex = 0 then
+      begin
+         if WinData.AnimalFileByID.Locate('ID', EventsQueryAnimalID.AsInteger, []) then
+            begin
+               if WinData.Events.Locate('ID', EventsQueryID.AsInteger, []) then
+                  begin
+                     LastEventID := EventsQuery.FieldByName('ID').AsInteger;
+                     EventsQuery.Close;
+                     case WinData.EventsEventType.AsInteger of
+                        cBullingEvent : Bullings.ShowBulling(AmendBulling); // Display the Bulling  Form
+                        cServiceEvent : Services.ShowService(AmendService);
+                        cPregDiagEvent : PregDiag.ShowPD(AmendPD);
+                        cDryOffEvent : uHealth.ShowHealth( AmendDryingOff );
+                        cCalvingEvent : uCalvings.ShowCalvings(Amending);
+                        cHealthEvent : uHealth.ShowHealth( AmendHealth );
+                        CWeightEvent : Weighing.ShowWeight(AmendWeight);
+                        CSaleDeathEvent : uSalesDeaths.ShowSalesDeaths(AmendSaleDeath,WinData.AnimalFileByIDInHerd.AsBoolean);
+                        CPurchaseEvent : uPurchases.ShowForm;
+                        CMovementEvent : uTempMovements.ShowMovement(AmendMovement);
+                        CAbortionEvent : uMPEvents.ShowTheForm(EABR, AmendAWE, 'Abortion');
+                        CCastrateEvent : uMPEvents.ShowTheForm(ECST, AmendAWE, 'Castration');
+                        CCondScoreEvent : uMPEvents.ShowTheForm(ECON, AmendAWE, 'Condition Score');
+                        CDiagProblemEvent: uMPEvents.ShowTheForm(EDNP, AmendAWE, 'Diagnose Problem');
+                        CEmbryoTransEvent: uMPEvents.ShowTheForm(EIMP, AmendAWE, 'Embryo Implant Transfer');
+                        CMastitisEvent : uMPEvents.ShowTheForm(EMST, AmendAWE, 'Mastitis');
+                        CToBeCulledEvent : uMPEvents.ShowTheForm(ETBC, AmendAWE, 'To be Culled');
+                        CWeaningEvent : uMPEvents.ShowTheForm(EWNC, AmendAWE, 'Wean');
+                        CIntExamEvent : uMPEvents.ShowTheForm(EINT, AmendAWE, 'Internal Exam');
+                        CStockBullIn : uMPEvents.ShowTheForm(ERBI, AmendAWE, 'Bull In');
+                        CStockBullOut : uMPEvents.ShowTheForm(ERBO, AmendAWE, 'Bull Out');
+                     end;
+                     EventsQuery.Open;
+                     EventsQuery.Locate('ID', LastEventID, []);
+                  end;
+            end;
+      end;
+   EventGridTableView.DataController.EndFullUpdate;
+end;
+
+procedure TEventFilterNew.btnFilterByDateClick(Sender: TObject);
+begin
+   deDateFrom.PostEditValue;
+   deDateTo.PostEditValue;
+   EventsQuery.Close;
+   EventsQuery.Open;
+//   FeedEventsQuery.Close;
+//   FeedEventsQuery.Open;
+end;
+
+procedure TEventFilterNew.actExportToExcelFileExecute(Sender: TObject);
+begin
+   SaveDialog.InitialDir := ApplicationPath;
+   if SaveDialog.Execute then
+      begin
+         if FileExists(SaveDialog.FileName) then
+            if MessageDlg(cFileOverwrite,mtConfirmation,[mbYes,mbNo],0) = idNo then
+               exit;
+
+         ExportGrid4ToExcel(SaveDialog.FileName,EventGrid);
+         if FileExists(SaveDialog.FileName) then
+            MessageDlg(Format(cFileCreated,[SaveDialog.FileName]),mtInformation,[mbOK],0)
+         else
+            MessageDlg(cFileCreateError,mtError,[mbOK],0);
+      end;
+end;
+
+procedure TEventFilterNew.FilterDiaryGrid;
+var
+   EventType,
+   FeedGroupID : Integer;
+begin
+   btnDeleteAllDiaryEvents.Enabled := ( deEventDate.Date > 0 ) or (cmboDeletableEventTypes.ItemIndex > 0);
+
+   EventGridTableView.DataController.Filter.Root.Clear;
+   EventGridTableView.DataController.Filter.Active := False;
+   EventGridTableView.Controller.FocusedRowIndex := 0;
+
+   BarManager.Bars[1].Visible := not cbAllowGroupDeletion.Checked;
+   pEventActions.Visible := ( (cbAllowGroupDeletion.Checked) and (rgSelectEventType.ItemIndex = 0) );
+
+   EventGridTableView.OptionsCustomize.ColumnGrouping := not cbAllowGroupDeletion.Checked;
+   EventGridTableView.OptionsView.GroupByBox := not cbAllowGroupDeletion.Checked;
+   if cbAllowGroupDeletion.Checked then
+      EventGridTableView.DataController.Groups.ClearGrouping;
+
+
+   if not cbAllowGroupDeletion.Checked then
+      begin
+         pMultipleEventDeletion.Height := 28;
+         Update;
+      end
+   else
+      begin
+         if rgSelectEventType.ItemIndex = 0 then
+            begin
+               pMultipleEventDeletion.Height := 122;
+               cxLabel7.Visible := True;
+               cmboDeletableEventTypes.Visible := True;
+               cmboDeletableFeedGroups.Visible := False;
+            end
+         else if rgSelectEventType.ItemIndex = 1 then
+            begin
+               //pMultipleEventDeletion.Height := 28;
+               pMultipleEventDeletion.Height := 122;
+               cxLabel7.Visible := False;
+               cmboDeletableEventTypes.Visible := False;
+               cmboDeletableFeedGroups.Visible := True;
+               cmboDeletableFeedGroups.Left := cmboDeletableEventTypes.Left;
+            end;
+
+         Update;
+
+         if ( deEventDate.Date > 0 ) then
+            EventGridTableView.DataController.Filter.AddItem(nil, EventGridTableViewEventDate, foEqual, deEventDate.Date, '');
+
+         if (cmboDeletableEventTypes.ItemIndex > 0) then
+            begin
+               if ( cmboDeletableEventTypes.Properties.Items.Objects[cmboDeletableEventTypes.ItemIndex] <> nil ) then
+                  begin
+                     EventType := Integer(cmboDeletableEventTypes.Properties.Items.Objects[cmboDeletableEventTypes.ItemIndex]);
+                     EventGridTableView.DataController.Filter.AddItem(nil, EventGridTableViewEventType, foEqual, EventType, '');
+                  end
+               else
+                  begin
+                     EventGridTableView.DataController.Filter.Root.Clear;
+                     EventGridTableView.DataController.Filter.Active := False;
+                     MessageDlg('Invalid event type has been selected',mtError,[mbOk],0);
+                     Exit;
+                  end;
+            end;
+
+         if (cmboDeletableFeedGroups.ItemIndex > 0) then
+            begin
+               if ( cmboDeletableFeedGroups.Properties.Items.Objects[cmboDeletableFeedGroups.ItemIndex] <> nil ) then
+                  begin
+                     FeedGroupID := Integer(cmboDeletableFeedGroups.Properties.Items.Objects[cmboDeletableFeedGroups.ItemIndex]);
+                     EventGridTableView.DataController.Filter.AddItem(nil, EventGridTableViewFeedGroupID, foEqual, FeedGroupID, '');
+                  end
+               else
+                  begin
+                     EventGridTableView.DataController.Filter.Root.Clear;
+                     EventGridTableView.DataController.Filter.Active := False;
+                     MessageDlg('Invalid event type has been selected',mtError,[mbOk],0);
+                     Exit;
+                  end;
+            end;
+
+         EventGridTableView.DataController.Filter.Active := True;
+         EventGridTableView.Controller.FocusedRowIndex := 0;
+      end;
+end;
+
+procedure TEventFilterNew.cbAllowGroupDeletionPropertiesChange(
+  Sender: TObject);
+begin
+   if cbAllowGroupDeletion.Checked then
+      begin
+         deEventDate.SetFocus;
+         if ( MessageDLG('Before using the block deletion a backup of your data'+cCRLF+
+                         'is advised in case a mistake is made while deleting events.'+cCRLFx2+
+                         'Do you want to backup your data now?',mtWarning,[mbYes,mbNo],0) = mrYes ) then
+          TfmDataBackup.execute(daBackup);
+      end;
+
+   Update;
+
+   // re-open query - displaying appropriate event types (deletable , All)
+   // if cbAllowGroupDeletion.checked = true - only deletable events will be displayed
+   // if cbAllowGroupDeletion.checked = false - all events can be shown
+   EventGridTableView.DataController.BeginFullUpdate;
+   EventsQuery.Active := False;
+   EventsQuery.Active := True;
+//   FeedEventsQuery.Active := False;
+//   FeedEventsQuery.Active := True;
+   EventGridTableView.DataController.EndFullUpdate;
+   FilterDiaryGrid();
+end;
+
+procedure TEventFilterNew.btnResetDiaryFilterClick(Sender: TObject);
+begin
+   deEventDate.Clear;
+   cmboDeletableEventTypes.ItemIndex := -1;
+   cmboDeletableFeedGroups.ItemIndex := -1;
+end;
+
+procedure TEventFilterNew.btnDeleteAllDiaryEventsClick(Sender: TObject);
+begin
+   FDiaryDeleteType := dtFilteredRows;
+   actDeleteEvents.Execute;
+end;
+
+procedure TEventFilterNew.actDeleteEventsExecute(Sender: TObject);
+var
+   MsgCaption : string;
+   FNoOfRecordsToDelete : Integer;
+begin
+   FNoOfRecordsDeleted := 0;
+   FNoOfRecordsToDelete := 0;
+
+   if FDiaryDeleteType = dtNone then
+      Exit;
+
+   if FDiaryDeleteType = dtSelectedRows then
+      FNoOfRecordsToDelete := EventGridTableView.DataController.GetSelectedCount
+   else if ( FDiaryDeleteType = dtFilteredRows) then
+      FNoOfRecordsToDelete := EventGridTableView.DataController.FilteredRecordCount;
+
+   if ( FNoOfRecordsToDelete <= 0 ) then
+       begin
+          MessageDlg('There are no events to delete.',mtInformation,[mbOK],0);
+          Exit;
+       end;
+
+   Update;
+   //   12/12/11 [V5.0 R2.8] /MK Change - Added Extra Message Before Deleting Of Feed Events.
+   if ( rgSelectEventType.ItemIndex = 1 ) then
+      begin
+         if ( MessageDlg('Are you sure you want to delete this feed event(s).'+#13#10+
+                         'Only existing feed regimes can be entered as a single event.',mtWarning,[mbYes,mbNo],0) = mrNo ) then
+            Exit
+         else
+            begin
+               MsgCaption := Format('"%d" events will be deleted.'+ cCRLFx2 + 'Are you sure you want to delete these events?',[FNoOfRecordsToDelete]);
+               if Application.MessageBox(PChar(MsgCaption), 'Confirm Deletion', MB_YESNO + MB_DEFBUTTON2 + MB_ICONWARNING) = IDNO then
+                  begin
+                     Exit;
+                  end;
+            end;
+      end
+   else
+      begin
+         MsgCaption := Format('"%d" events will be deleted.'+ cCRLFx2 + 'Are you sure you want to delete these events?',[FNoOfRecordsToDelete]);
+         if Application.MessageBox(PChar(MsgCaption), 'Confirm Deletion', MB_YESNO + MB_DEFBUTTON2 + MB_ICONWARNING) = IDNO then
+            begin
+               Exit;
+            end;
+      end;
+
+   Update;
+
+   Screen.Cursor := crHourGlass;
+   EventGridTableView.BeginUpdate;
+   try
+      EventGridTableView.DataController.ForEachRow((FDiaryDeleteType = dtSelectedRows), DeleteEvent);
+      DeleteFeedRegimes;
+   finally
+      EventGridTableView.DataController.DataSource := nil;
+
+      EventsQuery.Active := False;
+      EventsQuery.Active := True;
+
+//      FeedEventsQuery.Active := False;
+//      FeedEventsQuery.Active := True;
+
+      // It seems the only way to get the grid data to refresh without deleted events
+      // is to set the datasource to nil and assign it again to dmFarmDiary.EventDiaryDataSource!
+      EventGridTableView.DataController.DataSource := EventsQuerySource;
+
+      EventGridTableView.EndUpdate;
+
+      EventGridTableView.Controller.FocusedRowIndex := 0;
+
+      if (FDiaryDeleteType = dtFilteredRows) then
+         begin
+            // clear any filter, restoring the orginal view
+            EventGridTableView.DataController.Filter.Root.Clear;
+            EventGridTableView.DataController.Filter.Active := False;
+            EventGridTableView.Controller.FocusedRowIndex := 0;
+         end;
+
+      MessageDlg(Format('"%d" event(s) deleted.',[FNoOfRecordsDeleted]),mtInformation,[mbOK],0);
+
+      FDiaryDeleteType := dtNone;
+      Screen.Cursor := crDefault;
+   end;
+end;
+
+procedure TEventFilterNew.DeleteEvent(ARowIndex: Integer;  ARowInfo: TcxRowInfo);
+var
+   EventType, EventID, HerdId, EventDate, FeedRegimeID : Variant;
+begin
+   with EventGridTableView.DataController do
+      begin
+          EventID := Values[ ARowInfo.RecordIndex, EventGridTableViewID.Index ];
+          EventType := Values[ ARowInfo.RecordIndex, EventGridTableViewEventType.Index ];
+          HerdId := Values[ ARowInfo.RecordIndex, EventGridTableViewHerdId.Index ];
+          EventDate := Values[ ARowInfo.RecordIndex, EventGridTableViewEventDate.Index ];
+          FeedRegimeID := Values[ ARowInfo.RecordIndex, EventGridTableViewFeedRegimeID.Index ];
+
+          //if rgSelectEventType.ItemIndex = 0 then
+             //begin
+                if ( VarIsNull(EventID) ) or ( VarIsNull(EventType) ) or
+                   ( VarIsNull(HerdId) ) or (  VarIsNull(EventDate) ) then Exit;
+                if WinData.DeleteEvent(EventID, EventDate, HerdId, EventType) then
+                   Inc(FNoOfRecordsDeleted);
+             //end
+          {
+          else if rgSelectEventType.ItemIndex = 1 then
+             begin
+                if ( VarIsNull(EventID) ) or ( VarIsNull(HerdId) ) or (  VarIsNull(EventDate) ) then Exit;
+                if WinData.DeleteFeedEvent(EventID, EventDate, HerdId) then
+                   Inc(FNoOfRecordsDeleted);
+                AddToFeedRegimeArray(FeedRegimeID);
+             end
+          }
+       end;
+end;
+
+procedure TEventFilterNew.btnDeleteSelectedEventsClick(Sender: TObject);
+begin
+   FDiaryDeleteType := dtSelectedRows;
+   actDeleteEvents.Execute;
+end;
+
+procedure TEventFilterNew.deEventDatePropertiesChange(Sender: TObject);
+begin
+   FilterDiaryGrid();
+end;
+
+procedure TEventFilterNew.cmboDeletableEventTypesPropertiesChange(
+  Sender: TObject);
+begin
+   FilterDiaryGrid();
+end;
+
+procedure TEventFilterNew.FeedEventsQueryBeforeOpen(DataSet: TDataSet);
+begin
+{   Screen.Cursor := crHourGlass;
+   EventGridTableView.DataController.BeginFullUpdate;
+   try
+      FeedEventsQuery.SQL.Clear;
+      FeedEventsQuery.SQL.Add('SELECT F.ID, F.AllocDate, F.FeedRegimeID, FT.Name FeedName,');
+      FeedEventsQuery.SQL.Add('       FR.GroupID FeedGroupID, G.Description GroupName,');
+      FeedEventsQuery.SQL.Add('       A.LactNo, A.AnimalNo, A.SortAnimalNo, A.NatIDNum, A.SortNatID,');
+      FeedEventsQuery.SQL.Add('       A.ID AnimalID, A.HerdID');
+      FeedEventsQuery.SQL.Add('FROM Animals A');
+      FeedEventsQuery.SQL.Add('LEFT JOIN FeedEvents F ON (F.AnimalID = A.ID)');
+      FeedEventsQuery.SQL.Add('LEFT JOIN FeedTypes FT ON (FT.ID = F.FeedType)');
+      FeedEventsQuery.SQL.Add('LEFT JOIN FeedRegime FR ON (FR.ID = F.FeedRegimeID)');
+      FeedEventsQuery.SQL.Add('LEFT JOIN Grps G ON (FR.GroupID = G.ID)');
+      FeedEventsQuery.SQL.Add('WHERE A.HerdID = :AHerdID');
+      if ( deDateFrom.Date > 0 ) and ( deDateTo.Date > 0 ) then
+         FeedEventsQuery.SQL.Add('AND ( F.AllocDate Between ' + '''' + FormatDateTime(cUSDateStyle,deDateFrom.Date) + '''' + ' And ' + '''' + FormatDateTime(cUSDateStyle,deDateTo.Date) + '''' + ')')
+      else if ( deDateFrom.Date > 0 ) and ( deDateTo.Date <= 0 ) then
+         FeedEventsQuery.SQL.Add('And ( F.AllocDate >= ' + '''' + FormatDateTime(cUSDateStyle,deDateFrom.Date) + ''')')
+      else if ( deDateFrom.Date <= 0 ) and ( deDateTo.Date > 0 ) then
+         FeedEventsQuery.SQL.Add('And ( F.AllocDate <= ' + '''' + FormatDateTime(cUSDateStyle,deDateTo.Date) + ''')' );
+      FeedEventsQuery.SQL.Add('ORDER BY F.ID Desc');
+      FeedEventsQuery.Params[0].AsInteger := HerdCombo.EditValue;
+   finally
+      EventGridTableView.DataController.EndFullUpdate;
+      Screen.Cursor := crDefault;
+   end;
+   }
+end;
+
+procedure TEventFilterNew.FeedEventsQuerySortNatIDGetText(Sender: TField;
+  var Text: String; DisplayText: Boolean);
+begin
+   //Text := Sender.DataSet.FieldByName('NatIDNum').AsString;
+end;
+
+procedure TEventFilterNew.rgSelectEventTypeClick(Sender: TObject);
+begin
+   EventGrid.BeginUpdate;
+   if rgSelectEventType.ItemIndex = 0 then
+      begin
+         EventsQuerySource.DataSet := EventsQuery;
+         FeedEventsGrid.Visible := False;
+         EventGridTableViewEventDate.DataBinding.FieldName := 'EventDate';
+         EventGridTableViewEventDate.DataBinding.ValueType := 'DateTime';
+         EventGridTableViewEventDesc.DataBinding.FieldName := 'EventDesc';
+         EventGridTableViewEventDesc.DataBinding.ValueType := 'String';
+         EventGridTableViewAnimalLactNo.DataBinding.FieldName := 'AnimalLactNo';
+         EventGridTableViewEventDesc.DataBinding.ValueType := 'Integer';
+         EventGridTableViewEventType.Visible := True;
+         //dxBarControlContainerItem2.Visible := ivAlways;
+         cxLabel2.Enabled := True;
+         cbEventTypes.Enabled := True;
+      end
+   else if rgSelectEventType.ItemIndex = 1 then
+      begin
+         //EventsQuerySource.DataSet := FeedEventsQuery;
+         {dsFeedEvents.DataSet := FeedEventsQuery;
+         FeedEventsGrid.Visible := True;
+         FeedEventsGrid.Align := alClient;
+         {
+         EventGridTableViewEventDate.DataBinding.FieldName := 'AllocDate';
+         EventGridTableViewEventDesc.DataBinding.FieldName := 'FeedName';
+         EventGridTableViewAnimalLactNo.DataBinding.FieldName := 'LactNo';
+         EventGridTableViewEventType.Visible := False;
+         }
+         //dxBarControlContainerItem2.Visible := ivNever;
+         {cxLabel2.Enabled := False;
+         cbEventTypes.Enabled := False;
+         SetupFeedGroupTypes;   }
+      end;
+   EventGrid.EndUpdate;
+end;
+
+procedure TEventFilterNew.AddToFeedRegimeArray(AFeedRegimeID: Integer);
+var
+   i : Integer;
+   IsFound : Boolean;
+begin
+   {if (AFeedRegimeID > 0) then
+      begin
+         IsFound := False;
+         for i := Low(FFeedRegimeIDs) to High(FFeedRegimeIDs) do
+            begin
+               IsFound := ( FFeedRegimeIDs[i] = AFeedRegimeID );
+               if IsFound then
+                  Break;
+            end;
+
+         if not IsFound then
+            begin
+               SetLength(FFeedRegimeIDs, Length(FFeedRegimeIDs) +1);
+               FFeedRegimeIDs[Length(FFeedRegimeIDs)-1] := AFeedRegimeID;
+            end;
+      end;   }
+end;
+
+procedure TEventFilterNew.DeleteFeedRegimes;
+var
+   qDeleteFeedEvent : TQuery;
+   i : Integer;
+begin
+   {for i := Low(FFeedRegimeIDs) to High(FFeedRegimeIDs) do
+      begin
+         qDeleteFeedEvent := TQuery.Create(nil);
+
+         with qDeleteFeedEvent do
+            try
+               DatabaseName := AliasName;
+               SQL.Clear;
+               SQL.Add('SELECT COUNT(ID) FROM FeedEvents WHERE FeedRegimeID = :FeedRegimeID');
+               Params[0].AsInteger := FFeedRegimeIDs[i];
+               Open;
+               First;
+               try
+                  if ( Fields[0].AsInteger = 0 ) then
+                      begin
+                         SQL.Clear;
+                         SQL.Add('DELETE FROM FeedRegime WHERE ID = :FeedRegimeID');
+                         Params[0].AsInteger := FFeedRegimeIDs[i];
+                         ExecSQL;
+                      end;
+               finally
+               end;
+            finally
+               Free;
+            end;
+      end; }
+end;
+
+procedure TEventFilterNew.FeedEventsQuerySortAnimalNoGetText(Sender: TField;
+  var Text: String; DisplayText: Boolean);
+begin
+   //Text := Sender.DataSet.FieldByName('AnimalNo').AsString;
+end;
+
+procedure TEventFilterNew.cmboDeletableFeedGroupsPropertiesChange(
+  Sender: TObject);
+begin
+   //FilterDiaryGrid();
+end;
+
+procedure TEventFilterNew.FeedEventsGridDBTableViewDblClick(Sender: TObject);
+begin
+
+{   if WinData.AnimalFileByID.Locate('ID', FeedEventsQueryAnimalID.AsInteger, []) then
+      begin
+         if WinData.FeedEvents.Locate('ID', FeedEventsQueryID.AsInteger, []) then
+            begin
+               LastEventID := FeedEventsQuery.FieldByName('ID').AsInteger;
+               FeedEventsQuery.Close;
+               WinData.CreateAndShowForm(TfmFeedAllocEdit);
+               FeedEventsQuery.Open;
+               FeedEventsQuery.Locate('ID', LastEventID, []);
+            end;
+      end;}
+end;
+
+end.

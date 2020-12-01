@@ -1,0 +1,229 @@
+{
+   23/08/11 [V4.1 R4.7] /MK Additional Feature - Added SortAnimalNo & SortNatID Fields to AnimalGrid.
+
+   06/07/12 [V5.0 R7.6] /MK Additional Feature - Added Comment Field From AnimalsExt.
+                                               - Only Show Comment Field If GlobalSettings.DisplayAnimalComments.
+                                               - Added Footer To Grid On View To Count Records.
+
+   11/10/16 [V5.6 R0.9] /MK Change- Added FarmName to the top of the report - IAD.
+}
+
+unit uAnimalCartView;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  cxContainer, cxEdit, cxLabel, ExtCtrls, cxGridCustomTableView,
+  cxGridTableView, cxGridDBTableView, Db, dbtables, dxBar, StdCtrls, cxButtons,
+  dxmdaset, cxGridLevel, cxClasses, cxControls, cxGridCustomView, cxGrid,
+  Menus, RXCtrls, dxPScxGridLnk, dxPSCore, dxPScxCommon, dxPSContainerLnk,
+  uGroupSetup;
+
+type
+  TfmAnimalCartView = class(TForm)
+    AnimalCartGridDBTableView: TcxGridDBTableView;
+    AnimalCartGridLevel: TcxGridLevel;
+    AnimalCartGrid: TcxGrid;
+    AnimalCartData: TdxMemData;
+    AnimalCartDataID: TIntegerField;
+    AnimalCartDataAnimalNo: TStringField;
+    AnimalCartDataNatIDNum: TStringField;
+    btnClose: TcxButton;
+    btnRemoveFromCart: TcxButton;
+    btnGoTo: TcxButton;
+    dsAnimalCartData: TDataSource;
+    AnimalCartGridDBTableViewRecId: TcxGridDBColumn;
+    AnimalCartGridDBTableViewID: TcxGridDBColumn;
+    AnimalCartGridDBTableViewAnimalNo: TcxGridDBColumn;
+    AnimalCartGridDBTableViewNatIDNum: TcxGridDBColumn;
+    Bevel1: TBevel;
+    cxLabel1: TcxLabel;
+    lAnimalsInCart: TcxLabel;
+    PopupMenu1: TPopupMenu;
+    MovementsOut1: TMenuItem;
+    OnfarmEvents1: TMenuItem;
+    TagReplacementForm1: TMenuItem;
+    AnimalCartDataSex: TStringField;
+    AnimalCartDataDateofBirth: TDateField;
+    AnimalCartGridDBTableViewDateofBirth: TcxGridDBColumn;
+    AnimalCartGridDBTableViewSex: TcxGridDBColumn;
+    AnimalCartDataCode: TStringField;
+    AnimalCartGridDBTableViewCode: TcxGridDBColumn;
+    btnPrintCart: TcxButton;
+    AnimalCartDataSortAnimalNo: TStringField;
+    AnimalCartDataSortNatID: TStringField;
+    AnimalCartGridDBTableViewSortAnimalNo: TcxGridDBColumn;
+    AnimalCartGridDBTableViewSortNatID: TcxGridDBColumn;
+    AnimalCartGridDBTableViewComment: TcxGridDBColumn;
+    AnimalCartDataComments: TMemoField;
+    ComponentPrinter: TdxComponentPrinter;
+    AnimalCartPrint: TdxGridReportLink;
+    GroupSetup1: TMenuItem;
+    N1: TMenuItem;
+    AIM31AComplianceCertRequest1: TMenuItem;
+    AIMQueryCartAnimalHistory1: TMenuItem;
+    procedure FormCreate(Sender: TObject);
+    procedure btnRemoveFromCartClick(Sender: TObject);
+    procedure MovementsOut1Click(Sender: TObject);
+    procedure OnfarmEvents1Click(Sender: TObject);
+    procedure TagReplacementForm1Click(Sender: TObject);
+    procedure btnPrintCartClick(Sender: TObject);
+    procedure AnimalCartGridDBTableViewSortAnimalNoGetDisplayText(
+      Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
+      var AText: String);
+    procedure AnimalCartGridDBTableViewSortNatIDGetDisplayText(
+      Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
+      var AText: String);
+    procedure GroupSetup1Click(Sender: TObject);
+    procedure AIM31AComplianceCertRequest1Click(Sender: TObject);
+    procedure PopupMenu1Popup(Sender: TObject);
+  private
+    { Private declarations }
+    procedure LoadAnimalsFromCart;
+    procedure RemoveAnimalFromCart;
+    procedure UpdateRecordCount;
+  public
+    { Public declarations }
+    class procedure ViewAnimalCart;
+  end;
+
+var
+  fmAnimalCartView: TfmAnimalCartView;
+
+implementation
+
+uses DairyData, uAnimalCart, GenTypesConst, MenuUnit, uHerdLookup;
+
+{$R *.DFM}
+
+procedure TfmAnimalCartView.LoadAnimalsFromCart;
+var
+   AnimalQuery : TQuery;
+begin
+   AnimalQuery := TQuery.Create(nil);
+   with AnimalQuery do
+      try
+         DatabaseName := AliasName;
+         SQL.Clear;
+         SQL.Add('SELECT A.ID, A.AnimalNo, A.NatIDNum, A.DateOfBirth, A.Sex, B.Code,');
+         SQL.Add('       A.SortAnimalNo, A.SortNatID, AE.Comments');
+         SQL.Add('FROM Animals A');
+         SQL.Add('LEFT JOIN Breeds B ON (B.ID=A.PrimaryBreed)');
+         SQL.Add('LEFT JOIN AnimalsExt AE ON (AE.AnimalID=A.ID)');
+         SQL.Add('WHERE ID IN '+ AnimalCart.AnimalCartDataAsWideString+'');
+         Open;
+         try
+            AnimalCartData.LoadFromDataSet(AnimalQuery);
+            AnimalCartData.First;
+        finally
+            Close;
+         end;
+      finally
+         Free;
+      end;
+end;
+
+procedure TfmAnimalCartView.RemoveAnimalFromCart;
+begin
+   AnimalCart.RemoveFromCart(AnimalCartDataID.AsInteger);
+   AnimalCartData.Delete;
+   UpdateRecordCount;
+end;
+
+procedure TfmAnimalCartView.FormCreate(Sender: TObject);
+begin
+   lAnimalsInCart.Caption := '0';
+   LoadAnimalsFromCart;
+   AnimalCartGridDBTableView.OptionsView.Footer := False;
+   UpdateRecordCount;
+end;
+
+procedure TfmAnimalCartView.UpdateRecordCount;
+begin
+   lAnimalsInCart.Caption := IntToStr(AnimalCartData.RecordCount);
+end;
+
+procedure TfmAnimalCartView.btnRemoveFromCartClick(Sender: TObject);
+begin
+   RemoveAnimalFromCart;
+end;
+
+class procedure TfmAnimalCartView.ViewAnimalCart;
+begin
+   if not AnimalCart.IsEmpty then
+      begin
+         with TfmAnimalCartView.Create(nil) do
+            try
+               MenuForm.BuildOnFarmEventsMenu(PopupMenu1,OnfarmEvents1);
+               ShowModal;
+            finally
+               AnimalCartData.Close;
+               Free;
+            end;
+      end
+   else
+      MessageDlg(cMsg_NoAnimalsInCart,mtInformation,[mbOk],0);
+end;
+
+procedure TfmAnimalCartView.MovementsOut1Click(Sender: TObject);
+begin
+   MenuForm.FileExport1Click(nil);
+end;
+
+procedure TfmAnimalCartView.OnfarmEvents1Click(Sender: TObject);
+begin
+   MenuForm.Panel8Click(nil);
+end;
+
+procedure TfmAnimalCartView.TagReplacementForm1Click(Sender: TObject);
+begin
+   MenuForm.TagReplacementForm1Click(nil);
+end;
+
+procedure TfmAnimalCartView.btnPrintCartClick(Sender: TObject);
+begin
+   AnimalCartGridDBTableViewComment.Visible := WinData.GlobalSettings.DisplayAnimalComments;
+   AnimalCartPrint.ReportTitle.Text := 'Animal Cart Print ' + WinData.UserDefaultHerdName;
+   AnimalCartPrint.Preview;
+   AnimalCartGridDBTableViewComment.Visible := False;
+   AnimalCartGridDBTableView.OptionsView.Footer := False;
+end;
+
+procedure TfmAnimalCartView.AnimalCartGridDBTableViewSortAnimalNoGetDisplayText(
+  Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
+  var AText: String);
+begin
+   if ARecord <> nil then
+      AText := ARecord.DisplayTexts[AnimalCartGridDBTableViewAnimalNo.Index]
+   else
+      AText := '';
+end;
+
+procedure TfmAnimalCartView.AnimalCartGridDBTableViewSortNatIDGetDisplayText(
+  Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
+  var AText: String);
+begin
+   if ARecord <> nil then
+      AText := ARecord.DisplayTexts[AnimalCartGridDBTableViewNatIDNum.Index]
+   else
+      AText := '';
+end;
+
+procedure TfmAnimalCartView.GroupSetup1Click(Sender: TObject);
+begin
+   uGroupSetUp.ShowTheForm(0,False,stCart);
+end;
+
+procedure TfmAnimalCartView.AIM31AComplianceCertRequest1Click(Sender: TObject);
+begin
+   if ( not(AnimalCart.IsEmpty) ) then
+      WinData.GoToAimComplianceCert(WinData.UserDefaultHerdID,afCart, CC31A);
+end;
+
+procedure TfmAnimalCartView.PopupMenu1Popup(Sender: TObject);
+begin
+   N1.Visible := MenuForm.actAIM31ARequest.Visible;
+end;
+
+end.

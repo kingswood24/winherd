@@ -1,0 +1,691 @@
+unit uCalvingXML;
+
+interface
+
+uses
+  Controls, Dialogs, FileCtrl, Classes, SysUtils, ComObj, XML_Generator,
+  MSXML2_TLB, GenTypesConst, db, dbTables, EventRecording, DateUtil,
+  Contnrs, KRoutines, dxmdaset, cxUtils;
+
+const
+   cAddCalvingDBActionId = 1;
+   cAmendCalvingDBActionId = 2;
+   cDeleteCalvingDBActionId = 3;
+
+type
+   TCalvingHeader = class
+      EventID,
+      DamID : Integer;
+      EventDate : TDateTime;
+      DamNatIdNo,
+      DonorDamID,
+      BullIdentity,
+      DamGroupId,
+      CalvingSurvey,
+      Comment : String;
+      NoOfCalves,
+      DamLactNo,
+      DBActionId : Integer;
+      constructor Create;
+   end;
+
+   TCalfDetail = class
+   public
+      CalfID : Integer;
+      CalfStatus,
+      CalfAnimalNo,
+      CalfNatID,
+      CalfSex,
+      CalfColour,
+      CalfBreed,
+      CalfGroup,
+      CalfMortaility,
+      CalfDisposalPlace,
+      CalfName: String;
+      CalfIsBreeding,
+      CalfIsPedigree: Boolean;
+      CalfBirthWeight: Double;
+      constructor Create;
+   end;
+
+   TCalfDetails = class(TObjectList)
+   private
+     FIndex : Integer;
+   public
+     function AddCalfDetail : TCalfDetail;
+     procedure First;
+     procedure Next;
+     function Eof : Boolean;
+     function CurrentEvent : TCalfDetail;
+   end;
+
+   TCalvingXMLExport = class
+  private
+    function GetFHerdIdentity: String;
+   public
+      FCalvingDocument : IXMLDOMDocument;
+      FCalvingRootNode,
+      FCalvingNode,
+      FCalvingIntialNode,
+      FHeaderNode,
+      FHeaderChildNode,
+      FDetailNode,
+      FDetailCalfCountNode,
+      FDetailChildNode : IXMLDOMNode;
+      FProcInstr : IXMLDOMProcessingInstruction;
+      FXMLFilePath : String;
+      FCalvingHeader : TCalvingHeader;
+      FCalfDetails : TCalfDetails;
+      FCalfDetail : TCalfDetail;
+      procedure AddCalvingToXML;
+      procedure CreateOrOpenXMLFile;
+      property FHerdIdentity : String read GetFHerdIdentity;
+      constructor Create;
+      destructor Destroy;
+   end;
+
+   TCalvingXMLImport = class
+   public
+      FCalvingDocument : IXMLDOMDocument;
+      FCalvingNode,
+      FCalvingHeaderNode,
+      FCalvingDetailRootNode,
+      FCalvesNode : IXMLDOMNodeList;
+      FCalvingHeaderRootNode,
+      FCalvingHeaderChildNode,
+      FCalvingRootNode,
+      FCalvingDetailNode,
+      FCalvingChildNode,
+      FCalfNode,
+      FTempNode : IXMLDOMNode;
+      FXMLFilePath : String;
+      FCalvingHeader : TdxMemData;
+      FCalfDetails : TdxMemData;
+      procedure ReadCalvingsFromXML;
+      constructor Create;
+      destructor Destroy;
+   end;
+
+implementation
+
+{ TCalvingXMLExport }
+
+constructor TCalvingXMLExport.Create;
+begin
+   if ( FCalvingDocument <> nil ) then
+      FCalvingDocument := nil;
+   if ( FCalvingNode <> nil ) then
+      FCalvingNode := nil;
+   if ( FCalvingRootNode <> nil ) then
+      FCalvingRootNode := nil;
+   if ( FCalvingIntialNode <> nil ) then
+      FCalvingIntialNode := nil;
+   if ( FHeaderNode <> nil ) then
+      FHeaderNode := nil;
+   if ( FHeaderChildNode <> nil ) then
+      FHeaderChildNode := nil;
+   if ( FDetailNode <> nil ) then
+      FDetailNode  := nil;
+   if ( FDetailChildNode <> nil ) then
+      FDetailChildNode := nil;
+   if ( FProcInstr <> nil ) then
+      FProcInstr := nil;
+   FCalvingHeader := TCalvingHeader.Create();
+   if ( FDetailCalfCountNode <> nil ) then
+      FDetailCalfCountNode := nil;
+   if ( FDetailChildNode <> nil ) then
+      FDetailChildNode := nil;
+   if ( FCalfDetails <> nil ) then
+      SafeFreeAndNil(FCalfDetails);
+   FCalfDetails := TCalfDetails.Create();
+end;
+
+procedure TCalvingXMLExport.CreateOrOpenXMLFile;
+begin
+   if ( Length(FXMLFilePath) = 0 ) then
+      begin
+         MessageDlg('No database path specified.',mtError,[mbOK],0);
+         Exit;
+      end;
+   try
+      if ( FileExists(FXMLFilePath+cCalvingXMLFileName) ) then
+         begin
+            FCalvingDocument := CreateOleObject('MSXML2.DOMDocument') as IXMLDOMDocument;
+            FCalvingDocument.load(FXMLFilePath+cCalvingXMLFileName);
+            FCalvingRootNode := FCalvingDocument.Get_documentElement
+         end
+      else
+         begin
+            FCalvingDocument := CreateOleObject('MSXML2.DOMDocument') as IXMLDOMDocument;
+            FProcInstr := FCalvingDocument.createProcessingInstruction('xml', 'version="1.0" encoding="UTF-8"');
+            FCalvingDocument.appendChild(FProcInstr);
+            FCalvingRootNode := FCalvingDocument.createElement('Calvings');
+            FCalvingDocument.appendChild(FCalvingRootNode);
+         end;
+   except
+      raise Exception.Create('Error creating MSXML2.DOMDocument. Please contact Kingswood.');
+   end
+end;
+
+procedure TCalvingXMLExport.AddCalvingToXML;
+var
+   iCalfCount : Integer;
+   sCalfIndicator : String;
+begin
+   if ( FCalvingIntialNode <> nil ) then
+      FCalvingIntialNode := nil;
+
+   FCalvingNode := FCalvingDocument.createElement('Calving');
+   FCalvingRootNode.appendChild(FCalvingNode);
+   FCalvingIntialNode := FCalvingDocument.createElement('HerdIdentity');
+   FCalvingIntialNode.Set_text(FHerdIdentity);
+   FCalvingNode.appendChild(FCalvingIntialNode);
+   FCalvingIntialNode := FCalvingDocument.createElement('DBActionId');
+   FCalvingIntialNode.Set_text(IntToStr(FCalvingHeader.DBActionId));
+   FCalvingNode.appendChild(FCalvingIntialNode);
+   FCalvingIntialNode := FCalvingDocument.createElement('EventID');
+   FCalvingIntialNode.Set_text(IntToStr(FCalvingHeader.EventID));
+   FCalvingNode.appendChild(FCalvingIntialNode);
+   FCalvingIntialNode := FCalvingDocument.createElement('DamID');
+   FCalvingIntialNode.Set_text(IntToStr(FCalvingHeader.DamID));
+   FCalvingNode.appendChild(FCalvingIntialNode);
+   FCalvingIntialNode := FCalvingDocument.createElement('DamNatIDNo');
+   FCalvingIntialNode.Set_text(FCalvingHeader.DamNatIdNo);
+   FCalvingNode.appendChild(FCalvingIntialNode);
+   FCalvingIntialNode := FCalvingDocument.createElement('DamLactNo');
+   FCalvingIntialNode.Set_text(IntToStr(FCalvingHeader.DamLactNo));
+   FCalvingNode.appendChild(FCalvingIntialNode);
+   FCalvingIntialNode := FCalvingDocument.createElement('CalfCount');
+   FCalvingIntialNode.Set_text(IntToStr(FCalvingHeader.NoOfCalves));
+   FCalvingNode.appendChild(FCalvingIntialNode);
+
+   FHeaderNode := FCalvingDocument.createElement('CalvingHeader');
+   FCalvingNode.appendChild(FHeaderNode);
+
+   FHeaderChildNode := FCalvingDocument.createElement('CalvingDate');
+   FHeaderChildNode.Set_text(DateToStr(FCalvingHeader.EventDate));
+   FHeaderNode.appendChild(FHeaderChildNode);
+   FHeaderChildNode := FCalvingDocument.createElement('DonorDamId');
+   FHeaderChildNode.Set_text(FCalvingHeader.DonorDamID);
+   FHeaderNode.appendChild(FHeaderChildNode);
+   FHeaderChildNode := FCalvingDocument.createElement('BullId');
+   FHeaderChildNode.Set_text(FCalvingHeader.BullIdentity);
+   FHeaderNode.appendChild(FHeaderChildNode);
+   FHeaderChildNode := FCalvingDocument.createElement('DamGroupId');
+   FHeaderChildNode.Set_text(FCalvingHeader.DamGroupID);
+   FHeaderNode.appendChild(FHeaderChildNode);
+   FHeaderChildNode := FCalvingDocument.createElement('CalvingSurveyId');
+   FHeaderChildNode.Set_text(FCalvingHeader.CalvingSurvey);
+   FHeaderNode.appendChild(FHeaderChildNode);
+   FHeaderChildNode := FCalvingDocument.createElement('Comment');
+   FHeaderChildNode.Set_text(FCalvingHeader.Comment);
+   FHeaderNode.appendChild(FHeaderChildNode);
+
+   FDetailNode := FCalvingDocument.createElement('CalvingDetail');
+   FCalvingNode.appendChild(FDetailNode);
+
+   iCalfCount := 0;
+   FCalfDetails.First;
+   while ( not(FCalfDetails.Eof) ) do
+      begin
+         Inc(iCalfCount);
+         if ( FDetailCalfCountNode <> nil ) then
+            FDetailCalfCountNode := nil;
+         sCalfIndicator := '';
+         if ( iCalfCount = 1 ) then
+            sCalfIndicator := cCalvingXMLFirstCalfTag
+         else if ( iCalfCount = 2 ) then
+            sCalfIndicator := cCalvingXMLSecondCalfTag
+         else if ( iCalfCount = 3 ) then
+            sCalfIndicator := cCalvingXMLThirdCalfTag
+         else if ( iCalfCount = 4 ) then
+            sCalfIndicator := cCalvingXMLFourthCalfTag;
+         FDetailCalfCountNode := FCalvingDocument.createElement(sCalfIndicator);
+         FDetailNode.appendChild(FDetailCalfCountNode);
+
+         if ( FCalfDetails.CurrentEvent <> nil ) then
+            begin
+               if ( FDetailChildNode <> nil ) then
+                  FDetailChildNode := nil;
+               FDetailChildNode := FCalvingDocument.createElement('CalfID');
+               FDetailChildNode.Set_text(IntToStr(FCalfDetails.CurrentEvent.CalfID));
+               FDetailCalfCountNode.appendChild(FDetailChildNode);
+               FDetailChildNode := FCalvingDocument.createElement('CalfStatus');
+               FDetailChildNode.Set_text(FCalfDetails.CurrentEvent.CalfStatus);
+               FDetailCalfCountNode.appendChild(FDetailChildNode);
+               FDetailChildNode := FCalvingDocument.createElement('CalfAnimalNo');
+               FDetailChildNode.Set_text(FCalfDetails.CurrentEvent.CalfAnimalNo);
+               FDetailCalfCountNode.appendChild(FDetailChildNode);
+               FDetailChildNode := FCalvingDocument.createElement('CalfNatID');
+               FDetailChildNode.Set_text(FCalfDetails.CurrentEvent.CalfNatID);
+               FDetailCalfCountNode.appendChild(FDetailChildNode);
+               FDetailChildNode := FCalvingDocument.createElement('CalfSex');
+               FDetailChildNode.Set_text(FCalfDetails.CurrentEvent.CalfSex);
+               FDetailCalfCountNode.appendChild(FDetailChildNode);
+               FDetailChildNode := FCalvingDocument.createElement('CalfName');
+               FDetailChildNode.Set_text(FCalfDetails.CurrentEvent.CalfName);
+               FDetailCalfCountNode.appendChild(FDetailChildNode);
+               FDetailChildNode := FCalvingDocument.createElement('CalfBreed');
+               FDetailChildNode.Set_text(FCalfDetails.CurrentEvent.CalfBreed);
+               FDetailCalfCountNode.appendChild(FDetailChildNode);
+               FDetailChildNode := FCalvingDocument.createElement('CalfColour');
+               FDetailChildNode.Set_text(FCalfDetails.CurrentEvent.CalfColour);
+               FDetailCalfCountNode.appendChild(FDetailChildNode);
+               FDetailChildNode := FCalvingDocument.createElement('CalfIsBreeding');
+               if ( FCalfDetails.CurrentEvent.CalfIsBreeding ) then
+                  FDetailChildNode.Set_text('True')
+               else
+                  FDetailChildNode.Set_text('False');
+               FDetailCalfCountNode.appendChild(FDetailChildNode);
+               FDetailChildNode := FCalvingDocument.createElement('CalfIsPedigree');
+               if ( FCalfDetails.CurrentEvent.CalfIsPedigree ) then
+                  FDetailChildNode.Set_text('True')
+               else
+                  FDetailChildNode.Set_text('False');
+               FDetailCalfCountNode.appendChild(FDetailChildNode);
+               FDetailChildNode := FCalvingDocument.createElement('CalfBirthWeight');
+               FDetailChildNode.Set_text(FloatToStr(FCalfDetails.CurrentEvent.CalfBirthWeight));
+               FDetailCalfCountNode.appendChild(FDetailChildNode);
+               FDetailChildNode := FCalvingDocument.createElement('CalfGroupID');
+               FDetailChildNode.Set_text(FCalfDetails.CurrentEvent.CalfGroup);
+               FDetailCalfCountNode.appendChild(FDetailChildNode);
+               FDetailChildNode := FCalvingDocument.createElement('CalfMortailityID');
+               FDetailChildNode.Set_text(FCalfDetails.CurrentEvent.CalfMortaility);
+               FDetailCalfCountNode.appendChild(FDetailChildNode);
+               FDetailChildNode := FCalvingDocument.createElement('CalfDisposalPlaceID');
+               FDetailChildNode.Set_text(FCalfDetails.CurrentEvent.CalfDisposalPlace);
+               FDetailCalfCountNode.appendChild(FDetailChildNode);
+            end;
+         FCalfDetails.Next;
+      end;
+
+   FCalvingDocument.save(FXMLFilePath+cCalvingXMLFileName);
+end;
+
+function TCalvingXMLExport.GetFHerdIdentity: String;
+begin
+   Result := '';
+   with TQuery.Create(nil) do
+      try
+         DatabaseName := AliasName;
+         SQL.Clear;
+         SQL.Add('SELECT HerdIdentity');
+         SQL.Add('FROM Owners');
+         SQL.Add('WHERE ID IN (SELECT DefaultHerdID FROM Defaults)');
+         try
+            Open;
+            if ( RecordCount > 0 ) then
+               if ( Length(Fields[0].AsString) > 0 ) then
+                  Result := Fields[0].AsString;
+         except
+            on e : Exception do
+               ShowMessage(e.Message);
+         end;
+      finally
+         Free;
+      end;
+end;
+
+destructor TCalvingXMLExport.Destroy;
+var
+   i : Integer;
+begin
+   if ( FCalvingDocument <> nil ) then
+      FCalvingDocument := nil;
+   if ( FCalvingRootNode <> nil ) then
+      FCalvingRootNode := nil;
+   if ( FCalvingIntialNode <> nil ) then
+      FCalvingIntialNode := nil;
+   if ( FHeaderNode <> nil ) then
+      FHeaderNode := nil;
+   if ( FHeaderChildNode <> nil ) then
+      FHeaderChildNode := nil;
+   if ( FCalvingHeader <> nil ) then
+      FCalvingHeader := nil;
+   if ( FDetailNode <> nil ) then
+      FDetailNode  := nil;
+   if ( FDetailChildNode <> nil ) then
+      FDetailChildNode := nil;
+   if ( FProcInstr <> nil ) then
+      FProcInstr := nil;
+   FCalfDetails.First;
+   while ( not(FCalfDetails.Eof) ) do
+      begin
+         if ( FDetailCalfCountNode <> nil ) then
+            FDetailCalfCountNode := nil;
+         if ( FDetailChildNode <> nil ) then
+            FDetailChildNode := nil;
+         FCalfDetails.Next;
+      end;
+   if ( FCalfDetails <> nil ) then
+      SafeFreeAndNil(FCalfDetails);
+end;
+
+{ TCalvingXMLImport }
+
+constructor TCalvingXMLImport.Create;
+begin
+   if ( FCalvingDocument <> nil ) then
+      FCalvingDocument := nil;
+   if ( FCalvingNode <> nil ) then
+      FCalvingNode := nil;
+   if ( FCalvingHeaderNode <> nil ) then
+      FCalvingHeaderNode := nil;
+   if ( FCalvingDetailNode <> nil ) then
+      FCalvingDetailNode := nil;
+   if ( FCalvesNode <> nil ) then
+      FCalvesNode := nil;
+   if ( FCalvingHeaderRootNode <> nil ) then
+      FCalvingHeaderRootNode := nil;
+   if ( FCalvingHeaderChildNode <> nil ) then
+      FCalvingHeaderChildNode := nil;
+   if ( FCalvingRootNode <> nil ) then
+      FCalvingRootNode := nil;
+   if ( FCalvingDetailRootNode <> nil ) then
+      FCalvingDetailRootNode := nil;
+   if ( FCalvingChildNode <> nil ) then
+      FCalvingChildNode := nil;
+   if ( FCalfNode <> nil ) then
+      FCalfNode := nil;
+   if ( FTempNode <> nil ) then
+      FTempNode := nil;
+
+   try
+      FCalvingHeader := TdxMemData.Create(nil);
+      ClearMemDataFieldDefs(FCalvingHeader);
+      CreateMemDataFieldDef(FCalvingHeader,'EventID',ftInteger);
+      CreateMemDataFieldDef(FCalvingHeader,'DBActionId',ftInteger);
+      CreateMemDataFieldDef(FCalvingHeader,'EventDate',ftDateTime);
+      CreateMemDataFieldDef(FCalvingHeader,'DamID',ftInteger);
+      CreateMemDataFieldDef(FCalvingHeader,'DamLactNo',ftInteger);
+      CreateMemDataFieldDef(FCalvingHeader,'DonorDamID',ftInteger);
+      CreateMemDataFieldDef(FCalvingHeader,'BullID',ftInteger);
+      CreateMemDataFieldDef(FCalvingHeader,'DamGroupID',ftInteger);
+      CreateMemDataFieldDef(FCalvingHeader,'CalvingSurveyID',ftInteger);
+      CreateMemDataFieldDef(FCalvingHeader,'NoOfCalves',ftInteger);
+      CreateMemDataFieldDef(FCalvingHeader,'Comment',ftString);
+      CreateMemDataFieldDef(FCalvingHeader,'AddingEvent',ftBoolean);
+      FCalvingHeader.Open;
+   except
+      on e : Exception do
+         ShowMessage(e.Message);
+   end;
+
+   try
+      FCalfDetails := TdxMemData.Create(nil);
+      ClearMemDataFieldDefs(FCalfDetails);
+      CreateMemDataFieldDef(FCalfDetails,'EventID',ftInteger);
+      CreateMemDataFieldDef(FCalfDetails,'CalfStatus',ftString);
+      CreateMemDataFieldDef(FCalfDetails,'CalfAnimalNo',ftString);
+      CreateMemDataFieldDef(FCalfDetails,'CalfNatID',ftString);
+      CreateMemDataFieldDef(FCalfDetails,'CalfSex',ftString);
+      CreateMemDataFieldDef(FCalfDetails,'CalfName',ftString);
+      CreateMemDataFieldDef(FCalfDetails,'CalfIsBreeding',ftBoolean);
+      CreateMemDataFieldDef(FCalfDetails,'CalfIsPedigree',ftBoolean);
+      CreateMemDataFieldDef(FCalfDetails,'CalfBirthWeight',ftFloat);
+      CreateMemDataFieldDef(FCalfDetails,'CalfID',ftInteger);
+      CreateMemDataFieldDef(FCalfDetails,'CalfColourID',ftInteger);
+      CreateMemDataFieldDef(FCalfDetails,'CalfBreedID',ftInteger);
+      CreateMemDataFieldDef(FCalfDetails,'CalfGroupID',ftInteger);
+      CreateMemDataFieldDef(FCalfDetails,'CalfMortailityID',ftInteger);
+      CreateMemDataFieldDef(FCalfDetails,'CalfDisposalPlaceID',ftInteger);
+      FCalfDetails.Open;
+   except
+      on e : Exception do
+         ShowMessage(e.Message);
+   end;
+end;
+
+procedure TCalvingXMLImport.ReadCalvingsFromXML;
+var
+   i, j, k, iCalfCount, iCalvingEventID : Integer;
+   sCalfCount : String;
+begin
+   if ( Length(FXMLFilePath) = 0 ) then Exit;
+   FCalvingDocument := CreateOleObject('MSXML2.DOMDocument') as IXMLDOMDocument;
+   FCalvingDocument.load(FXMLFilePath);
+
+   FCalvingNode := FCalvingDocument.getElementsByTagName('Calving');
+   if ( FCalvingNode = nil ) then Exit;
+   for i := 0 to FCalvingNode.Get_length-1 do
+      begin
+         iCalfCount := 0;
+         iCalvingEventID := 0;
+         FCalvingRootNode := FCalvingNode.item[i];
+         if ( FCalvingRootNode = nil ) then Continue;
+
+         try
+            if ( FCalvingHeader.RecordCount = 0 ) then
+               FCalvingHeader.Insert
+            else
+               FCalvingHeader.Append;
+
+            FCalvingChildNode := FCalvingRootNode.selectSingleNode('EventId');
+            if ( FCalvingNode = nil ) or ( Length(Trim(FCalvingChildNode.text)) = 0) then Continue;
+            FCalvingHeader.FieldByName('EventID').AsInteger := StrToInt(FCalvingChildNode.Text);
+            iCalvingEventID := StrToInt(FCalvingChildNode.Text);
+
+            FCalvingChildNode := FCalvingRootNode.selectSingleNode('DBActionId');
+            if ( FCalvingNode = nil ) or ( Length(Trim(FCalvingChildNode.text)) = 0) then Continue;
+            FCalvingHeader.FieldByName('DBActionId').AsInteger := StrToInt(FCalvingChildNode.Text);
+
+            FCalvingChildNode := FCalvingRootNode.selectSingleNode('DamId');
+            if ( FCalvingNode = nil ) or ( Length(Trim(FCalvingChildNode.text)) = 0) then Continue;
+            FCalvingHeader.FieldByName('DamID').AsInteger := StrToInt(FCalvingChildNode.Text);
+
+            FCalvingChildNode := FCalvingRootNode.selectSingleNode('DamLactNo');
+            if ( FCalvingChildNode = nil ) or ( Length(Trim(FCalvingChildNode.text)) = 0) then Continue;
+            FCalvingHeader.FieldByName('DamLactNo').AsInteger := StrToInt(FCalvingChildNode.Text);
+
+            FCalvingChildNode := FCalvingRootNode.selectSingleNode('CalfCount');
+            if ( FCalvingChildNode = nil ) or ( Length(Trim(FCalvingChildNode.text)) = 0) then Continue;
+            FCalvingHeader.FieldByName('NoOfCalves').AsInteger := StrToInt(FCalvingChildNode.Text);
+            iCalfCount := StrToInt(FCalvingChildNode.Text);
+
+            FCalvingHeaderNode := FCalvingRootNode.selectNodes('CalvingHeader');
+            if ( FCalvingHeaderNode.Get_length = 0 ) then Continue;
+            for j := 0 to FCalvingHeaderNode.Get_length-1 do
+               begin
+                  FCalvingHeaderRootNode := FCalvingHeaderNode.item[j];
+                  for k := 0 to FCalvingHeaderRootNode.childNodes.Get_length-1 do
+                     begin
+                        FCalvingHeaderChildNode := FCalvingHeaderRootNode.childNodes[k];
+                        if ( FCalvingHeaderChildNode = nil ) or ( Length(Trim(FCalvingHeaderChildNode.nodeName)) = 0) then Continue;
+
+                        if ( FCalvingHeaderChildNode.nodeName = 'CalvingDate' ) then
+                           FCalvingHeader.FieldByName('EventDate').AsDateTime := StrToDate(FCalvingHeaderChildNode.text)
+                        else if ( FCalvingHeaderChildNode.nodeName = 'DonorDamId' ) then
+                           FCalvingHeader.FieldByName('DonorDamID').AsInteger := StrToInt(FCalvingHeaderChildNode.text)
+                        else if ( FCalvingHeaderChildNode.nodeName = 'BullId' ) then
+                           FCalvingHeader.FieldByName('BullId').AsInteger := StrToInt(FCalvingHeaderChildNode.text)
+                        else if ( FCalvingHeaderChildNode.nodeName = 'DamGroupId' ) then
+                           FCalvingHeader.FieldByName('DamGroupId').AsInteger := StrToInt(FCalvingHeaderChildNode.text)
+                        else if ( FCalvingHeaderChildNode.nodeName = 'CalvingSurveyId' ) then
+                           FCalvingHeader.FieldByName('CalvingSurveyID').AsInteger := StrToInt(FCalvingHeaderChildNode.text)
+                        else if ( FCalvingHeaderChildNode.nodeName = 'Comment' ) then
+                           FCalvingHeader.FieldByName('Comment').AsString := FCalvingHeaderChildNode.text;
+                     end;
+               end;
+
+            FCalvingHeader.Post;
+         except
+            on e : Exception do
+               ShowMessage(e.Message);
+         end;
+
+         FCalvingDetailNode := FCalvingRootNode.selectSingleNode('CalvingDetail');
+         for j := 0 to iCalfCount-1 do
+            begin
+               if ( j = 0 ) then
+                  sCalfCount := cCalvingXMLFirstCalfTag
+               else if ( j = 1 ) then
+                  sCalfCount := cCalvingXMLSecondCalfTag
+               else if ( j = 2 ) then
+                  sCalfCount := cCalvingXMLThirdCalfTag
+               else if ( j = 3 ) then
+                  sCalfCount := cCalvingXMLFourthCalfTag;
+               FCalvesNode := FCalvingDetailNode.selectNodes(sCalfCount);
+               if ( FCalvesNode.Get_length = 0 ) then Continue;
+               for k := 0 to FCalvesNode.Get_length-1 do
+                  try
+                     if ( FCalfDetails.RecordCount = 0 ) then
+                        FCalfDetails.Insert
+                     else
+                        FCalfDetails.Append;
+
+                     FCalfNode := FCalvesNode.Get_item(k);
+                     if ( FCalfNode = nil ) then Continue;
+
+                     if ( iCalvingEventID > 0 ) then
+                        FCalfDetails.FieldByName('EventID').AsInteger := iCalvingEventID;
+                     FTempNode := FCalfNode.selectSingleNode('CalfStatus');
+                     if ( FTempNode <> nil ) then
+                        FCalfDetails.FieldByName('CalfID').AsInteger := StrToInt(FTempNode.text);
+                     FTempNode := FCalfNode.selectSingleNode('CalfAnimalNo');
+                     if ( FTempNode <> nil ) then
+                        FCalfDetails.FieldByName('CalfAnimalNo').AsString := FTempNode.text;
+                     FTempNode := FCalfNode.selectSingleNode('CalfNatID');
+                     if ( FTempNode <> nil ) then
+                        FCalfDetails.FieldByName('CalfNatID').AsString := FTempNode.text;
+                     FTempNode := FCalfNode.selectSingleNode('CalfSex');
+                     if ( FTempNode <> nil ) then
+                        FCalfDetails.FieldByName('CalfSex').AsString := FTempNode.text;
+                     FTempNode := FCalfNode.selectSingleNode('CalfName');
+                     if ( FTempNode <> nil ) then
+                        FCalfDetails.FieldByName('CalfName').AsString := FTempNode.text;
+                     FTempNode := FCalfNode.selectSingleNode('CalfBreedID');
+                     if ( FTempNode <> nil ) then
+                        FCalfDetails.FieldByName('CalfBreedID').AsInteger := StrToInt(FTempNode.text);
+                     FTempNode := FCalfNode.selectSingleNode('CalfColourID');
+                     if ( FTempNode <> nil ) then
+                        FCalfDetails.FieldByName('CalfColourID').AsInteger := StrToInt(FTempNode.text);
+                     FTempNode := FCalfNode.selectSingleNode('CalfIsBreeding');
+                     if ( FTempNode <> nil ) then
+                        FCalfDetails.FieldByName('CalfIsBreeding').AsBoolean := ( UpperCase(FTempNode.Text) = 'TRUE' );
+                     FTempNode := FCalfNode.selectSingleNode('CalfIsPedigree');
+                     if ( FTempNode <> nil ) then
+                        FCalfDetails.FieldByName('CalfIsPedigree').AsBoolean := ( UpperCase(FTempNode.Text) = 'TRUE' );
+                     FTempNode := FCalfNode.selectSingleNode('CalfBirthWeight');
+                     if ( FTempNode <> nil ) then
+                        FCalfDetails.FieldByName('CalfBirthWeight').AsFloat := StrToFloat(FTempNode.text);
+                     FTempNode := FCalfNode.selectSingleNode('CalfGroupID');
+                     if ( FTempNode <> nil ) then
+                        FCalfDetails.FieldByName('CalfGroupID').AsInteger := StrToInt(FTempNode.text);
+                     FTempNode := FCalfNode.selectSingleNode('CalfMortailityID');
+                     if ( FTempNode <> nil ) then
+                        FCalfDetails.FieldByName('CalfMortailityID').AsInteger := StrToInt(FTempNode.text);
+                     FTempNode := FCalfNode.selectSingleNode('CalfDisposalPlaceID');
+                     if ( FTempNode <> nil ) then
+                        FCalfDetails.FieldByName('CalfDisposalPlaceID').AsInteger := StrToInt(FTempNode.text);
+
+                     FCalfDetails.Post;
+                  except
+                     on e : Exception do
+                        ShowMessage(e.Message);
+                  end;
+            end;
+      end;
+end;
+
+destructor TCalvingXMLImport.Destroy;
+begin
+   if ( FCalvingDocument <> nil ) then
+      FCalvingDocument := nil;
+   if ( FCalvingNode <> nil ) then
+      FCalvingNode := nil;
+   if ( FCalvingHeaderNode <> nil ) then
+      FCalvingHeaderNode := nil;
+   if ( FCalvingDetailNode <> nil ) then
+      FCalvingDetailNode := nil;
+   if ( FCalvesNode <> nil ) then
+      FCalvesNode := nil;
+   if ( FCalvingHeaderRootNode <> nil ) then
+      FCalvingHeaderRootNode := nil;
+   if ( FCalvingHeaderChildNode <> nil ) then
+      FCalvingHeaderChildNode := nil;
+   if ( FCalvingRootNode <> nil ) then
+      FCalvingRootNode := nil;
+   if ( FCalvingDetailRootNode <> nil ) then
+      FCalvingDetailRootNode := nil;
+   if ( FCalvingChildNode <> nil ) then
+      FCalvingChildNode := nil;
+   if ( FCalfNode <> nil ) then
+      FCalfNode := nil;
+   if ( FTempNode <> nil ) then
+      FTempNode := nil;
+   if ( FCalvingHeader.Active ) then
+      FCalvingHeader.Close;
+   FreeAndNil(FCalvingHeader);
+   if ( FCalfDetails.Active ) then
+      FCalfDetails.Close;
+   FreeAndNil(FCalfDetails);
+end;
+
+{ TCalvingHeader }
+
+constructor TCalvingHeader.Create;
+begin
+   DamID := 0;
+   EventDate := 0;
+   DamNatIdNo := '';
+   DamLactNo := 0;
+   DonorDamID := '';
+   BullIdentity := '';
+   DamGroupId := '';
+   CalvingSurvey := '';
+   DBActionId := 0;
+   NoOfCalves := 0;
+   Comment := '';
+end;
+
+{ TCalfDetail }
+
+constructor TCalfDetail.Create;
+begin
+   CalfID := 0;
+   CalfStatus := '';
+   CalfAnimalNo := '';
+   CalfNatID := '';
+   CalfSex := '';
+   CalfColour := '';
+   CalfBreed := '';
+   CalfGroup := '';
+   CalfMortaility := '';
+   CalfDisposalPlace := '';
+   CalfName := '';
+   CalfIsBreeding := False;
+   CalfIsPedigree := False;
+   CalfBirthWeight := 0;
+end;
+
+{ TCalfDetails }
+
+function TCalfDetails.AddCalfDetail: TCalfDetail;
+begin
+   Result := TCalfDetail.Create;
+   Add(Result);
+end;
+
+function TCalfDetails.CurrentEvent: TCalfDetail;
+begin
+   Result := nil;
+   if ((FIndex >= 0 )and (FIndex <= Count-1)) then
+      Result := Items[FIndex] as TCalfDetail;
+end;
+
+function TCalfDetails.Eof: Boolean;
+begin
+   Result := (FIndex > Count -1);
+end;
+
+procedure TCalfDetails.First;
+begin
+   FIndex := 0;
+end;
+
+procedure TCalfDetails.Next;
+begin
+   Inc(FIndex);
+end;
+
+end.

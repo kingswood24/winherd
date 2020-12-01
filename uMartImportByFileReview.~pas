@@ -1,0 +1,857 @@
+{
+   06/01/09 V3.9 R5.6 /SP : Additional Feature - Remove Tab captions from TabSheet [AnimalPageControl.HideTabs =True]
+                            Bug Fix - Movements Out/Sales Review - SortTagNo field value was not generated when loading dataset from file.
+
+   07/12/10 [V4.0 R7.0] /MK Bug Fix - New Field, ColdDeadWt, created for Cold Dead Weight to be saved from Grid.
+
+   18/10/11 [V5.0 R1.5] /MK Change - Changed Price, Haulage and Commission Field Properties to CurrencyEdit.
+                                   - Windows 7 still shows the Euro(€) for the Currency Symbol - Changed Display Format To Remove Currency Symbol.
+
+   08/05/13 [V5.1 R7.1] /MK Additional Feature - ReviewData - Added refresh of Customers and Suppliers to take in FMartTable.CustomerSupplierID.
+
+   03/12/13 [V5.2 R6.6] /MK Additional Feature - Show Purchase and Batch Group columns for Purchases.
+
+   16/12/13 [V5.2 R7.0] /MK Additional Feature - FQAS Days replaced by FQAS date.
+
+   18/06/14 [V5.3 R2.8] /MK Additional Feature - If the user enters FQAS Days then create QADate on screen.
+
+   28/08/14 [V5.3 R5.7] /MK Change - CreateDefaultHealthEvents - Only show default health events that are not specified to be used in the Crush.
+
+   12/01/16 [V5.5 R3.1] /MK Change - actDefaultVetTreatments/blbDefaults - Changed Caption to Default Treatment Templates - requested by GL.
+
+   10/11/16 [V5.6 R3.0] /MK Change - actCloseExecute - Check to see if the customer/supplier is selected before closing the form.
+
+   22/09/17 [V5.7 R3.0] /MK Bug Fix - MartDataGridDBTableViewKeyDown - If the user was on the last field on the grid and pressed tab it would go into a loop and crash.
+                                                                       If FocusedRecordIndex+1 = RecordCount then exit out of procedure - John Milliken.
+
+   05/10/17 [V5.7 R3.5] /MK Bug Fix - MartDataGridDBTableViewKeyDown - FocusedRecordIndex+1 didn't do the job. Changed to FocusedRow.IsLast boolean to check if on last record - John Milliken.
+
+   17/10/17 [V5.7 R3.9] /MK Change - Changed QADate to FQASDate.
+                            Additional Feature - Made the colour field editable in NorthernIreland systems - John Milliken.
+
+   06/11/17 [V5.7 R4.3] /MK Change - Added Header panel to the top of the grid to allow the user to fill in the grid with buyer, feed group, batch group and purchase group.
+
+   18/05/18 [V5.8 R0.1] /MK Change - Added combobox and label to allow the user to change the supplier for the whole file.
+
+   19/07/18 [V5.8 R1.2] /MK Bug Fix - If user pressed the x button to close the Review screen the import should be cancelled - GL request.
+
+   31/07/18 [V5.8 R2.1] /MK Change - FormActivate - Sort grid by BreedCode if (its a purchase file) and (there are blank breeds) so blank breeds show first.
+                                                  - Allow the BreedCode field to be edited if (its a purchase file) and (there are blank breeds).
+                                   - FormCloseQuery - Don't allow the form to close if (its a purchase file) and (there are blank breeds).
+                                   - FormCreate - Added new query and datasource for in use breeds for BreedColumn LookupCombobox property.
+}
+
+unit uMartImportByFileReview;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  uBaseForm, ActnList, dxBar, dxBarExtItems, cxControls, dxStatusBar,
+  cxGridLevel, cxClasses, cxGridCustomView, cxGridCustomTableView,
+  cxGridTableView, cxGridDBTableView, cxGrid, db, dbtables, uMartImportTypes,
+  uHerdLookup, dxmdaset, cxPC, Menus, cxCustomData, cxStyles, ExtCtrls,
+  cxTextEdit, cxMaskEdit, cxDropDownEdit, cxContainer, cxEdit, cxLabel,
+  cxLookupEdit, cxDBLookupEdit, cxDBLookupComboBox, DairyData;
+
+type
+  TfmMartImportByFileReview = class(TfmBaseForm)
+    tMart: TTable;
+    dstMart: TDataSource;
+    bblbDelete: TdxBarLargeButton;
+    actDelete: TAction;
+    actDefaultVetTreatments: TAction;
+    pgDefaultTreatments: TcxPageControl;
+    tsHealth: TcxTabSheet;
+    HealthGrid: TcxGrid;
+    HealthGridDBTableView: TcxGridDBTableView;
+    HealthGridLevel: TcxGridLevel;
+    dsHealthTable: TDataSource;
+    HealthTable: TTable;
+    bcDefaultTreatments: TdxBarDockControl;
+    blbAdd: TdxBarLargeButton;
+    blbDelete: TdxBarLargeButton;
+    blbEdit: TdxBarLargeButton;
+    blbDefaults: TdxBarLargeButton;
+    actAddHealth: TAction;
+    actDeleteHealth: TAction;
+    actEditHealth: TAction;
+    HealthTableID: TAutoIncField;
+    HealthTableSearchTagNo: TStringField;
+    HealthTableDrugID: TIntegerField;
+    HealthTableApplicRate: TFloatField;
+    HealthTableComment: TStringField;
+    HealthGridDBTableViewDrugID: TcxGridDBColumn;
+    HealthGridDBTableViewApplicRate: TcxGridDBColumn;
+    HealthGridDBTableViewComment: TcxGridDBColumn;
+    HealthTableEventDate: TDateField;
+    HealthGridDBTableViewEventDate: TcxGridDBColumn;
+    blbCancelImport: TdxBarLargeButton;
+    HealthTableApplicRatePerKgs: TFloatField;
+    HealthTableUseDrugNameForComment: TBooleanField;
+    tMartID: TAutoIncField;
+    tMartAnimalNo: TStringField;
+    tMarttAnimalNo: TStringField;
+    tMartTagNo: TStringField;
+    tMartSearchTagNo: TStringField;
+    tMartSex: TStringField;
+    tMartBreedCode: TStringField;
+    tMartColourCode: TStringField;
+    tMartDOB: TDateTimeField;
+    tMartTBTestDate: TDateTimeField;
+    tMartBruceTestDate: TDateTimeField;
+    tMartEventDate: TDateTimeField;
+    tMartLotNo: TStringField;
+    tMartWeight: TFloatField;
+    tMartPrice: TFloatField;
+    tMartCustomerSupplier: TIntegerField;
+    tMartDeath: TBooleanField;
+    tMartCustomerSupplierRefCode: TStringField;
+    tMartFeedGrpId: TIntegerField;
+    tMartFQAS: TBooleanField;
+    tMartNoDaysOnPrevHolding: TIntegerField;
+    tMartComment: TStringField;
+    tMartHerdID: TIntegerField;
+    HealthTableDefaultApplicRate: TFloatField;
+    actCancelImport: TAction;
+    tMartBuyerID: TIntegerField;
+    Action1: TAction;
+    tMartSortTagNo: TStringField;
+    tMartCommission: TFloatField;
+    tMartHaulage: TFloatField;
+    tMartColdDeadWt: TFloatField;
+    tMartBatchGrpID: TIntegerField;
+    tMartPurchGrpID: TIntegerField;
+    tMartFQASDate: TDateField;
+    cxStyleRepository: TcxStyleRepository;
+    sHiddenFieldData: TcxStyle;
+    HealthTableDrugPurchID: TIntegerField;
+    HealthTableDrugBatchNo: TStringField;
+    HealthGridDBTableViewDrugBatchNo: TcxGridDBColumn;
+    AnimalGridPanel: TPanel;
+    AnimalGrid: TcxGrid;
+    MartDataGridDBTableView: TcxGridDBTableView;
+    MartDataGridDBTableViewID: TcxGridDBColumn;
+    MartDataGridDBTableViewSortTagNo: TcxGridDBColumn;
+    MartDataGridDBTableViewTagNo: TcxGridDBColumn;
+    MartDataGridDBTableViewSearchTagNo: TcxGridDBColumn;
+    MartDataGridDBTableViewSex: TcxGridDBColumn;
+    MartDataGridDBTableViewDOB: TcxGridDBColumn;
+    MartDataGridDBTableViewBreedCode: TcxGridDBColumn;
+    MartDataGridDBTableViewColourCode: TcxGridDBColumn;
+    MartDataGridDBTableViewEventDate: TcxGridDBColumn;
+    MartDataGridDBTableViewCustomerSupplier: TcxGridDBColumn;
+    MartDataGridDBTableViewBuyerID: TcxGridDBColumn;
+    MartDataGridDBTableViewAnimalNo: TcxGridDBColumn;
+    MartDataGridDBTableViewWeight: TcxGridDBColumn;
+    MartDataGridDBTableViewDeadWeight: TcxGridDBColumn;
+    MartDataGridDBTableViewPrice: TcxGridDBColumn;
+    MartDataGridDBTableViewHaulage: TcxGridDBColumn;
+    MartDataGridDBTableViewCommission: TcxGridDBColumn;
+    MartDataGridDBTableViewLotNo: TcxGridDBColumn;
+    MartDataGridDBTableViewDaysOnPrevHolding: TcxGridDBColumn;
+    MartDataGridDBTableViewFQASDate: TcxGridDBColumn;
+    MartDataGridDBTableViewPurchGrpID: TcxGridDBColumn;
+    MartDataGridDBTableViewFeedGrpID: TcxGridDBColumn;
+    MartDataGridDBTableViewBatchGrpID: TcxGridDBColumn;
+    MartDataGridDBTableViewComment: TcxGridDBColumn;
+    AnimalGridLevel: TcxGridLevel;
+    pTop: TPanel;
+    lBuyer: TcxLabel;
+    lPurchaseGroup: TcxLabel;
+    lFeedGroup: TcxLabel;
+    lBatchGroup: TcxLabel;
+    lcmboBuyers: TcxLookupComboBox;
+    lcmboPurchGroup: TcxLookupComboBox;
+    lcmboFeedGroup: TcxLookupComboBox;
+    lcmboBatchGroup: TcxLookupComboBox;
+    lSupplier: TcxLabel;
+    lcmboSuppliers: TcxLookupComboBox;
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure FormCreate(Sender: TObject);
+    procedure actCloseExecute(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure actDeleteExecute(Sender: TObject);
+    procedure actDefaultVetTreatmentsExecute(Sender: TObject);
+    procedure actAddHealthExecute(Sender: TObject);
+    procedure actAddHealthUpdate(Sender: TObject);
+    procedure actEditHealthUpdate(Sender: TObject);
+    procedure actEditHealthExecute(Sender: TObject);
+    procedure actDeleteHealthUpdate(Sender: TObject);
+    procedure actDeleteHealthExecute(Sender: TObject);
+    procedure tMartWeightChange(Sender: TField);
+    procedure tMartAnimalNoValidate(Sender: TField);
+    procedure pgDefaultTreatmentsDrawTabEx(AControl: TcxCustomTabControl;
+      ATab: TcxTab; Font: TFont);
+    procedure HealthTableNewRecord(DataSet: TDataSet);
+    procedure actDeleteUpdate(Sender: TObject);
+    procedure actCancelImportExecute(Sender: TObject);
+    procedure HealthGridDBTableViewCellDblClick(
+      Sender: TcxCustomGridTableView;
+      ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
+      AShift: TShiftState; var AHandled: Boolean);
+    procedure MartDataGridDBTableViewKeyDown(Sender: TObject;
+      var Key: Word; Shift: TShiftState);
+    procedure MartDataGridDBTableViewSortTagNoGetDisplayText(
+      Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
+      var AText: String);
+    procedure MartDataGridDBTableViewDataControllerSummaryFooterSummaryItemsSummary(
+      ASender: TcxDataSummaryItems; Arguments: TcxSummaryEventArguments;
+      var OutArguments: TcxSummaryEventOutArguments);
+    procedure tMartNoDaysOnPrevHoldingChange(Sender: TField);
+    procedure PostHeaderComboChange(Sender : TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure FormActivate(Sender: TObject);
+  private
+    { Private declarations }
+    FCancelled : Boolean;
+    DS : TDataSource;
+    FMartImportType : TMartImportType;
+    LookupBreedsQuery : TQuery;
+    LookupBreedsSource : TDataSource;
+    procedure CreateDefaultHealthEvents;
+    function Customer_Supplier_Selected: Boolean;
+    procedure WMSyscommand(Var msg: TWmSysCommand); message WM_SYSCOMMAND;
+  public
+    { Public declarations }
+    class function ReviewData(AMartImportType : TMartImportType; AHerdID : Integer;
+       const ACaption : string = '') : Boolean;
+  end;
+
+var
+  fmMartImportByFileReview: TfmMartImportByFileReview;
+
+const
+   cNumOfRecords = 'No. %s of records: %d';
+
+   cPurchaseGridLayout = 'martpurchgrid.ini';
+   cSaleGridLayout = 'martsalegrid.ini';
+
+implementation
+uses
+   GenTypesConst, uMovementsInHealthDefaultsGrid,
+   uMovementsInHealth, uImageStore, KRoutines;
+
+{$R *.DFM}
+
+procedure TfmMartImportByFileReview.FormClose(Sender: TObject;
+  var Action: TCloseAction);
+begin
+  inherited;
+  MartDataGridDBTableView.DataController.GotoFirst;
+  Action := caFree;
+end;
+
+procedure TfmMartImportByFileReview.FormCreate(Sender: TObject);
+begin
+   inherited;
+   ImageStore := TImageStore.Create(nil);
+   HerdLookup.FeedGroups.Open;
+   HerdLookup.qBatchGroups.Open;
+   HerdLookup.qPurchaseGroups.Open;
+   HerdLookup.qDrugList.Open;
+   FCancelled := False;
+   tMart.Active := True;
+   MartDataGridDBTableViewBreedCode.PropertiesClass := nil;
+   MartDataGridDBTableViewBreedCode.Options.Editing := False;
+
+   LookupBreedsQuery := TQuery.Create(nil);
+   LookupBreedsQuery.DatabaseName := AliasName;
+   LookupBreedsQuery.SQL.Clear;
+   LookupBreedsQuery.SQL.Add('SELECT Code, Name');
+   LookupBreedsQuery.SQL.Add('FROM Breeds');
+   LookupBreedsQuery.SQL.Add('WHERE InUse = True');
+   LookupBreedsQuery.SQL.Add('ORDER BY Code');
+   LookupBreedsQuery.Open;
+
+   LookupBreedsSource := TDataSource.Create(nil);
+   LookupBreedsSource.DataSet := LookupBreedsQuery;
+end;
+
+procedure TfmMartImportByFileReview.actCloseExecute(Sender: TObject);
+var
+   sCustomer_Supplier : String;
+begin
+   //   10/11/16 [V5.6 R3.0 /MK Change - Check to see if the customer/supplier is selected before closing the form.   
+   sCustomer_Supplier := '';
+   if ( FMartImportType = mitPurchase ) then
+      sCustomer_Supplier := 'Supplier'
+   else if ( FMartImportType = mitSale ) then
+      sCustomer_Supplier := 'Customer';
+   if ( not(Customer_Supplier_Selected) ) then
+      MessageDlg(''+sCustomer_Supplier+' not selected.'+cCRLF+
+                 'A '+sCustomer_Supplier+' must be selected for all records.',mtError,[mbOK],0)
+   else
+      Close;
+end;
+
+class function TfmMartImportByFileReview.ReviewData(AMartImportType : TMartImportType;
+   AHerdID : Integer; const ACaption : string) : Boolean;
+var
+   FilePath : string;
+   Country : TCountry;
+begin
+   with TfmMartImportByFileReview.Create(nil) do
+      try
+         Caption := ACaption;
+         Country := HerdLookup.CountryByHerdID(AHerdID);
+         FMartImportType := AMartImportType;
+         if FMartImportType = mitPurchase then
+            begin
+               // Refresh Suppliers table to take CustomerSupplierID from FMartTable.
+               WinData.Suppliers.Close;
+               WinData.Suppliers.Open;
+
+               MartDataGridDBTableViewCustomerSupplier.RepositoryItem := HerdLookup.erSupplierLookup;
+               MartDataGridDBTableViewCustomerSupplier.Caption := 'Supplier';
+               MartDataGridDBTableViewComment.Hidden := False;
+               MartDataGridDBTableViewComment.Visible := True;
+               MartDataGridDBTableViewDaysOnPrevHolding.Hidden := False;
+               MartDataGridDBTableViewDaysOnPrevHolding.Visible := True;
+               MartDataGridDBTableViewFeedGrpID.Hidden := False;
+               MartDataGridDBTableViewFeedGrpID.Visible := True;
+               MartDataGridDBTableViewBatchGrpID.Hidden := False;
+               MartDataGridDBTableViewBatchGrpID.Visible := True;
+               MartDataGridDBTableViewPurchGrpID.Hidden := False;
+               MartDataGridDBTableViewPurchGrpID.Visible := True;
+               MartDataGridDBTableViewLotNo.Hidden := False;
+               MartDataGridDBTableViewLotNo.Visible := True;
+               MartDataGridDBTableViewBuyerID.Hidden := False;
+               MartDataGridDBTableViewBuyerID.Visible := True;
+               BarManager.Bars[1].Visible := True;
+               StatusBar.Panels[0].Text := Format(cNumOfRecords, ['Purchase',MartDataGridDBTableView.DataController.RecordCount]);
+               HealthTable.Active := True;
+               CreateDefaultHealthEvents;
+               FilePath := IncludeTrailingBackslash(DataPath)+cPurchaseGridLayout;
+               if FileExists(FilePath) then
+                  MartDataGridDBTableView.RestoreFromIniFile(FilePath,True,False);
+            end
+         else
+            begin
+               // Refresh Customers table to take CustomerSupplierID from FMartTable.
+               WinData.Customers.Close;
+               WinData.Customers.Open;
+
+               MartDataGridDBTableViewCustomerSupplier.RepositoryItem := HerdLookup.erCustomerLookup;
+               MartDataGridDBTableViewCustomerSupplier.Caption := 'Customer';
+               MartDataGridDBTableViewComment.Hidden := True;
+               MartDataGridDBTableViewComment.Visible := False;
+               MartDataGridDBTableViewDaysOnPrevHolding.Hidden := True;
+               MartDataGridDBTableViewDaysOnPrevHolding.Visible := False;
+               MartDataGridDBTableViewFeedGrpID.Hidden := True;
+               MartDataGridDBTableViewFeedGrpID.Visible := False;
+               MartDataGridDBTableViewBatchGrpID.Hidden := True;
+               MartDataGridDBTableViewBatchGrpID.Visible := False;
+               MartDataGridDBTableViewPurchGrpID.Hidden := True;
+               MartDataGridDBTableViewPurchGrpID.Visible := False;
+               MartDataGridDBTableViewLotNo.Hidden := True;
+               MartDataGridDBTableViewLotNo.Visible := False;
+               MartDataGridDBTableViewBuyerID.Hidden := True;
+               MartDataGridDBTableViewBuyerID.Visible := False;
+               BarManager.Bars[1].Visible := False;
+               StatusBar.Panels[0].Text := Format(cNumOfRecords, ['Sale',MartDataGridDBTableView.DataController.RecordCount]);
+               FilePath := IncludeTrailingBackslash(DataPath)+cSaleGridLayout;
+               if FileExists(FilePath) then
+                  MartDataGridDBTableView.RestoreFromIniFile(FilePath,True,False);
+
+               if MartDataGridDBTableViewDeadWeight.Visible then
+                  MartDataGridDBTableViewDeadWeight.Index := MartDataGridDBTableViewWeight.Index + 1;
+            end;
+
+         pTop.Visible := ( FMartImportType = mitPurchase );
+         lcmboBuyers.RepositoryItem := HerdLookup.erLookupBuyers;
+         lcmboSuppliers.RepositoryItem := HerdLookup.erSupplierLookup;
+         lcmboPurchGroup.RepositoryItem := HerdLookup.erPurchaseGroupLookup;
+         lcmboFeedGroup.RepositoryItem := HerdLookup.erFeedGroupLookup;
+         lcmboBatchGroup.RepositoryItem := HerdLookup.erBatchGroupLookup; 
+
+         MartDataGridDBTableView.DataController.FocusedRowIndex := 0;
+
+         //   02/12/13 [V5.2 R6.5] /MK Additional Feature - Only show FQAS days for NIreland herds.
+         //   16/12/13 [V5.2 R7.0] /MK Additional Feature - FQAS Days replaced by FQAS date.
+         //   17/06/14 [V5.3 R2.8] /MK Change - Brought back FQASDays for NIreland herds - TGM/GL Request.
+         MartDataGridDBTableViewDaysOnPrevHolding.Visible := ( Country = NIreland );
+         MartDataGridDBTableViewDaysOnPrevHolding.Hidden := ( not(MartDataGridDBTableViewFQASDate.Visible) );
+
+         MartDataGridDBTableViewFQASDate.Visible := ( Country = NIreland );
+         MartDataGridDBTableViewFQASDate.Hidden := ( not(MartDataGridDBTableViewFQASDate.Visible) );
+
+         if tMartBuyerID.AsInteger > 0 then
+            begin
+               // exclude in tab sequence
+               MartDataGridDBTableViewBuyerID.Tag := 0;
+               MartDataGridDBTableView.Controller.FocusedColumn := MartDataGridDBTableViewAnimalNo;
+            end
+         else
+            begin
+               // include in tab sequence
+               MartDataGridDBTableViewBuyerID.Tag := 1;
+               MartDataGridDBTableView.Controller.FocusedColumn := MartDataGridDBTableViewBuyerID;
+            end;
+
+         MartDataGridDBTableViewColourCode.Options.Editing := ( FMartImportType = mitPurchase ) and ( Country = NIreland );
+         if MartDataGridDBTableViewColourCode.Options.Editing then
+            MartDataGridDBTableViewColourCode.RepositoryItem := HerdLookup.erAnimalColourCodeLookup;
+         HerdLookup.qAnimalColours.Open;
+
+         ShowModal;
+      finally
+         if FMartImportType = mitPurchase then
+            begin
+               FilePath := IncludeTrailingBackslash(DataPath)+cPurchaseGridLayout;
+               MartDataGridDBTableView.StoreToIniFile(FilePath,True);
+            end
+         else
+            begin
+               FilePath := IncludeTrailingBackslash(DataPath)+cSaleGridLayout;
+               MartDataGridDBTableView.StoreToIniFile(FilePath,True);
+            end;
+
+         if ( tMart.State in dsEditModes) then
+            tMart.Post;
+
+         Result := not(FCancelled);
+
+         Free;
+      end;
+end;
+
+procedure TfmMartImportByFileReview.FormDestroy(Sender: TObject);
+begin
+   FreeAndNil(ImageStore);
+   tMart.Active := False;
+   if HealthTable.Active then
+      HealthTable.Active := False;
+   HerdLookup.FeedGroups.Close;
+   HerdLookup.qBatchGroups.Close;
+   HerdLookup.qPurchaseGroups.Close;
+   HerdLookup.qDrugList.Close;
+   HerdLookup.qAnimalColours.Close;
+   if ( LookupBreedsQuery <> nil ) then
+      begin
+         LookupBreedsQuery.Close;
+         FreeAndNil(LookupBreedsQuery);
+      end;
+   if ( LookupBreedsSource <> nil ) then
+      FreeAndNil(LookupBreedsSource);
+   inherited;
+end;
+
+procedure TfmMartImportByFileReview.CreateDefaultHealthEvents;
+var
+   HealthQuery : TQuery;
+   Multiplier : double;
+
+   function IsBatchNoAvailable ( ADrugPurchID : Integer; AEventDate : TDateTime ) : Boolean;
+   var
+      qDrugPurch : TQuery;
+   begin
+      qDrugPurch := TQuery.Create(nil);
+      with qDrugPurch do
+         try
+            DatabaseName := AliasName;
+            SQL.Clear;
+            SQL.Add('SELECT ID');
+            SQL.Add('FROM MediPur');
+            SQL.Add('WHERE ID = :ADrugPurchID');
+            SQL.Add('AND PurchDate <= :AEventDate');
+            Params[0].AsInteger := ADrugPurchID;
+            Params[1].AsDateTime := AEventDate;
+            try
+               Open;
+               Result := ( Fields[0].AsInteger > 0 );
+            except
+               on e : Exception do
+                  ShowMessage(e.Message);
+            end;
+         finally
+            Free;
+         end;
+   end;
+
+begin
+   HealthTable.DisableControls;
+   try
+      WinData.CreateTQuery(HealthQuery, nil, AliasName);
+
+      HealthQuery.SQL.Add('SELECT *');
+      HealthQuery.SQL.Add('FROM DefaultHealthEvents');
+      //   28/08/14 [V5.3 R5.7] /MK Change - Only show default health events that are not specified
+      //                                     to be used in the Crush.
+      HealthQuery.SQL.Add('WHERE CrushTreatment = FALSE');
+      HealthQuery.Open;
+      HealthQuery.First;
+
+      if (HealthQuery.RecordCount>0) then
+         begin
+            with tMart do
+               begin
+                  DisableControls;
+                  try
+                     First;
+                     while not eof do
+                        begin
+                           HealthQuery.First;
+                           while not HealthQuery.eof do
+                              begin
+                                 HealthTable.Append;
+                                 HealthTableSearchTagNo.AsString := tMartSearchTagNo.AsString;
+                                 HealthTableEventDate.AsDateTime := tMartEventDate.AsDateTime;
+                                 HealthTableDrugID.AsInteger := HealthQuery.FieldByName('DrugID').AsInteger;
+                                 HealthTableDefaultApplicRate.AsFloat := HealthQuery.FieldByName('ApplicRate').AsFloat;
+                                 HealthTableApplicRatePerKgs.AsFloat := HealthQuery.FieldByName('ApplicRatePerKgs').AsFloat;
+                                 if (HealthQuery.FieldByName('ApplicRatePerKgs').AsFloat>0) and (tMartWeight.AsFloat>0) then
+                                    begin
+                                       Multiplier := (tMartWeight.AsFloat / HealthTableApplicRatePerKgs.AsFloat);
+                                       HealthTableApplicRate.AsFloat := ( HealthQuery.FieldByName('ApplicRate').AsFloat * Multiplier);
+                                    end
+                                 else
+                                    HealthTableApplicRate.AsFloat := HealthQuery.FieldByName('ApplicRate').AsFloat;
+
+                                 if HealthQuery.FieldByName('UseDrugNameForComment').AsBoolean then
+                                    HealthTableComment.AsString := HerdLookup.DrugDetailByDrugID(HealthTableDrugID.AsInteger, Medicine_Name);
+
+                                 HealthTable.Post;
+                                 HealthQuery.Next;
+                              end;
+                           Next;
+                        end;
+                  finally
+                     First;
+                     EnableControls;
+                  end;
+               end;
+         end;
+      HealthQuery.Close;
+      FreeAndNil(HealthQuery);
+   finally
+      HealthTable.EnableControls;
+   end;
+end;
+
+procedure TfmMartImportByFileReview.actDeleteExecute(Sender: TObject);
+begin
+  inherited;
+  if (tMart.RecordCount>0) then
+     if MessageDlg('Delete record?', mtConfirmation, [mbYes,mbNo],0) = idYes then
+        tMart.Delete;
+end;
+
+procedure TfmMartImportByFileReview.actDefaultVetTreatmentsExecute(
+  Sender: TObject);
+begin
+  inherited;
+  TfmMovementsInHealthDefaultsGrid.ShowMovementsInHealthDefaultGrid;
+end;
+
+procedure TfmMartImportByFileReview.actAddHealthExecute(Sender: TObject);
+begin
+  inherited;
+  dsHealthTable.Dataset.Append;
+  TfmMovementsInHealth.ShowHealthEditor(dsHealthTable,tMart.FieldByName('TagNo').AsString,tMart.FieldByName('Weight').AsFloat);
+end;
+
+procedure TfmMartImportByFileReview.actAddHealthUpdate(Sender: TObject);
+begin
+  inherited;
+  actAddHealth.Enabled := (tMart.FieldByName('TagNo').AsString<>'');
+end;
+
+procedure TfmMartImportByFileReview.actEditHealthUpdate(Sender: TObject);
+begin
+  inherited;
+  actEditHealth.Enabled := (dsHealthTable.Dataset.FieldByName('ID').AsInteger>0);
+end;
+
+procedure TfmMartImportByFileReview.actEditHealthExecute(Sender: TObject);
+begin
+  inherited;
+  TfmMovementsInHealth.ShowHealthEditor(dsHealthTable,tMart.FieldByName('TagNo').AsString,tMart.FieldByName('Weight').AsFloat);
+end;
+
+procedure TfmMartImportByFileReview.actDeleteHealthUpdate(Sender: TObject);
+begin
+  inherited;
+  actDeleteHealth.Enabled := (dsHealthTable.Dataset.FieldByName('ID').AsInteger>0);
+end;
+
+procedure TfmMartImportByFileReview.actDeleteHealthExecute(
+  Sender: TObject);
+begin
+  inherited;
+  if (dsHealthTable.Dataset.FieldByName('ID').AsInteger>0) then
+     if MessageDlg('Delete record?', mtConfirmation, [mbYes,mbNo],0) = idYes then
+        dsHealthTable.Dataset.Delete;
+end;
+
+procedure TfmMartImportByFileReview.tMartWeightChange(Sender: TField);
+var
+  Multiplier : Double;
+begin
+  inherited;
+  if ( FMartImportType = mitPurchase ) and ( HealthTable <> nil ) and ( HealthTable.Exists ) and  ( HealthTable.Active ) then
+     begin
+        HealthTable.DisableControls;
+        try
+           HealthTable.First;
+           while not HealthTable.eof do
+              begin
+                 HealthTable.Edit;
+                 try
+                    if (HealthTableApplicRatePerKgs.AsFloat>0) and (tMartWeight.AsFloat>0) then
+                       begin
+                          Multiplier := (tMartWeight.AsFloat / HealthTableApplicRatePerKgs.AsFloat);
+                          HealthTableApplicRate.AsFloat := ( HealthTableDefaultApplicRate.AsFloat * Multiplier);
+                       end
+                    else
+                       HealthTableApplicRate.AsFloat := HealthTableDefaultApplicRate.AsFloat ;
+                    HealthTable.Post;
+                 except
+                    HealthTable.Cancel;
+                 end;
+
+                 HealthTable.Next;
+              end;
+        finally
+           HealthTable.EnableControls;
+        end;
+     end;
+end;
+
+procedure TfmMartImportByFileReview.tMartAnimalNoValidate(Sender: TField);
+const
+   cAnimalNoInUse = 'Animal No. "%s" is already in use';
+begin
+  inherited;
+   if (Trim ((Sender as TField).AsString) <> '') then
+      begin
+         // Check the herd database.
+
+         if DuplicateAnimalNo((Sender as TField).AsString) then
+            raise ErrorMsg.CreateFmt(cAnimalNoInUse,[(Sender as TField).AsString])
+         else
+            begin
+               // Now check animal numbers entered into review grid.
+               with TQuery.Create(nil) do
+                  try
+                     DatabaseName := 'kingswd';
+                     SQL.Add('Select AnimalNo From tMart Where AnimalNo=:AnimalNo');
+                     SQL.Add('And ID<>:ID');
+                     Params[0].AsString := (Sender as TField).AsString;
+                     Params[1].AsInteger := tMartID.AsInteger;
+                     Open;
+                     if RecordCount>0 then
+                        raise ErrorMsg.CreateFmt(cAnimalNoInUse,[(Sender as TField).AsString]);
+                  finally
+                     Free;
+                  end;
+            end;
+      end;
+end;
+
+procedure TfmMartImportByFileReview.pgDefaultTreatmentsDrawTabEx(
+  AControl: TcxCustomTabControl; ATab: TcxTab; Font: TFont);
+begin
+  inherited;
+  Font.Style := [fsBold];
+end;
+
+procedure TfmMartImportByFileReview.HealthTableNewRecord(
+  DataSet: TDataSet);
+begin
+  inherited;
+  HealthTableEventDate.AsDateTime := tMartEventDate.AsDateTime;
+end;
+
+procedure TfmMartImportByFileReview.actDeleteUpdate(Sender: TObject);
+begin
+  inherited;
+   actDelete.Enabled := (tMart.RecordCount>0)
+end;
+
+procedure TfmMartImportByFileReview.actCancelImportExecute(
+  Sender: TObject);
+begin
+  inherited;
+  if MessageDlg('Cancel import and lose any changes, are you sure?',mtConfirmation,[mbYes,mbNo],0) = idYes then
+     begin
+        FCancelled := True;
+        Close;
+     end;
+end;
+
+procedure TfmMartImportByFileReview.HealthGridDBTableViewCellDblClick(
+  Sender: TcxCustomGridTableView;
+  ACellViewInfo: TcxGridTableDataCellViewInfo; AButton: TMouseButton;
+  AShift: TShiftState; var AHandled: Boolean);
+begin
+  inherited;
+  actEditHealth.Execute;
+end;
+
+procedure TfmMartImportByFileReview.MartDataGridDBTableViewKeyDown(
+  Sender: TObject; var Key: Word; Shift: TShiftState);
+var
+   AView: TcxGridDBTableView;
+begin
+   AView := TcxGridDBTableView(TcxGridSite(Sender).GridView);
+   if ( Key = VK_TAB ) then
+      begin
+         //   22/09/17 [V5.7 R3.0] /MK Bug Fix - If the user was on the last field on the grid and pressed tab it would go into a loop and crash.
+         //                                      If FocusedRecordIndex+1 = RecordCount then exit out of procedure - John Milliken.
+         //   05/10/17 [V5.7 R3.5] /MK Bug Fix - FocusedRecordIndex+1 didn't do the job. Changed to FocusedRow.IsLast boolean to check if on last record.
+         if ( AView.Controller.FocusedRow.IsLast ) then Exit;
+         with AView.Controller do
+            begin
+               FocusNextItem(FocusedItemIndex, True, True, True);
+               while FocusedItem.Tag = 0 do // skip items not commonly used
+                  FocusNextItem(FocusedItemIndex, True, True, True);
+               Key := 0;
+            end;
+      end;
+end;
+
+procedure TfmMartImportByFileReview.MartDataGridDBTableViewSortTagNoGetDisplayText(
+  Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
+  var AText: String);
+begin
+  inherited;
+   if ARecord <> nil then
+      AText := ARecord.DisplayTexts[MartDataGridDBTableViewTagNo.Index]
+   else
+      AText := '';
+end;
+
+procedure TfmMartImportByFileReview.MartDataGridDBTableViewDataControllerSummaryFooterSummaryItemsSummary(
+  ASender: TcxDataSummaryItems; Arguments: TcxSummaryEventArguments;
+  var OutArguments: TcxSummaryEventOutArguments);
+begin
+  inherited;
+  ASender.Items[0].Format := Format('%s0.00;%s-0.00',[CurrencyString,CurrencyString]);
+end;
+
+procedure TfmMartImportByFileReview.tMartNoDaysOnPrevHoldingChange(
+  Sender: TField);
+begin
+   inherited;
+   //   18/06/14 [V5.3 R2.8] /MK Additional Feature - If the user enters FQAS Days then create QADate on screen.
+   if ( tMartNoDaysOnPrevHolding.AsInteger > 0 ) then
+      tMartFQASDate.AsDateTime := Trunc(tMartEventDate.AsDateTime + tMartNoDaysOnPrevHolding.AsInteger);
+end;
+
+function TfmMartImportByFileReview.Customer_Supplier_Selected : Boolean;
+begin
+   Result := True;
+   with TQuery.Create(nil) do
+      try
+         DatabaseName := AliasName;
+         SQL.Clear;
+         SQL.Add('SELECT Count(ID)');
+         SQL.Add('FROM tMart');
+         SQL.Add('WHERE CustomerSupplier > 0');
+         Open;
+         try
+            First;
+            Result := ( tMart.RecordCount = Fields[0].AsInteger );
+         finally
+            Close;
+         end;
+      finally
+         Free;
+      end;
+end;
+
+procedure TfmMartImportByFileReview.PostHeaderComboChange(Sender: TObject);
+var
+   sFieldName : String;
+   Value : Variant;
+begin
+   inherited;
+   if ( Sender is TcxLookupComboBox ) then
+      begin
+         if ( (Sender as TcxLookupComboBox).Name = 'lcmboBuyers' ) then
+            sFieldName := 'BuyerID'
+         else if ( (Sender as TcxLookupComboBox).Name = 'lcmboPurchGroup' ) then
+            sFieldName := 'PurchGrpID'
+         else if ( (Sender as TcxLookupComboBox).Name = 'lcmboFeedGroup' ) then
+            sFieldName := 'FeedGrpID'
+         else if ( (Sender as TcxLookupComboBox).Name = 'lcmboBatchGroup' ) then
+            sFieldName := 'BatchGrpID'
+         else if ( (Sender as TcxLookupComboBox).Name = 'lcmboSuppliers' ) then
+            sFieldName := 'CustomerSupplier';
+         (Sender as TcxLookupComboBox).PostEditValue;
+         Value := (Sender as TcxLookupComboBox).EditValue;
+         if ( Value <> Null ) then
+            with TQuery.Create(nil) do
+               try
+                  DatabaseName := AliasName;
+                  SQL.Clear;
+                  SQL.Add('UPDATE '+tMart.TableName+'');
+                  SQL.Add('SET '+sFieldName+' = '+VarToStr(Value)+'');
+                  try
+                     ExecSQL;
+                     tMart.Close;
+                     tMart.Open;
+                  except
+                  end;
+               finally
+                  Free;
+               end;
+      end;
+end;
+
+procedure TfmMartImportByFileReview.WMSyscommand(var msg: TWmSysCommand);
+begin
+   if ( (msg.cmdtype and $FFF0) = SC_CLOSE ) then
+      actCancelImport.Execute
+   else
+   inherited;
+end;
+
+procedure TfmMartImportByFileReview.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+begin
+   inherited;
+   CanClose := FCancelled;
+   if ( not(CanClose) ) then
+      CanClose := ( FMartImportType <> mitPurchase );
+   if ( not(CanClose) ) then
+      CanClose := ( not(WinData.MartFileHasBlankBreeds) );
+   if ( not(CanClose) ) then
+      MessageDlg('This file contain blank breeds.'+cCRLF+
+                 'Please correct all animals that do not have a breed by selecting'+cCRLF+
+                 'a breed from the drop-down-list provided for each animal.',mtError,[mbOK],0);
+end;
+
+procedure TfmMartImportByFileReview.FormActivate(Sender: TObject);
+begin
+   inherited;
+   MartDataGridDBTableViewSortTagNo.Width := 124;
+   MartDataGridDBTableViewSortTagNo.SortOrder := soAscending;
+   MartDataGridDBTableViewBreedCode.SortOrder := soNone;
+
+   if ( FMartImportType = mitPurchase ) and ( WinData.MartFileHasBlankBreeds ) then
+      begin
+         with MartDataGridDBTableView do
+            begin
+               with GetColumnByFieldName('BreedCode') do
+                  begin
+                     SortOrder := soAscending;
+                     Options.Editing := True;
+                     PropertiesClass := TcxLookupComboBoxProperties;
+                     with TcxLookupComboBoxProperties(Properties) do
+                        begin
+                           ListSource := LookupBreedsSource;
+                           KeyFieldNames := 'Code';
+                           ListFieldNames := 'Code;Name';
+                           DropDownAutoSize := False;
+                           DropDownWidth := 150;
+                           ListColumns[0].Width := 20;
+                           ListColumns[1].Width := 50;
+                        end;
+                  end;
+            end;
+      end;
+   OnActivate := nil;
+end;
+
+end.

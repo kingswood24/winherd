@@ -1,0 +1,253 @@
+inherited fmAIMAnimalPurchaseEdit: TfmAIMAnimalPurchaseEdit
+  Left = 302
+  Top = 201
+  Width = 830
+  Height = 495
+  Caption = 'Lactation Number Correction'
+  Font.Height = -13
+  Font.Name = 'Segoe UI'
+  OldCreateOrder = True
+  OnCloseQuery = FormCloseQuery
+  PixelsPerInch = 96
+  TextHeight = 17
+  inherited StatusBar: TdxStatusBar
+    Top = 444
+    Width = 822
+    Visible = False
+  end
+  object lInfo: TcxLabel [1]
+    Left = 18
+    Top = 17
+    AutoSize = False
+    Caption = 
+      '       The following animals have been imported into your Kingsw' +
+      'ood Herd database. '#13#10#13#10'       Enter a price and/or weight for th' +
+      'e animal if required.'#13#10#13#10'       A default lactation number has b' +
+      'een calculated by the program based on age. If you need to corre' +
+      'ct this you can do so by'#13#10'       editing the Lact. No. column.'
+    ParentFont = False
+    Properties.Alignment.Horz = taLeftJustify
+    Properties.WordWrap = True
+    Style.Edges = []
+    Style.Font.Charset = ANSI_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -13
+    Style.Font.Name = 'Segoe UI'
+    Style.Font.Style = []
+    Style.TransparentBorder = False
+    Style.IsFontAssigned = True
+    Height = 107
+    Width = 781
+  end
+  object AnimalGrid: TcxGrid [2]
+    Left = 17
+    Top = 134
+    Width = 783
+    Height = 251
+    TabOrder = 6
+    LookAndFeel.Kind = lfFlat
+    object AnimalGridTableView: TcxGridTableView
+      NavigatorButtons.ConfirmDelete = False
+      NavigatorButtons.First.Visible = True
+      NavigatorButtons.PriorPage.Visible = True
+      NavigatorButtons.Prior.Visible = True
+      NavigatorButtons.Next.Visible = True
+      NavigatorButtons.NextPage.Visible = True
+      NavigatorButtons.Last.Visible = True
+      NavigatorButtons.Insert.Visible = True
+      NavigatorButtons.Delete.Visible = True
+      NavigatorButtons.Edit.Visible = True
+      NavigatorButtons.Post.Visible = True
+      NavigatorButtons.Cancel.Visible = True
+      NavigatorButtons.Refresh.Visible = True
+      NavigatorButtons.SaveBookmark.Visible = True
+      NavigatorButtons.GotoBookmark.Visible = True
+      NavigatorButtons.Filter.Visible = True
+      DataController.Summary.DefaultGroupSummaryItems = <>
+      DataController.Summary.FooterSummaryItems = <>
+      DataController.Summary.SummaryGroups = <>
+      OptionsData.Deleting = False
+      OptionsData.DeletingConfirmation = False
+      OptionsData.Inserting = False
+      OptionsView.DataRowHeight = 22
+      OptionsView.GridLines = glHorizontal
+      OptionsView.GroupByBox = False
+      OptionsView.HeaderHeight = 28
+      OptionsView.Indicator = True
+      object AnimalGridTableViewAId: TcxGridColumn
+        Caption = 'ID'
+        DataBinding.ValueType = 'Integer'
+        Visible = False
+        Hidden = True
+        Options.Editing = False
+        Options.Filtering = False
+      end
+      object AnimalGridTableViewNatIdNo: TcxGridColumn
+        Caption = 'Nat. Id. No'
+        PropertiesClassName = 'TcxTextEditProperties'
+        Properties.Alignment.Vert = taVCenter
+        HeaderAlignmentHorz = taCenter
+        HeaderAlignmentVert = vaCenter
+        Options.Editing = False
+        Options.Filtering = False
+        Width = 210
+      end
+      object AnimalGridTableViewDateOfBirth: TcxGridColumn
+        Caption = 'Date Of Birth'
+        DataBinding.ValueType = 'DateTime'
+        PropertiesClassName = 'TcxTextEditProperties'
+        Properties.Alignment.Vert = taVCenter
+        HeaderAlignmentHorz = taCenter
+        HeaderAlignmentVert = vaCenter
+        Options.Editing = False
+        Options.Filtering = False
+        Width = 125
+      end
+      object AnimalGridTableViewBreed: TcxGridColumn
+        Caption = 'Breed'
+        PropertiesClassName = 'TcxTextEditProperties'
+        Properties.Alignment.Horz = taCenter
+        Properties.Alignment.Vert = taVCenter
+        HeaderAlignmentHorz = taCenter
+        HeaderAlignmentVert = vaCenter
+        Options.Editing = False
+        Options.Filtering = False
+        Width = 75
+      end
+      object AnimalGridTableViewLactNo: TcxGridColumn
+        Caption = 'Lact. No.'
+        DataBinding.ValueType = 'Smallint'
+        PropertiesClassName = 'TcxSpinEditProperties'
+        Properties.Alignment.Horz = taCenter
+        Properties.Alignment.Vert = taVCenter
+        FooterAlignmentHorz = taRightJustify
+        HeaderAlignmentHorz = taCenter
+        HeaderAlignmentVert = vaCenter
+        Options.Filtering = False
+        Width = 85
+      end
+      object AnimalGridTableViewEId: TcxGridColumn
+        Visible = False
+        Hidden = True
+      end
+      object AnimalGridTableViewSortNatIdNo: TcxGridColumn
+        Visible = False
+        Hidden = True
+      end
+      object AnimalGridTableViewSupplier: TcxGridColumn
+        Caption = 'Supplier'
+        HeaderAlignmentHorz = taCenter
+        HeaderAlignmentVert = vaCenter
+        HeaderGlyphAlignmentHorz = taCenter
+        Options.Filtering = False
+        Options.Grouping = False
+        Options.Moving = False
+        Width = 120
+      end
+      object AnimalGridTableViewPrice: TcxGridColumn
+        Caption = 'Price'
+        DataBinding.ValueType = 'Float'
+        PropertiesClassName = 'TcxCurrencyEditProperties'
+        Properties.DisplayFormat = '0.00'
+        HeaderAlignmentHorz = taCenter
+        HeaderAlignmentVert = vaCenter
+        HeaderGlyphAlignmentHorz = taCenter
+        Options.Filtering = False
+        Options.Grouping = False
+        Options.Moving = False
+        Width = 64
+      end
+      object AnimalGridTableViewWeight: TcxGridColumn
+        Caption = 'Weight'
+        DataBinding.ValueType = 'Float'
+        PropertiesClassName = 'TcxCurrencyEditProperties'
+        Properties.DisplayFormat = '0.00'
+        HeaderAlignmentHorz = taCenter
+        HeaderAlignmentVert = vaCenter
+        HeaderGlyphAlignmentHorz = taCenter
+        Options.Filtering = False
+        Options.Grouping = False
+        Options.Moving = False
+      end
+    end
+    object AnimalGridLevel1: TcxGridLevel
+      GridView = AnimalGridTableView
+    end
+  end
+  object btnUpdate: TcxButton [3]
+    Left = 643
+    Top = 398
+    Width = 76
+    Height = 32
+    Caption = 'Update'
+    Default = True
+    ModalResult = 1
+    TabOrder = 8
+    LookAndFeel.Kind = lfUltraFlat
+    LookAndFeel.NativeStyle = True
+  end
+  object btnCancel: TcxButton [4]
+    Left = 725
+    Top = 398
+    Width = 76
+    Height = 32
+    Caption = 'Cancel'
+    ModalResult = 3
+    TabOrder = 7
+    LookAndFeel.NativeStyle = True
+  end
+  inherited ActionList: TActionList
+    Left = 578
+    Top = 401
+  end
+  inherited BarManager: TdxBarManager
+    Bars = <
+      item
+        AllowClose = False
+        AllowCustomizing = False
+        AllowQuickCustomizing = False
+        AllowReset = False
+        Caption = 'Main'
+        DockedDockingStyle = dsTop
+        DockedLeft = 0
+        DockedTop = 0
+        DockingStyle = dsTop
+        FloatLeft = 353
+        FloatTop = 250
+        FloatClientWidth = 23
+        FloatClientHeight = 22
+        ItemLinks = <
+          item
+            Item = bClose
+            UserGlyph.Data = {00000000}
+            Visible = True
+          end
+          item
+            BeginGroup = True
+            Item = bHelp
+            UserGlyph.Data = {00000000}
+            Visible = True
+          end>
+        Name = 'Main'
+        OneOnRow = True
+        Row = 0
+        ShowMark = False
+        SizeGrip = False
+        UseOwnFont = False
+        Visible = False
+        WholeRow = False
+        BackgroundBitmap.Data = {00000000}
+      end>
+    Categories.ItemsVisibles = (
+      2)
+    Categories.Visibles = (
+      True)
+    Left = 544
+    Top = 401
+    DockControlHeights = (
+      0
+      0
+      0
+      0)
+  end
+end

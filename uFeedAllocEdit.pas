@@ -1,0 +1,165 @@
+{
+   15/12/11 [V5.0 R2.8] /MK Change - Removed Add & Delete Buttons So User Can Only Add Or Delete In Bulk.
+
+   07/05/15 [V5.4 R5.5] /MK Change - Change Amount/Price to Qty/Cost - GL/L.Clerkin request.
+                            Additional Feature - Added calculated field for NoDays - GL/L.Clerkin request.
+
+   12/09/17 [V5.7 R3.0] /MK Change - Created Class Procedure for ShowTheForm.   
+}
+
+unit uFeedAllocEdit;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  ExtCtrls, kwDBNavigator, RXCtrls, ComCtrls, ToolWin, Grids, DBGrids,
+  DBCtrls, StdCtrls, Mask, ToolEdit, RXDBCtrl, RxLookup, db;
+
+type
+  TfmFeedAllocEdit = class(TForm)
+    Bevel1: TBevel;
+    ToolBar1: TToolBar;
+    ToolButton3: TToolButton;
+    sbExit: TRxSpeedButton;
+    ToolButton2: TToolButton;
+    Nav: TKwDBNavigator;
+    sbHelp: TRxSpeedButton;
+    DBDateEdit1: TDBDateEdit;
+    Label3: TLabel;
+    DBDateEdit2: TDBDateEdit;
+    lNoDays: TLabel;
+    DBEdit1: TDBEdit;
+    Label2: TLabel;
+    FeedType: TRxDBLookupCombo;
+    DBEdit2: TDBEdit;
+    Label4: TLabel;
+    ToolButton1: TToolButton;
+    Label5: TLabel;
+    dbeNoDays: TDBEdit;
+    procedure sbExitClick(Sender: TObject);
+    procedure NavClick(Sender: TObject; Button: TKNavigateBtn);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure FeedTypeChange(Sender: TObject);
+    procedure DBEdit1Change(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure DBDateEdit1Change(Sender: TObject);
+    procedure DBEdit2Change(Sender: TObject);
+    procedure DBDateEdit2Change(Sender: TObject);
+  private
+    { Private declarations }
+    FFormShowing : Boolean;
+    FModified : Boolean;
+    procedure SetModifiedFlag;
+    function GetDefPrice: Double;
+    procedure SetCostDay;
+    procedure SetToEdit;
+    property DefFeedPrice : Double read GetDefPrice;
+  public
+    { Public declarations }
+    class procedure ShowTheForm;
+  end;
+
+
+var
+  fmFeedAllocEdit: TfmFeedAllocEdit;
+
+implementation
+uses
+   DairyData, GenTypesConst;
+
+{$R *.DFM}
+
+procedure TfmFeedAllocEdit.sbExitClick(Sender: TObject);
+begin
+   Close;
+end;
+
+procedure TfmFeedAllocEdit.NavClick(Sender: TObject;
+  Button: TKNavigateBtn);
+begin
+   if Button <> kwnbInsert then
+      Close;
+end;
+
+procedure TfmFeedAllocEdit.FormCloseQuery(Sender: TObject;
+  var CanClose: Boolean);
+begin
+   CanClose := WinData.DataSetApplyUpdates(Windata.FeedEvents, ModalResult = mrOK, FModified);
+end;
+
+function TfmFeedAllocEdit.GetDefPrice: Double;
+begin
+   Result := WinData.FeedTypes.Lookup('ID',  FeedType.Value, 'DefCostTon') / 1000 ;
+end;
+
+procedure TfmFeedAllocEdit.SetCostDay;
+begin
+   if (FeedType.Value = '0') then Exit;
+   if not(WinData.FeedEvents.State in dsEditModes) then Exit;
+   if ((WinData.FeedEvents.FieldByName('CostDay').AsFloat <= 0) or
+      (WinData.FeedEvents.FieldByName('QuantDay').AsFloat <= 0)) then Exit;
+   WinData.FeedEvents.FieldByName('CostDay').AsFloat := GetDefPrice * WinData.FeedEvents.FieldByName('QuantDay').AsFloat;
+
+end;
+
+procedure TfmFeedAllocEdit.FeedTypeChange(Sender: TObject);
+begin
+   SetModifiedFlag;
+   if WinData.FeedEvents.FieldByName('QuantDay').AsFloat > 0 then
+      SetCostDay;
+end;
+
+procedure TfmFeedAllocEdit.DBEdit1Change(Sender: TObject);
+begin
+   SetModifiedFlag;
+   if WinData.FeedTypes.FieldByName('ID').AsInteger > 0 then
+      SetCostDay;
+end;
+
+procedure TfmFeedAllocEdit.SetToEdit;
+begin
+end;
+
+procedure TfmFeedAllocEdit.FormCreate(Sender: TObject);
+begin
+   FFormShowing := False;
+   FModified := False;
+   WinData.LoadBtnImage(WinData.Images,sbExit.Glyph,cBtnImgExit);
+   WinData.LoadBtnImage(WinData.Images,sbHelp.Glyph,cBtnImgHelp);
+end;
+
+procedure TfmFeedAllocEdit.SetModifiedFlag;
+begin
+   if FFormShowing then FModified := True;
+end;
+
+procedure TfmFeedAllocEdit.DBDateEdit1Change(Sender: TObject);
+begin
+   SetModifiedFlag;
+end;
+
+procedure TfmFeedAllocEdit.DBEdit2Change(Sender: TObject);
+begin
+   SetModifiedFlag;
+
+end;
+
+procedure TfmFeedAllocEdit.DBDateEdit2Change(Sender: TObject);
+begin
+   SetModifiedFlag;
+
+end;
+
+class procedure TfmFeedAllocEdit.ShowTheForm;
+begin
+   with TfmFeedAllocEdit.Create(nil) do
+      try
+         ShowModal;
+      finally
+         Free;
+      end;
+end;
+
+end.
+

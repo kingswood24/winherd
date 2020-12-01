@@ -1,0 +1,250 @@
+unit uRemarks;
+
+interface
+
+uses Windows, SysUtils, Classes, Graphics, Forms, Controls, StdCtrls,
+  Buttons, ExtCtrls, GenTypesConst, Mask, ToolEdit, DairyData;
+{
+This Form allow the user store the reason they have changed an animals
+1. National ID
+2. Date of Birth
+3. Colour
+4. Breed
+5. Sales Information.
+6. Purchase Information.
+7. Sex
+}
+
+{
+  SP 05/11/2003
+
+  Field "UserDate" as Datetime - Requirement for NI system
+}
+Const
+  cNatIDRemark       = 1;
+  cDOBRemark         = 2;
+  cColourRemark      = 3;
+  cBreedRemark       = 4;
+  cSexRemark         = 5;
+  cSaleDateRemark    = 6;
+  cSalePlaceRemark   = 7;
+  cPurchDateRemark   = 8;
+  cPurchPlaceRemark  = 9;
+  cTempTagRemark     = 10;
+  cNewTagRemark      = 11;
+  cDeletionRemark    = 12;
+  cGeneralRemark     = 13;   // Not entered in conjunction with any thing
+  cSaleDeleteRemark  = 14;
+  cPurchDeleteRemark = 15;
+  cUnDeleteRemark    = 16;  // For the UnDelete Remark
+  cHerdIDRemark      = 17;  // For the UnDelete Remark
+
+  MaxRemarks = 10;
+
+type
+  // Used to add remarks to the Remarks Table
+  TRecordRemarks = Record
+     RecType : TRemark;
+     RecText : String;
+     RecUserDate : TDateTime;
+  end;
+
+  TfRemarks = class(TForm)
+    GroupBox1: TGroupBox;
+    eRemark: TEdit;
+    OKBtn: TButton;
+    dUserDate: TDateEdit;
+    procedure OKBtnClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+  private
+    { Private declarations }
+    CurrRemark : TRemark;
+    AddedRemarks : Boolean;
+    ArrPos        : Integer;
+
+    // Property DisplayRemark
+    function GetDisplayRemarks : TRemark;
+    procedure SetDisplayRemarks( Remark : TRemark );
+    // Property RemarksAdded
+    function GetRemarksAdded : Boolean;
+    procedure SetRemarksAdded( ARemarks : Boolean );
+    // Property NewRemark
+    function GetNewRemarkArrPos : TRemark;
+    procedure SetNewRemarkArrPos( NRemarks : TRemark );
+    // Property RemoveRemark
+    // function GetRemoveRemark : TRemark;
+    procedure SetRemoveRemark( NRemarks : TRemark );
+
+  public
+    { Public declarations }
+    // All remarks added by user
+    RecordRemarks : Packed Array[1..MaxRemarks] of TRecordRemarks;
+    UserConfirm : Boolean;
+    // Displays the Form ready for Data Input
+    property DisplayRemark : TRemark read GetDisplayRemarks write SetDisplayRemarks default None;
+    // TRUE if Remarks Added
+    property RemarksAdded : Boolean read GetRemarksAdded write SetRemarksAdded default FALSE;
+    // Get the Array position for this record
+    property NewRemarkArrPos : TRemark read GetNewRemarkArrPos write SetNewRemarkArrPos;
+    // Remove Remark
+    property RemoveRemark : TRemark write SetRemoveRemark;
+  end;
+
+var
+  fRemarks: TfRemarks;
+
+implementation
+
+{$R *.DFM}
+
+procedure TfRemarks.OKBtnClick(Sender: TObject);
+begin
+    Close;
+end;
+
+procedure TfRemarks.SetRemoveRemark( NRemarks : TRemark );
+var
+   i : Integer;
+begin
+   // Searches the Array for a Record of NRemarks Type and Removes it
+   for i := 1 to MaxRemarks do
+      if ( RecordRemarks[i].RecType = NRemarks ) then
+         begin
+            RecordRemarks[i].RecText := '';
+            RecordRemarks[i].RecType := None;
+            RecordRemarks[i].RecUserDate := 0;
+            Break;
+         end;
+end;
+
+function TfRemarks.GetNewRemarkArrPos : TRemark;
+var
+   FoundNew,
+   ItemFound  : Boolean;
+   i          : Integer;
+begin
+   FoundNew  := FALSE;
+   ItemFound := FALSE;
+   // Searches the Array for a Record of CurrRemark Type
+   for i := 1 to MaxRemarks do
+      if ( RecordRemarks[i].RecType = CurrRemark ) then
+         begin
+            ItemFound := TRUE;
+            ArrPos := i;
+            eRemark.Text := RecordRemarks[i].RecText;
+            Result := RecordRemarks[i].RecType;
+            Break;
+         end
+      // Store the First Empty Record Location
+      else if (( RecordRemarks[i].RecType = None ) And ( NOT FoundNew )) then
+         begin
+            ArrPos := i;
+            FoundNew := TRUE;
+         end;
+   if NOT ItemFound then
+      // Found Next Empty Record
+      begin
+         eRemark.Text := Caption;
+         Result := CurrRemark;
+      end;
+end;
+
+procedure TfRemarks.SetNewRemarkArrPos( NRemarks : TRemark );
+begin
+    RecordRemarks[ArrPos].RecType := NRemarks;
+    RecordRemarks[ArrPos].RecText := eRemark.Text;
+    RecordRemarks[ArrPos].RecUserDate := dUserDate.Date;
+end;
+
+// Set remark has been added
+function TfRemarks.GetRemarksAdded : Boolean;
+begin
+    Result := AddedRemarks;
+end;
+
+// If a remark has been added i.e. user changed the Records
+procedure TfRemarks.SetRemarksAdded ( ARemarks : Boolean );
+var
+   i : Integer;
+begin
+    AddedRemarks := ARemarks;
+    if NOT ARemarks then
+       begin
+          // Initialise the Remarks Record Structure and Arr Pos
+          ArrPos := 0;
+          for i := 1 to MaxRemarks do
+             begin
+                 RecordRemarks[i].RecType := None;
+                 RecordRemarks[i].RecText := '';
+                 RecordRemarks[i].RecUserDate := 0;
+             end;
+          // Check a Default User exists show form if it doesn't
+          WinData.DefaultSysUser;
+       end;
+end;
+
+// Gets the Current Remark type
+function TfRemarks.GetDisplayRemarks : TRemark;
+begin
+    Result := CurrRemark;
+end;
+
+// Sets the Current Remark type
+procedure TfRemarks.SetDisplayRemarks ( Remark : TRemark );
+begin
+    CurrRemark := Remark;
+    Caption := '';
+    case CurrRemark of
+        NatID      : Caption := Caption + 'National ID Number';
+        DOB        : Caption := Caption + 'Date Of Birth';
+        Colour     : Caption := Caption + 'Colour';
+        Breed      : Caption := Caption + 'Breed';
+        SaleDate   : Caption := Caption + 'Sales Date';
+        SalePlace  : Caption := Caption + 'Sales Place';
+        PurchDate  : Caption := Caption + 'Purchase Date';
+        PurchPlace : Caption := Caption + 'Purchase Place';
+        Sex        : Caption := Caption + 'Sex';
+        Deletion   : Caption := 'Record Deleted';
+        rHerdID    : Caption := 'Herd Identity';
+    end;
+    if ( CurrRemark <> Deletion ) then
+       Caption := Caption + ' Changed';
+    RemarksAdded := TRUE;
+//    if not WinData.NISystem then try not assume based on herds in system, needs to be based on Animal.HerdID
+//  assuming that all changes are recorded thru animalfilebyid table.
+    if WinData.DefCountry(WinData.AnimalFileByIDHerdID.AsInteger) = NIreland then
+       begin
+          dUserDate.Show;
+          dUserDate.Date := Date;
+          eRemark.Width := 254;
+       end
+    else
+       begin
+          dUserDate.Hide;
+          dUserDate.Date := 0;
+          eRemark.Width := 369;
+       end;
+
+    if UserConfirm then
+       ShowModal
+    else
+       begin
+          NewRemarkArrPos;
+          // Assign the Text into the Array
+          NewRemarkArrPos := CurrRemark;
+       end;
+end;
+
+procedure TfRemarks.FormShow(Sender: TObject);
+begin
+    NewRemarkArrPos;
+end;
+
+procedure TfRemarks.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+    // Assign the Text into the Array
+    NewRemarkArrPos := CurrRemark;
+end;
+
+end.

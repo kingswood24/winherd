@@ -1,0 +1,169 @@
+unit uTagReplacements;
+
+interface
+
+uses
+   Classes, Windows, IniFiles, SysUtils, db, dbtables;
+
+type
+  TTagReplacements = class(TObject)
+  private
+    function GetPairTagPrice: double;
+    function GetSingleTagPrice: double;
+    procedure SetPairTagPrice(const Value: double);
+    procedure SetSingleTagPrice(const Value: double);
+    function GetPostAndPackage: double;
+    procedure SetPostAndPackage(const Value: double);
+  protected
+    FDataStore : TTable;
+    FIniFile : TIniFile;
+  public
+    procedure GetDataStore(var ADataset : TDataset);
+    procedure AddToDataStore(ADataset : TDataset);
+    constructor Create;
+    destructor Destroy; override;
+  published
+     property SingleTagPrice : double read GetSingleTagPrice write SetSingleTagPrice;
+     property PairTagPrice : double read GetPairTagPrice write SetPairTagPrice;
+     property PostAndPackage : double read GetPostAndPackage write SetPostAndPackage;
+  end;
+
+implementation
+uses
+   BDE, KRoutines;
+
+{ TTagReplacements }
+
+procedure TTagReplacements.AddToDataStore(ADataset: TDataset);
+begin
+   if ADataset <> nil then
+      begin
+         ADataset.First;
+         while not ADataset.eof do
+            begin
+               FDataStore.Append;
+               FDataStore.FieldByName('TagNo').AsString := ADataset.FieldByName('TagNo').AsString;
+               FDataStore.FieldByName('SortNatID').AsString := ADataset.FieldByName('SortNatID').AsString;
+               FDataStore.FieldByName('Quantity').AsInteger := ADataset.FieldByName('Qty').AsInteger;
+               FDataStore.FieldByName('OrderDate').AsDateTime := ADataset.FieldByName('OrderDate').AsDateTime;
+               FDataStore.Post;
+               ADataset.Next;
+            end;
+      end;
+   DbiSaveChanges(FDataStore.Handle);
+end;
+
+constructor TTagReplacements.Create;
+begin
+  inherited;
+  FDataStore := TTable.Create(nil);
+  FDataStore.DatabaseName := 'kingswd';
+  FDataStore.TableName := 'TagReplacements';
+  if not FDataStore.Exists then
+     begin
+        with FDataStore.FieldDefs do
+           begin
+              Clear;
+              Add('ID', ftAutoInc);
+              Add('TagNo', ftString, 20);
+              //   21/11/12 [V5.1 R3.2] /MK Additional Feature - Added SortNatID field to sort by tag no.
+              Add('SortNatID',ftString,20);
+              Add('Quantity', ftInteger);
+              Add('OrderDate', ftDateTime);
+           end;
+
+        with FDataStore.IndexDefs do
+           begin
+              Clear;
+              Add('','ID',[ixPrimary, ixUnique]);
+              Add('iTagNo','TagNo',[ixCaseInsensitive]);
+           end;
+        FDataStore.CreateTable;
+     end;
+
+  try
+     FDataStore.Open;
+  except
+     on EDatabaseError do
+        begin
+           FDataStore.DeleteIndex( '');
+           FDataStore.DeleteIndex( 'iTagNo');
+           FDataStore.IndexDefs.Update;
+           FDataStore.AddIndex( '','ID',[ixUnique, ixPrimary]);
+           FDataStore.AddIndex( 'iTagNo','TagNo',[ixCaseInsensitive] );
+           FDataStore.IndexDefs.Update;
+           FDataStore.Open;
+        end;
+  end;
+
+  FIniFile := TIniFile.Create(IncludeTrailingBackslash(DataPath)+'tagreplace.ini');
+end;
+
+destructor TTagReplacements.Destroy;
+begin
+  FDataStore.Close;
+  FreeAndNil(FDataStore);
+  FreeAndNil(FIniFile);
+  inherited;
+end;
+
+procedure TTagReplacements.GetDataStore(var ADataset: TDataset);
+begin
+   if ADataset <> nil then
+      begin
+         FDataStore.First;
+         while not FDataStore.eof do
+            begin
+               ADataset.Append;
+               if ADataset.FindField('TagNo') <> nil then
+                  ADataset.FieldByName('TagNo').AsString := FDataStore.FieldByName('TagNo').AsString;
+               if ADataset.FindField('SortNatID') <> nil then
+                  ADataset.FieldByName('SortNatID').AsString := FDataStore.FieldByName('SortNatID').AsString;
+               if ADataset.FindField('Quantity') <> nil then
+                  ADataset.FieldByName('Quantity').AsInteger := FDataStore.FieldByName('Qty').AsInteger;
+               if ADataset.FindField('OrderDate') <> nil then
+                  ADataset.FieldByName('OrderDate').AsDateTime := FDataStore.FieldByName('OrderDate').AsDateTime;
+               ADataset.Post;
+               FDataStore.Next;
+            end;
+      end;
+end;
+
+function TTagReplacements.GetPairTagPrice: double;
+begin
+   Result := 0;
+   if FIniFile.ValueExists('TagPrices', 'Pair') then
+      Result := FIniFile.ReadFloat('TagPrices', 'Pair',Result);
+end;
+
+function TTagReplacements.GetPostAndPackage: double;
+begin
+   Result := 0;
+   if FIniFile.ValueExists('TagPrices', 'PostAndPackage') then
+      Result := FIniFile.ReadFloat('TagPrices', 'PostAndPackage',Result);
+end;
+
+function TTagReplacements.GetSingleTagPrice: double;
+begin
+   Result := 0;
+   if FIniFile.ValueExists('TagPrices', 'Single') then
+      Result := FIniFile.ReadFloat('TagPrices', 'Single',Result);
+end;
+
+procedure TTagReplacements.SetPairTagPrice(const Value: double);
+begin
+   FIniFile.WriteFloat('TagPrices', 'Pair', Value);
+end;
+
+procedure TTagReplacements.SetPostAndPackage(const Value: double);
+begin
+   FIniFile.WriteFloat('TagPrices', 'PostAndPackage', Value);
+end;
+
+procedure TTagReplacements.SetSingleTagPrice(const Value: double);
+begin
+   FIniFile.WriteFloat('TagPrices', 'Single', Value);
+end;
+
+end.
+ 

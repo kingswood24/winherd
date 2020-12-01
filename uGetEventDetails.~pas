@@ -1,0 +1,95 @@
+unit uGetEventDetails;
+
+interface
+
+uses
+   Windows, Classes, SysUtils, db, dbtables, uProgressIndicator;
+type
+
+   TActionReminderData = class
+   private
+      GenQuery : TQuery;
+      EventTable,
+      DetailTable : TTable;
+      FShowProgress: Boolean;
+      FHerdID: Integer;
+      FFromDate: TDateTime;
+      FToDate: TDateTime;
+   public
+      constructor create;
+      destructor Destroy;override;
+      property HerdID : Integer read FHerdID write FHerdID;
+      property ShowProgress : Boolean read FShowProgress write FShowProgress;
+      property FromDate : TDateTime read FFromDate write FFromDate;
+      property ToDate : TDateTime read FToDate write FToDate;
+   end;
+
+
+   TDueServiceData = class(TActionReminderData)
+   private
+      procedure GetServiceData;
+   public
+      //procedure GetServiceData
+      constructor Create;override;
+   end;
+
+const
+   AliasName = 'kingswd';
+
+implementation
+
+{ TActionReminderData }
+
+constructor TActionReminderData.create;
+begin
+
+   EventTable := TTable.Create(nil);
+   EventTable.DatabaseName :=  AliasName;
+   EventTable.TableName := 'Events';
+   EventTable.Active := True;
+
+   DetailTable := TTable.Create(nil);
+   DetailTable.DatabaseName :=  AliasName;
+
+   GenQuery := TQuery.Create(nil);
+   GenQuery.DatabaseName :=  AliasName;
+
+   FShowProgress := False;
+   FHerdID := 0;
+   FFromDate := 0;
+   FToDate := 0;
+end;
+
+destructor TActionReminderData.Destroy;
+begin
+  inherited;
+  if DetailTable <>  nil then
+     begin
+        DetailTable.Close;
+        DetailTable.Free;
+     end;
+  if EventTable <>  nil then
+     begin
+        EventTable.Close;
+        EventTable.Free;
+     end;
+  if GenQuery <>  nil then
+     begin
+        GenQuery.Close;
+        GenQuery.Free;
+     end;
+end;
+
+{ TDueServiceData }
+
+constructor TDueServiceData.Create;
+begin
+  inherited;
+  if DetailTable <> nil then
+     begin
+        DetailTable.TableName := 'Services';
+        DetailTable.Active := True;
+     end;
+end;
+
+end.

@@ -1,0 +1,198 @@
+{
+   08/07/11 [V4.1 R2.3] /MK Additional Feature - Moved All Old Stock Control Components to End Of Screen.
+                                               - Moved All Working Components Into Place - No Big Spaces.
+                                               - Added Ton To Label1(Current Stock) Caption.
+                                               - Added DevExpress DBSpinEdit Button In Place Of Standard DBEdit For FeedTypes.Stock Field.
+                                               - ShowTheForm Now Allows For GridRecordIndex To Be Set To FeedID.
+}
+
+unit uFeedTypes;
+
+interface
+
+uses
+  SysUtils, Windows, Messages, Classes, Graphics, Controls,
+  StdCtrls, Forms, DBCtrls, DB, Mask, ExtCtrls, Buttons, Grids, DBGrids,
+  RXDBCtrl, RXCtrls, ComCtrls, ToolWin, kwDBNavigator, ToolEdit, RXLookup,
+  cxControls, cxContainer, cxEdit, cxTextEdit, cxMaskEdit, cxDBEdit,
+  cxSpinEdit, cxGridCustomTableView, cxGridTableView, cxGridDBTableView,
+  cxGridLevel, cxClasses, cxGridCustomView, cxGrid;
+
+type
+  TfFeedTypes = class(TForm)
+    Panel2: TPanel;
+    lName: TLabel;
+    lDescription: TLabel;
+    EditName: TDBEdit;
+    EditDescription: TDBEdit;
+    PurchUnits: TDBEdit;
+    ToolBar1: TToolBar;
+    ToolButton3: TToolButton;
+    sbExit: TRxSpeedButton;
+    ToolButton2: TToolButton;
+    ToolButton1: TToolButton;
+    sbHelp: TRxSpeedButton;
+    DBNavigator: TkwDBNavigator;
+    lPurchUnits: TLabel;
+    lStartDate: TLabel;
+    lEndDate: TLabel;
+    dbeStart: TDBDateEdit;
+    dbeEnd: TDBDateEdit;
+    dbcLIFO: TDBCheckBox;
+    dbeLastFeed: TDBDateEdit;
+    lLastFeed: TLabel;
+    lCostType: TLabel;
+    lChange: TLabel;
+    bChange: TButton;
+    lDateChange: TLabel;
+    dbeChange: TDBDateEdit;
+    lCategory: TLabel;
+    dbcCategory: TRxDBLookupCombo;
+    lFeedUnits: TLabel;
+    FeedUnits: TDBEdit;
+    Label2: TLabel;
+    Label3: TLabel;
+    CostWeight: TDBEdit;
+    QuantDay: TDBEdit;
+    Label1: TLabel;
+    dbeStock: TDBEdit;
+    sbResetStock: TRxSpeedButton;
+    dbseStock: TcxDBSpinEdit;
+    FeedTypesGridDBTableView: TcxGridDBTableView;
+    FeedTypesGridLevel: TcxGridLevel;
+    FeedTypesGrid: TcxGrid;
+    FeedTypesGridDBTableViewName: TcxGridDBColumn;
+    FeedTypesGridDBTableViewDescription: TcxGridDBColumn;
+    procedure bExitClick(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure DBNavigatorClick(Sender: TObject; Button: TKNavigateBtn);
+    procedure dbgFeedTypeExit(Sender: TObject);
+    procedure dbcCategoryCloseUp(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure sbHelpClick(Sender: TObject);
+    procedure sbResetStockClick(Sender: TObject);
+  private
+    { private declarations }
+    procedure CheckForReadOnly;
+  public
+    { public declarations }
+  end;
+
+procedure ShowTheForm ( const AFeedID : Integer = 0; const AddingRecord : Boolean = True);
+
+implementation
+uses
+   DairyData,
+   uGenLookSetUp,
+   GenTypesConst,
+   Dialogs;
+
+var
+  fFeedTypes: TfFeedTypes;
+
+{$R *.DFM}
+
+procedure ShowTheForm ( const AFeedID : Integer; const AddingRecord : Boolean );
+begin
+   try
+      if ( fFeedTypes = nil ) then
+         Application.CreateForm(TfFeedTypes, fFeedTypes);
+      if ( AddingRecord ) and (AFeedID <= 0 )then
+         WinData.FeedTypes.Append
+      else
+         begin
+            if WinData.FeedTypes.Locate('ID',AFeedID, []) then
+               begin
+                  fFeedTypes.FeedTypesGridDBTableView.Controller.TopRowIndex := fFeedTypes.FeedTypesGridDBTableView.DataController.FocusedRecordIndex;
+                  WinData.FeedTypes.Edit;
+               end;
+         end;
+
+      fFeedTypes.CheckForReadOnly;
+      fFeedTypes.ShowModal;
+   except
+      ShowMessage('Cannot create form - close program and re-boot');
+   end;
+end;
+
+procedure TfFeedTypes.CheckForReadOnly;
+begin
+   if WinData.FeedTypes.Active then
+      begin
+         if WinData.FeedTypes.State = dsInsert then
+            EditName.ReadOnly := FALSE
+         else
+            EditName.ReadOnly := TRUE;
+      end;
+end;
+
+procedure TfFeedTypes.bExitClick(Sender: TObject);
+begin
+   Close;
+end;
+
+procedure TfFeedTypes.FormCloseQuery(Sender: TObject;
+  var CanClose: Boolean);
+begin
+   // Make sure to cancel any pending record
+   if WinData.FeedTypes.Active then
+      WinData.FeedTypes.Cancel;
+end;
+
+procedure TfFeedTypes.DBNavigatorClick(Sender: TObject;
+  Button: TKNavigateBtn);
+begin
+   CheckForReadOnly;
+end;
+
+procedure TfFeedTypes.dbgFeedTypeExit(Sender: TObject);
+begin
+   CheckForReadOnly;
+end;
+
+procedure TfFeedTypes.dbcCategoryCloseUp(Sender: TObject);
+begin
+   If dbcCategory.Value = '0' Then
+      begin
+         GenLookUpType := TFeedCategory;
+         uGenLookSetUp.ShowTheForm(TRUE); // blank record on open
+      end;
+end;
+
+procedure TfFeedTypes.FormShow(Sender: TObject);
+begin
+   // hide stock control components
+   lCostType.Hide;
+   lStartDate.Hide;
+   lEndDate.Hide;
+   dbcLIFO.Hide;
+   lLastFeed.Hide;
+   lChange.Hide;
+   lDateChange.Hide;
+   dbeStart.Hide;
+   dbeEnd.Hide;
+   dbeLastFeed.Hide;
+   bChange.Hide;
+   dbeChange.Hide;
+   PurchUnits.Hide;
+   lPurchUnits.Hide;
+   FeedUnits.Hide;
+   lFeedUnits.Hide;
+end;
+
+procedure TfFeedTypes.sbHelpClick(Sender: TObject);
+begin
+   WinData.HTMLHelp('FeedTypes.htm');
+end;
+
+procedure TfFeedTypes.sbResetStockClick(Sender: TObject);
+begin
+   if messagedlg('Return stock level to zero?',mtConfirmation,[mbYes,mbNo],0) = mrYes then
+      begin
+         WinData.FeedTypes.edit;
+         WinData.FeedTypes.FieldByName('Stock').AsFloat := 0;
+         WinData.FeedTypes.post;
+      end;
+end;
+
+end.

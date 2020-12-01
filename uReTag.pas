@@ -1,0 +1,293 @@
+unit uReTag;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  StdCtrls, Mask, DBCtrls, Buttons, ExtCtrls, ComCtrls, DBCGrids, RXLookup,
+  ToolEdit, RXDBCtrl, Db, DBTables, uListAnimals, RXCtrls, ToolWin, GenTypesConst,
+  KRoutines;
+
+type
+  TReTagType = ( TempTag, NewTag );
+  TfReTag = class(TkwEventForm)
+    pMain: TPanel;
+    ToolBar1: TToolBar;
+    ToolButton3: TToolButton;
+    sbExit: TRxSpeedButton;
+    ToolButton2: TToolButton;
+    sbSave: TRxSpeedButton;
+    ToolButton1: TToolButton;
+    sbHelp: TRxSpeedButton;
+    Label1: TLabel;
+    lTag: TLabel;
+    Label4: TLabel;
+    lNo: TLabel;
+    Label3: TLabel;
+    lWhatType: TLabel;
+    SearchForAnimal: TComboEdit;
+    eNewTag: TEdit;
+    dbeNatId: TDBEdit;
+    DBEdit1: TDBEdit;
+    eRemark: TEdit;
+    procedure ExitButtonClick(Sender: TObject);
+
+    procedure SearchForAnimalChange(Sender: TObject);
+    procedure SearchForAnimalButtonClick(Sender: TObject);
+    procedure bSaveClick(Sender: TObject);
+    procedure eNewTagExit(Sender: TObject);
+    procedure rgReTagTypeClick(Sender: TObject);
+    procedure SearchForAnimalExit(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure sbHelpClick(Sender: TObject);
+    procedure FormActivate(Sender: TObject);
+    procedure dbeNatIdChange(Sender: TObject);
+    procedure DBEdit1Change(Sender: TObject);
+    procedure eNewTagChange(Sender: TObject);
+    procedure eRemarkChange(Sender: TObject);
+  private
+  private
+    { Private declarations }
+    ReTagType : TReTagType;
+    NewNatId  : String;
+    Country : TCountry;
+    procedure CheckTagType;
+    function NoDups : Boolean;
+  public
+    { Public declarations }
+  end;
+
+procedure ShowReTag(FCountry : TCountry);
+
+implementation
+uses
+    DairyData,
+    uRemarks;
+
+
+{$R *.DFM}
+
+procedure ShowReTag(FCountry : TCountry);
+begin
+     with TfReTag.Create(nil) do
+        try
+           Country := FCountry;
+           // Mark sure to clear the Remarks
+           fRemarks.RemarksAdded := FALSE;
+           lWhatType.Caption := '';
+
+           WinData.EventType := TReTag;
+           ThisCombo := SearchForAnimal;
+           ThisNav := sbSave;
+
+           // Set the Animal Number to the one on the Grid
+           SetSearchField ( SearchForAnimal );
+           CheckTagType;
+           WinData.RetaggingAnimal := TRUE;
+           ShowModal;
+        finally
+           WinData.RetaggingAnimal := FALSE;
+           Free;
+        end;
+end;
+
+procedure TfReTag.ExitButtonClick(Sender: TObject);
+begin
+     Close;
+end;
+
+procedure TfReTag.SearchForAnimalChange(Sender: TObject);
+begin
+   SetModifiedFlag;
+     SearchAnimalChange(Sender);
+end;
+
+function TfReTag.NoDups : Boolean;
+begin
+     Result := FALSE;
+     if Length ( eNewTag.Text ) > 0 then
+        if WinData.LookUpDamSire.Locate('NatIdNum',eNewTag.Text, [] ) then
+           MessageDLG('National ID already in use',mtInformation,[mbOK],0)
+        else
+           Result := TRUE;
+end;
+
+procedure TfReTag.SearchForAnimalButtonClick(Sender: TObject);
+begin
+     SearchButtonClick(Sender, lNo);
+     SetSearchField(SearchForAnimal);
+end;
+
+procedure TfReTag.bSaveClick(Sender: TObject);
+var
+   TestTag,
+   ChangedItem : String;
+   CancelledChanges,
+   AnimalAltered : Boolean;
+begin
+    eNewTagExit(Sender);
+    // Save the info to the relevant place
+    AnimalAltered := FALSE;
+
+    TestTag := WinData.StripSpaces(eNewTag.Text);
+    if Length(TestTag) = 0 then
+       MessageDLG('Cannot Save a Blank New/Temporary Tag',mtWarning,[mbOK],0)
+    else
+       if NoDups then
+          with WinData do
+             try
+                if ReTagType = TempTag then  // Temporary
+                   ChangedItem := eNewTag.Text
+                else
+                   begin
+                      AnimalAltered := TRUE;
+                      AnimalFileById.Edit;
+                      ChangedItem := AnimalFileByIdNatIdNum.AsString;
+                      AnimalFileByIdNatIdNum.AsString := eNewTag.Text;
+                   end;
+                // Open the Tables
+                tRemarks.Open;
+                tSysUser.Open;
+                // Add a Record
+                tRemarks.Append;
+                tRemarks.FieldByName('AID').AsInteger := AnimalFileByIDID.AsInteger;
+                tRemarks.FieldByName('DateChanged').AsDateTime := Date();
+                tRemarks.FieldByName('TimeChanged').AsDateTime := Time();
+                if ReTagType = TempTag then  // Temporary Tag
+                   tRemarks.FieldByName('ItemChanged').AsInteger  := uReMarks.cTempTagRemark
+                else
+                   tRemarks.FieldByName('ItemChanged').AsInteger  := uReMarks.cNewTagRemark;
+                tRemarks.FieldByName('OldItem').AsString       := ChangedItem;
+                tRemarks.FieldByName('Remark').AsString        := eRemark.Text;
+                // Get the Current User Name
+                try
+                   if tSysUser.Locate('ID',DefaultSysUser,[] ) then
+                      tRemarks.FieldByName('ChangedBy').AsString := tSysUser.FieldByName('Name').AsString
+                   else
+                      raise EInvalidOp.CreateFmt('SetUp a Default User Name - Changes NOT saved',[0]);
+                   CancelledChanges := FALSE;
+                except
+                   tRemarks.Cancel;
+                   if AnimalAltered then
+                      AnimalFileByID.CancelUpdates;
+                   CancelledChanges := TRUE;
+                end;
+                // Only try and save changes if the default is set.
+                if NOT CancelledChanges then
+                   begin
+                      if AnimalAltered then
+                         AnimalFileById.Post;
+                      tRemarks.Post;
+                      WinData.Kingdata.ApplyUpdates([tRemarks]);
+                      Close;   // Close the Form
+                   end;
+             finally
+                tSysUser.Close;
+                tRemarks.Close;
+             end
+       else
+           eNewTag.SetFocus;
+end;
+
+procedure TfReTag.eNewTagExit(Sender: TObject);
+var
+   ThisTagStyle : TNatIDStyle;
+begin
+   if Country = Ireland then
+      begin
+         if lWhatType.Caption = 'New Tag' then
+            begin
+               ThisTagStyle := WhatStyleNatId(eNewTag.Text, False );
+               if NOT(ThisTagStyle In [Style1999,Style1996,StylePre1996]) then
+                  raise ErrorMsg.CreateFmt('This Tag is not a valid format for Retagging',[nil]);
+            end;
+
+         if NOT CheckNatId(eNewTag.Text, NewNatId,FALSE ) then
+            begin
+               eNewTag.SetFocus;
+               Abort;
+            end
+         else
+            eNewTag.Text := NewNatID;
+      end;
+
+   // Check it isn't already on the system
+   if NOT NoDups then
+      eNewTag.SetFocus;
+end;
+
+procedure TfReTag.rgReTagTypeClick(Sender: TObject);
+begin
+    if ReTagType = TempTag then
+       eRemark.Text := 'Temporary ReTagging'
+    else
+       eRemark.Text := 'New Tag';
+end;
+
+procedure TfReTag.SearchForAnimalExit(Sender: TObject);
+begin
+    /// Check the National ID Format
+    CheckTagType;
+end;
+
+procedure TfReTag.CheckTagType;
+var
+   ThisTagStyle : TNatIDStyle;
+begin
+    /// Check the National ID Format
+    ThisTagStyle := WhatStyleNatId(dbeNatId.Field.AsString, False  );
+    if ((( ThisTagStyle In [Style1999,Style1996] )) and (Country = Ireland)) then
+       begin
+          ReTagType := TempTag;
+          lWhatType.Caption := 'Temporary Tag';
+       end
+    else
+       begin
+          ReTagType := NewTag;
+          lWhatType.Caption := 'New Tag';
+       end;
+    lTag.Caption := lWhatType.Caption;
+end;
+
+procedure TfReTag.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+begin
+     CanClose := WinData.DataSetApplyUpdates(Windata.Events, ModalResult = mrOK, FModified );
+end;
+
+procedure TfReTag.sbHelpClick(Sender: TObject);
+begin
+     WinData.HTMLHelp('retagging.htm');
+end;
+
+procedure TfReTag.FormActivate(Sender: TObject);
+begin
+    lNo.Caption := NoLabel;
+    inherited FormActivate(Sender);
+end;
+
+
+procedure TfReTag.dbeNatIdChange(Sender: TObject);
+begin
+   SetModifiedFlag;
+
+end;
+
+procedure TfReTag.DBEdit1Change(Sender: TObject);
+begin
+   SetModifiedFlag;
+
+end;
+
+procedure TfReTag.eNewTagChange(Sender: TObject);
+begin
+   SetModifiedFlag;
+
+end;
+
+procedure TfReTag.eRemarkChange(Sender: TObject);
+begin
+   SetModifiedFlag;
+
+end;
+
+end.

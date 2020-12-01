@@ -1,0 +1,133 @@
+unit uTestGridWithDataSet;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  cxGridLevel, cxClasses, cxControls, cxGridCustomView,
+  cxGridCustomTableView, cxGridTableView, cxGridDBTableView, cxGrid,
+  db, dbTables, StdCtrls, cxButtons, GenTypesConst, uProjectedCalvingData;
+
+type
+  TGridType = (gtMediDisposal, gtProjCalving);
+  TfmTestGridWithDataSet = class(TForm)
+    TestGridDBTableView: TcxGridDBTableView;
+    TestGridLevel: TcxGridLevel;
+    TestGrid: TcxGrid;
+    btnClose: TcxButton;
+    procedure btnCloseClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+  private
+    { Private declarations }
+    FGridType : TGridType;
+    FTempQuery : TQuery;
+    FTempTable : TTable;
+    FTempDataSource : TDataSource;
+  public
+    { Public declarations }
+    class procedure ShowTheForm(AGridType : TGridType);
+  end;
+
+var
+  fmTestGridWithDataSet: TfmTestGridWithDataSet;
+
+implementation
+
+{$R *.DFM}
+
+{ TfmTestGridWithDataSet }
+
+class procedure TfmTestGridWithDataSet.ShowTheForm(AGridType : TGridType);
+begin
+   with TfmTestGridWithDataSet.Create(nil) do
+      try
+         FGridType := AGridType;
+         case FGridType of
+            gtMediDisposal : Caption := 'Medicine Disposal Table';
+            gtProjCalving : Caption := 'Projected Calving Table';
+         end;
+         ShowModal;
+      finally
+         Free;
+      end;
+end;
+
+procedure TfmTestGridWithDataSet.btnCloseClick(Sender: TObject);
+begin
+   Close;
+end;
+
+procedure TfmTestGridWithDataSet.FormCreate(Sender: TObject);
+var
+   i : Integer;
+begin
+   FTempQuery := TQuery.Create(nil);
+   FTempQuery.DatabaseName := AliasName;
+
+   FTempTable := TTable.Create(nil);
+   FTempTable.DatabaseName := AliasName;
+   FTempTable.TableName := 'tmpProjCalv';
+   FTempTable.FieldDefs.Clear;
+   FTempTable.FieldDefs.Add('ID',ftAutoInc);
+   FTempTable.FieldDefs.Add('AnimalID',ftInteger);
+   FTempTable.FieldDefs.Add('LactNo',ftInteger);
+   FTempTable.FieldDefs.Add('ThisCalvDate',ftDateTime);
+   FTempTable.FieldDefs.Add('LastCalvDate',ftDateTime);
+   FTempTable.FieldDefs.Add('ProjCalvDate',ftDateTime);
+   FTempTable.IndexDefs.Clear;
+   FTempTable.IndexDefs.Add('iID','ID',[ixPrimary,ixUnique]);
+   FTempTable.IndexDefs.Add('iAnimalID','AnimalID',[ixUnique]);
+   FTempTable.CreateTable;
+
+   FTempDataSource := TDataSource.Create(nil);
+   FTempDataSource.DataSet := FTempQuery;
+
+   TestGridDBTableView.DataController.DataSource := FTempDataSource;
+end;
+
+procedure TfmTestGridWithDataSet.FormShow(Sender: TObject);
+var
+   ProjData : TProjectedCalvingData;
+   Item : TProjectedItem;
+begin
+   FTempQuery.Close;
+   FTempQuery.SQL.Clear;
+   if ( FGridType = gtMediDisposal ) then
+      begin
+         FTempQuery.SQL.Add('SELECT *');
+         FTempQuery.SQL.Add('FROM MedicineDisposal');
+      end
+   else if ( FGridType = gtProjCalving ) then
+      try
+         ProjData := TProjectedCalvingData.Create;
+         ProjData.Load;
+      finally
+         FreeAndNil(ProjData);
+      end;
+
+   if ( Length(FTempQuery.SQL.Text) > 0 ) then
+      begin
+         FTempQuery.Open;
+         TestGridDBTableView.DataController.ClearDetails;
+         TestGridDBTableView.DataController.CreateAllItems;
+         TestGrid.Refresh;
+      end;
+end;
+
+procedure TfmTestGridWithDataSet.FormDestroy(Sender: TObject);
+begin
+   if ( FTempQuery <> nil ) then
+      FreeAndNil(FTempQuery);
+   if ( FTempTable <> nil ) then
+      begin
+         FTempTable.Close;
+         FTempTable.DeleteTable;
+         FreeAndNil(FTempTable);
+      end;
+   if ( FTempDataSource <> nil ) then
+      FreeAndNil(FTempDataSource);
+end;
+
+end.

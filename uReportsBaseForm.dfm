@@ -1,0 +1,815 @@
+object ReportsBaseForm: TReportsBaseForm
+  Left = 390
+  Top = 244
+  HorzScrollBar.Visible = False
+  VertScrollBar.Visible = False
+  ActiveControl = cbHerdIdentity
+  BorderStyle = bsDialog
+  Caption = 'ReportsBaseForm'
+  ClientHeight = 459
+  ClientWidth = 588
+  Color = clBtnFace
+  Font.Charset = ANSI_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -13
+  Font.Name = 'Verdana'
+  Font.Style = []
+  KeyPreview = True
+  OldCreateOrder = False
+  Position = poScreenCenter
+  Scaled = False
+  OnActivate = FormActivate
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  OnKeyDown = FormKeyDown
+  OnShow = FormShow
+  PixelsPerInch = 96
+  TextHeight = 16
+  object ToolBar1: TToolBar
+    Left = 0
+    Top = 0
+    Width = 588
+    Height = 53
+    ButtonHeight = 45
+    ButtonWidth = 86
+    EdgeBorders = [ebLeft, ebTop, ebRight, ebBottom]
+    TabOrder = 0
+    object ToolButton2: TToolButton
+      Left = 0
+      Top = 2
+      Width = 8
+      Caption = 'ToolButton2'
+      ImageIndex = 1
+      Style = tbsDivider
+    end
+    object sbExit: TRxSpeedButton
+      Left = 8
+      Top = 2
+      Width = 58
+      Height = 45
+      Hint = 'Click Here To Exit'
+      Caption = 'E&xit'
+      Flat = True
+      NumGlyphs = 2
+      Transparent = True
+      OnClick = sbExitClick
+    end
+    object ToolButton1: TToolButton
+      Left = 66
+      Top = 2
+      Width = 8
+      Caption = 'ToolButton1'
+      ImageIndex = 0
+      Style = tbsDivider
+    end
+    object sbView: TRxSpeedButton
+      Left = 74
+      Top = 2
+      Width = 86
+      Height = 45
+      Hint = 'Click Here To View This Report On Screen'
+      Caption = '&View'
+      Flat = True
+      NumGlyphs = 2
+      Transparent = True
+      OnClick = sbViewClick
+    end
+    object sbPrint: TRxSpeedButton
+      Tag = 1
+      Left = 160
+      Top = 2
+      Width = 86
+      Height = 45
+      Hint = 'Click Here To Print This Report'
+      Caption = '&Print'
+      Flat = True
+      NumGlyphs = 2
+      Transparent = True
+      OnClick = sbPrintClick
+    end
+    object ToolButton3: TToolButton
+      Left = 246
+      Top = 2
+      Width = 8
+      Caption = 'ToolButton3'
+      ImageIndex = 1
+      Style = tbsDivider
+    end
+    object sbHelp: TRxSpeedButton
+      Left = 254
+      Top = 2
+      Width = 58
+      Height = 45
+      Hint = 'Click Here For Help'
+      Caption = '&Help'
+      Flat = True
+      Transparent = True
+      OnClick = sbHelpClick
+    end
+    object ToolButton5: TToolButton
+      Left = 312
+      Top = 2
+      Width = 8
+      Caption = 'ToolButton5'
+      ImageIndex = 3
+      Style = tbsDivider
+    end
+    object pHerdID: TPanel
+      Left = 320
+      Top = 2
+      Width = 146
+      Height = 45
+      BevelOuter = bvNone
+      ParentColor = True
+      TabOrder = 0
+      object Label7: TLabel
+        Left = 9
+        Top = 2
+        Width = 87
+        Height = 16
+        Caption = 'Herd I&dentity'
+        FocusControl = cbHerdIdentity
+      end
+      object cbHerdIdentity: TRxDBLookupCombo
+        Left = 7
+        Top = 20
+        Width = 133
+        Height = 23
+        DropDownCount = 8
+        EmptyValue = '0'
+        LookupField = 'ID'
+        LookupDisplay = 'HerdIdentity'
+        LookupSource = WinData.dsHerdDefaults
+        TabOrder = 0
+        OnChange = cbHerdIdentityChange
+      end
+    end
+  end
+  object GroupBox1: TGroupBox
+    Left = 32
+    Top = 80
+    Width = 521
+    Height = 337
+    Caption = 'GroupBox1'
+    TabOrder = 1
+    object LFromDate: TLabel
+      Left = 22
+      Top = 34
+      Width = 68
+      Height = 16
+      Caption = 'Date From'
+    end
+    object LToDate: TLabel
+      Left = 282
+      Top = 34
+      Width = 17
+      Height = 16
+      Caption = 'To'
+    end
+    object lWaitCaption: TLabel
+      Left = 192
+      Top = 208
+      Width = 90
+      Height = 16
+      Alignment = taCenter
+      Caption = 'Please wait...'
+      Font.Charset = ANSI_CHARSET
+      Font.Color = clBlue
+      Font.Height = -13
+      Font.Name = 'Verdana'
+      Font.Style = []
+      ParentFont = False
+    end
+    object FromDate: TDateEdit
+      Left = 104
+      Top = 30
+      Width = 113
+      Height = 23
+      ButtonHint = 'Click Here For Calender'
+      CheckOnExit = True
+      NumGlyphs = 2
+      PopupColor = clWindow
+      YearDigits = dyFour
+      TabOrder = 0
+    end
+    object ToDate: TDateEdit
+      Left = 310
+      Top = 30
+      Width = 113
+      Height = 23
+      ButtonHint = 'Click Here For Calender'
+      CheckOnExit = True
+      NumGlyphs = 2
+      PopupColor = clWindow
+      YearDigits = dyFour
+      TabOrder = 1
+    end
+    object rgSortBy: TRadioGroup
+      Left = 34
+      Top = 234
+      Width = 203
+      Height = 85
+      Caption = 'Sort By'
+      ItemIndex = 0
+      Items.Strings = (
+        '&Animal No'
+        'Date Of &Birth'
+        '&Lact No.')
+      TabOrder = 2
+    end
+    object rgSortOrder: TRadioGroup
+      Left = 242
+      Top = 234
+      Width = 189
+      Height = 85
+      Caption = 'Sort Order'
+      ItemIndex = 0
+      Items.Strings = (
+        'As&cending'
+        '&Descending')
+      TabOrder = 3
+    end
+    object ProgBar: TProgressBar
+      Left = 40
+      Top = 176
+      Width = 393
+      Height = 25
+      Min = 0
+      Max = 100
+      TabOrder = 4
+    end
+    object cbUseFilter: TCheckBox
+      Left = 312
+      Top = 8
+      Width = 97
+      Height = 17
+      Caption = 'Apply Animal Grid Filter'
+      TabOrder = 5
+      OnClick = cbUseFilterClick
+    end
+    object cbDichromatic: TCheckBox
+      Left = 400
+      Top = 8
+      Width = 97
+      Height = 17
+      Caption = 'Dichromatic'
+      Font.Charset = ANSI_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Verdana'
+      Font.Style = []
+      ParentFont = False
+      TabOrder = 6
+    end
+  end
+  object BaseReport: TQuickRep
+    Left = 90
+    Top = 496
+    Width = 794
+    Height = 1123
+    Frame.Color = clBlack
+    Frame.DrawTop = True
+    Frame.DrawBottom = True
+    Frame.DrawLeft = False
+    Frame.DrawRight = False
+    Frame.Width = 2
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Arial'
+    Font.Style = []
+    Functions.Strings = (
+      'PAGENUMBER'
+      'COLUMNNUMBER'
+      'REPORTTITLE')
+    Functions.DATA = (
+      '0'
+      '0'
+      #39#39)
+    Options = [FirstPageHeader, LastPageFooter]
+    Page.Columns = 1
+    Page.Orientation = poPortrait
+    Page.PaperSize = A4
+    Page.Values = (
+      100
+      2970
+      100
+      2100
+      100
+      100
+      0)
+    PrinterSettings.Copies = 1
+    PrinterSettings.OutputBin = Auto
+    PrinterSettings.Duplex = False
+    PrinterSettings.FirstPage = 0
+    PrinterSettings.LastPage = 0
+    PrinterSettings.UseStandardprinter = False
+    PrinterSettings.UseCustomBinCode = False
+    PrinterSettings.CustomBinCode = 0
+    PrinterSettings.ExtendedDuplex = 0
+    PrinterSettings.UseCustomPaperCode = False
+    PrinterSettings.CustomPaperCode = 0
+    PrinterSettings.PrintMetaFile = False
+    PrintIfEmpty = True
+    SnapToGrid = True
+    Units = MM
+    Zoom = 100
+    PrevFormStyle = fsNormal
+    PreviewInitialState = wsMaximized
+    object PageHeaderBand: TQRBand
+      Left = 38
+      Top = 38
+      Width = 718
+      Height = 123
+      Frame.Color = clBlack
+      Frame.DrawTop = False
+      Frame.DrawBottom = True
+      Frame.DrawLeft = False
+      Frame.DrawRight = False
+      AlignToBottom = False
+      Color = clWhite
+      ForceNewColumn = False
+      ForceNewPage = False
+      Size.Values = (
+        325.4375
+        1899.70833333333)
+      BandType = rbPageHeader
+      object ReportTitle: TQRLabel
+        Left = 8
+        Top = 8
+        Width = 141
+        Height = 35
+        Frame.Color = clBlack
+        Frame.DrawTop = False
+        Frame.DrawBottom = False
+        Frame.DrawLeft = False
+        Frame.DrawRight = False
+        Size.Values = (
+          92.6041666666667
+          21.1666666666667
+          21.1666666666667
+          373.0625)
+        Alignment = taLeftJustify
+        AlignToBand = False
+        AutoSize = True
+        AutoStretch = False
+        Caption = 'Report Title'
+        Color = clWhite
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clRed
+        Font.Height = -29
+        Font.Name = 'Times New Roman'
+        Font.Style = [fsItalic]
+        ParentFont = False
+        Transparent = False
+        WordWrap = True
+        FontSize = 22
+      end
+      object DateTimeLabel: TQRSysData
+        Left = 574
+        Top = 8
+        Width = 131
+        Height = 17
+        Frame.Color = clBlack
+        Frame.DrawTop = False
+        Frame.DrawBottom = False
+        Frame.DrawLeft = False
+        Frame.DrawRight = False
+        Size.Values = (
+          44.9791666666667
+          1518.70833333333
+          21.1666666666667
+          346.604166666667)
+        Alignment = taRightJustify
+        AlignToBand = False
+        AutoSize = True
+        Color = clWhite
+        Data = qrsDateTime
+        Text = 'Date/Time:'
+        Transparent = False
+        FontSize = 10
+      end
+      object PageNumLabel: TQRSysData
+        Left = 625
+        Top = 27
+        Width = 80
+        Height = 17
+        Frame.Color = clBlack
+        Frame.DrawTop = False
+        Frame.DrawBottom = False
+        Frame.DrawLeft = False
+        Frame.DrawRight = False
+        Size.Values = (
+          44.9791666666667
+          1653.64583333333
+          71.4375
+          211.666666666667)
+        Alignment = taRightJustify
+        AlignToBand = False
+        AutoSize = True
+        Color = clWhite
+        Data = qrsPageNumber
+        Text = 'Page:'
+        Transparent = False
+        FontSize = 10
+      end
+      object qrlSortBy: TQRLabel
+        Left = 256
+        Top = 8
+        Width = 55
+        Height = 17
+        Frame.Color = clNavy
+        Frame.DrawTop = False
+        Frame.DrawBottom = False
+        Frame.DrawLeft = False
+        Frame.DrawRight = False
+        Size.Values = (
+          44.9791666666667
+          677.333333333333
+          21.1666666666667
+          145.520833333333)
+        Alignment = taLeftJustify
+        AlignToBand = False
+        AutoSize = True
+        AutoStretch = False
+        Caption = 'qrlSortBy'
+        Color = clWhite
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clNavy
+        Font.Height = -13
+        Font.Name = 'Arial'
+        Font.Style = []
+        ParentFont = False
+        Transparent = False
+        WordWrap = True
+        FontSize = 10
+      end
+      object qrlSortOrder: TQRLabel
+        Left = 256
+        Top = 24
+        Width = 71
+        Height = 17
+        Frame.Color = clNavy
+        Frame.DrawTop = False
+        Frame.DrawBottom = False
+        Frame.DrawLeft = False
+        Frame.DrawRight = False
+        Size.Values = (
+          44.9791666666667
+          677.333333333333
+          63.5
+          187.854166666667)
+        Alignment = taLeftJustify
+        AlignToBand = False
+        AutoSize = True
+        AutoStretch = False
+        Caption = 'qrlSortOrder'
+        Color = clWhite
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clNavy
+        Font.Height = -13
+        Font.Name = 'Arial'
+        Font.Style = []
+        ParentFont = False
+        Transparent = False
+        WordWrap = True
+        FontSize = 10
+      end
+      object QRLabel32: TQRLabel
+        Left = 200
+        Top = 8
+        Width = 51
+        Height = 17
+        Frame.Color = clBlack
+        Frame.DrawTop = False
+        Frame.DrawBottom = False
+        Frame.DrawLeft = False
+        Frame.DrawRight = False
+        Size.Values = (
+          44.9791666666667
+          529.166666666667
+          21.1666666666667
+          134.9375)
+        Alignment = taLeftJustify
+        AlignToBand = False
+        AutoSize = True
+        AutoStretch = False
+        Caption = 'Sort By:'
+        Color = clWhite
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -13
+        Font.Name = 'Arial'
+        Font.Style = [fsBold]
+        ParentFont = False
+        Transparent = False
+        WordWrap = True
+        FontSize = 10
+      end
+      object QRLabel34: TQRLabel
+        Left = 180
+        Top = 24
+        Width = 71
+        Height = 17
+        Frame.Color = clBlack
+        Frame.DrawTop = False
+        Frame.DrawBottom = False
+        Frame.DrawLeft = False
+        Frame.DrawRight = False
+        Size.Values = (
+          44.9791666666667
+          476.25
+          63.5
+          187.854166666667)
+        Alignment = taLeftJustify
+        AlignToBand = False
+        AutoSize = True
+        AutoStretch = False
+        Caption = 'Sort Order:'
+        Color = clWhite
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -13
+        Font.Name = 'Arial'
+        Font.Style = [fsBold]
+        ParentFont = False
+        Transparent = False
+        WordWrap = True
+        FontSize = 10
+      end
+      object QRLabel19: TQRLabel
+        Left = 8
+        Top = 48
+        Width = 86
+        Height = 17
+        Frame.Color = clBlack
+        Frame.DrawTop = False
+        Frame.DrawBottom = False
+        Frame.DrawLeft = False
+        Frame.DrawRight = False
+        Size.Values = (
+          44.9791666666667
+          21.1666666666667
+          127
+          227.541666666667)
+        Alignment = taLeftJustify
+        AlignToBand = False
+        AutoSize = True
+        AutoStretch = False
+        Caption = 'Herd Identity:'
+        Color = clWhite
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -13
+        Font.Name = 'Arial'
+        Font.Style = [fsBold]
+        ParentFont = False
+        Transparent = False
+        WordWrap = True
+        FontSize = 10
+      end
+      object qrlHerdIdentity: TQRLabel
+        Left = 100
+        Top = 48
+        Width = 54
+        Height = 17
+        Frame.Color = clNavy
+        Frame.DrawTop = False
+        Frame.DrawBottom = False
+        Frame.DrawLeft = False
+        Frame.DrawRight = False
+        Size.Values = (
+          44.9791666666667
+          264.583333333333
+          127
+          142.875)
+        Alignment = taLeftJustify
+        AlignToBand = False
+        AutoSize = True
+        AutoStretch = False
+        Caption = 'qrlHerdID'
+        Color = clWhite
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clNavy
+        Font.Height = -13
+        Font.Name = 'Arial'
+        Font.Style = []
+        ParentFont = False
+        Transparent = False
+        WordWrap = True
+        FontSize = 10
+      end
+    end
+    object SubDetailBand: TQRSubDetail
+      Left = 38
+      Top = 161
+      Width = 718
+      Height = 40
+      Frame.Color = clBlack
+      Frame.DrawTop = False
+      Frame.DrawBottom = False
+      Frame.DrawLeft = False
+      Frame.DrawRight = False
+      AlignToBottom = False
+      BeforePrint = SubDetailBandBeforePrint
+      Color = clWhite
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clNavy
+      Font.Height = -13
+      Font.Name = 'Arial'
+      Font.Style = []
+      ForceNewColumn = False
+      ForceNewPage = False
+      ParentFont = False
+      Size.Values = (
+        105.833333333333
+        1899.70833333333)
+      Master = BaseReport
+      PrintBefore = False
+      PrintIfEmpty = True
+    end
+    object SummaryBand: TQRBand
+      Left = 38
+      Top = 201
+      Width = 718
+      Height = 56
+      Frame.Color = clBlack
+      Frame.DrawTop = True
+      Frame.DrawBottom = True
+      Frame.DrawLeft = False
+      Frame.DrawRight = False
+      AlignToBottom = False
+      Color = clWhite
+      Font.Charset = ANSI_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -13
+      Font.Name = 'Verdana'
+      Font.Style = []
+      ForceNewColumn = False
+      ForceNewPage = False
+      ParentFont = False
+      Size.Values = (
+        148.166666666667
+        1899.70833333333)
+      BandType = rbSummary
+      object CountExpression: TQRExpr
+        Left = 60
+        Top = 24
+        Width = 47
+        Height = 17
+        Frame.Color = clBlack
+        Frame.DrawTop = False
+        Frame.DrawBottom = False
+        Frame.DrawLeft = False
+        Frame.DrawRight = False
+        Size.Values = (
+          44.9791666666667
+          158.75
+          63.5
+          124.354166666667)
+        Alignment = taLeftJustify
+        AlignToBand = False
+        AutoSize = True
+        AutoStretch = False
+        Font.Charset = ANSI_CHARSET
+        Font.Color = clNavy
+        Font.Height = -13
+        Font.Name = 'Verdana'
+        Font.Style = []
+        Color = clWhite
+        Master = SubDetailBand
+        ParentFont = False
+        ResetAfterPrint = False
+        Transparent = False
+        WordWrap = True
+        Expression = 'COUNT'
+        FontSize = 10
+      end
+      object TotalLabel: TQRLabel
+        Left = 16
+        Top = 24
+        Width = 41
+        Height = 17
+        Frame.Color = clBlack
+        Frame.DrawTop = False
+        Frame.DrawBottom = False
+        Frame.DrawLeft = False
+        Frame.DrawRight = False
+        Size.Values = (
+          44.9791666666667
+          42.3333333333333
+          63.5
+          108.479166666667)
+        Alignment = taLeftJustify
+        AlignToBand = False
+        AutoSize = True
+        AutoStretch = False
+        Caption = 'Total:'
+        Color = clWhite
+        Transparent = False
+        WordWrap = True
+        FontSize = 10
+      end
+    end
+    object PageFooterBand: TQRBand
+      Left = 38
+      Top = 257
+      Width = 718
+      Height = 29
+      Frame.Color = clBlack
+      Frame.DrawTop = True
+      Frame.DrawBottom = False
+      Frame.DrawLeft = False
+      Frame.DrawRight = False
+      AlignToBottom = False
+      Color = clWhite
+      Font.Charset = ANSI_CHARSET
+      Font.Color = clRed
+      Font.Height = -13
+      Font.Name = 'Verdana'
+      Font.Style = []
+      ForceNewColumn = False
+      ForceNewPage = False
+      ParentFont = False
+      Size.Values = (
+        76.7291666666667
+        1899.70833333333)
+      BandType = rbPageFooter
+      object CompanyNameLabel: TQRLabel
+        Left = 8
+        Top = 8
+        Width = 175
+        Height = 17
+        Frame.Color = clBlack
+        Frame.DrawTop = False
+        Frame.DrawBottom = False
+        Frame.DrawLeft = False
+        Frame.DrawRight = False
+        Size.Values = (
+          44.9791666666667
+          21.1666666666667
+          21.1666666666667
+          463.020833333333)
+        Alignment = taLeftJustify
+        AlignToBand = False
+        AutoSize = True
+        AutoStretch = False
+        Caption = 'Kingswood Computing Ltd.'
+        Color = clWhite
+        Transparent = False
+        WordWrap = True
+        FontSize = 10
+      end
+      object ProgramVersionLabel: TQRLabel
+        Left = 516
+        Top = 8
+        Width = 194
+        Height = 17
+        Frame.Color = clBlack
+        Frame.DrawTop = False
+        Frame.DrawBottom = False
+        Frame.DrawLeft = False
+        Frame.DrawRight = False
+        Size.Values = (
+          44.9791666666667
+          1365.25
+          21.1666666666667
+          513.291666666667)
+        Alignment = taRightJustify
+        AlignToBand = False
+        AutoSize = True
+        AutoStretch = False
+        Caption = 'Kingswood Herd Management'
+        Color = clWhite
+        Transparent = False
+        WordWrap = True
+        FontSize = 10
+      end
+    end
+  end
+  object QRTextFilter1: TQRTextFilter
+    Top = 128
+  end
+  object QRCSVFilter1: TQRCSVFilter
+    Separator = ','
+    Top = 160
+  end
+  object QRHTMLFilter1: TQRHTMLFilter
+    Top = 192
+  end
+  object QRExcelFilter1: TQRExcelFilter
+    Top = 224
+  end
+  object QRRTFFilter1: TQRRTFFilter
+    Top = 256
+  end
+  object QRWMFFilter1: TQRWMFFilter
+    Enhanced = False
+    Top = 288
+  end
+  object GenQuery: TQuery
+    DatabaseName = 'Kingswd'
+    Left = 376
+    Top = 56
+  end
+end

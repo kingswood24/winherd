@@ -1,0 +1,17 @@
+unit uEventDataTransfer;
+
+interface
+
+type
+  TEventDataTransfer = class
+  private
+    FNewID: Integer;
+    FOldID: Integer;
+  public
+    property NewID : Integer read FNewID write FNewID;
+    property OldID : Integer read FOldID write FOldID;
+  end;
+
+implementation
+
+end.

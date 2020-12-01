@@ -1,0 +1,484 @@
+{
+   15/03/12 [V5.0 R4.5] /MK Additional Feature - New Unit, uAccsDairyParams, Opened.
+
+   15/04/12 [V5.0 R4.9] /MK Additional Feature - Favourite Button Added.
+
+   27/09/19 [V5.9 R0.6] /MK Change - Added Application.ProcessMessages after Updates when running UpdateFigures.
+}
+
+unit uAccsReps;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  StdCtrls, ExtCtrls, ComCtrls, ToolWin, RXCtrls, RxLookup,db, dbTables,
+  Menus, FileCtrl, cxControls, dxStatusBar, cxProgressBar, cxContainer,
+  cxEdit, cxTextEdit, cxMaskEdit, cxDropDownEdit, cxLookupEdit,
+  cxDBLookupEdit, cxDBLookupComboBox, uAccsDairyParams, cxCheckBox;
+
+type
+  TfmAccsReps = class(TForm)
+    Bevel4: TBevel;
+    Bevel3: TBevel;
+    Bevel2: TBevel;
+    Bevel1: TBevel;
+    RxSpeedButton1: TRxSpeedButton;
+    RxSpeedButton2: TRxSpeedButton;
+    RxSpeedButton3: TRxSpeedButton;
+    Label1: TLabel;
+    RxSpeedButton8: TRxSpeedButton;
+    ToolBar1: TToolBar;
+    ToolButton1: TToolButton;
+    Exit: TRxSpeedButton;
+    RxSpeedButton6: TRxSpeedButton;
+    ToolButton3: TToolButton;
+    NLAccs: TTable;
+    Groups: TTable;
+    PopupMenu1: TPopupMenu;
+    LivestockClassification1: TMenuItem;
+    RxSpeedButton7: TRxSpeedButton;
+    sbAccounts: TRxSpeedButton;
+    ToolButton5: TToolButton;
+    Panel1: TPanel;
+    lHerdFarm: TLabel;
+    Label3: TLabel;
+    cmboAccCompanys: TcxComboBox;
+    StatusBar: TdxStatusBar;
+    HerdCombo: TcxLookupComboBox;
+    pbCollectData: TcxProgressBar;
+    cbFavourite: TcxCheckBox;
+    procedure ExitClick(Sender: TObject);
+    procedure RxSpeedButton1Click(Sender: TObject);
+    procedure RxSpeedButton3Click(Sender: TObject);
+    procedure RxSpeedButton2Click(Sender: TObject);
+    procedure RxSpeedButton4Click(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure RxSpeedButton6Click(Sender: TObject);
+    procedure HerdComboCloseUp(Sender: TObject);
+    procedure LivestockClassification1Click(Sender: TObject);
+    procedure RxSpeedButton7Click(Sender: TObject);
+    procedure sbAccountsClick(Sender: TObject);
+    procedure HerdComboPropertiesEditValueChanged(Sender: TObject);
+    procedure cmboAccCompanysPropertiesEditValueChanged(Sender: TObject);
+    procedure cmboAccCompanysPropertiesCloseUp(Sender: TObject);
+    procedure cbFavouritePropertiesChange(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+  private
+    { Private declarations }
+    Depreciation : double;
+    GroupsChecked,
+    NlaccsChecked : Boolean;
+
+    function ValidHerdID : Boolean;
+    procedure CheckValidHerdID;
+    procedure CheckTables;
+    procedure NAlccsIntegrityCheck;
+    procedure GroupsIntegrityCheck;
+    function TablesExist : Boolean;
+    function UnallocBalances : Boolean;
+    procedure LoadAccsCompanies;
+    procedure UpdateFigures;
+    procedure CheckUpdateFigures;
+    procedure DoPreliminaryChecks;
+  public
+    { Public declarations }
+    HerdID : Integer;
+
+  end;
+
+const
+   DbPath = 'C:\Kingsacc\';
+
+var
+  fmAccsReps: TfmAccsReps;
+
+implementation
+
+uses
+   DairyData, uLivestockSum, uProfitLoss, uBalanceSheet, uDairyProfit, KRoutines, LiveStkClass, Def,
+   uSWSReport, GenTypesConst;
+
+{$R *.DFM}
+
+procedure TfmAccsReps.ExitClick(Sender: TObject);
+begin
+   Close;
+end;
+
+procedure TfmAccsReps.RxSpeedButton1Click(Sender: TObject);
+begin
+   DoPreliminaryChecks;
+   Application.CreateForm(TfmProfitLoss, fmProfitLoss);
+end;
+
+function TfmAccsReps.ValidHerdID : Boolean;
+begin
+   Result := HerdCombo.EditValue <> '0';
+end;
+
+procedure TfmAccsReps.CheckValidHerdID;
+begin
+   if not ValidHerdID then
+      begin
+         MessageDlg('Please select a herd',mtInformation,[mbOK],0);
+         Abort;
+      end;
+end;
+
+procedure TfmAccsReps.RxSpeedButton3Click(Sender: TObject);
+begin
+   DoPreliminaryChecks;
+   Application.CreateForm(TfmProfitMonitor, fmProfitMonitor);
+   if UnallocBalances then
+      if MessageDlg('You have several unallocated variable cost balances.'+#13+
+                    'Click "Yes" to automatically allocate the balances'+#13+
+                    'on the basis of enterprise livestock units.'+#13+
+                    'Click "No" to manually allocate the balances'+#13+
+                    'using enterprise transfers in the accounts program?',mtConfirmation,[mbYes,mbNo],0) = idYes then
+         fmProfitMonitor.SetUnallocated(HerdCombo.EditValue, NLAccs.DatabaseName);
+   uDairyProfit.Preview(HerdCombo.EditValue);
+   try
+      fmProfitMonitor.Free;
+   except
+   end;
+end;
+
+procedure TfmAccsReps.RxSpeedButton2Click(Sender: TObject);
+begin
+   DoPreliminaryChecks;
+   Application.CreateForm(TfmBalanceSheet, fmBalanceSheet);
+end;
+
+procedure TfmAccsReps.RxSpeedButton4Click(Sender: TObject);
+begin
+   CheckValidHerdID;
+   if Definition.dUseKingsAccs then
+      WinData.CallProg.Accounts(' R ' + RegistrySerialNum, WinData.UserDefaultHerdID)
+   else
+      WinData.CallProg.Accounts(' R ', WinData.UserDefaultHerdID);
+end;
+
+procedure TfmAccsReps.NAlccsIntegrityCheck;
+begin
+   with NLAccs do
+      try
+         { Open Table }
+         Open;
+         { Go to First Record In The Table }
+         First;
+         while not eof do
+            begin
+               { Make All Negative Balances a Positive Figure }
+               if (((FieldByName('Category').AsString = 'EI') or (FieldByName('Category').AsString = 'LI')) and (FieldByName('Balance').AsFloat < 0)) then
+                  begin
+                     { Now Save The New Balance }
+                     Edit;
+                     FieldByName('Balance').AsFloat := FieldByName('Balance').AsFloat * -1;
+                     Post;
+                  end;
+               { Capitalize All Names }
+               if Length(Trim(FieldByName('Name').AsString)) > 0 then
+                  begin
+                     Edit;
+                     FieldByName('Name').AsString := CapitalizeString(FieldByName('Name').AsString);
+                     Post;
+                  end;
+               { Go To Next Record In Table }
+               Next;
+            end;
+      finally
+         { Close Table }
+         Close;
+      end;
+end;
+
+procedure TfmAccsReps.FormCreate(Sender: TObject);
+begin
+   LoadAccsCompanies;
+   HerdCombo.EditValue := intToStr(WinData.UserDefaultHerdID);
+   CheckTables;
+end;
+
+procedure TfmAccsReps.GroupsIntegrityCheck;
+var
+   TempStr : String;
+   TempChar : String;
+   i : Byte;
+begin
+   with Groups do
+      try
+         { Open Table }
+         Open;
+         { Go to First Record In The Table }
+         First;
+         while not eof do
+            begin
+               { Capitalize All Names }
+               if Length(Trim(FieldByName('Groupdesc').AsString)) > 0 then
+                  begin
+                     Edit;
+                     FieldByName('GroupDesc').AsString := CapitalizeString(FieldByName('GroupDesc').AsString);
+                     Post;
+                  end;
+               { Go To Next Record In Table }
+               Next;
+            end;
+      finally
+         { Close Table }
+         Close;
+      end;
+end;
+
+procedure TfmAccsReps.CheckTables;
+begin
+   NlaccsChecked := False;
+   GroupsChecked := False;
+   if not TablesExist then
+      begin
+         MessageDlg('Unable to load Accs database.'+#13+#13+
+                    'Select the herd associated with your accounts company'+#13+
+                    'and click Import Data to regenerate database',mtInformation,[mbOK],0);
+         Abort;
+      end
+   else
+      begin
+         NAlccsIntegrityCheck;
+         NlaccsChecked := True;
+         GroupsIntegrityCheck;
+         GroupsChecked := True;
+      end;
+end;
+
+procedure TfmAccsReps.RxSpeedButton6Click(Sender: TObject);
+begin
+   UpdateFigures;
+end;
+
+function TfmAccsReps.TablesExist: Boolean;
+var
+   TempName : String;
+begin
+   Result := False;
+   TempName := DbPath + WinData.GetAccsCompany(WinData.UserDefaultHerdID);
+
+   if DirectoryExists(TempName) then
+      begin
+         if NLaccs.Active then
+            NLaccs.Active := False;
+         NLaccs.DatabaseName := TempName;
+
+         if Groups.Active then
+            Groups.Active := False;
+         Groups.DatabaseName := TempName;
+         Result := (NLaccs.Exists) and (Groups.Exists);
+      end;
+end;
+
+procedure TfmAccsReps.HerdComboCloseUp(Sender: TObject);
+begin
+   if HerdCombo.EditValue <> null then
+      begin
+         WinData.UserDefaultHerdID := StrToInt(HerdCombo.EditValue);
+         CheckTables;
+      end
+   else
+      MessageDlg('You must select a herd',mtInformation,[mbOK],0);
+end;
+
+procedure TfmAccsReps.LivestockClassification1Click(Sender: TObject);
+begin
+   LiveStkClass.RunReport(StrToInt(HerdCombo.EditValue));
+end;
+
+function TfmAccsReps.UnallocBalances: Boolean;
+var
+   qUnallocated : TQuery;
+begin
+   Result := False;
+   try
+      qUnallocated := TQuery.Create(nil);
+      qUnallocated.DatabaseName := NLAccs.DatabaseName;
+      with qUnallocated do
+         try
+            sql.Clear;
+            sql.Add('SELECT COUNT(ID) CID FROM Nlaccs');
+            sql.Add('WHERE Balance > 0');
+            sql.Add('AND ID in (301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311)');
+            Open;
+
+            if FieldByName('CID').asInteger > 0 then
+               Result := True;
+            Close;
+         finally
+            Free;
+         end;
+   finally
+   end;
+end;
+
+procedure TfmAccsReps.RxSpeedButton7Click(Sender: TObject);
+begin
+   DoPreliminaryChecks;
+   Application.CreateForm(TfmSWSReport, fmSWSReport);
+   try
+      uSWSReport.Preview(HerdCombo.EditValue, UnallocBalances);
+   finally
+      fmSWSReport.Free;
+   end;
+end;
+
+procedure TfmAccsReps.sbAccountsClick(Sender: TObject);
+begin
+   CheckValidHerdID;
+   if Definition.dUseKingsAccs then
+      WinData.CallProg.Accounts(' R ' + RegistrySerialNum, WinData.UserDefaultHerdID)
+   else
+      WinData.CallProg.Accounts(' R ', WinData.UserDefaultHerdID);
+end;
+
+procedure TfmAccsReps.HerdComboPropertiesEditValueChanged(Sender: TObject);
+begin
+   if HerdCombo.EditValue <> Null then
+      begin
+         WinData.UserDefaultHerdID := HerdCombo.EditValue;
+         LoadAccsCompanies;
+         if WinData.OwnerFile.Locate('ID',HerdCombo.EditValue,[]) then
+            begin
+               try
+                  cmboAccCompanys.ItemIndex := cmboAccCompanys.Properties.Items.IndexOf( UPPERCASE(WinData.OwnerFile.FieldByName('DefAccComp').AsString ));
+               except
+                  raise Exception.Create('Cannot set default accounts company');
+               end;
+            end;
+     end;
+end;
+
+procedure TfmAccsReps.LoadAccsCompanies;
+begin
+   if cmboAccCompanys.Properties.Items.Count = 0 then
+      RetrieveAvailableWinAccsDatabases(cmboAccCompanys.Properties.Items);
+end;
+
+procedure TfmAccsReps.cmboAccCompanysPropertiesEditValueChanged(
+  Sender: TObject);
+begin
+   if HerdCombo.EditValue <> Null then
+      begin
+         if cmboAccCompanys.ItemIndex > -1 then
+            begin
+               if WinData.OwnerFile.Locate('ID',HerdCombo.EditValue,[]) then
+                  begin
+                     WinData.OwnerFile.Edit;
+                     try
+                        WinData.OwnerFile.FieldByName('DefAccComp').AsString := cmboAccCompanys.Properties.Items[cmboAccCompanys.ItemIndex];
+                        WinData.OwnerFile.Post;
+                     except
+                        WinData.OwnerFile.Cancel;
+                        raise Exception.Create('Error posting data');
+                     end;
+                  end;
+            end
+         else
+            MessageDlg('No company selected',mtInformation,[mbOK],0);
+      end
+   else
+      MessageDlg('You must select a herd before selecting company',mtInformation,[mbOK],0);
+end;
+
+procedure TfmAccsReps.UpdateFigures;
+begin
+   Enabled := False;
+   try
+
+   pbCollectData.Visible := True;
+   pbCollectData.Position := 0;
+   pbCollectData.Properties.Max := 15;
+   StatusBar.Panels[0].Text := 'Retrieving accounts data...';
+   Update;
+   Enabled := True;
+   if ( Definition.dUseKingsAccs ) and ( Length(cmboAccCompanys.Text) > 0 ) then
+      //WinData.CallProg.Accounts(' NL ' + RegistrySerialNum, WinData.UserDefaultHerdID)
+      WinData.CallProg.Accounts(' NL ' + cmboAccCompanys.Text, WinData.UserDefaultHerdID)
+   else
+      WinData.CallProg.Accounts(' NL ', WinData.UserDefaultHerdID);
+   Enabled := False;
+   pbCollectData.Position := 2;
+
+   Screen.Cursor := crHourGlass;
+   try
+      WinData.DataForAccounts := True;
+      StatusBar.Panels[0].Text := 'Compiling Livestock Inventory...';
+      Application.ProcessMessages;
+      Update;
+      uLivestockSum.ShowTheForm(RepsStkInventSilent, pbCollectData);
+      StatusBar.Panels[0].Text := 'Compiling Livestock Summary...';
+      Application.ProcessMessages;
+      Update;
+      Livestkclass.RunReport(HerdCombo.EditValue, LiveStkSilent);
+      pbCollectData.Position := pbCollectData.Properties.Max;
+      StatusBar.Panels[0].Text := 'Update complete.';
+      pbCollectData.Visible := False;
+      pbCollectData.Position := 0;
+      WinData.DataForAccounts := False;
+   finally
+      Screen.Cursor := crDefault;
+   end;
+   RequestAccountsData := True;
+   finally
+      Enabled := True;
+   end;
+
+end;
+
+procedure TfmAccsReps.cmboAccCompanysPropertiesCloseUp(Sender: TObject);
+begin
+   if MessageDlg(Format('Update figures for company %s',[cmboAccCompanys.Properties.Items[cmboAccCompanys.ItemIndex]]),mtconfirmation,[mbYes,mbNo],0) = mrYes then
+      UpdateFigures
+   else
+      RequestAccountsData := True;
+end;
+
+procedure TfmAccsReps.CheckUpdateFigures;
+begin
+   if ( not RequestAccountsData ) then
+      cmboAccCompanysPropertiesCloseUp( cmboAccCompanys )
+end;
+
+procedure TfmAccsReps.DoPreliminaryChecks;
+begin
+   CheckTables;
+   CheckValidHerdID;
+   CheckUpdateFigures;
+   //   15/03/12 [V5.0 R4.5] /MK Additional Feature - New Unit, uAccsDairyParams, Opened.
+   //TfmAccsDairyParams.ShowTheForm( HerdCombo.EditValue );
+end;
+
+//   15/04/12 [V5.0 R4.9] /MK Additional Feature - Favourite Button Added.
+procedure TfmAccsReps.cbFavouritePropertiesChange(Sender: TObject);
+begin
+   if cbFavourite.Checked then
+      begin
+         WinData.SetReportAsFavourite(cProfMonRepsRep,True);
+         cbFavourite.Style.TextColor := clBlue;
+         cbFavourite.StyleHot.TextColor := clBlue;
+      end
+   else
+      begin
+         WinData.SetReportAsFavourite(cProfMonRepsRep,False);
+         cbFavourite.Style.TextColor := clBlack;
+         cbFavourite.StyleHot.TextColor := clBlack;
+      end;
+   Application.ProcessMessages;
+   Update;
+end;
+
+//   15/04/12 [V5.0 R4.9] /MK Additional Feature - Favourite Button Added.
+procedure TfmAccsReps.FormShow(Sender: TObject);
+begin
+   cbFavourite.Checked := WinData.IsReportFavourite(cProfMonRepsRep);
+end;
+
+end.
+
+

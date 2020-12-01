@@ -1,0 +1,304 @@
+unit uTestCreateCalvings;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  StdCtrls, cxButtons, EventRecording, cxControls, cxContainer, cxEdit,
+  cxProgressBar, KRoutines, db, dbTables, GenTypesConst, uHerdLookup, DateUtil;
+
+type
+  TfmTestCreateCalvings = class(TForm)
+    btnCreateCalvings: TcxButton;
+    pbCreateCalvings: TcxProgressBar;
+    procedure btnCreateCalvingsClick(Sender: TObject);
+  private
+    function GetUserDefaultHerdIdentifier: String;
+    function GetNextNatID: Integer;
+    procedure SetNextNatID(const Value: Integer);
+    function GetUserDefaultHerdID: Integer;
+    function GetNoneHerdID: Integer;
+  private
+    FCountry : TCountry;
+    property UserDefaultHerdID : Integer read GetUserDefaultHerdID;
+    property UserDefaultHerdIdentifier : String read GetUserDefaultHerdIdentifier;
+    property NextNatID : Integer read GetNextNatID write SetNextNatID;
+    property NoneHerdID : Integer read GetNoneHerdID;
+    { Private declarations }
+  public
+    { Public declarations }
+    class procedure ShowTheForm;
+  end;
+
+var
+  fmTestCreateCalvings: TfmTestCreateCalvings;
+
+implementation
+
+const
+  cAliasName = 'Kingswd';
+  
+{$R *.DFM}
+
+{ TfmTestCreateCalvings }
+
+class procedure TfmTestCreateCalvings.ShowTheForm;
+begin
+   with TfmTestCreateCalvings.Create(nil) do
+      try
+         FCountry := HerdLookup.CountryByHerdID(UserDefaultHerdID);
+         ShowModal;
+      finally
+         Free;
+      end;
+end;
+
+procedure TfmTestCreateCalvings.btnCreateCalvingsClick(Sender: TObject);
+var
+   i,
+   iLactNo : Integer;
+   ECalving : TCalvingEvent;
+   UpperTxt, FormattedStr : String;
+
+   function GetNextNatID : String;
+   var
+      CheckDigit : Integer;
+      CheckTagNo : String;
+   begin
+      for CheckDigit := 1 to 9 do
+         begin
+            Result := '';
+            CheckTagNo := 'IE ' + UserDefaultHerdIdentifier + IntToStr(CheckDigit) + PadLeft(IntToStr(NextNatID),'0',4);
+            if ( CheckNatID(CheckTagNo, Result, True) ) then
+               begin
+                  if ( Length(Result) > 0 ) then
+                     begin
+                        NextNatID := NextNatID+1;
+                        Break;
+                     end;
+               end;
+         end;
+   end;
+
+begin
+   pbCreateCalvings.Position := 0;
+   iLactNo := 1;
+   for i := 1 to 1000 do
+      begin
+         if ( ECalving <> nil ) then
+            FreeAndNil(ECalving);
+
+         ECalving := TCalvingEvent.Create('NEWCLVEV');
+         ECalving.Database.StartTransaction;
+         try
+            try
+               ECalving.CalfRecord.Add;
+               ECalving.CalfRecord.UndeletedAnimal := False;
+
+               UpperTxt := GetNextNatID;
+               FormattedStr := '';
+               if ( not(CheckNatID(UpperTxt, FormattedStr, TRUE)) ) then   //Checks for a valid NatID Number format
+                  begin
+                     raise ErrorMsg.CreateFmt(cInvalid_NatIdNo,[nil]);
+                  end
+               else if ( IsNINatID(UpperTxt)) then
+                  begin
+                     if not( CheckNINatID( UpperTxt, FormattedStr ) ) then
+                        raise ErrorMsg.CreateFmt(cInvalid_NatIdNo,[nil])
+                  end;
+               if ( FCountry = Ireland ) and ( Length(StripAllAlphaButNum(FormattedStr)) < 12 ) then
+                  raise ErrorMsg.CreateFmt(cInvalid_NatIdNo,[nil]);
+
+               ECalving.CalfRecord.NatIDNum := FormattedStr;
+               ECalving.CalfRecord.AnimalNo := '';
+               ECalving.CalfRecord.DateOfBirth := Date;
+               ECalving.CalfRecord.Sex := cSex_Female;
+
+               ECalving.CalfRecord.PrimaryBreed := 61;
+
+               ECalving.CalfRecord.HerdID := UserDefaultHerdID;
+
+               ECalving.CalfRecord.DamID := 3221;
+               ECalving.CalfRecord.SireID := 591;
+               ECalving.CalfRecord.Breeding := False;
+               ECalving.CalfRecord.Pedigree := False;
+               ECalving.CalfRecord.IsSynchronized := False;
+               ECalving.CalfRecord.Save;
+
+               ECalving.CalfReg[1] := True;
+
+               ECalving.CalfID[1] := ECalving.CalfRecord.ID;
+
+               ECalving.Append;
+               ECalving.AnimalID := 3221;
+               ECalving.EventDate := Date;
+               ECalving.AnimalLactNo := iLactNo;
+               ECalving.AnimalHerdID := UserDefaultHerdID;
+               ECalving.EventComment := 'Calving';
+               ECalving.EventSource := sNEW_CALVINGEVENTSCR;
+               ECalving.BirthType := 73;
+               ECalving.Post;
+
+               if ( ECalving.Database.InTransaction ) then
+                  ECalving.Database.Commit
+               else
+                  begin
+                    ECalving.Database.Rollback;
+                    MessageDlg('Error commiting transaction.'+cCRLF+
+                               'Contact Kingswood.',mtError,[mbOK],0);
+                  end;
+
+            except
+               ECalving.Database.Rollback;
+               raise;
+            end;
+
+         finally
+            FreeAndNil(ECalving);
+            Screen.Cursor := crDefault;
+            Close;
+         end;
+
+         Inc(iLactNo);
+
+         pbCreateCalvings.Position := pbCreateCalvings.Position+1;
+      end;
+end;
+
+function TfmTestCreateCalvings.GetUserDefaultHerdIdentifier: String;
+begin
+   if ( UserDefaultHerdID = 0 ) or ( UserDefaultHerdID = NoneHerdID ) then Exit;
+   with TQuery.Create(nil) do
+      try
+         DatabaseName := cAliasName;
+         SQL.Clear;
+         SQL.Add('SELECT HerdIdentifier');
+         SQL.Add('FROM Owners');
+         SQL.Add('WHERE ID = '+IntToStr(UserDefaultHerdID)+'');
+         try
+            Open;
+            if ( Length(Fields[0].AsString) > 0 ) then
+               Result := Fields[0].AsString;
+         except
+            on e : Exception do
+               ShowMessage(e.Message);
+         end;
+      finally
+         Free;
+      end;
+end;
+
+function TfmTestCreateCalvings.GetNextNatID: Integer;
+begin
+   Result := 0;
+   with TQuery.Create(nil) do
+      try
+         DatabaseName := AliasName;
+         SQL.Add('SELECT NextNatID');
+         SQL.Add('FROM Owners');
+         SQL.Add('WHERE ID = '+IntToStr(UserDefaultHerdID)+'');
+         try
+            Open;
+            First;
+            if ( Fields[0].AsInteger > 0 ) then
+               Result := Fields[0].AsInteger;
+         except
+            on e : Exception do
+               ShowMessage(e.Message);
+         end;
+      finally
+         Free;
+      end;
+end;
+
+procedure TfmTestCreateCalvings.SetNextNatID(const Value: Integer);
+begin
+   with TQuery.Create(nil) do
+      try
+         DatabaseName := AliasName;
+         SQL.Clear;
+         SQL.Add('UPDATE Owners');
+         SQL.Add('SET NextNatID = '+IntToStr(Value)+'');
+         SQL.Add('WHERE ID = '+IntToStr(UserDefaultHerdID)+'');
+         try
+            ExecSQL;
+         except
+            on e : Exception do
+               ShowMessage(e.Message);
+         end;
+      finally
+         Free;
+      end;
+end;
+
+function TfmTestCreateCalvings.GetUserDefaultHerdID: Integer;
+begin
+   Result := 0;
+   with TQuery.Create(nil) do
+      try
+         DatabaseName := cAliasName;
+         SQL.Clear;
+         SQL.Add('SELECT DefaultHerdID');
+         SQL.Add('FROM Defaults');
+         try
+            Open;
+            Result := Fields[0].AsInteger;
+            if ( Result = 0 ) then
+               begin
+                  SQL.Clear;
+                  SQL.Add('SELECT ID');
+                  SQL.Add('FROM Owners');
+                  SQL.Add('WHERE ID <> '+IntToStr(NoneHerdID)+'');
+                  try
+                     Open;
+                     if ( Fields[0].AsInteger > 0 ) then
+                        Result := Fields[0].AsInteger;
+                  except
+                     on e : Exception do
+                        ShowMessage(e.Message);
+                  end;
+               end;
+         except
+            on e : Exception do
+               ShowMessage(e.Message);
+         end;
+      finally
+         Free;
+      end;
+end;
+
+function TfmTestCreateCalvings.GetNoneHerdID: Integer;
+begin
+   Result := 0;
+   with TQuery.Create(nil) do
+      try
+         DatabaseName := cAliasName;
+         SQL.Clear;
+         SQL.Add('SELECT ID');
+         SQL.Add('FROM Owners');
+         SQL.Add('WHERE Upper(HerdIdentity) = "NONE"');
+         try
+            Open;
+            Result := Fields[0].AsInteger;
+            if ( Result = 0 ) then
+               begin
+                  SQL.Clear;
+                  SQL.Add('INSERT INTO Owners (HerdIdentity, UserCanDelete)');
+                  SQL.Add('VALUES "NONE", False');
+                  try
+                     ExecSQL;
+                  except
+                     on e : Exception do
+                        ShowMessage(e.Message);
+                  end;
+               end;
+         except
+            on e : Exception do
+               ShowMessage(e.Message);
+         end;
+      finally
+         Free;
+      end;
+end;
+
+end.

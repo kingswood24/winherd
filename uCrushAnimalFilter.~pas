@@ -1,0 +1,167 @@
+unit uCrushAnimalFilter;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  StdCtrls, cxButtons, cxMaskEdit, cxDropDownEdit, cxCalendar, cxLabel,
+  cxContainer, cxEdit, cxTextEdit, cxPC, cxControls, cxImage,
+  cxCurrencyEdit, cxGridCustomTableView, cxGridTableView,
+  cxGridDBTableView, cxStyles, Db, DBTables, cxGridLevel, cxClasses,
+  cxGridCustomView, cxGrid, ActnList, dxmdaset, EventRecording, cxDBEdit,
+  uRemarks, GenTypesConst, kRoutines, cxLookupEdit, cxDBLookupEdit,
+  cxDBLookupComboBox, dxPSCore, dxPScxCommon, dxPScxGridLnk;
+
+type
+  TfmCrushAnimalFilter = class(TForm)
+    QueryAnimals: TQuery;
+    dsQueryAnimals: TDataSource;
+    cxStyleRepository1: TcxStyleRepository;
+    cxStyle1: TcxStyle;
+    SelectedRecord: TcxStyle;
+    ActionList: TActionList;
+    actSaveAnimal: TAction;
+    actCancelAnimal: TAction;
+    actClose: TAction;
+    cxStyle2: TcxStyle;
+    pcCrushFilterAnimals: TcxPageControl;
+    tsFilterAnimals: TcxTabSheet;
+    btnClose: TcxButton;
+    lJumboFrom: TcxLabel;
+    lJumboTo: TcxLabel;
+    lBreed: TcxLabel;
+    ceJumboFrom: TcxCurrencyEdit;
+    ceJumboTo: TcxCurrencyEdit;
+    cmboBreed: TcxLookupComboBox;
+    AnimalGrid: TcxGrid;
+    AnimalTableView: TcxGridDBTableView;
+    AnimalTableViewID: TcxGridDBColumn;
+    AnimalTableViewNatIdNum: TcxGridDBColumn;
+    AnimalTableViewDateOfBirth: TcxGridDBColumn;
+    AnimalTableViewSex: TcxGridDBColumn;
+    AnimalTableViewCode: TcxGridDBColumn;
+    AnimalTableViewAnimalNo: TcxGridDBColumn;
+    AnimalGridLevel: TcxGridLevel;
+    btnFind: TcxButton;
+    btnPrint: TcxButton;
+    dxComponentPrinter: TdxComponentPrinter;
+    dxComponentPrinterLink: TdxGridReportLink;
+    procedure actCloseExecute(Sender: TObject);
+    procedure btnFindClick(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure btnPrintClick(Sender: TObject);
+  private
+    dsActiveBreeds : TDataSource;
+    qActiveBreeds : TQuery;
+
+    { Private declarations }
+  public
+    { Public declarations }
+    class function Show : Boolean;
+  end;
+
+var
+  fmCrushAnimalFilter: TfmCrushAnimalFilter;
+
+implementation
+
+uses DairyData, cxUtils, kDBRoutines;
+
+{$R *.DFM}
+
+class function TfmCrushAnimalFilter.Show : Boolean;
+begin
+   with TfmCrushAnimalFilter.Create(nil) do
+      try
+         if ( not(QueryAnimals.Active) ) then
+            QueryAnimals.Active := True;
+
+         qActiveBreeds := TQuery.Create(nil);
+         with qActiveBreeds do
+            try
+               DatabaseName := AliasName;
+               SQL.Clear;
+               SQL.Add('SELECT DISTINCT(Code), ID');
+               SQL.Add('FROM Breeds');
+               SQL.Add('WHERE ID IN (SELECT PrimaryBreed FROM Animals');
+               SQL.Add('             WHERE InHerd = True');
+               SQL.Add('             AND AnimalDeleted = False');
+               SQL.Add('             AND HerdID = :ADefaulHerdID)');
+               Params[0].AsInteger := WinData.DefaultHerdID;
+               Open;
+            finally
+
+            end;
+
+         dsActiveBreeds := TDataSource.Create(nil);
+         dsActiveBreeds.DataSet := qActiveBreeds;
+
+         with cmboBreed.Properties do
+            begin
+               ListSource := dsActiveBreeds;
+               KeyFieldNames := 'ID';
+               ListFieldNames := 'Code';
+            end;
+
+         ShowModal;
+      finally
+         Free;
+      end
+end;
+
+procedure TfmCrushAnimalFilter.btnFindClick(Sender: TObject);
+begin
+   if ( ceJumboFrom.Text = '') and ( ceJumboTo.Text = '' ) and ( cmboBreed.EditValue = 0 ) then
+      MessageDlg('No search criteria selected.',mtError,[mbOK],0);
+
+
+   with QueryAnimals do
+      try
+         DatabaseName := AliasName;
+         SQL.Clear;
+         SQL.Add('SELECT A.ID, A.NatIdNum, A.AnimalNo, A.SortAnimalNo,');
+         SQL.Add('       A.DateOfBirth, A.Sex, B.Code BreedCode');
+         SQL.Add('FROM Animals A');
+         SQL.Add('LEFT JOIN Breeds B ON (A.PrimaryBreed=B.Id)');
+         SQL.Add('WHERE (A.InHerd = True)');
+         SQL.Add('AND   (A.AnimalDeleted = False)');
+         SQL.Add('AND   (A.HerdID = :ADefaultHerdID)');
+
+         if ( ceJumboFrom.Text <> '' ) and ( ceJumboTo.Text <> '' ) then
+            SQL.Add('AND (A.AnimalNo >= "'+ceJumboFrom.Text+'" AND A.AnimalNo <= "'+ceJumboTo.Text+'")')
+         else if ( ceJumboFrom.Text <> '' ) and ( ceJumboTo.Text = '' ) then
+            SQL.Add('AND (A.AnimalNo >= "'+ceJumboFrom.Text+'")')
+         else if ( ceJumboFrom.Text = '' ) and ( ceJumboTo.Text <> '' ) then
+            SQL.Add('AND (A.AnimalNo <= "'+ceJumboTo.Text+'")');
+
+         if ( cmboBreed.EditValue > 0 ) then
+            SQL.Add('AND A.PrimaryBreed = '+VarToStr(cmboBreed.EditValue)+' ');
+
+         SQL.Add('ORDER BY SortAnimalNo Asc');
+         Params[0].AsInteger := WinData.DefaultHerdID;
+         Open;
+      finally
+
+      end;
+      
+end;
+
+procedure TfmCrushAnimalFilter.btnPrintClick(Sender: TObject);
+begin
+   dxComponentPrinterLink.Preview;
+end;
+
+procedure TfmCrushAnimalFilter.FormDestroy(Sender: TObject);
+begin
+   if ( QueryAnimals.Active ) then
+      QueryAnimals.Active := False;
+
+   FreeAndNil(QueryAnimals);
+end;
+
+procedure TfmCrushAnimalFilter.actCloseExecute(Sender: TObject);
+begin
+   Close;
+end;
+
+end.

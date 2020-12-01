@@ -1,0 +1,362 @@
+//   28/09/17 [V5.7 R3.2] /MK Bug Fix - CreateFeedsForAnimal - Was using an allocation date filter instead of just applying the allocation date for all feeds as the start date selected.
+
+unit Feeds;
+
+interface
+
+uses
+   Classes, Windows, SysUtils, db, dbtables, GenTypesConst, Dialogs,
+   DateUtil, uEventDataHelper, uHerdSync, uAnimal, KRoutines, KDBRoutines;
+
+type
+   TFeedManager = class
+   private
+      FEventDataHelper : TEventDataHelper;
+      FQuery : TQuery;
+    function GetInactiveFeedRegimes: PIntegerArray;
+   public
+      constructor Create;
+      destructor Destroy;
+      procedure CreateFeedsForAnimal(AAnimalID, AGroupID : Integer; AAllocDate : TDateTime);
+      function GroupHasActiveFeedRegime(AGroupID : Integer) : Boolean;
+      procedure EndFeedEventsForAnimal(AID : Integer; const AFeedEndDate : TDateTime = 0);
+      function GetAnimalFeedEndDate(AAnimalID : Integer) : TDateTime;
+      function EarliestRegimeStartDate(AGroupID : Integer; const AFromDate : TDateTime = 0) : TDateTime;
+      function GetAnimalFeedStartDateOfEndDate(AAnimalID : Integer; AEndDate : TDateTime) : TDateTime;
+      function FeedEndDateIsBeforeStartDate(AAnimalID : Integer; AEndDate : TDateTime) : Boolean;
+      function FeedTypeInUse ( AFeedTypeID : Integer ) : Boolean;
+      function FeedRegimeHasFeeds ( AFeedGroupID : Integer ) : Boolean;
+      procedure RemoveInactiveFeedRegimes;
+      property InactiveFeedRegimes : PIntegerArray read GetInactiveFeedRegimes; 
+   end;
+
+implementation
+
+{ TFeedManager }
+
+constructor TFeedManager.Create;
+begin
+   FEventDataHelper := TEventDataHelper.Create;
+   FQuery := TQuery.Create(nil);
+   FQuery.DatabaseName := AliasName;
+end;
+
+procedure TFeedManager.CreateFeedsForAnimal(AAnimalID, AGroupID: Integer; AAllocDate : TDateTime);
+var
+   FeedEvents : TTable;
+   Animal : TAnimal;
+   dDateOfBirth,
+   dPurchDate,
+   dAnimalLeftHerdDate,
+   dAllocDate : TDateTime;
+   sAllocCheckDate : String;
+begin
+   if ( AAnimalID <= 0 ) or ( AGroupID <= 0 ) or ( AAllocDate <= 0 ) then Exit;
+
+   if ( not(GroupHasActiveFeedRegime(AGroupID)) ) then Exit;
+
+   Animal := GetAnimal(AAnimalID);
+   dDateOfBirth := Animal.DateOfBirth;
+   dPurchDate := FEventDataHelper.GetAnimalPurchaseEventDate(AAnimalID);
+   dAllocDate := AAllocDate;
+   if ( dDateOfBirth > dAllocDate ) then
+      dAllocDate := dDateOfBirth;
+   if ( dPurchDate > dAllocDate ) then
+      dAllocDate := dPurchDate;
+
+   sAllocCheckDate := FormatDateTime(cUSDateStyle,dAllocDate);
+   sAllocCheckDate := Copy(sAllocCheckDate,0,3)+'01/'+Copy(sAllocCheckDate,7,4);
+
+   // find current group feed events
+   with FQuery do
+      begin
+         SQL.Clear;
+         SQL.Add('SELECT *');
+         SQL.Add('FROM FeedRegime');
+         SQL.Add('WHERE (GroupID = '+IntToStr(AGroupID)+')');
+         //   28/09/17 [V5.7 R3.2] /MK Bug Fix - Was using an allocation date filter instead of just applying the allocation date for all feeds as the start date selected.
+         Open;
+         First;
+      end;
+
+   FeedEvents := TTable.Create(nil);
+   FeedEvents.DatabaseName := AliasName;
+   FeedEvents.TableName := 'FeedEvents';
+   FeedEvents.Active := True;
+   try
+      // allocate feed events to new animal
+      while ( not(FQuery.Eof) ) do
+         begin
+           FeedEvents.Append;
+           FeedEvents.FieldByName('AnimalID').AsInteger := AAnimalID;
+           FeedEvents.FieldByName('FeedType').AsInteger := FQuery.FieldByName('FeedType').AsInteger;
+
+           if ( dAllocDate > FQuery.FieldByName('AllocDate').AsDateTime ) then
+              FeedEvents.FieldByName('AllocDate').AsDateTime := dAllocDate
+           else
+              FeedEvents.FieldByName('AllocDate').AsDateTime := FQuery.FieldByName('AllocDate').AsDateTime;
+
+           FeedEvents.FieldByName('FeedRegimeID').AsInteger := FQuery.FieldByName('ID').AsInteger;
+
+           FeedEvents.FieldByName('QuantDay').AsFloat := FQuery.FieldByName('QuantDay').AsFloat;
+           FeedEvents.FieldByName('CostDay').AsFloat := FQuery.FieldByName('CostDay').AsFloat;
+
+           dAnimalLeftHerdDate := FEventDataHelper.GetAnimalLeftHerdDate(AAnimalID);
+           if ( dAnimalLeftHerdDate > 0 ) then
+              FeedEvents.FieldByName('EndDate').AsDateTime := dAnimalLeftHerdDate;
+
+           FeedEvents.Post;
+
+           FQuery.Next;
+         end;
+   finally
+      DBIForceWrite(FeedEvents);
+      FeedEvents.Active := False;
+      FreeAndNil(FeedEvents);
+   end;
+end;
+
+function TFeedManager.GroupHasActiveFeedRegime(AGroupID: Integer): Boolean;
+begin
+   Result := False;
+   with TQuery.Create(nil) do
+      try
+         DatabaseName := AliasName;
+         SQL.Clear;
+         SQL.Add('SELECT *');
+         SQL.Add('FROM FeedRegime');
+         SQL.Add('WHERE GroupID = '+IntToStr(AGroupID));
+         try
+            Open;
+            Result := ( RecordCount > 0 );
+         except
+            on e : Exception do
+               ShowMessage(e.Message);
+         end;
+      finally
+         Free;
+      end;
+end;
+
+procedure TFeedManager.EndFeedEventsForAnimal(AID: Integer; const AFeedEndDate : TDateTime = 0);
+var
+   dEndFeedDate : TDateTime;
+begin
+   with TQuery.Create(nil) do
+      try
+         dEndFeedDate := AFeedEndDate;
+         if ( dEndFeedDate = 0 ) then
+            dEndFeedDate := GetAnimalFeedEndDate(AID);
+         DatabaseName := AliasName;
+         SQL.Add('UPDATE FeedEvents SET EndDate = "' + FormatDateTime('mm/dd/yyyy',dEndFeedDate) + '" ');
+         SQL.Add('WHERE ( AnimalID = :AAID ) AND ( EndDate IS NULL ) ');
+         Params[0].AsInteger := AID;
+         ExecSQL;
+      finally
+         Free;
+      end;
+end;
+
+function TFeedManager.GetAnimalFeedEndDate(AAnimalID: Integer): TDateTime;
+var
+   dSaleDeathDate : TDateTime;
+begin
+   Result := 0;
+   if ( AAnimalID = 0 ) then Exit;
+   dSaleDeathDate := FEventDataHelper.GetAnimalSaleEventDate(AAnimalID);
+   if ( dSaleDeathDate = 0 ) then
+      dSaleDeathDate := FEventDataHelper.GetAnimalDeathEventDate(AAnimalID);
+   if ( dSaleDeathDate > 0 ) then
+      Result := dSaleDeathDate
+   else
+      Result := Date;
+end;
+
+function TFeedManager.EarliestRegimeStartDate(AGroupID : Integer) : TDateTime;
+begin
+   Result := 0;
+   if ( AGroupID <= 0 ) then Exit;
+   with TQuery.Create(nil) do
+      try
+         DatabaseName := AliasName;
+         SQL.Clear;
+         SQL.Add('SELECT Min(AllocDate) MinAllocDate');
+         SQL.Add('FROM FeedRegime FR');
+         SQL.Add('WHERE GroupID = :AGroupID');
+         Params[0].AsInteger := AGroupID;
+         Open;
+         try
+            Result := FieldByName('MinAllocDate').AsDateTime;
+         finally
+            Close;
+         end;
+      finally
+      end;
+end;
+
+function TFeedManager.GetAnimalFeedStartDateOfEndDate(AAnimalID: Integer; AEndDate : TDateTime): TDateTime;
+begin
+   Result := 0;
+   if ( AAnimalID <= 0 ) or ( AEndDate = 0 ) then Exit;
+   with TQuery.Create(nil) do
+      try
+         DatabaseName := AliasName;
+         SQL.Clear;
+         SQL.Add('SELECT Min(AllocDate) MinAllocDate');
+         SQL.Add('FROM FeedEvents');
+         SQL.Add('WHERE AnimalID = '+IntToStr(AAnimalID)+'');
+         SQL.Add('AND   EndDate IS NULL');
+         SQL.Add('AND   AllocDate >= "'+FormatDateTime(cUSDateStyle,AEndDate)+'"');
+         try
+            Open;
+            Result := Fields[0].AsDateTime;
+         except
+            on e : Exception do
+               ShowMessage(e.Message);
+         end;
+      finally
+         Free;
+      end;
+end;
+
+function TFeedManager.FeedEndDateIsBeforeStartDate(AAnimalID : Integer; AEndDate : TDateTime): Boolean;
+begin
+   Result := False;
+   if ( AAnimalID <= 0 ) or ( AEndDate <= 0 ) then Exit;
+   with TQuery.Create(nil) do
+      try
+         DatabaseName := AliasName;
+         SQL.Clear;
+         SQL.Add('SELECT *');
+         SQL.Add('FROM FeedEvents');
+         SQL.Add('WHERE AnimalID = '+IntToStr(AAnimalID)+'');
+         SQL.Add('AND   EndDate IS NULL');
+         SQL.Add('AND   AllocDate >= "'+FormatDateTime(cUSDateStyle,AEndDate)+'"');
+         try
+            Open;
+            Result := ( RecordCount > 0 );
+         except
+            on e : Exception do
+               ShowMessage(e.Message);
+         end;
+      finally
+         Free;
+      end;
+end;
+
+destructor TFeedManager.Destroy;
+begin
+  FQuery.Close;
+  FreeAndNil(FQuery);
+  if ( FEventDataHelper <> nil ) then
+     FreeAndNil(FEventDataHelper);
+end;
+
+function TFeedManager.GetInactiveFeedRegimes: PIntegerArray;
+begin
+   // InactiveFeedRegimes are feed regime records that have a group ID that doesn't exist in Grps table.
+   SetLength(Result,0);
+   with TQuery.Create(nil) do
+      try
+         DatabaseName := AliasName;
+         SQL.Clear;
+         SQL.Add('SELECT ID');
+         SQL.Add('FROM FeedRegime');
+         SQL.Add('WHERE GroupID NOT IN (SELECT ID FROM Grps)');
+         try
+            Open;
+            if ( RecordCount = 0 ) then Exit;
+            First;
+            while ( not(Eof) ) do
+               begin
+                  SetLength(Result,Length(Result)+1);
+                  Result[Length(Result)-1] := Fields[0].AsInteger;
+                  Next;
+               end;
+         except
+            on e : Exception do
+               ShowMessage(e.Message);
+         end;
+      finally
+         Free;
+      end;
+end;
+
+procedure TFeedManager.RemoveInactiveFeedRegimes;
+var
+   iaInactiveFeedRegimes : PIntegerArray;
+   i : Integer;
+begin
+   iaInactiveFeedRegimes := InactiveFeedRegimes;
+   if ( Length(iaInactiveFeedRegimes) = 0 ) then Exit;
+   with TQuery.Create(nil) do
+      try
+         DatabaseName := AliasName;
+         SQL.Clear;
+         SQL.Add('DELETE FROM FeedRegime');
+         SQL.Add('WHERE ID IN '+IntArrayToSQLInString(iaInactiveFeedRegimes)+'');
+         try
+            ExecSQL;
+         except
+            on e : Exception do
+               MessageDlg('Unable to delete Inactive Feed Regimes.'+cCRLF+
+                          'Contact Kingswood Support.',mtError,[mbOK],0);
+         end;
+      finally
+         Free;
+      end;
+end;
+
+function TFeedManager.FeedTypeInUse(AFeedTypeID: Integer): Boolean;
+begin
+   Result := False;
+   if ( AFeedTypeID = 0 ) then Exit;
+   with TQuery.Create(nil) do
+      try
+         DatabaseName := AliasName;
+         SQL.Clear;
+         SQL.Add('SELECT *');
+         SQL.Add('FROM FeedEvents');
+         SQL.Add('WHERE FeedType = '+IntToStr(AFeedTypeID)+'');
+         try
+            Open;
+            Result := ( RecordCount > 0 );
+            if ( not(Result) ) then
+               begin
+                  Close;
+                  SQL.Clear;
+                  SQL.Add('SELECT *');
+                  SQL.Add('FROM FdStkEvents');
+                  SQL.Add('WHERE FeedType = '+IntToStr(AFeedTypeID)+'');
+                  Open;
+                  Result := ( RecordCount > 0 );
+               end;
+         except
+         end;
+      finally
+         Free;
+      end;
+end;
+
+function TFeedManager.FeedRegimeHasFeeds(AFeedGroupID: Integer): Boolean;
+begin
+   Result := False;
+   if ( AFeedGroupID = 0 ) then Exit;
+   with TQuery.Create(nil) do
+      try
+         DatabaseName := AliasName;
+         SQL.Clear;
+         SQL.Add('SELECT *');
+         SQL.Add('FROM FeedRegime');
+         SQL.Add('WHERE GroupID = '+IntToStr(AFeedGroupID)+'');
+         try
+            Open;
+            Result := ( RecordCount > 0 );
+         except
+         end;
+      finally
+         Free;
+      end;
+end;
+
+end.

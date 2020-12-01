@@ -1,0 +1,263 @@
+unit uGroupPrint;
+
+interface
+
+uses Windows, SysUtils, Messages, Classes, Graphics, Controls,
+  StdCtrls, ExtCtrls, Forms, Quickrpt, QRCtrls, db, dbTables;
+
+type
+  Tc = class(TQuickRep)
+    QRBand1: TQRBand;
+    QRSubDetail1: TQRSubDetail;
+    GroupFooterBand1: TQRBand;
+    QRBand3: TQRBand;
+    QRLabel3: TQRLabel;
+    QRSysData1: TQRSysData;
+    QRSysData2: TQRSysData;
+    QRDBText1: TQRDBText;
+    QRDBText2: TQRDBText;
+    QRDBText3: TQRDBText;
+    QRDBText4: TQRDBText;
+    QRDBText5: TQRDBText;
+    QRDBText6: TQRDBText;
+    QRDBText7: TQRDBText;
+    QRDBText8: TQRDBText;
+    QRLabel13: TQRLabel;
+    QRLabel14: TQRLabel;
+    QRExpr2: TQRExpr;
+    QRExpr3: TQRExpr;
+    QRExpr4: TQRExpr;
+    QRExpr5: TQRExpr;
+    QRExpr6: TQRExpr;
+    lGrpName: TQRLabel;
+    GroupTable: TTable;
+    QRDBText10: TQRDBText;
+    QRDBText11: TQRDBText;
+    QRExpr1: TQRExpr;
+    QRLabel1: TQRLabel;
+    QRLabel2: TQRLabel;
+    QRLabel4: TQRLabel;
+    QRLabel5: TQRLabel;
+    QRLabel6: TQRLabel;
+    QRShape1: TQRShape;
+    QRLabel7: TQRLabel;
+    QRLabel8: TQRLabel;
+    QRLabel9: TQRLabel;
+    QRShape2: TQRShape;
+    QRLabel10: TQRLabel;
+    QRLabel16: TQRLabel;
+    QRLabel17: TQRLabel;
+    QRLabel11: TQRLabel;
+    QRShape3: TQRShape;
+    QRLabel15: TQRLabel;
+    QRLabel34: TQRLabel;
+    VerLabel: TQRLabel;
+    QRExpr7: TQRExpr;
+  private
+     procedure GetAnimals;
+  public
+
+  end;
+
+
+  procedure Preview(const GrpName, IDField : String; Alist : TList);
+
+var
+  c: Tc;
+
+implementation
+uses
+   uProgressIndicator, GenTypesConst, DairyData, Types, Dialogs;
+
+{$R *.DFM}
+
+  procedure Preview(const GrpName, IDField : String; Alist : TList);
+  var
+     i : Integer;
+  begin
+     Application.CreateForm(TGroupPrint, GroupPrint);
+     try
+
+        GroupPrint.lGrpName.Caption := UPPERCASE(GrpName);
+        with GroupPrint.GroupTable do
+           begin
+              if Exists then
+                 DeleteTable;
+
+              FieldDefs.Clear;
+              FieldDefs.Add('ID', ftAutoInc);
+              FieldDefs.Add('AID', ftInteger);
+              FieldDefs.Add('NatIDNum', ftString,20);
+              FieldDefs.Add('SortNatID', ftString,20);
+              FieldDefs.Add('Sex', ftString,6);
+              FieldDefs.Add('BreedCode', ftString,6);
+              FieldDefs.Add('DOB', ftDate);
+              { Purch Info }
+              FieldDefs.Add('PurchDate', ftDate);
+              FieldDefs.Add('PurchSupplier', ftstring,30);
+              FieldDefs.Add('PurchBuyer', ftstring,30);
+              FieldDefs.Add('PurchPrice', ftFloat);
+              FieldDefs.Add('PurchWeight', ftFloat);
+              { On-Farm Info }
+              FieldDefs.Add('DaysOnFarm', ftFloat);
+              FieldDefs.Add('LastWeighingDate', ftDate);
+              FieldDefs.Add('OnFarmWeight', ftFloat);
+              FieldDefs.Add('LURate', ftFloat);
+              { Sale Info }
+
+              IndexDefs.Clear;
+
+              { Primary }
+              IndexDefs.Add('iID', 'ID', [ixUnique,ixPrimary]);
+              IndexDefs.Add('iAID', 'AID', [ixUnique]);
+              { Ascending }
+              IndexDefs.Add('iNatIDNum', 'NatIDNum', [ixCaseInsensitive]);
+              IndexDefs.Add('iSortNatID', 'SortNatID', [ixCaseInsensitive]);
+              IndexDefs.Add('iSex', 'Sex', [ixCaseInsensitive]);
+              IndexDefs.Add('iBreedCode', 'BreedCode', [ixCaseInsensitive]);
+              IndexDefs.Add('iDOB', 'DOB', [ixCaseInsensitive]);
+              IndexDefs.Add('iPurchDate', 'PurchDate', [ixCaseInsensitive]);
+              IndexDefs.Add('iPurchSupplier', 'PurchSupplier', [ixCaseInsensitive]);
+              IndexDefs.Add('iPurchBuyer', 'PurchBuyer', [ixCaseInsensitive]);
+              IndexDefs.Add('iPurchPrice', 'PurchPrice', [ixCaseInsensitive]);
+              IndexDefs.Add('iPurchWeight', 'PurchWeight', [ixCaseInsensitive]);
+              IndexDefs.Add('iDaysOnFarm', 'DaysOnFarm', [ixCaseInsensitive]);
+              IndexDefs.Add('iOnFarmWeight', 'OnFarmWeight', [ixCaseInsensitive]);
+              IndexDefs.Add('iLURate', 'LURate', [ixCaseInsensitive]);
+
+              { Descending }
+              IndexDefs.Add('idNatIDNum', 'NatIDNum', [ixCaseInsensitive, ixDescending]);
+              IndexDefs.Add('idSortNatID', 'SortNatID', [ixCaseInsensitive, ixDescending]);
+              IndexDefs.Add('idSex', 'Sex', [ixCaseInsensitive, ixDescending]);
+              IndexDefs.Add('idBreedCode', 'BreedCode', [ixCaseInsensitive, ixDescending]);
+              IndexDefs.Add('idDOB', 'DOB', [ixCaseInsensitive, ixDescending]);
+              IndexDefs.Add('idPurchDate', 'PurchDate', [ixCaseInsensitive, ixDescending]);
+              IndexDefs.Add('idPurchSupplier', 'PurchSupplier', [ixCaseInsensitive, ixDescending]);
+              IndexDefs.Add('idPurchBuyer', 'PurchBuyer', [ixCaseInsensitive, ixDescending]);
+              IndexDefs.Add('idPurchPrice', 'PurchPrice', [ixCaseInsensitive, ixDescending]);
+              IndexDefs.Add('idPurchWeight', 'PurchWeight', [ixCaseInsensitive, ixDescending]);
+              IndexDefs.Add('idDaysOnFarm', 'DaysOnFarm', [ixCaseInsensitive, ixDescending]);
+              IndexDefs.Add('idOnFarmWeight', 'OnFarmWeight', [ixCaseInsensitive, ixDescending]);
+              IndexDefs.Add('idLURate', 'LURate', [ixCaseInsensitive, ixDescending]);
+
+              GroupPrint.GroupTable.CreateTable;
+              GroupPrint.GroupTable.Active := True;
+           end;
+
+        for i := 0 to ( AList.Count-1 ) do
+           begin
+
+              if ( AList.Items[i] <> nil ) then
+                 begin
+                    GroupPrint.GroupTable.Append;
+                    try
+                       GroupPrint.GroupTable.FieldByName('AID').AsInteger := integer(AList.Items[i]);
+                       GroupPrint.GroupTable.Post;
+                    except
+                       GroupPrint.GroupTable.Cancel;
+                    end;
+                 end;
+           end;
+
+        if ( GroupPrint.GroupTable.RecordCount > 0 ) then
+           begin
+              GroupPrint.GetAnimals;
+              GroupPrint.Preview;
+           end
+        else
+           MessageDlg('No animals found in group',mtInformation,[mbOK],0);
+
+     finally
+        GroupPrint.GroupTable.Close;
+        GroupPrint.GroupTable.DeleteTable;
+        FreeAndNil(GroupPrint.GroupTable);
+        FreeAndNil(GroupPrint);
+     end;
+  end;
+
+{ TQuickReport1 }
+
+procedure Tc.GetAnimals;
+var
+   PurchRec : PPurchaseRecord;
+   WeighRec : PWeighingRecord;
+   SaleDate : TDateTime;
+   NoDaysOnFarm : Integer;
+   OnDate, OffDate : TDateTime;
+begin
+   uProgressIndicator.ShowProgressIndictor('Building group report, please wait...',1, GroupTable.RecordCount, 1);
+
+   GroupTable.First;
+
+   GetMem(PurchRec, SizeOf(TPurchaseRecord));
+   GetMem(WeighRec, SizeOf(TWeighingRecord));
+
+   WinData.LookupTablesActive(TRUE, [WinData.LookupPurchases, WinData.LookupWeighings]);
+   with TTable.Create(nil) do
+      try
+         DatabaseName := AliasName;
+         TableName := 'animals';
+         Active := True;
+
+         while not GroupTable.Eof do
+            begin
+
+               if Locate('ID', GroupTable.FieldByName('AID').AsInteger, []) then
+                  begin
+                     GroupTable.Edit;
+                     GroupTable.FieldByName('NatIDNum').AsString := FieldByName('NatIDNum').AsString;
+                     GroupTable.FieldByName('SortNatID').AsString := FieldByName('SortNatID').AsString;
+                     GroupTable.FieldByName('Sex').AsString := FieldByName('Sex').AsString;
+                     GroupTable.FieldByName('DOB').AsDateTime := FieldByName('DateOfBirth').AsDateTime;
+                     if WinData.Breeds.Locate('ID', FieldByName('PrimaryBreed').AsInteger, []) then
+                        GroupPrint.GroupTable.FieldByName('BreedCode').AsString := WinData.Breeds.FieldByName('Code').AsString;
+
+                     WinData.GetPurchaseEventDetails(GroupTable.Fields[1].AsInteger, PurchRec);
+                     if ( PurchRec^.Date > 0 ) then
+                        begin
+                           OnDate := PurchRec^.Date;
+                           GroupTable.FieldByName('PurchDate').AsDateTime := PurchRec^.Date;
+                           GroupTable.FieldByName('PurchSupplier').AsString := PurchRec^.sSupplier;
+                           GroupTable.FieldByName('PurchBuyer').AsString := PurchRec^.sBuyer;
+                           if ( PurchRec^.Price ) > 0 then
+                              GroupTable.FieldByName('PurchPrice').AsFloat  := PurchRec^.Price;
+                           if ( PurchRec^.Weight ) > 0 then
+                              GroupTable.FieldByName('PurchWeight').AsFloat := PurchRec^.Weight;
+                        end
+                     else
+                        OnDate := GroupTable.FieldByName('DOB').AsDateTime;
+
+                     SaleDate := WinData.GetLastEventDate(GroupTable.Fields[1].AsInteger, -1, cSaleDeathEvent);
+
+                     if ( SaleDate > 0 ) then
+                        OffDate := SaleDate
+                     else
+                        OffDate := Date;
+
+                     NoDaysOnFarm := Trunc( OffDate - OnDate );
+                     if ( NoDaysOnFarm > 0 ) then
+                        GroupTable.FieldByName('DaysOnFarm').AsInteger := NoDaysOnFarm;
+
+                     WinData.GetWeighingEventDetails(GroupTable.Fields[1].AsInteger, -1, WeighRec);
+
+                     if ( WeighRec^.Date > 0 ) then
+                        begin
+                           GroupTable.FieldByName('LastWeighingDate').AsDateTime := WeighRec^.Date;
+                           GroupTable.FieldByName('OnFarmWeight').AsFloat := WeighRec^.Weight;
+                        end;
+                     GroupTable.Post;
+                  end;
+               GroupPrint.GroupTable.Next;
+               ProgressIndicator.StepIt(1);
+            end;
+
+      finally
+         Free;
+         ProgressIndicator.Close;
+         FreeMem(PurchRec);
+         FreeMem(WeighRec);
+         WinData.LookupTablesActive(FALSE, [WinData.LookupPurchases, WinData.LookupWeighings]);
+      end;
+end;
+
+end.

@@ -1,0 +1,58 @@
+{
+   14/06/11 [V4.1 R1.9] /MK Bug Fix - Changed Text To Verdana From Segoe UI.
+}
+
+unit uDataRestoreConfirm;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  cxLabel, cxControls, cxContainer, cxEdit, cxTextEdit, StdCtrls, cxButtons,
+  ExtCtrls;
+
+type
+  TfmDataRestoreConfirm = class(TForm)
+    btnRestore: TcxButton;
+    btCancel: TcxButton;
+    teRESTORE: TcxTextEdit;
+    cxLabel1: TcxLabel;
+    Image1: TImage;
+    procedure FormCreate(Sender: TObject);
+    procedure teRESTOREPropertiesChange(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+    class function ConfirmRestore : Boolean;
+  end;
+
+var
+  fmDataRestoreConfirm: TfmDataRestoreConfirm;
+
+implementation
+
+{$R *.DFM}
+
+class function TfmDataRestoreConfirm.ConfirmRestore: Boolean;
+begin
+   with TfmDataRestoreConfirm.Create(nil) do
+      try
+         Result := (ShowModal=MrOK);
+      finally
+         Free;
+      end;
+end;
+
+procedure TfmDataRestoreConfirm.FormCreate(Sender: TObject);
+begin
+   teRESTORE.Text := '';
+   btnRestore.Enabled := False;
+end;
+
+procedure TfmDataRestoreConfirm.teRESTOREPropertiesChange(Sender: TObject);
+begin
+   btnRestore.Enabled := ( UPPERCASE(teRESTORE.Text) = 'RESTORE');
+end;
+
+end.

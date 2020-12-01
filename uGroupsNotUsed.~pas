@@ -1,0 +1,226 @@
+unit uGroupsNotUsed;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  uBaseForm, dxBar, dxBarExtItems, ActnList, cxControls, dxStatusBar, db,
+  dbTables, GenTypesConst, cxGridCustomTableView, cxGridTableView,
+  cxGridDBTableView, cxGridLevel, cxClasses, cxGridCustomView, cxGrid,
+  cxContainer, cxEdit, cxLabel, ExtCtrls, uHerdLookup;
+
+type
+  TfmGroupsNotUsed = class(TfmBaseForm)
+    blbSave: TdxBarLargeButton;
+    actDeleteSelected: TAction;
+    blbSelectDeSelectAll: TdxBarLargeButton;
+    actSelectAll: TAction;
+    actDeselectAll: TAction;
+    pInfo: TPanel;
+    lInfo: TcxLabel;
+    GroupsNotUsedGridDBTableView: TcxGridDBTableView;
+    GroupsNotUsedGridLevel: TcxGridLevel;
+    GroupsNotUsedGrid: TcxGrid;
+    GroupsNotUsedGridDBTableViewSelected: TcxGridDBColumn;
+    GroupsNotUsedGridDBTableViewGroupCode: TcxGridDBColumn;
+    GroupsNotUsedGridDBTableViewGroupDesc: TcxGridDBColumn;
+    GroupsNotUsedGridDBTableViewGroupType: TcxGridDBColumn;
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure actSelectAllExecute(Sender: TObject);
+    procedure actDeselectAllExecute(Sender: TObject);
+    procedure actDeleteSelectedExecute(Sender: TObject);
+  private
+    { Private declarations }
+    FTable : TTable;
+    FDataSource : TDataSource;
+    FQuery : TQuery;
+    FSelectType : TSelectType;
+    procedure FillGrid;
+    procedure SelectDeselectAll;
+  public
+    { Public declarations }
+    class procedure ShowTheForm;
+  end;
+
+var
+  fmGroupsNotUsed: TfmGroupsNotUsed;
+
+implementation
+
+{$R *.DFM}
+
+{ TfmGroupsNotUsed }
+
+class procedure TfmGroupsNotUsed.ShowTheForm;
+begin
+   with TfmGroupsNotUsed.Create(nil) do
+      try
+         FillGrid;
+         ShowModal;
+      finally
+         Free;
+      end;
+end;
+
+procedure TfmGroupsNotUsed.FormCreate(Sender: TObject);
+begin
+   inherited;
+   FTable := TTable.Create(nil);
+   FTable.DatabaseName := AliasName;
+   FTable.TableName := 'tmpGroupsNotUsed';
+   FTable.FieldDefs.Clear;
+   FTable.FieldDefs.Add('ID',ftAutoInc);
+   FTable.FieldDefs.Add('Selected',ftBoolean);
+   FTable.FieldDefs.Add('GroupID',ftInteger);
+   FTable.FieldDefs.Add('GroupType',ftString,20);
+   FTable.FieldDefs.Add('GroupCode',ftString,6);
+   FTable.FieldDefs.Add('GroupDesc',ftString,30);
+   FTable.IndexDefs.Clear;
+   FTable.IndexDefs.Add('iID','ID',[ixPrimary,ixUnique]);
+   FTable.IndexDefs.Add('iGroupID','GroupID',[ixUnique]);
+   FTable.CreateTable;
+   FTable.Open;
+
+   FDataSource := TDataSource.Create(nil);
+   FDataSource.DataSet := FTable;
+
+   FQuery := TQuery.Create(nil);
+   FQuery.DatabaseName := AliasName;
+
+   GroupsNotUsedGridDBTableView.DataController.DataSource := FDataSource;
+end;
+
+procedure TfmGroupsNotUsed.FillGrid;
+begin
+   if ( FQuery.Active ) then
+      FQuery.Close;
+
+   FQuery.SQL.Clear;
+   FQuery.SQL.Add('DELETE FROM '+FTable.TableName);
+   FQuery.ExecSQL;
+
+   FQuery.SQL.Clear;
+   FQuery.SQL.Add('INSERT INTO '+FTable.TableName+' (GroupID, GroupType, GroupCode, GroupDesc)');
+   FQuery.SQL.Text := FQueraqy.SQL.Text + HerdLookup.qGroupsNotUsed.SQL.Text;
+   FQuery.ExecSQL;
+
+   FQuery.SQL.Clear;
+   FQuery.SQL.Add('UPDATE '+FTable.TableName+'');
+   FQuery.SQL.Add('SET Selected = False');
+   FQuery.ExecSQL;
+
+   FSelectType := stDeselected;
+
+   FTable.Close;
+   FTable.Open;
+end;
+
+procedure TfmGroupsNotUsed.actSelectAllExecute(Sender: TObject);
+begin
+   inherited;
+   FSelectType := stSelected;
+   SelectDeselectAll;
+   blbSelectDeSelectAll.Glyph := nil;
+   blbSelectDeSelectAll.Action := actDeselectAll;
+end;
+
+procedure TfmGroupsNotUsed.actDeselectAllExecute(Sender: TObject);
+begin
+   inherited;
+   FSelectType := stDeselected;
+   SelectDeselectAll;
+   blbSelectDeSelectAll.Glyph := nil;
+   blbSelectDeSelectAll.Action := actSelectAll;
+end;
+
+procedure TfmGroupsNotUsed.SelectDeselectAll;
+begin
+   FQuery.SQL.Clear;
+   FQuery.SQL.Add('UPDATE '+FTable.TableName);
+   FQuery.SQL.Add('SET Selected = :SelectType');
+   case FSelectType of
+      stSelected : FQuery.Params[0].AsString := 'True';
+      stDeselected : FQuery.Params[0].AsString := 'False';
+   end;
+   FQuery.ExecSQL;
+
+   FTable.Close;
+   FTable.Open;
+end;
+
+procedure TfmGroupsNotUsed.actDeleteSelectedExecute(Sender: TObject);
+var
+   iDeleteCount : Integer;
+begin
+   inherited;
+   try
+      if ( FTable.State in dsEditModes ) then
+         FTable.Post;
+
+      FQuery.Close;
+      FQuery.SQL.Clear;
+      FQuery.SQL.Add('SELECT *');
+      FQuery.SQL.Add('FROM '+FTable.TableName);
+      FQuery.SQL.Add('WHERE Selected = True');
+      FQuery.Open;
+      iDeleteCount := FQuery.RecordCount;
+      if ( iDeleteCount = 0 ) then
+         begin
+            MessageDlg('There are no groups selected.',mtError,[mbOK],0);
+            Exit;
+         end;
+
+      if ( MessageDlg(Format('Are you sure you want to delete %d group(s)?',[iDeleteCount]),mtConfirmation,[mbYes,mbNo],0) = mrNo ) then Exit;
+
+      FQuery.Close;
+      FQuery.SQL.Clear;
+      FQuery.SQL.Add('INSERT INTO DeletedGrps (GroupID, DateDeleted, IsSynchronized) ');
+      FQuery.SQL.Add('SELECT GroupID, "'+FormatDateTime(cUSDateStyle,Date)+'", False');
+      FQuery.SQL.Add('FROM '+FTable.TableName);
+      FQuery.SQL.Add('WHERE Selected = True');
+      FQuery.ExecSQL;
+
+      FQuery.Close;
+      FQuery.SQL.Clear;
+      FQuery.SQL.Add('DELETE FROM Grps');
+      FQuery.SQL.Add('WHERE ID IN (SELECT GroupID FROM '+FTable.TableName+' WHERE Selected = True)');
+      FQuery.ExecSQL;
+
+      FQuery.Close;
+      FQuery.SQL.Clear;
+      FQuery.SQL.Add('DELETE FROM '+FTable.TableName);
+      FQuery.SQL.Add('WHERE Selected = True');
+      FQuery.ExecSQL;
+
+      GroupsNotUsedGridDBTableView.DataController.BeginFullUpdate;
+      FTable.Close;
+      FTable.Open;
+      GroupsNotUsedGridDBTableView.DataController.EndFullUpdate;
+
+      MessageDlg(Format('%d group(s) deleted.',[iDeleteCount]),mtInformation,[mbOK],0);
+   except
+      on e : Exception do
+         ShowMessage(e.Message);
+   end;
+end;
+
+procedure TfmGroupsNotUsed.FormDestroy(Sender: TObject);
+begin
+   inherited;
+   if ( FTable <> nil ) then
+      begin
+         FTable.Close;
+         FTable.DeleteTable;
+         FreeAndNil(FTable);
+      end;
+   if ( FDataSource <> nil ) then
+      FreeAndNil(FDataSource);
+   if ( FQuery <> nil ) then
+      begin
+         FQuery.Close;
+         FreeAndNil(FQuery);
+      end;
+end;
+
+end.

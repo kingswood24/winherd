@@ -1,0 +1,368 @@
+object fmDBBaseForm: TfmDBBaseForm
+  Left = 283
+  Top = 197
+  Width = 696
+  Height = 480
+  Color = clBtnFace
+  Font.Charset = ANSI_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  PixelsPerInch = 96
+  TextHeight = 13
+  object StatusBar: TdxStatusBar
+    Left = 0
+    Top = 426
+    Width = 688
+    Height = 20
+    Panels = <>
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'MS Sans Serif'
+    Font.Style = []
+  end
+  object BarManager: TdxBarManager
+    AllowReset = False
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    Bars = <
+      item
+        AllowClose = False
+        AllowCustomizing = False
+        AllowQuickCustomizing = False
+        Caption = 'Main'
+        DockedDockingStyle = dsTop
+        DockedLeft = 0
+        DockedTop = 0
+        DockingStyle = dsTop
+        FloatLeft = 276
+        FloatTop = 213
+        FloatClientWidth = 23
+        FloatClientHeight = 22
+        ItemLinks = <>
+        Name = 'Main'
+        OneOnRow = True
+        Row = 0
+        ShowMark = False
+        SizeGrip = False
+        UseOwnFont = False
+        UseRecentItems = False
+        UseRestSpace = True
+        Visible = True
+        WholeRow = True
+      end>
+    CanCustomize = False
+    Categories.Strings = (
+      'Default'
+      'Nav Buttons')
+    Categories.ItemsVisibles = (
+      2
+      2)
+    Categories.Visibles = (
+      True
+      True)
+    HotImages = ImageStore.ImageList16x16
+    Images = ImageStore.ImageList16x16
+    MenuAnimations = maRandom
+    PopupMenuLinks = <>
+    Style = bmsUseLookAndFeel
+    SunkenBorder = True
+    UseSystemFont = True
+    Left = 116
+    Top = 90
+    DockControlHeights = (
+      0
+      0
+      30
+      0)
+    object blbExit: TdxBarLargeButton
+      Caption = 'Exit'
+      Category = 0
+      Hint = 'Exit'
+      Visible = ivAlways
+      HotImageIndex = 0
+      Width = 55
+      SyncImageIndex = False
+      ImageIndex = 0
+    end
+    object blbHelp: TdxBarLargeButton
+      Caption = 'Help'
+      Category = 0
+      Hint = 'Help'
+      Visible = ivAlways
+      HotImageIndex = 7
+      Width = 55
+      SyncImageIndex = False
+      ImageIndex = 7
+    end
+    object blbAdd: TdxBarLargeButton
+      Action = actAdd
+      Category = 1
+      Width = 55
+    end
+    object blbDelete: TdxBarLargeButton
+      Caption = 'Delete'
+      Category = 1
+      Hint = 'Delete'
+      Visible = ivAlways
+      HotImageIndex = 10
+      Width = 55
+      SyncImageIndex = False
+      ImageIndex = 10
+    end
+    object blbEdit: TdxBarLargeButton
+      Caption = 'Edit'
+      Category = 1
+      Hint = 'Edit'
+      Visible = ivAlways
+      HotImageIndex = 12
+      Width = 55
+      SyncImageIndex = False
+      ImageIndex = 12
+    end
+    object blbSave: TdxBarLargeButton
+      Caption = 'Save'
+      Category = 1
+      Hint = 'Save'
+      Visible = ivAlways
+      HotImageIndex = 18
+      Width = 55
+      SyncImageIndex = False
+      ImageIndex = 18
+    end
+    object blbCancel: TdxBarLargeButton
+      Caption = 'Cancel'
+      Category = 1
+      Hint = 'Cancel'
+      Visible = ivAlways
+      HotImageIndex = 11
+      Width = 55
+      SyncImageIndex = False
+      ImageIndex = 11
+    end
+    object blbFirst: TdxBarLargeButton
+      Caption = 'First'
+      Category = 1
+      Hint = 'First'
+      Visible = ivAlways
+      HotImageIndex = 14
+      Width = 55
+      SyncImageIndex = False
+      ImageIndex = 14
+    end
+    object blbNext: TdxBarLargeButton
+      Caption = 'Next'
+      Category = 1
+      Hint = 'Next'
+      Visible = ivAlways
+      HotImageIndex = 16
+      Width = 55
+      SyncImageIndex = False
+      ImageIndex = 16
+    end
+    object blbPrior: TdxBarLargeButton
+      Caption = 'Prior'
+      Category = 1
+      Hint = 'Prior'
+      Visible = ivAlways
+      HotImageIndex = 17
+      Width = 55
+      SyncImageIndex = False
+      ImageIndex = 17
+    end
+    object blbLast: TdxBarLargeButton
+      Caption = 'Last'
+      Category = 1
+      Hint = 'Last'
+      Visible = ivAlways
+      HotImageIndex = 15
+      Width = 55
+      SyncImageIndex = False
+      ImageIndex = 15
+    end
+  end
+  object ActionList: TActionList
+    Images = ImageStore.ImageList16x16
+    Left = 144
+    Top = 90
+    object actExit: TAction
+      Category = 'Main'
+      Caption = 'Exit'
+      ImageIndex = 0
+      OnExecute = actExitExecute
+    end
+    object actHelp: TAction
+      Category = 'Main'
+      Caption = 'Help'
+      ImageIndex = 7
+      OnExecute = actHelpExecute
+    end
+    object actAdd: TAction
+      Category = 'Nav Buttons'
+      Caption = 'Add'
+      ImageIndex = 9
+      OnUpdate = actAddUpdate
+    end
+    object actDelete: TAction
+      Category = 'Nav Buttons'
+      Caption = 'Delete'
+      ImageIndex = 10
+      OnUpdate = actDeleteUpdate
+    end
+    object actEdit: TAction
+      Category = 'Nav Buttons'
+      Caption = 'Edit'
+      ImageIndex = 12
+      OnUpdate = actEditUpdate
+    end
+    object actSave: TAction
+      Category = 'Nav Buttons'
+      Caption = 'actSave'
+      ImageIndex = 18
+      OnExecute = actSaveExecute
+      OnUpdate = actSaveUpdate
+    end
+    object actCancel: TAction
+      Category = 'Nav Buttons'
+      Caption = 'Cancel'
+      ImageIndex = 11
+      OnExecute = actCancelExecute
+      OnUpdate = actCancelUpdate
+    end
+    object actRefresh: TAction
+      Category = 'Nav Buttons'
+      Caption = 'Refresh'
+      ImageIndex = 13
+      OnUpdate = actRefreshUpdate
+    end
+    object actFirst: TAction
+      Category = 'Nav Buttons'
+      Caption = 'First'
+      ImageIndex = 14
+      OnUpdate = actFirstUpdate
+    end
+    object actNext: TAction
+      Category = 'Nav Buttons'
+      Caption = 'Next'
+      ImageIndex = 16
+      OnUpdate = actNextUpdate
+    end
+    object actPrevious: TAction
+      Category = 'Nav Buttons'
+      Caption = 'Previous'
+      ImageIndex = 17
+      OnUpdate = actPreviousUpdate
+    end
+    object actLast: TAction
+      Category = 'Nav Buttons'
+      Caption = 'Last'
+      ImageIndex = 15
+      OnUpdate = actLastUpdate
+    end
+  end
+  object LookAndFeelController: TcxLookAndFeelController
+    Kind = lfStandard
+    NativeStyle = True
+    Left = 60
+    Top = 90
+  end
+  object EditStyleController: TcxEditStyleController
+    Style.BorderStyle = ebs3D
+    Style.Edges = [bLeft, bTop, bRight, bBottom]
+    Style.Font.Charset = ANSI_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Verdana'
+    Style.Font.Style = []
+    Style.Shadow = False
+    Style.ButtonStyle = btsDefault
+    Style.ButtonTransparency = ebtNone
+    Left = 88
+    Top = 90
+  end
+  object StyleRepository: TcxStyleRepository
+    Left = 172
+    Top = 90
+  end
+  object GridViewRepository: TcxGridViewRepository
+    Left = 200
+    Top = 90
+    object DBBandedTableView: TcxGridDBBandedTableView
+      NavigatorButtons.ConfirmDelete = False
+      DataController.Summary.DefaultGroupSummaryItems = <>
+      DataController.Summary.FooterSummaryItems = <>
+      DataController.Summary.SummaryGroups = <>
+      Bands = <
+        item
+        end>
+    end
+    object DBTableView: TcxGridDBTableView
+      NavigatorButtons.ConfirmDelete = False
+      NavigatorButtons.First.Visible = True
+      NavigatorButtons.PriorPage.Visible = False
+      NavigatorButtons.Prior.Visible = True
+      NavigatorButtons.Next.Visible = True
+      NavigatorButtons.NextPage.Visible = False
+      NavigatorButtons.Last.Visible = True
+      NavigatorButtons.Insert.Visible = False
+      NavigatorButtons.Delete.Visible = False
+      NavigatorButtons.Edit.Visible = False
+      NavigatorButtons.Post.Visible = False
+      NavigatorButtons.Cancel.Visible = False
+      NavigatorButtons.Refresh.Visible = False
+      NavigatorButtons.SaveBookmark.Visible = False
+      NavigatorButtons.GotoBookmark.Visible = False
+      NavigatorButtons.Filter.Visible = False
+      DataController.Summary.DefaultGroupSummaryItems = <>
+      DataController.Summary.FooterSummaryItems = <>
+      DataController.Summary.SummaryGroups = <>
+      OptionsData.CancelOnExit = False
+      OptionsData.Deleting = False
+      OptionsData.DeletingConfirmation = False
+      OptionsData.Editing = False
+      OptionsData.Inserting = False
+      OptionsSelection.CellSelect = False
+      OptionsSelection.HideFocusRectOnExit = False
+      OptionsSelection.InvertSelect = False
+      OptionsSelection.UnselectFocusedRecordOnExit = False
+      OptionsView.FocusRect = False
+      OptionsView.Navigator = True
+      OptionsView.GridLines = glHorizontal
+      OptionsView.GroupByBox = False
+      OptionsView.Indicator = True
+      OptionsView.IndicatorWidth = 10
+      Preview.Visible = True
+    end
+    object DBCardView: TcxGridDBCardView
+      NavigatorButtons.ConfirmDelete = False
+      DataController.Summary.DefaultGroupSummaryItems = <>
+      DataController.Summary.FooterSummaryItems = <>
+      DataController.Summary.SummaryGroups = <>
+    end
+    object DBChartView: TcxGridDBChartView
+      DiagramColumn.Active = True
+    end
+  end
+  object LabelStyleController: TcxEditStyleController
+    Style.BorderStyle = ebs3D
+    Style.Edges = []
+    Style.Font.Charset = ANSI_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Verdana'
+    Style.Font.Style = []
+    Style.Shadow = False
+    Style.ButtonStyle = btsDefault
+    Style.ButtonTransparency = ebtNone
+    Left = 88
+    Top = 120
+  end
+end

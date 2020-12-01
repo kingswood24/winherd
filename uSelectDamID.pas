@@ -1,0 +1,94 @@
+unit uSelectDamID;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  cxControls, cxContainer, cxEdit, cxLabel, StdCtrls, cxButtons,
+  cxTextEdit, cxMaskEdit, cxDropDownEdit, cxLookupEdit, cxDBLookupEdit,
+  cxDBLookupComboBox, db, dbtables;
+
+type
+  TfmSelectDamID = class(TForm)
+    cxLabel1: TcxLabel;
+    lCalfNatIDValue: TcxLabel;
+    cxLabel2: TcxLabel;
+    cxLabel3: TcxLabel;
+    cxLabel4: TcxLabel;
+    cmboDamID: TcxLookupComboBox;
+    cxButton1: TcxButton;
+    cxButton2: TcxButton;
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+  private
+    { Private declarations }
+    QueryDams : TQuery;
+    procedure OpenDamListing;
+    procedure CloseDamListing;
+  public
+    { Public declarations }
+    class function GetDamID(ACalfNatID : string) : Integer;
+  end;
+
+var
+  fmSelectDamID: TfmSelectDamID;
+
+implementation
+
+uses uHerdLookup, DairyData, GenTypesConst;
+
+{$R *.DFM}
+
+{ TfmSelectDamID }
+
+class function TfmSelectDamID.GetDamID(ACalfNatID: string): Integer;
+begin
+   Result := 0;
+   with TfmSelectDamID.Create(nil) do
+      try
+         Caption := 'Dam Selection';//Format('Select Dam number for calf "%s"',[ACalfNatID]);
+         lCalfNatIDValue.Caption := UpperCase(ACalfNatID);
+         OpenDamListing;
+         ShowModal;
+      finally
+         if not VarIsNull(cmboDamID.EditValue) then
+            Result := cmboDamID.EditValue;
+         CloseDamListing;
+         Free;
+      end;
+end;
+
+procedure TfmSelectDamID.FormCloseQuery(Sender: TObject;
+  var CanClose: Boolean);
+begin
+   if ModalResult = mrOK then
+      begin
+         if VarIsNull(cmboDamID.EditValue) then
+            begin
+               MessageDlg('No dam has been selected!',mtError,[mbOK],0);
+               CanClose := False;
+            end;
+      end;
+end;
+
+procedure TfmSelectDamID.CloseDamListing;
+begin
+   QueryDams.Close;
+   FreeAndNil(QueryDams);
+   if HerdLookup.erDamLookup.Properties.ListSource <> nil then
+      HerdLookup.erDamLookup.Properties.ListSource.DataSet := WinData.DamQuery;
+end;
+
+procedure TfmSelectDamID.OpenDamListing;
+begin
+   QueryDams := TQuery.Create(nil);
+   QueryDams.DatabaseName := AliasName;
+   QueryDams.SQL.Text := 'Select ID, AnimalNo, NatIDNum, SortNatID From Animals Where ( Sex = ''Female'') Order by SortNatID';
+   QueryDams.Open;
+
+   if HerdLookup.erDamLookup.Properties.ListSource <> nil then
+      HerdLookup.erDamLookup.Properties.ListSource.DataSet := QueryDams;
+end;
+
+
+
+end.

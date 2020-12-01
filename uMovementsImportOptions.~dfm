@@ -1,0 +1,97 @@
+object fmMovementsImportOptions: TfmMovementsImportOptions
+  Left = 535
+  Top = 275
+  Width = 462
+  Height = 279
+  Caption = 'Kingswood Movements In - Data Import options'
+  Color = clBtnFace
+  Font.Charset = ANSI_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Segoe UI'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poMainFormCenter
+  PixelsPerInch = 96
+  TextHeight = 13
+  object cxGroupBox1: TcxGroupBox
+    Left = 25
+    Top = 39
+    Caption = 'Please select data options to import'
+    Style.TextStyle = [fsBold]
+    TabOrder = 0
+    Height = 157
+    Width = 395
+    object cbBreedingEvents: TcxCheckBox
+      Left = 50
+      Top = 32
+      Caption = 'Import Breeding Events'
+      Properties.ImmediatePost = True
+      State = cbsChecked
+      TabOrder = 0
+      Width = 215
+    end
+    object cbHealthEvents: TcxCheckBox
+      Left = 50
+      Top = 58
+      Caption = 'Import Health Events'
+      Properties.ImmediatePost = True
+      State = cbsChecked
+      TabOrder = 1
+      Width = 215
+    end
+    object cbDamSireDetails: TcxCheckBox
+      Left = 50
+      Top = 84
+      Caption = 'Import Sire/Dam details'
+      Properties.ImmediatePost = True
+      State = cbsChecked
+      TabOrder = 2
+      Width = 215
+    end
+    object cbMilkLactationDetails: TcxCheckBox
+      Left = 50
+      Top = 110
+      Caption = 'Import Milk Lactation details'
+      Properties.ImmediatePost = True
+      State = cbsChecked
+      TabOrder = 3
+      Width = 215
+    end
+  end
+  object btnCancel: TcxButton
+    Left = 314
+    Top = 205
+    Width = 105
+    Height = 25
+    Caption = 'Cancel Import'
+    ModalResult = 2
+    TabOrder = 1
+    LookAndFeel.Kind = lfFlat
+    LookAndFeel.NativeStyle = True
+  end
+  object btnImport: TcxButton
+    Left = 203
+    Top = 205
+    Width = 105
+    Height = 25
+    Caption = 'Import'
+    ModalResult = 1
+    TabOrder = 2
+    LookAndFeel.Kind = lfFlat
+    LookAndFeel.NativeStyle = True
+  end
+  object cxLabel1: TcxLabel
+    Left = 26
+    Top = 14
+    Caption = 'File: '
+    Style.TextStyle = [fsBold]
+  end
+  object lFilePath: TcxLabel
+    Left = 62
+    Top = 14
+    AutoSize = False
+    Height = 17
+    Width = 359
+  end
+end

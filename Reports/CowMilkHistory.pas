@@ -1,0 +1,69 @@
+unit CowMilkHistory;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  QuickRpt, QRCtrls, ExtCtrls, StdCtrls;
+
+type
+  TfmCowMilkHistory = class(TForm)
+    qrCowMilkHistory: TQuickRep;
+    PageHeaderBand1: TQRBand;
+    QRLabel1: TQRLabel;
+    QRLabel2: TQRLabel;
+    QRLabel3: TQRLabel;
+    QRLabel4: TQRLabel;
+    QRLabel5: TQRLabel;
+    QRLabel6: TQRLabel;
+    QRLabel7: TQRLabel;
+    QRLabel8: TQRLabel;
+    DetailBand1: TQRBand;
+    QRDBText1: TQRDBText;
+    QRDBText2: TQRDBText;
+    QRDBText3: TQRDBText;
+    QRDBText4: TQRDBText;
+    QRDBText5: TQRDBText;
+    QRDBText6: TQRDBText;
+    QRDBText7: TQRDBText;
+    QRDBText8: TQRDBText;
+    QRSubDetail1: TQRSubDetail;
+    QRDBText9: TQRDBText;
+    QRDBText10: TQRDBText;
+    QRDBText11: TQRDBText;
+    QRDBText12: TQRDBText;
+    QRDBText13: TQRDBText;
+    GroupHeaderBand1: TQRBand;
+    QRLabel9: TQRLabel;
+    QRLabel10: TQRLabel;
+    QRLabel11: TQRLabel;
+    QRLabel12: TQRLabel;
+    QRLabel13: TQRLabel;
+    QRLabel14: TQRLabel;
+    QRLabel15: TQRLabel;
+    QRLabel16: TQRLabel;
+    procedure qrCowMilkHistoryBeforePrint(Sender: TCustomQuickRep;
+      var PrintReport: Boolean);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  fmCowMilkHistory: TfmCowMilkHistory;
+
+implementation
+uses
+   DairyData, SetupAnimals;
+
+{$R *.DFM}
+
+procedure TfmCowMilkHistory.qrCowMilkHistoryBeforePrint(Sender: TCustomQuickRep;
+  var PrintReport: Boolean);
+begin
+   if WinData.AnimalFileByID.Active then
+      QRLabel15.Caption := WinData.AnimalFileByIDAnimalNo.AsString;
+end;
+
+end.

@@ -1,0 +1,313 @@
+{
+   24/09/18 [V5.8 R2.9] /MK Additional Feature - Added new label to the report title band to show that the filter is on.
+}
+
+unit uNutrientProductionProjectionRpt;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  QRCtrls, QuickRpt, ExtCtrls, QRExport;
+
+type
+  TfmNutrientProductionProjectionRpt = class(TForm)
+    NutProdProjRpt: TQuickRep;
+    QRBand7: TQRBand;
+    QRLabel41: TQRLabel;
+    lProgramVer: TQRLabel;
+    QRBand8: TQRBand;
+    ReportTitle: TQRLabel;
+    QRShape3: TQRShape;
+    QRSysData5: TQRSysData;
+    QRSysData6: TQRSysData;
+    lDate1: TQRLabel;
+    QRLabel48: TQRLabel;
+    lDate2: TQRLabel;
+    lDate3: TQRLabel;
+    lDate4: TQRLabel;
+    lDate5: TQRLabel;
+    QRLabel47: TQRLabel;
+    lHerdID: TQRLabel;
+    QRLabel42: TQRLabel;
+    qrlHectares: TQRLabel;
+    lDate6: TQRLabel;
+    lForecast: TQRLabel;
+    lForecastWaste1: TQRLabel;
+    lForecastWaste2: TQRLabel;
+    lForecastWaste5: TQRLabel;
+    lForecastWaste3: TQRLabel;
+    lForecastWaste4: TQRLabel;
+    lDate7: TQRLabel;
+    lDate8: TQRLabel;
+    lDate9: TQRLabel;
+    lDate10: TQRLabel;
+    lDate11: TQRLabel;
+    lDate12: TQRLabel;
+    lForecastWaste8: TQRLabel;
+    lForecastWaste11: TQRLabel;
+    lForecastWaste9: TQRLabel;
+    lForecastWaste10: TQRLabel;
+    QRLabel35: TQRLabel;
+    l2PlusYrs1: TQRLabel;
+    l2PlusYrs2: TQRLabel;
+    l2PlusYrs3: TQRLabel;
+    l2PlusYrs4: TQRLabel;
+    l2PlusYrs5: TQRLabel;
+    QRLabel75: TQRLabel;
+    l1To2Yr1: TQRLabel;
+    l1To2Yr2: TQRLabel;
+    l1To2Yr3: TQRLabel;
+    l1To2Yr4: TQRLabel;
+    l1To2Yr5: TQRLabel;
+    QRLabel97: TQRLabel;
+    l0To1Yr1: TQRLabel;
+    l0To1Yr2: TQRLabel;
+    l0To1Yr3: TQRLabel;
+    l0To1Yr4: TQRLabel;
+    l0To1Yr5: TQRLabel;
+    sepline1: TQRShape;
+    sepline2: TQRShape;
+    sepline3: TQRShape;
+    sepline4: TQRShape;
+    sepline5: TQRShape;
+    sepline6: TQRShape;
+    l0To1Yr6: TQRLabel;
+    l1To2Yr6: TQRLabel;
+    l2PlusYrs6: TQRLabel;
+    QRLabel4: TQRLabel;
+    QRLabel5: TQRLabel;
+    lDairyCows1: TQRLabel;
+    lDairyCows2: TQRLabel;
+    lDairyCows3: TQRLabel;
+    lDairyCows4: TQRLabel;
+    lDairyCows5: TQRLabel;
+    lDairyCows6: TQRLabel;
+    lSucklerCows1: TQRLabel;
+    lSucklerCows2: TQRLabel;
+    lSucklerCows3: TQRLabel;
+    lSucklerCows4: TQRLabel;
+    lSucklerCows5: TQRLabel;
+    lSucklerCows6: TQRLabel;
+    sepline7: TQRShape;
+    l0To1Yr7: TQRLabel;
+    l1To2Yr7: TQRLabel;
+    l2PlusYrs7: TQRLabel;
+    lDairyCows7: TQRLabel;
+    lSucklerCows7: TQRLabel;
+    sepline8: TQRShape;
+    l0To1Yr8: TQRLabel;
+    l1To2Yr8: TQRLabel;
+    l2PlusYrs8: TQRLabel;
+    lDairyCows8: TQRLabel;
+    lSucklerCows8: TQRLabel;
+    sepline9: TQRShape;
+    l0To1Yr9: TQRLabel;
+    l1To2Yr9: TQRLabel;
+    l2PlusYrs9: TQRLabel;
+    lDairyCows9: TQRLabel;
+    lSucklerCows9: TQRLabel;
+    sepline10: TQRShape;
+    l0To1Yr10: TQRLabel;
+    l1To2Yr10: TQRLabel;
+    l2PlusYrs10: TQRLabel;
+    lDairyCows10: TQRLabel;
+    lSucklerCows10: TQRLabel;
+    sepline11: TQRShape;
+    l0To1Yr12: TQRLabel;
+    l1To2Yr12: TQRLabel;
+    l2PlusYrs12: TQRLabel;
+    lDairyCows12: TQRLabel;
+    lSucklerCows12: TQRLabel;
+    l0To1Yr11: TQRLabel;
+    l1To2Yr11: TQRLabel;
+    l2PlusYrs11: TQRLabel;
+    lDairyCows11: TQRLabel;
+    lSucklerCows11: TQRLabel;
+    sepline12: TQRShape;
+    lTotalWaste: TQRLabel;
+    QRLabel39: TQRLabel;
+    lTotNum1: TQRLabel;
+    lTotNum2: TQRLabel;
+    lTotNum3: TQRLabel;
+    lTotNum4: TQRLabel;
+    lTotNum5: TQRLabel;
+    lTotalWasteProd1: TQRLabel;
+    lTotalWasteProd2: TQRLabel;
+    lTotalWasteProd3: TQRLabel;
+    lTotalWasteProd4: TQRLabel;
+    lTotalWasteProd5: TQRLabel;
+    lWastePerHa: TQRLabel;
+    lWastePerHa1: TQRLabel;
+    lWastePerHa2: TQRLabel;
+    lWastePerHa3: TQRLabel;
+    lWastePerHa4: TQRLabel;
+    lWastePerHa5: TQRLabel;
+    lTotalWasteProd6: TQRLabel;
+    lWastePerHa6: TQRLabel;
+    lTotNum6: TQRLabel;
+    lWasteGenOnFarm: TQRLabel;
+    lWasteProd1: TQRLabel;
+    lWasteProd2: TQRLabel;
+    lWasteProd3: TQRLabel;
+    lWasteProd4: TQRLabel;
+    lWasteProd5: TQRLabel;
+    lWasteProd6: TQRLabel;
+    QRLabel58: TQRLabel;
+    lWasteNonBovine: TQRLabel;
+    WasteProdNonBovine1: TQRLabel;
+    WasteProdNonBovine2: TQRLabel;
+    WasteProdNonBovine3: TQRLabel;
+    WasteProdNonBovine4: TQRLabel;
+    WasteProdNonBovine5: TQRLabel;
+    WasteProdNonBovine6: TQRLabel;
+    lTotalProductionInYr: TQRLabel;
+    lTotalWasteProdCalYr: TQRLabel;
+    lAvgProductionInYr: TQRLabel;
+    lAvgWastePerHaCalYr: TQRLabel;
+    lTotalWasteProd7: TQRLabel;
+    lWastePerHa7: TQRLabel;
+    lTotNum7: TQRLabel;
+    lWasteProd7: TQRLabel;
+    WasteProdNonBovine7: TQRLabel;
+    lTotalWasteProd8: TQRLabel;
+    lWastePerHa8: TQRLabel;
+    lTotNum8: TQRLabel;
+    lWasteProd8: TQRLabel;
+    WasteProdNonBovine8: TQRLabel;
+    lTotalWasteProd9: TQRLabel;
+    lWastePerHa9: TQRLabel;
+    lTotNum9: TQRLabel;
+    lWasteProd9: TQRLabel;
+    WasteProdNonBovine9: TQRLabel;
+    lTotalWasteProd10: TQRLabel;
+    lWastePerHa10: TQRLabel;
+    lTotNum10: TQRLabel;
+    lWasteProd10: TQRLabel;
+    WasteProdNonBovine10: TQRLabel;
+    lTotalWasteProd11: TQRLabel;
+    lWastePerHa11: TQRLabel;
+    lTotNum11: TQRLabel;
+    lWasteProd11: TQRLabel;
+    WasteProdNonBovine11: TQRLabel;
+    lTotalWasteProd12: TQRLabel;
+    lWastePerHa12: TQRLabel;
+    lTotNum12: TQRLabel;
+    lWasteProd12: TQRLabel;
+    WasteProdNonBovine12: TQRLabel;
+    QRShape8: TQRShape;
+    QRShape9: TQRShape;
+    lForecastWaste6: TQRLabel;
+    lForecastWaste7: TQRLabel;
+    lForecastWaste12: TQRLabel;
+    QRLabel2: TQRLabel;
+    lPeriod: TQRLabel;
+    QRShape1: TQRShape;
+    QRRTFFilter1: TQRRTFFilter;
+    QRExcelFilter1: TQRExcelFilter;
+    QRWMFFilter1: TQRWMFFilter;
+    QRHTMLFilter1: TQRHTMLFilter;
+    QRCSVFilter1: TQRCSVFilter;
+    QRTextFilter1: TQRTextFilter;
+    qrlFilterWarning: TQRLabel;
+    procedure NutProdProjRptBeforePrint(Sender: TCustomQuickRep;
+      var PrintReport: Boolean);
+  private
+    { Private declarations }
+    FDate1,
+    FDate2,
+    FDate3,
+    FDate4,
+    FDate5,
+    FDate6 : TDateTime;
+  public
+    CurrentYear : Integer;
+    procedure ResetCaptions(AProductionType, APeriod : string);
+    procedure ShiftLeft(QrLabel : TQrLabel; Offset : Integer);
+    procedure HideCaptions(StartDate : Integer);
+    procedure HideHectareProduction;
+  end;
+
+var
+  fmNutrientProductionProjectionRpt: TfmNutrientProductionProjectionRpt;
+
+implementation
+
+{$R *.DFM}
+
+procedure TfmNutrientProductionProjectionRpt.HideCaptions(
+  StartDate: Integer);
+begin
+
+{   sepline11.Visible := StartDate
+   if StartDate = 11 then
+      begin
+   else if StartDate = 10 then
+      sepline11.Visible := False
+   else if StartDate = 9 then
+      sepline10.Visible := False
+}
+end;
+
+procedure TfmNutrientProductionProjectionRpt.HideHectareProduction;
+begin
+//   lTotalProductionInYr.Caption := '';
+   lAvgProductionInYr.Caption := '';
+//   lTotalWasteProdCalYr.Caption := '';
+   lAvgWastePerHaCalYr.Caption := '';
+   lWastePerHa.Caption := '';
+   lWastePerHa1.Caption := '';
+   lWastePerHa2.Caption := '';
+   lWastePerHa3.Caption := '';
+   lWastePerHa4.Caption := '';
+   lWastePerHa5.Caption := '';
+   lWastePerHa6.Caption := '';
+   lWastePerHa7.Caption := '';
+   lWastePerHa8.Caption := '';
+   lWastePerHa9.Caption := '';
+   lWastePerHa10.Caption := '';
+   lWastePerHa11.Caption := '';
+   lWastePerHa12.Caption := '';
+end;
+
+procedure TfmNutrientProductionProjectionRpt.NutProdProjRptBeforePrint(
+  Sender: TCustomQuickRep; var PrintReport: Boolean);
+begin
+//
+end;
+
+procedure TfmNutrientProductionProjectionRpt.ResetCaptions(AProductionType, APeriod : string);
+var
+  i : Integer;
+begin
+   ReportTitle.Caption := Format('Livestock Nutrient Production Projection - %s',[AProductionType]);
+   lWasteGenOnFarm.Caption := Format('%s Generated On Farm',[AProductionType]);
+   lWasteForecast.Caption := Format('(+/-) %s based on livestock Purchase/Sales',[AProductionType]);
+   lWasteNonBovine.Caption := Format('%s Generated by Non-Bovine Animals',[AProductionType]);
+   lForecast.Caption := Format('(+/-) %s based on livestock Purchase/Sales',[AProductionType]);
+   lTotalWaste.Caption := Format('Total %s',[AProductionType]);
+   lWastePerHa.Caption := Format('%s/Hectare',[AProductionType]);
+   lPeriod.Caption := APeriod;
+
+   lTotalProductionInYr.Caption := Format('Total %s generated between %s',[AProductionType,APeriod]);
+   lAvgProductionInYr.Caption := Format('Average %s/Hectare between %s',[AProductionType,APeriod]);
+
+   //lYear.Caption := IntToStr(CurrentYear);
+
+   for i := 0 to ComponentCount-1 do
+      if (Components[i] is TQrLabel) then
+         if ( Components[i] As TQrLabel ).Tag = 1 then
+            ( Components[i] As TQrLabel ).Caption := ''
+         else if ( Components[i] As TQrLabel ).Tag = 2 then
+//            ( Components[i] As TQrLabel ).Caption := '0';
+            ( Components[i] As TQrLabel ).Caption := '';
+end;
+
+
+procedure TfmNutrientProductionProjectionRpt.ShiftLeft(QrLabel: TQrLabel;
+  Offset: Integer);
+begin
+
+end;
+
+end.

@@ -1,0 +1,105 @@
+{
+   22/05/12 [V5.0 R6.0] /MK Additional Feature - Added Grade For Sale Events.
+}
+
+unit uEditInfo;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  ToolEdit, RXDBCtrl, StdCtrls, Mask, DBCtrls, ExtCtrls, Db, kwDBNavigator,
+  RXCtrls, TB97, TB97Tlbr, GenTypesConst, DBCtrlsEh, RxLookup;
+
+
+type
+  TfEditInfo = class(TForm)
+    pEditInfo: TPanel;
+    Label12: TLabel;
+    Label13: TLabel;
+    lComment: TLabel;
+    lDate: TLabel;
+    DBEdit1: TDBEdit;
+    DBEdit2: TDBEdit;
+    dbeComment: TDBEdit;
+    DBDateEdit1: TDBDateEdit;
+    Dock971: TDock97;
+    Toolbar971: TToolbar97;
+    Panel1: TPanel;
+    KwDBNavigator1: TKwDBNavigator;
+    RxSpeedButton1: TRxSpeedButton;
+    ToolbarSep971: TToolbarSep97;
+    ToolbarSep972: TToolbarSep97;
+    ToolbarSep974: TToolbarSep97;
+    DBEdit4: TDBEditEh;
+    Label1: TLabel;
+    dsCurrTableData: TDataSource;
+    cmboCulling: TRxDBLookupCombo;
+    lCullingReason: TLabel;
+    lGrade: TLabel;
+    dbeGrade: TDBEdit;
+    procedure RxSpeedButton1Click(Sender: TObject);
+    procedure KwDBNavigator1Click(Sender: TObject; Button: TKNavigateBtn);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+     procedure ShowTheForm(NatID : String; PurchOrSale : TEventType);
+  end;
+
+
+var
+  fEditInfo: TfEditInfo;
+
+implementation
+uses
+   uKImport;
+
+
+{$R *.DFM}
+
+procedure TfEditInfo.RxSpeedButton1Click(Sender: TObject);
+begin
+   Close;
+end;
+
+procedure TfEditInfo.ShowTheForm(NatID : String; PurchOrSale : TEventType);
+begin
+   if PurchOrSale = TSaleDeath then
+      begin
+         DBDateEdit1.DataField := 'SaleDate';
+         lDate.Caption := 'Sale Date';
+         lCullingReason.Visible := True;
+         cmboCulling.Visible := True;
+         lCullingReason.Top := 53;
+         cmboCulling.Top := 50;
+         lComment.Top := 83;
+         dbeComment.Top := 80;
+         cmboCulling.DataSource := dsCurrTableData;
+      end
+   else
+      begin
+         DBDateEdit1.DataField := 'PurchDate';
+         lDate.Caption := 'Purchase Date';
+         lCullingReason.Visible := False;
+         cmboCulling.Visible := False;
+         lGrade.Visible := False;
+         dbeGrade.Visible := False;
+         Label1.Top := 83;
+         DBEdit4.Top := 80;
+         lComment.Top := 53;
+         dbeComment.Top := 50;
+      end;
+   Caption := 'Animal - '+ NatID;
+   ShowModal;
+end;
+
+
+procedure TfEditInfo.KwDBNavigator1Click(Sender: TObject;
+  Button: TKNavigateBtn);
+begin
+   Close;
+end;
+
+end.
+

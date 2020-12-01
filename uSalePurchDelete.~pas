@@ -1,0 +1,193 @@
+unit uSalePurchDelete;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  StdCtrls, Mask, DBCtrls, Buttons, ExtCtrls, ComCtrls, DBCGrids, RXLookup,
+  ToolEdit, RXDBCtrl, Db, DBTables, RXCtrls, ToolWin;
+
+type
+  TSaleOrPurchaseDelete = ( SaleDelete, PurchaseDelete );
+  TfSalePurchDelete = class(TForm)
+    Panel2: TPanel;
+    lDelSaleOrPurchase: TLabel;
+    tDeletion: TTable;
+    ToolBar1: TToolBar;
+    ToolButton3: TToolButton;
+    sbExit: TRxSpeedButton;
+    ToolButton2: TToolButton;
+    sbSave: TRxSpeedButton;
+    ToolButton1: TToolButton;
+    sbHelp: TRxSpeedButton;
+    pStatic: TPanel;
+    Label1: TLabel;
+    Label4: TLabel;
+    Label5: TLabel;
+    Label3: TLabel;
+    dbeNatId: TDBEdit;
+    DBEdit1: TDBEdit;
+    eRemark: TEdit;
+    DBEdit2: TDBEdit;
+    Label2: TLabel;
+    dUserDate: TDateEdit;
+    procedure ExitButtonClick(Sender: TObject);
+    procedure bDeleteClick(Sender: TObject);
+  private
+    { Private declarations }
+    EventToDelete : Integer;
+    ThisDelType : TSaleOrPurchaseDelete;
+  public
+    { Public declarations }
+  end;
+
+procedure ShowSalePurchaseDeleteScreen ( SaleOrPurchaseDelete : TSaleOrPurchaseDelete );
+
+implementation
+uses
+    GenTypesConst,
+    DairyData;
+
+{$R *.DFM}
+
+procedure ShowSalePurchaseDeleteScreen ( SaleOrPurchaseDelete : TSaleOrPurchaseDelete );
+begin
+   with TfSalePurchDelete.Create(nil) do
+      try
+         ThisDelType := SaleOrPurchaseDelete;
+
+         // Check the Animal has a Sale or Purchase Event stored against it
+         EventToDelete := 0;
+         if ThisDelType = SaleDelete then
+            begin
+               lDelSaleOrPurchase.Caption := 'Delete Sale Information';
+               if NOT WinData.CheckEvents.Locate('AnimalID;EventType',VarArrayOf([WinData.AnimalFileByIDID.AsInteger,CSaleDeathEvent]), [] ) then
+                  MessageDLG('This Animal is not Sold',mtInformation,[mbOk],0)
+               else
+                  EventToDelete := WinData.CheckEvents.FieldByNAme('ID').AsInteger;
+            end
+         else
+            begin
+               lDelSaleOrPurchase.Caption := 'Delete Purchase Information';
+               if NOT WinData.CheckEvents.Locate('AnimalID;EventType',VarArrayOf([WinData.AnimalFileByIDID.AsInteger,CPurchaseEvent]), [] ) then
+                  MessageDLG('This Animal has no Purchase record',mtInformation,[mbOk],0)
+               else
+                  EventToDelete := WinData.CheckEvents.FieldByNAme('ID').AsInteger;
+            end;
+         // Found the Sale or Purhase Event.
+         if ( EventToDelete > 0 ) then
+            begin
+               if ThisDelType = SaleDelete then
+                  tDeletion.TableName := 'shrd'
+               else
+                  tDeletion.TableName := 'phrd';
+               tDeletion.Open;
+               // Show the Form
+
+               if WinData.DefCountry(WinData.AnimalFileByIDHerdId.AsInteger) = Nireland then // SP 05/11/2003
+                  begin
+                     pStatic.top := 64;
+                     dUserDate.Date := Date;
+                     ShowModal;
+                  end
+               else
+                  begin
+                     pStatic.top := 32;
+                     dUserDate.Date := 0;
+                     eRemark.Text := 'Deleted';
+                     sbSave.Click();
+                  end;
+            end;
+      finally
+         tDeletion.Close;
+         Free;
+      end;
+end;
+
+procedure TfSalePurchDelete.ExitButtonClick(Sender: TObject);
+begin
+   Close;
+end;
+
+procedure TfSalePurchDelete.bDeleteClick(Sender: TObject);
+var
+   TestStr : String;
+   EventDelNOTOK,
+   CancelledChanges : Boolean;
+begin
+   TestStr := WinData.StripSpaces(eRemark.Text);
+   if Length(TestStr) = 0 then
+      MessageDLG('Cannot Save a Blank Remark',mtWarning,[mbOK],0)
+   else
+      with WinData do
+         try
+            // Locate the Event
+            WinData.Events.Locate('ID',EventToDelete,[] );
+            if ThisDelType = SaleDelete then
+               WinData.SaleDeath.Locate('EventID',EventToDelete,[] )
+            else
+               WinData.Purchases.Locate('EventID',EventToDelete,[] );
+
+            // Open the Tables
+            tSysUser.Open;
+            // Add a Record
+            tDeletion.Append;
+            tDeletion.FieldByName('AID').AsInteger := AnimalFileByIDID.AsInteger;
+            tDeletion.FieldByName('DateChanged').AsDateTime := Date();
+            tDeletion.FieldByName('TimeChanged').AsDateTime := Time();
+            tDeletion.FieldByName('Remark').AsString  := eRemark.Text;
+            tDeletion.FieldByName('HerdID').AsInteger := EventsHerdID.AsInteger;
+            tDeletion.FieldByName('UserDate').AsDateTime := dUserDate.Date;
+
+            if ThisDelType = SaleDelete then
+               begin
+                  tDeletion.FieldByName('SaleDate').AsDateTime := EventsEventDate.AsDateTime;
+                  tDeletion.FieldByName('SaleDesc').AsString   := EventsEventDesc.AsString;
+                  tDeletion.FieldByName('Sold').AsBoolean      := WinData.SaleDeath.FieldByName('Sold').AsBoolean;
+                  tDeletion.FieldByName('SalePlace').AsInteger := WinData.SaleDeath.FieldByName('Customer').AsInteger;
+               end
+            else
+               begin
+                  tDeletion.FieldByName('PurchDate').AsDateTime := EventsEventDate.AsDateTime;
+                  tDeletion.FieldByName('PurchDesc').AsString   := EventsEventDesc.AsString;
+                  tDeletion.FieldByName('PurchPlace').AsInteger   := WinData.Purchases.FieldByName('Supplier').AsInteger;
+               end;
+
+            // Get the Current User Name
+            try
+               if tSysUser.Locate('ID',DefaultSysUser,[] ) then
+                  tDeletion.FieldByName('ChangedBy').AsString := tSysUser.FieldByName('Name').AsString
+               else
+                  raise EInvalidOp.CreateFmt('SetUp a Default User Name - Changes NOT saved',[0]);
+               CancelledChanges := FALSE;
+            except
+               tDeletion.Cancel;
+               CancelledChanges := TRUE;
+            end;
+
+            if NOT CancelledChanges then
+               try
+                  EventDelNOTOK     := FALSE;
+                  // Try and Event
+                  if WinData.Events.Locate('ID',EventToDelete,[] ) then
+                     begin
+                        WinData.Events.Delete;
+                        EventDelNOTOK := (WinData.Events.Locate('ID',EventToDelete,[]));
+                     end;
+                  CancelledChanges := EventDelNOTOK;
+               except
+                  MessageDLG('Cannot Delete this Event',mtinformation,[mbOk],0);
+               end;
+
+            // Only try and save changes if the default is set.
+            if NOT CancelledChanges then
+               tDeletion.Post
+            else
+               MessageDLG('No changes Saved',mtinformation,[mbOk],0);
+            Close;   // Close the Form
+         finally
+            tSysUser.Close;
+         end;
+end;
+
+end.
