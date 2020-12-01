@@ -5789,7 +5789,11 @@ begin
                            FHealthEvent.EventDate := EventDate;
                            FHealthEvent.EventComment := EventComment;
                            FHealthEvent.EventSource := sSMARTPHONE;
-                           FHealthEvent.DryOffEvent := IsDryOffEvent;
+
+                           ExistEventId := FEventDataHelper.GetEventID(FAnimalQuery.FieldByName('ID').AsInteger,
+                                                                       AnimalLactNo, CDryOffEvent, EventDate);
+                           FHealthEvent.DryOffEvent := ( (IsDryOffEvent) and (ExistEventId = 0));
+
                            FHealthEvent.IsSynchronized := True;
 
                            FHealthEvent.DrugUsed := GetDrugIdByVPANumber(RemedyTreatment.DrugVPANumber);
