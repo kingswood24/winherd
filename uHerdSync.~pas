@@ -124,7 +124,7 @@
 
    22/10/20 [V5.9 R6.3] /SP Additional Feature - Added sync in and out of Condition Score events.
 
-   20/11/20 [V5.9 R7.4] /MK Change - LocateAnimal - Search for animals In Herd first, if the animal is not in herd then use a filter for the tag number and get recent instance of animal.
+   20/11/20 [V5.9 R7.5] /MK Change - LocateAnimal - Search for animals In Herd first, if the animal is not in herd then use a filter for the tag number and get recent instance of animal.
                             Additional Feature - CreateHerdSyncData - Added code to sync out the Mastitis and Lameness events - Geraldine Murphy
 }
 
