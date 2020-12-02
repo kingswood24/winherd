@@ -1,4 +1,8 @@
-Version V5.9 R7.6 
+Version V5.9 R7.7
+
+02/12/20 /MK Change - uSystem - Removed Emer Howards number from the Evening phone but keep the Event phone number there - GL request.
+
+Version V5.9 R7.6
 
 25/11/20 /MK Change - SetupAnimals - SetMilkDiskGridDisplayColumns - Default to Cummulative Yield.
 26/11/20 /MK Bug Fix - DairyData - GetUserHerdId - I moved the OwnerFile.Open in OpenAllTables up to the top as it is a primary table to open.

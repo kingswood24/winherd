@@ -5419,7 +5419,9 @@ begin
       Splash.SplashForm.lStartmessage.Caption := ' Opening Files ...';
 
    OwnerFile.Open;
-
+   Calvings.Open;
+   Medicine.Open;
+   Health.Open;
    BullExt.Open;
    CowExt.Open;
    tBullExt.Open;
@@ -5431,7 +5433,6 @@ begin
 
    FilteredAnimals.Open;
    Events.Open;
-   Weighings.Open;
    Groups.Open;
    GroupLinks.Open;
 
@@ -5467,16 +5468,13 @@ begin
    tBullSemen.Open;
    Services.Open;
    PregDiag.Open;
-   Health.Open;
-   Calvings.Open;
-   Medicine.Open;
    MediPurch.Open;
    Units.Open;
    MediAdmin.Open;
    Suppliers.Open;
    CheckEvents.Open;
    LookUpServices.Open;
-//   LookUpCalvings.Open;
+ //   LookUpCalvings.Open;
    LookUpPDs.Open;
    LookUpBullings.Open;
    BeefSubsidy.Open;
@@ -5513,12 +5511,13 @@ begin
    pDefs.Open;
    Disbudding.Open;
    MealFeeding.Open;
-   Weaning.Open;
    FertilityCheck.Open;
    MilkTemperament.Open;
    JohnesResult.Open;
    ICBFDamEvent.Open;
    ICBFStockBullEvent.Open;
+   Weaning.Open;
+   Weighings.Open;
 
    RefreshDamSireLookupTable(True); // Sires
    RefreshDamSireLookupTable(False); // Dams
@@ -22115,8 +22114,7 @@ begin
 end;
 }
 
-function TWinData.CreateYoungStockEBIValues(
-   const HerdID : Integer) : Integer;
+function TWinData.CreateYoungStockEBIValues(const HerdID : Integer) : Integer;
 var
    tCowExt, tBullExt, tYoungStock : TTable;
    DamID, SireID : Integer;

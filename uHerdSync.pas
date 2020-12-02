@@ -4578,6 +4578,7 @@ begin
          if (not LocateAnimal(NatIdNo)) then
             begin
                CreateLogEntry(Format('Could not create bulling. Animal tag %s not found in the database.',[NatIdNo]));
+               AddEventToEventsExt(0,CBullingEvent,ClientId,NatIdNo);
                continue;
             end;
 
@@ -4689,6 +4690,7 @@ begin
         if (not LocateAnimal(NatIdNo)) then
            begin
               CreateLogEntry(Format('Could not create service event. Animal tag %s not found in the database.',[NatIdNo]));
+              AddEventToEventsExt(0,CServiceEvent,ClientId,NatIdNo);
               continue;
            end;
 
@@ -5027,6 +5029,7 @@ begin
         if (not LocateAnimal(NatIdNo)) then
            begin
               CreateLogEntry(Format('Could not create calving event. Animal tag %s not found in the database.',[NatIdNo]));
+              AddEventToEventsExt(0,CCalvingEvent,ClientId,NatIdNo);
               continue;
            end;
 
@@ -5631,6 +5634,7 @@ begin
         if (not LocateAnimal(NatIdNo)) then
            begin
               CreateLogEntry(Format('Could not create remedy event. Animal tag %s not found in the database.',[NatIdNo]));
+              AddEventToEventsExt(0,CDryOffEvent,ClientId,NatIdNo);
               continue;
            end;
 
@@ -6757,6 +6761,7 @@ begin
          if ( not LocateAnimal(NatIdNo) ) then
             begin
                CreateLogEntry(Format('Could not create Purchase event for animal (%s). Animal tag not found in the database.',[NatIdNo]));
+               AddEventToEventsExt(0,CPurchaseEvent,ClientId,NatIdNo);
                Continue;
             end;
 
@@ -6903,6 +6908,7 @@ begin
          if (not LocateAnimal(NatIdNo)) then
             begin
                CreateLogEntry(Format('Could not create Sale/Death event for animal (%s). Animal tag not found in the database.',[NatIdNo]));
+               AddEventToEventsExt(0,CSaleDeathEvent,ClientId,NatIdNo);
                continue;
             end;
 
@@ -7429,6 +7435,7 @@ begin
         if (not LocateAnimal(NatIdNo)) then
            begin
               CreateLogEntry(Format('Could not create PD event. Animal tag %s not found in the database.',[NatIdNo]));
+              AddEventToEventsExt(0,CPregDiagEvent,ClientId,NatIdNo);
               continue;
            end;
 
@@ -7826,6 +7833,7 @@ begin
         if (not LocateAnimal(NatIdNo)) then
            begin
               CreateLogEntry(Format('Could not create NewId event. Animal tag %s not found in the database.',[NatIdNo]));
+              AddEventToEventsExt(0,CNewIDEvent,ClientId,NatIdNo);
               continue;
            end;
 
@@ -9703,7 +9711,7 @@ var
    end;
 
 begin
-   if ( AEventID = 0 ) or ( Length(AClientID) = 0 ) then Exit;
+   if ( Length(AClientID) = 0 ) then Exit;
 
    tEventsExt := TTable.Create(nil);
    with tEventsExt do
