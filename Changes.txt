@@ -1,6 +1,7 @@
 Version V5.9 R7.7
 
 02/12/20 /MK Change - uSystem - Removed Emer Howards number from the Evening phone but keep the Event phone number there - GL request.
+                    - uUpdateTables - UpdateGenLook - Spelling mistake here and change from Foot to Hoof - GL request.
 
 Version V5.9 R7.6
 

@@ -3588,8 +3588,7 @@ function UpdateGenLookup : Boolean;
           end;
     end;
 
-    procedure UpdateGenLookupItemDesc (ACode, AOldDescription, ANewDescription : String;
-       AListType : Integer);
+    procedure UpdateGenLookupItemDesc (ACode, AOldDescription, ANewDescription : String; AListType : Integer);
     begin
        with UpdateQuery do
           begin
@@ -3824,7 +3823,7 @@ begin
          //   07/06/11 [V4.1 R1.8] /MK Additional Feature - If Not Locate LookupCode AI Then Add LookupCode AI
          if not UpdateTable.Locate('LookupCode', 'AI', []) then
             AddListType('AI', 'AI', LServiceType, False, True);
-         //   23/11/20 [V5.9 R7.4] /MK Additional Feature - Add Sexed Semen service type if it can't be found already.
+         //   23/11/20 [V5.9 R7.5] /MK Additional Feature - Add Sexed Semen service type if it can't be found already.
          if ( not(UpdateTable.Locate('LookupCode','SS',[])) ) or ( not(UpdateTable.Locate('Description','Sexed Semen',[loCaseInsensitive])) ) then
             AddListType('SS', 'Sexed Semen', LServiceType, False, True);
 
@@ -3920,6 +3919,9 @@ begin
          AddListType('MD2', 'Spilled', LMediDiposalReasons, False, True);
          AddListType('MD3', 'Stolen', LMediDiposalReasons, False, True);
          AddListType('MD4', 'Unknown', LMediDiposalReasons, False, True);
+
+         //   02/12/20 [V5.9 R7.7] /MK Change - Spelling mistake here and change from Foot to Hoof - GL request.
+         UpdateGenLookupItemDesc('TU1', 'Foot Pairing', 'Hoof Paring', LTreatmentUsed);
 
       except
          on e : Exception do

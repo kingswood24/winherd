@@ -294,6 +294,8 @@
   30/10/20 [V5.9 R6.7] /MK Bug - Any update/create functions to tables from UpdateDrugRegisterHeader on are not required so default Result to True.
 
   23/11/20 [V5.9 R7.5] /MK Additional Feature - UpdateGenLook - Add Sexed Semen service type if it can't be found already.
+
+  02/12/20 [V5.9 R7.7] /MK Change - UpdateGenLook - Spelling mistake here and change from Foot to Hoof - GL request.
 }
 
 unit uUpdateTables;
@@ -3588,8 +3590,7 @@ function UpdateGenLookup : Boolean;
           end;
     end;
 
-    procedure UpdateGenLookupItemDesc (ACode, AOldDescription, ANewDescription : String;
-       AListType : Integer);
+    procedure UpdateGenLookupItemDesc (ACode, AOldDescription, ANewDescription : String; AListType : Integer);
     begin
        with UpdateQuery do
           begin
@@ -3920,6 +3921,9 @@ begin
          AddListType('MD2', 'Spilled', LMediDiposalReasons, False, True);
          AddListType('MD3', 'Stolen', LMediDiposalReasons, False, True);
          AddListType('MD4', 'Unknown', LMediDiposalReasons, False, True);
+
+         //   02/12/20 [V5.9 R7.7] /MK Change - Spelling mistake here and change from Foot to Hoof - GL request.
+         UpdateGenLookupItemDesc('TU1', 'Foot Pairing', 'Hoof Paring', LTreatmentUsed);
 
       except
          on e : Exception do

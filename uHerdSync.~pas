@@ -9696,6 +9696,7 @@ end;
 procedure THerdSync.AddEventToEventsExt(AEventID, AEventType : Integer; AClientID, ANatIDNo : String);
 var
    tEventsExt : TTable;
+   iExistEvExtId : Integer;
 
    function InFSyncedEventsArray : Boolean;
    var
@@ -9719,9 +9720,32 @@ begin
          DatabaseName := AliasName;
          TableName := 'EventsExt';
          Open;
+         iExistEvExtId := 0;
 
          try
-            if ( Locate('EventID',AEventID,[]) ) then
+            with TQuery.Create(nil) do
+               try
+                  DatabaseName := AliasName;
+                  SQL.Clear;
+                  SQL.Add('SELECT *');
+                  SQL.Add('FROM EventsExt');
+                  if ( AEventId > 0 ) then
+                     SQL.Add('WHERE EventId = '+IntToStr(AEventID))
+                  else
+                     SQL.Add('WHERE Client = '+IntToStr(AClientId));
+                  try
+                     Open;
+                     if ( RecordCount > 0 ) then
+                        iExistEvExtId := FieldByName('Id').AsInteger;
+                  except
+                     on e : Exception do
+                        ShowDebugMessage(e.Message);
+                  end;
+               finally
+                  Free;
+               end;
+
+            if ( iExistEvExtId > 0 ) and ( Locate('Id',iExistEvExtId,[]) ) then
                Edit
             else
                Append;
