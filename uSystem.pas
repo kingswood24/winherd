@@ -3,7 +3,7 @@
 
    10/02/19 [V5.8 R6.8] /MK Change - Changed TeamViewer to call program, same as MenuUnit TeamViewer objects.
 
-   02/12/20 [V5.9 R7.7] /MK Change - Removed Emer Howards number from the Evening phone but keep the Event phone number there - GL request.
+   02/12/20 [V5.9 R7.7] /MK Change - Removed Emer Howard's phone number from Evening Support but leave Evening Support - GL request.   
 }
 
 unit uSystem;
