@@ -1,6 +1,16 @@
-Version V5.9 R7.6 
+Version V5.9 R7.7
+
+02/12/20 /MK Change - uSystem - Removed Emer Howard's phone number from Evening Support but leave Evening Support - GL request.
+02/12/20 /MK Bug Fix - uUpdateTables - UpdateGenLook - Changed Foot to Hoof and fixed spelling misate of Paring - GL request.
+
+Version V5.9 R7.6
 
 25/11/20 /MK Change - SetupAnimals - SetMilkDiskGridDisplayColumns - Default to Cummulative Yield.
+26/11/20 /MK Bug Fix - DairyData - GetUserHerdId - I moved the OwnerFile.Open in OpenAllTables up to the top as it is a primary table to open.
+                                                   The reason I did this was, if the OwnerFile can't be opened (because of corruption) the user
+                                                   wasn't told if the table before OwnerFile was also corrupted. Shane had a look at the change
+                                                   I made and found that the setting of OwnerFile.Active to AlreadyOpen was causing other forms
+                                                   that locate on the OwnerFile were getting the error "OwnerFile : Cannot perform this operation on a closed database".
 
 Version V5.9 R7.5
 

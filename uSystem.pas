@@ -2,6 +2,8 @@
    26/03/14 [V5.2 R9.1] /MK Change - Chnaged LogMeIn logo and URL to TeamViewer.
 
    10/02/19 [V5.8 R6.8] /MK Change - Changed TeamViewer to call program, same as MenuUnit TeamViewer objects.
+
+   02/12/20 [V5.9 R7.7] /MK Change - Removed Emer Howard's phone number from Evening Support but leave Evening Support - GL request.   
 }
 
 unit uSystem;

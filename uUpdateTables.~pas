@@ -294,6 +294,8 @@
   30/10/20 [V5.9 R6.7] /MK Bug - Any update/create functions to tables from UpdateDrugRegisterHeader on are not required so default Result to True.
 
   23/11/20 [V5.9 R7.5] /MK Additional Feature - UpdateGenLook - Add Sexed Semen service type if it can't be found already.
+
+  02/12/20 [V5.9 R7.7] /MK Bug Fix - UpdateGenLook - Changed Foot to Hoof and fixed spelling misate of Paring - GL request.
 }
 
 unit uUpdateTables;
@@ -3824,7 +3826,7 @@ begin
          //   07/06/11 [V4.1 R1.8] /MK Additional Feature - If Not Locate LookupCode AI Then Add LookupCode AI
          if not UpdateTable.Locate('LookupCode', 'AI', []) then
             AddListType('AI', 'AI', LServiceType, False, True);
-         //   23/11/20 [V5.9 R7.4] /MK Additional Feature - Add Sexed Semen service type if it can't be found already.
+         //   23/11/20 [V5.9 R7.5] /MK Additional Feature - Add Sexed Semen service type if it can't be found already.
          if ( not(UpdateTable.Locate('LookupCode','SS',[])) ) or ( not(UpdateTable.Locate('Description','Sexed Semen',[loCaseInsensitive])) ) then
             AddListType('SS', 'Sexed Semen', LServiceType, False, True);
 
@@ -3911,7 +3913,7 @@ begin
          AddListType('-75M', 'Sexed 75% Male', LSexedSemen, False, True);
 
          //   31/01/19 [V5.8 R6.5] /MK Additional Feature - Added in new genlook items for the Treatment Used.
-         AddListType('TU1', 'Foot Pairing', LTreatmentUsed, False, True);
+         AddListType('TU1', 'Hoof Paring', LTreatmentUsed, False, True);
          AddListType('TU2', 'Pare and Antibiotics', LTreatmentUsed, False, True);
          AddListType('TU3', 'Routine Trim', LTreatmentUsed, False, True);
          AddListType('TU4', 'Shoe/Block', LTreatmentUsed, False, True);
@@ -3920,6 +3922,9 @@ begin
          AddListType('MD2', 'Spilled', LMediDiposalReasons, False, True);
          AddListType('MD3', 'Stolen', LMediDiposalReasons, False, True);
          AddListType('MD4', 'Unknown', LMediDiposalReasons, False, True);
+
+         //   02/12/20 [V5.9 R7.7] /MK Bug Fix - Changed Foot to Hoof and fixed spelling misate of Paring - GL request.
+         UpdateGenLookupItemDesc('TU1', 'Foot Pairing', 'Hoof Paring', LTreatmentUsed);
 
       except
          on e : Exception do
