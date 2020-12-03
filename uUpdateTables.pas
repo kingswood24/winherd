@@ -294,6 +294,8 @@
   30/10/20 [V5.9 R6.7] /MK Bug - Any update/create functions to tables from UpdateDrugRegisterHeader on are not required so default Result to True.
 
   23/11/20 [V5.9 R7.5] /MK Additional Feature - UpdateGenLook - Add Sexed Semen service type if it can't be found already.
+
+  02/12/20 [V5.9 R7.7] /MK Bug Fix - UpdateGenLook - Changed Foot to Hoof and fixed spelling misate of Paring - GL request.
 }
 
 unit uUpdateTables;
@@ -3910,8 +3912,11 @@ begin
          AddListType('-90M', 'Sexed 90% Male', LSexedSemen, False, True);
          AddListType('-75M', 'Sexed 75% Male', LSexedSemen, False, True);
 
+         //   02/12/20 [V5.9 R7.7] /MK Bug Fix - Changed Foot to Hoof and fixed spelling misate of Paring - GL request.
+         UpdateGenLookupItemDesc('TU1', 'Foot Pairing', 'Hoof Paring', LTreatmentUsed);
+
          //   31/01/19 [V5.8 R6.5] /MK Additional Feature - Added in new genlook items for the Treatment Used.
-         AddListType('TU1', 'Foot Pairing', LTreatmentUsed, False, True);
+         AddListType('TU1', 'Hoof Paring', LTreatmentUsed, False, True);
          AddListType('TU2', 'Pare and Antibiotics', LTreatmentUsed, False, True);
          AddListType('TU3', 'Routine Trim', LTreatmentUsed, False, True);
          AddListType('TU4', 'Shoe/Block', LTreatmentUsed, False, True);
