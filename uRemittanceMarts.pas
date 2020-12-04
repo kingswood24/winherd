@@ -3,7 +3,9 @@
 
    21/05/15 [V5.4 R7.0] /MK Additional Feature - Added Ashbourne to cmbMartNames.
 
-   22/09/17 [V5.7 R3.0] /MK Additional Feature - Added Ballinasloe to Liffey Meats.   
+   22/09/17 [V5.7 R3.0] /MK Additional Feature - Added Ballinasloe to Liffey Meats.
+
+   04/12/20 [V5.9 R7.8] /MK Change - Added Jennings to the list of factories that a file can be requested from.
 }
 
 unit uRemittanceMarts;
@@ -97,6 +99,10 @@ begin
             begin
                //   21/05/15 [V5.4 R7.0] /MK Additional Feature - Added Ashbourne to cmbMartNames.
                cmbMartNames.Properties.Items.Add('Ashbourne');
+            end
+         else if AMartName = iRemittanceMarts[8] then
+            begin
+               cmbMartNames.Properties.Items.Add('Martin Jennings Wholesale');
             end;
        finally
           cmbMartNames.ItemIndex := 0;

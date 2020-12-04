@@ -118,6 +118,7 @@ type
     procedure pmiAshbourneClick(Sender: TObject);
     procedure FileTimerTimer(Sender: TObject);
     procedure FormActivate(Sender: TObject);
+    procedure pmiMartinJenningsClick(Sender: TObject);
   private
     procedure ShowToolBarOptions;
   private
@@ -998,7 +999,7 @@ begin
       end
    else if AMartName = iRemittanceMarts[8] then
       begin
-         ToAddress := 'liveStock@jenningsmeat.com';
+         ToAddress := 'livestock@jenningsmeat.com';
       end
    else
       begin
@@ -1113,6 +1114,11 @@ end;
 procedure TfRemittance.FormActivate(Sender: TObject);
 begin
    FileTimer.Enabled := True;
+end;
+
+procedure TfRemittance.pmiMartinJenningsClick(Sender: TObject);
+begin
+   SendEmail(iRemittanceMarts[pmiMartinJennings.Tag]);
 end;
 
 end.
