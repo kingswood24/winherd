@@ -29,6 +29,8 @@
                                                - Allow the file to be read in again and update SalesDeaths record fields.
 
    11/08/20 [V5.9 R5.3] /MK Bug Fix - When checking for the .csv in the file name allow for the uppercase version of .csv also - Denis O'Brien / CJ Meats.
+
+   04/12/20 [V5.9 R7.8] /MK Change - Added Jennings to the list of factories that a file can be requested from.   
 }
 
 unit uRemittance;
@@ -87,6 +89,7 @@ type
     SlaneyMeats1: TMenuItem;
     pmiAshbourne: TMenuItem;
     FileTimer: TTimer;
+    pmiMartinJennings: TMenuItem;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FromEmail1Click(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -115,6 +118,7 @@ type
     procedure pmiAshbourneClick(Sender: TObject);
     procedure FileTimerTimer(Sender: TObject);
     procedure FormActivate(Sender: TObject);
+    procedure pmiMartinJenningsClick(Sender: TObject);
   private
     procedure ShowToolBarOptions;
   private
@@ -989,10 +993,14 @@ begin
          ToAddress := 'eamon@slaney.com';
       end
    else if AMartName = iRemittanceMarts[7] then
-       begin
-          //   21/05/15 [V5.4 R7.0] /MK Additional Feature - Added Ashbourne to pmRemitMarts list - email address from emails in Anne Ryan's Gmail inbox.
-          ToAddress := 'reception@ashmeats.ie';
-       end
+      begin
+         //   21/05/15 [V5.4 R7.0] /MK Additional Feature - Added Ashbourne to pmRemitMarts list - email address from emails in Anne Ryan's Gmail inbox.
+         ToAddress := 'reception@ashmeats.ie';
+      end
+   else if AMartName = iRemittanceMarts[8] then
+      begin
+         ToAddress := 'livestock@jenningsmeat.com';
+      end
    else
       begin
          MessageDlg('Failed to send email. An unknown email address has been specified.',mtError,[mbOk],0);
@@ -1106,6 +1114,11 @@ end;
 procedure TfRemittance.FormActivate(Sender: TObject);
 begin
    FileTimer.Enabled := True;
+end;
+
+procedure TfRemittance.pmiMartinJenningsClick(Sender: TObject);
+begin
+   SendEmail(iRemittanceMarts[pmiMartinJennings.Tag]);
 end;
 
 end.

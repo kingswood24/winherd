@@ -126,6 +126,12 @@
 
    20/11/20 [V5.9 R7.5] /MK Change - LocateAnimal - Search for animals In Herd first, if the animal is not in herd then use a filter for the tag number and get recent instance of animal.
                             Additional Feature - CreateHerdSyncData - Added code to sync out the Mastitis and Lameness events - Geraldine Murphy
+
+   04/12/20 [V5.9 R7.8] /MK Change - CreateHealthEvents - If multi treatment then save first event as dryoff and any following treatments as remedy events.
+                                                        - Also change the comment of following treatments of dry off events to Remedy Event similar to non Dry Off Events.
+                                                        - Set new DryOffSaved variable boolean to true if event is dry off and its the first treatment.
+                                   - AddEventToEventsExt - No need to check for EventId as we allow events to come in here that were not saved
+                                                           because the animal doesn't exist in the database so push back the event as synced.
 }
 
 unit uHerdSync;
@@ -4578,6 +4584,7 @@ begin
          if (not LocateAnimal(NatIdNo)) then
             begin
                CreateLogEntry(Format('Could not create bulling. Animal tag %s not found in the database.',[NatIdNo]));
+               AddEventToEventsExt(0,CBullingEvent,ClientId,NatIdNo);
                continue;
             end;
 
@@ -4689,6 +4696,7 @@ begin
         if (not LocateAnimal(NatIdNo)) then
            begin
               CreateLogEntry(Format('Could not create service event. Animal tag %s not found in the database.',[NatIdNo]));
+              AddEventToEventsExt(0,CServiceEvent,ClientId,NatIdNo);
               continue;
            end;
 
@@ -5027,6 +5035,7 @@ begin
         if (not LocateAnimal(NatIdNo)) then
            begin
               CreateLogEntry(Format('Could not create calving event. Animal tag %s not found in the database.',[NatIdNo]));
+              AddEventToEventsExt(0,CCalvingEvent,ClientId,NatIdNo);
               continue;
            end;
 
@@ -5578,6 +5587,8 @@ var
 
    ExistEventId : Integer;
 
+   DryOffSaved : Boolean;
+
 begin
    if ( ARemediesNode = nil ) then Exit;
 
@@ -5631,6 +5642,7 @@ begin
         if (not LocateAnimal(NatIdNo)) then
            begin
               CreateLogEntry(Format('Could not create remedy event. Animal tag %s not found in the database.',[NatIdNo]));
+              AddEventToEventsExt(0,CDryOffEvent,ClientId,NatIdNo);
               continue;
            end;
 
@@ -5777,6 +5789,7 @@ begin
                end
             else
                begin
+                  DryOffSaved := False;
                   for x := 0 to RemedyTreatments.Count-1 do
                      begin
                         RemedyTreatment :=  TRemedyTreatment(RemedyTreatments[x]);
@@ -5790,9 +5803,11 @@ begin
                            FHealthEvent.EventComment := EventComment;
                            FHealthEvent.EventSource := sSMARTPHONE;
 
-                           ExistEventId := FEventDataHelper.GetEventID(FAnimalQuery.FieldByName('ID').AsInteger,
-                                                                       AnimalLactNo, CDryOffEvent, EventDate);
-                           FHealthEvent.DryOffEvent := ( (IsDryOffEvent) and (ExistEventId = 0));
+                           //   04/12/20 [V5.9 R7.8] /MK Change - If multi treatment then save first event as dryoff and any following treatments as remedy events.
+                           FHealthEvent.DryOffEvent := ( (IsDryOffEvent) and (not(DryOffSaved)) );
+                           //   04/12/20 [V5.9 R7.8] /MK Change - Also change the comment of following treatments of dry off events to Remedy Event similar to non Dry Off Events.
+                           if ( IsDryOffEvent ) and ( not(FHealthEvent.DryOffEvent) ) then
+                              FHealthEvent.EventComment := 'Remedy Event';
 
                            FHealthEvent.IsSynchronized := True;
 
@@ -5854,6 +5869,9 @@ begin
                               end;
 
                            FHealthEvent.Post;
+
+                           //   04/12/20 [V5.9 R7.8] /MK Change - Set new DryOffSaved variable boolean to true if event is dry off and its the first treatment.
+                           DryOffSaved := ( IsDryOffEvent ) and ( x = 0 );
 
                            if ( IsDryOffEvent ) then
                               AddEventToEventsExt(FHealthEvent.EventID,CDryOffEvent,ClientId,NatIdNo)
@@ -6757,6 +6775,7 @@ begin
          if ( not LocateAnimal(NatIdNo) ) then
             begin
                CreateLogEntry(Format('Could not create Purchase event for animal (%s). Animal tag not found in the database.',[NatIdNo]));
+               AddEventToEventsExt(0,CPurchaseEvent,ClientId,NatIdNo);
                Continue;
             end;
 
@@ -6903,6 +6922,7 @@ begin
          if (not LocateAnimal(NatIdNo)) then
             begin
                CreateLogEntry(Format('Could not create Sale/Death event for animal (%s). Animal tag not found in the database.',[NatIdNo]));
+               AddEventToEventsExt(0,CSaleDeathEvent,ClientId,NatIdNo);
                continue;
             end;
 
@@ -7429,6 +7449,7 @@ begin
         if (not LocateAnimal(NatIdNo)) then
            begin
               CreateLogEntry(Format('Could not create PD event. Animal tag %s not found in the database.',[NatIdNo]));
+              AddEventToEventsExt(0,CPregDiagEvent,ClientId,NatIdNo);
               continue;
            end;
 
@@ -7826,6 +7847,7 @@ begin
         if (not LocateAnimal(NatIdNo)) then
            begin
               CreateLogEntry(Format('Could not create NewId event. Animal tag %s not found in the database.',[NatIdNo]));
+              AddEventToEventsExt(0,CNewIDEvent,ClientId,NatIdNo);
               continue;
            end;
 
@@ -9688,6 +9710,7 @@ end;
 procedure THerdSync.AddEventToEventsExt(AEventID, AEventType : Integer; AClientID, ANatIDNo : String);
 var
    tEventsExt : TTable;
+   iExistEvExtId : Integer;
 
    function InFSyncedEventsArray : Boolean;
    var
@@ -9703,7 +9726,9 @@ var
    end;
 
 begin
-   if ( AEventID = 0 ) or ( Length(AClientID) = 0 ) then Exit;
+   //   04/12/20 [V5.9 R7.8] /MK Change - No need to check for EventId as we allow events to come in here that were not saved
+   //                                     because the animal doesn't exist in the database so push back the event as synced.
+   if ( Length(AClientID) = 0 ) then Exit;
 
    tEventsExt := TTable.Create(nil);
    with tEventsExt do
@@ -9711,9 +9736,33 @@ begin
          DatabaseName := AliasName;
          TableName := 'EventsExt';
          Open;
+         iExistEvExtId := 0;
 
          try
-            if ( Locate('EventID',AEventID,[]) ) then
+            //   04/12/20 [V5.9 R7.8] /MK Change - Use a query to find the EventId or the ClientId.
+            with TQuery.Create(nil) do
+               try
+                  DatabaseName := AliasName;
+                  SQL.Clear;
+                  SQL.Add('SELECT *');
+                  SQL.Add('FROM EventsExt');
+                  if ( AEventId > 0 ) then
+                     SQL.Add('WHERE EventId = '+IntToStr(AEventID))
+                  else
+                     SQL.Add('WHERE Client = '+AClientId);
+                  try
+                     Open;
+                     if ( RecordCount > 0 ) then
+                        iExistEvExtId := FieldByName('Id').AsInteger;
+                  except
+                     on e : Exception do
+                        ShowDebugMessage(e.Message);
+                  end;
+               finally
+                  Free;
+               end;
+
+            if ( iExistEvExtId > 0 ) and ( Locate('Id',iExistEvExtId,[]) ) then
                Edit
             else
                Append;

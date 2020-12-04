@@ -22114,8 +22114,7 @@ begin
 end;
 }
 
-function TWinData.CreateYoungStockEBIValues(
-   const HerdID : Integer) : Integer;
+function TWinData.CreateYoungStockEBIValues(const HerdID : Integer) : Integer;
 var
    tCowExt, tBullExt, tYoungStock : TTable;
    DamID, SireID : Integer;
