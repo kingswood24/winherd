@@ -8,6 +8,8 @@
   21/05/15 [V5.4 R7.0] /MK Additional Feature - Added Ashbourne to iRemittanceMarts.
 
   17/10/18 [V5.8 R4.0] /MK Additional Feature - CarcaseExists - Added const boolean for ReImportSale to allow the sale to be saved to again.
+
+  04/12/20 [V5.9 R7.8] /MK Change - Added Jennings to the list of factories that a file can be requested from.
 }
 
 unit DaZMisc;
@@ -29,7 +31,7 @@ function  RemitFileDateToDateTime(s : string) : tDateTime;
 function  StrToFloatEx(s : string) : double;
 
 var
-  iRemittanceMarts : array [0..7] of string = ('Kepak','AIBP','Dawn Meats','Liffey Meats','Dunbia','Ballon','Slaney','Ashbourne');
+  iRemittanceMarts : array [0..8] of string = ('Kepak','AIBP','Dawn Meats','Liffey Meats','Dunbia','Ballon','Slaney','Ashbourne','Jennings');
 
 implementation
 uses

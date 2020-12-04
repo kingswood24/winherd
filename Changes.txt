@@ -5,6 +5,7 @@ Version V5.9 R7.8
                                                      - Set new DryOffSaved variable boolean to true if event is dry off and its the first treatment.
                                 - AddEventToEventsExt - No need to check for EventId as we allow events to come in here that were not saved
                                                         because the animal doesn't exist in the database so push back the event as synced.
+                    - uRemittance, DaZMisc - Added Jennings to the list of factories that a file can be requested from.   
 
 Version V5.9 R7.7
 
