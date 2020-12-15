@@ -50,6 +50,8 @@
   03/05/19 [V5.8 R9.2] /MK Bug Fix - F5 was being used instead of V5 for valdating the Calf Survey codes - Michael Denning.
 
   04/11/20 [V5.9 R7.2] /MK Change - Added a const string array for KeyReports.
+
+  15/12/20 [V5.9 R7.8] /MK Change - Changed cUnitedDairiesURL URL as requested by George (TGM).
 }
 
 unit GenTypesConst;
@@ -897,7 +899,8 @@ const
    cAdvisorDBName = 'ADVISORY';
    cAdvisoryAccessMsg = 'This action cannot be taken when accessed using the advisory database.';
 
-   cUnitedDairiesURL = 'http://ukcows.com/theCIS/Secure/UDF_Login.aspx?ReturnUrl=MainMenu.aspx';
+   //   15/12/20 [V5.9 R7.8] /MK Change - Changed the URL as requested by George (TGM).
+   cUnitedDairiesURL = 'http://www.thecis.co.uk/thecis/secure/UDF_Login.aspx?ReturnUrl=MainMenu.aspx';
    cNMRURL = 'http://www.nmr.co.uk/data-download/';
 
    // ************* ReportName Consts Start *************

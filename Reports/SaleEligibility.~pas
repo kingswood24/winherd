@@ -252,8 +252,9 @@ var
                  FieldDefs.Add('DaysToSixteenMthDate',ftInteger,0,False);
                  FieldDefs.Add('DaysToTwentyFourtMthDate',ftInteger,0,False);
                  FieldDefs.Add('DaysToThirtyMthDate',ftInteger,0,False);
-                 FieldDefs.Add('HerdIdentity',ftString,20);
-                 FieldDefs.Add('NatIDShort',ftString,20);
+                 FieldDefs.Add('HerdIdentity',ftString,20,False);
+                 FieldDefs.Add('NatIDShort',ftString,20,False);
+                 FieldDefs.Add('FQASRetentionDate',ftDate,0,False);
 
                  CreateTable;
                  Open;
@@ -332,13 +333,14 @@ begin
       6 : LReportOn.Caption := 'All Animals';
    end;
 
-{
-   if (FSalesPlannerReportType in [rtFQAS,rtNonFQAS]) then
+   if ( (WinData.SystemRegisteredCountry = NIreland) and (SalesPlannerReportType in [rtSalesPlanner, rtNonFQAS]) ) then
       begin
          QRDBFQAS.DataField := 'FQASRetentionDate';
          qrFQAS.Caption := 'FQAS Retention';
          qrdbFQASDays.DataField := 'FQAStatus';
          lFQASDays.Caption := 'FQA Status';
+         QRDBText7.DataField := 'FQASDays'; 
+         QRLabel1.Caption := 'FQAS Qualified Days';
       end
    else
       begin
@@ -346,9 +348,9 @@ begin
          qrFQAS.Caption := '';
          qrdbFQASDays.DataField := '';
          lFQASDays.Caption := '';
+         QRDBText7.DataField := '';
+         QRLabel1.Caption := '';
       end;
-
-}
 
    lHerd.Caption:= HerdCombo.Text;
    if cbUseFilter.Checked then
@@ -508,7 +510,7 @@ begin
          SQL.Clear;
          SQL.Add('INSERT INTO TempBeefRep (AnimalID, AnimalNo, SortAnimalNo, NatIdNum, SortNatID, DateOfBirth, Sex, QADate, LookUpCode, Code');
          if IncludeAllHerds then
-            SQL.Add(', HerdIdentity )')
+            SQL.Add(', HerdIdentity)')
          else
             SQL.Add(')');
          SQL.Add('Select  A.ID, A.AnimalNo, A.SortAnimalNo, A.NatIDNum, A.SortNatID, A.DateOfBirth, A.Sex, A.QADate, G.LookUpCode, B.Code');
@@ -687,13 +689,16 @@ begin
                            SQL.ADD('Where FQAStatus=''Yes''')
                         else
                            begin
-                              if (( cbFQAEligible.Checked ) and (deFQAEligilbleDate.Enabled) and (deFQAEligilbleDate.Date>0)) then
+                              if ( (cbFQAEligible.Checked) and (deFQAEligilbleDate.Enabled) and (deFQAEligilbleDate.Date > 0)) then
                                  begin
+                                    SQL.Add('WHERE ((FQAStatus=''No'') AND (FQASRetentionDate <= "'+FormatDateTime(cUSDateStyle,deFQAEligilbleDate)+'"))');
+                                    {
                                     DaystoFQASStatus := Trunc(deFQAEligilbleDate.Date - Date);
                                     if ( DaystoFQASStatus > 0 ) then
                                        SQL.ADD(Format('Where ((FQAStatus=''No'') AND (FQASDays + %d > 90))',[DaystoFQASStatus]))
                                     else
                                        SQL.ADD('Where FQAStatus=''No''');
+                                    }
                                  end
                               else
                                  SQL.ADD('Where FQAStatus=''No''');
@@ -905,7 +910,12 @@ begin
                if ( TempBeefRep.FieldByName('QADate').AsDateTime <= Date ) then
                   TempBeefRep.FieldByName('FQAStatus').AsString := 'Yes'
                else if ( TempBeefRep.FieldByName('QADate').AsDateTime > Date ) then
-                  TempBeefRep.FieldByName('FQAStatus').AsString := 'No';
+                  begin
+                     TempBeefRep.FieldByName('FQAStatus').AsString := 'No';
+                     TempBeefRep.FieldByName('FQASRetentionDate').AsDateTime := TempBeefRep.FieldByName('QADate').AsDateTime;
+                     if ( TempBeefRep.FieldByName('FQASRetentionDate').AsDateTime > Date ) then
+                        TempBeefRep.FieldByName('FQASDays').AsInteger := Trunc(TempBeefRep.FieldByName('FQASRetentionDate').AsDateTime-Date);
+                  end;
             end
          else
             begin
@@ -1061,7 +1071,7 @@ end;
 procedure TEligibilityRep.QRDBFQASPrint(sender: TObject;
   var Value: String);
 begin
-   if RptQuery.FieldByName('QADate').AsDateTime <= 0 then
+   if RptQuery.FieldByName('FQASRetentionDate').AsDateTime <= 0 then
       Value := '';
 end;
 
@@ -1176,8 +1186,7 @@ begin
       Value := '';
 end;
 
-procedure TEligibilityRep.SetSalesPlannerReportType(
-  const Value: TSalesPlannerReportType);
+procedure TEligibilityRep.SetSalesPlannerReportType(const Value: TSalesPlannerReportType);
 begin
    if Value <> FSalesPlannerReportType then
       begin
@@ -1274,12 +1283,12 @@ begin
                   end
                else if ( FSalesPlannerReportType = rtNonFQAS ) then
                   begin
-                     Height := 370;
+                     Height := 400;
                      gbNoneFQASFilter.Top := 108;
                      ReportFilter.Top := gbNoneFQASFilter.Top + gbNoneFQASFilter.Height + 10;
                      SortByRadio.Top := ReportFilter.Top + ReportFilter.Height + 10;
                      OrderRadio.Top := SortByRadio.Top;
-                     PBar.Top := SortByRadio.Top + SortByRadio.Height + 10;
+                     PBar.Top := SortByRadio.Top + SortByRadio.Height + 8;
                   end;
             end;
 
@@ -1387,11 +1396,13 @@ procedure TEligibilityRep.cbFavouriteClick(Sender: TObject);
          begin
             WinData.SetReportAsFavourite(AReportConst,True);
             cbFavourite.Style.TextColor := clBlue;
+            cbFavourite.StyleHot.TextColor := clBlue;
          end
       else
          begin
             WinData.SetReportAsFavourite(AReportConst,False);
             cbFavourite.Style.TextColor := clBlack;
+            cbFavourite.StyleHot.TextColor := clBlack;
          end;
       Application.ProcessMessages;
       Update;
