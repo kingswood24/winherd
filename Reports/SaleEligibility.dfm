@@ -23,48 +23,6 @@ object EligibilityRep: TEligibilityRep
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 16
-  object gbNoneFQASFilter: TcxGroupBox
-    Left = 31
-    Top = 290
-    Caption = 'FQA Filter'
-    ParentFont = False
-    Style.Font.Charset = ANSI_CHARSET
-    Style.Font.Color = clWindowText
-    Style.Font.Height = -11
-    Style.Font.Name = 'Verdana'
-    Style.Font.Style = []
-    Style.LookAndFeel.Kind = lfFlat
-    Style.IsFontAssigned = True
-    StyleDisabled.LookAndFeel.Kind = lfFlat
-    StyleFocused.LookAndFeel.Kind = lfFlat
-    StyleHot.LookAndFeel.Kind = lfFlat
-    TabOrder = 6
-    Height = 55
-    Width = 449
-    object cbFQAEligible: TcxCheckBox
-      Left = 14
-      Top = 22
-      Caption = 'Show animals that become FQA on or before '
-      Properties.OnChange = cbFQAEligiblePropertiesChange
-      Style.LookAndFeel.Kind = lfFlat
-      StyleDisabled.LookAndFeel.Kind = lfFlat
-      StyleFocused.LookAndFeel.Kind = lfFlat
-      StyleHot.LookAndFeel.Kind = lfFlat
-      TabOrder = 0
-      Width = 309
-    end
-    object deFQAEligilbleDate: TcxDateEdit
-      Left = 306
-      Top = 22
-      Enabled = False
-      Style.LookAndFeel.Kind = lfFlat
-      StyleDisabled.LookAndFeel.Kind = lfFlat
-      StyleFocused.LookAndFeel.Kind = lfFlat
-      StyleHot.LookAndFeel.Kind = lfFlat
-      TabOrder = 1
-      Width = 125
-    end
-  end
   object pSalesPlanner: TPanel
     Left = 31
     Top = 110
@@ -184,7 +142,7 @@ object EligibilityRep: TEligibilityRep
       object LToDate: TLabel
         Left = 318
         Top = 10
-        Width = 18
+        Width = 19
         Height = 13
         Caption = 'To:'
         Font.Charset = ANSI_CHARSET
@@ -334,6 +292,48 @@ object EligibilityRep: TEligibilityRep
       Style.Font.Name = 'Verdana'
       Style.Font.Style = []
       Style.IsFontAssigned = True
+    end
+  end
+  object gbNoneFQASFilter: TcxGroupBox
+    Left = 31
+    Top = 290
+    Caption = 'FQA Filter'
+    ParentFont = False
+    Style.Font.Charset = ANSI_CHARSET
+    Style.Font.Color = clWindowText
+    Style.Font.Height = -11
+    Style.Font.Name = 'Verdana'
+    Style.Font.Style = []
+    Style.LookAndFeel.Kind = lfFlat
+    Style.IsFontAssigned = True
+    StyleDisabled.LookAndFeel.Kind = lfFlat
+    StyleFocused.LookAndFeel.Kind = lfFlat
+    StyleHot.LookAndFeel.Kind = lfFlat
+    TabOrder = 6
+    Height = 55
+    Width = 449
+    object cbFQAEligible: TcxCheckBox
+      Left = 14
+      Top = 22
+      Caption = 'Show animals that become FQAS on or before '
+      Properties.OnChange = cbFQAEligiblePropertiesChange
+      Style.LookAndFeel.Kind = lfFlat
+      StyleDisabled.LookAndFeel.Kind = lfFlat
+      StyleFocused.LookAndFeel.Kind = lfFlat
+      StyleHot.LookAndFeel.Kind = lfFlat
+      TabOrder = 0
+      Width = 309
+    end
+    object deFQAEligilbleDate: TcxDateEdit
+      Left = 306
+      Top = 22
+      Enabled = False
+      Style.LookAndFeel.Kind = lfFlat
+      StyleDisabled.LookAndFeel.Kind = lfFlat
+      StyleFocused.LookAndFeel.Kind = lfFlat
+      StyleHot.LookAndFeel.Kind = lfFlat
+      TabOrder = 1
+      Width = 125
     end
   end
   object ToolBar1: TToolBar
@@ -1434,7 +1434,7 @@ object EligibilityRep: TEligibilityRep
         AlignToBand = False
         AutoSize = False
         AutoStretch = False
-        Caption = 'FQA Qualified Days'
+        Caption = 'FQAS Qualified Days'
         Color = clWhite
         Font.Charset = ANSI_CHARSET
         Font.Color = clWindowText
@@ -2189,7 +2189,7 @@ object EligibilityRep: TEligibilityRep
   end
   object PBar: TProgressBar
     Left = 31
-    Top = 447
+    Top = 448
     Width = 447
     Height = 18
     Min = 0
