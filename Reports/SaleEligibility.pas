@@ -16,6 +16,9 @@
   21/05/14 [V5.3 R1.4] /MK Change - Form layout changed as requested by GL.
 
   03/10/17 [V5.7 R3.5] /MK Change - Don't change caption of favourites button just tick it and change the colour to blue like Apply Filter check box - SP request.
+
+  16/12/20 [V5.9 R7.8] /MK Bug Fix - Fixed problem where the Days To FQAS and Date of FQAS headings were appearing report but the data wasn't - TGM reported bug.
+                                   - Fixed problem where "Show animals with Days To FQAS on or before" - TGM reported bug.
 }
 
 unit SaleEligibility;
