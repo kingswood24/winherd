@@ -691,7 +691,7 @@ begin
                            begin
                               if ( (cbFQAEligible.Checked) and (deFQAEligilbleDate.Enabled) and (deFQAEligilbleDate.Date > 0)) then
                                  begin
-                                    SQL.Add('WHERE ((FQAStatus=''No'') AND (FQASRetentionDate <= "'+FormatDateTime(cUSDateStyle,deFQAEligilbleDate)+'"))');
+                                    SQL.Add('WHERE ((FQAStatus=''No'') AND (FQASRetentionDate <= "'+FormatDateTime(cUSDateStyle,deFQAEligilbleDate.Date)+'"))');
                                     {
                                     DaystoFQASStatus := Trunc(deFQAEligilbleDate.Date - Date);
                                     if ( DaystoFQASStatus > 0 ) then
