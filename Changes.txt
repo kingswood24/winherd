@@ -1,6 +1,7 @@
 Version V5.9 R7.9
 
 16/12/20 /MK Change - MainUnit - Show Parlour Link and Ration Calc icons but give "acquire this facility" error if the module is not installed i.e. not purchased.
+                    - uDanRyanImport - FilterGridTable - Default the ActivePageIndex to Pregnant as this event should always exist.
 
 Version V5.9 R7.8
 

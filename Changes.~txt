@@ -1,3 +1,7 @@
+Version V5.9 R7.9
+
+16/12/20 /MK Change - MainUnit - Show Parlour Link and Ration Calc icons but give "acquire this facility" error if the module is not installed i.e. not purchased.
+
 Version V5.9 R7.8
 
 04/12/20 /MK Change - uHerdSync - CreateHealthEvents - If multi treatment then save first event as dryoff and any following treatments as remedy events.
