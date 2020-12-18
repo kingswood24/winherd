@@ -987,6 +987,8 @@ unit MenuUnit;
  06/11/20 [V5.9 R7.2] /MK Additional Feature - Added menu item to mGroup menu to add Help button that links to new Calving help PDF file on the server.
 
  16/11/20 [V5.9 R7.3] /MK Change - Calving button - If its a Suckler herd only show the help drop-down-menu.
+
+ 16/12/20 [V5.9 R7.9] /MK Change - Show Parlour Link and Ration Calc icons but give "acquire this facility" error if the module is not installed. 
 }
 
 interface
@@ -12634,12 +12636,18 @@ end;
 
 procedure TMenuForm.actParlourLinkExecute(Sender: TObject);
 begin
-   ShowParlourLinkScreen();
+   if ShowParlourLink then
+      ShowParlourLinkScreen()
+   else
+      MessageDlg(cMissingModulePayMsg,mtError,[mbOK],0);
 end;
 
 procedure TMenuForm.actRationCalcExecute(Sender: TObject);
 begin
-   ShowRationCalc;
+   if ShowRationCalcLink then
+      ShowRationCalc()
+   else
+      MessageDlg(cMissingModulePayMsg,mtError,[mbOK],0);
 end;
 
 procedure TMenuForm.actBulkTankExecute(Sender: TObject);
@@ -12805,8 +12813,8 @@ const
          begin
             actBulkTank.Visible := (FSelectedHerdType in [htDairy,htSuckler,htBeef]);
             actMilkRecording.Visible := (FSelectedHerdType = htDairy);
-            actParlourLink.Visible := ShowParlourLink;
-            actRationCalc.Visible := ShowRationCalcLink;
+            //actParlourLink.Visible := ShowParlourLink;
+            //actRationCalc.Visible := ShowRationCalcLink;
          end;
       ContainerCheckDefFile;
    end;
@@ -12941,10 +12949,10 @@ begin
    actGroupMovements.Visible := (Def.Definition.dUseManCal) or (Def.Definition.dUseBeefMan) or ( WinData.ShowDealerControls );
    btnGroupMovement.Visible := actGroupMovements.Visible;
 
-   actParlourLink.Visible := ShowParlourLink;
-   btnParlourLink.Visible := actParlourLink.Visible;
-   actRationCalc.Visible := ShowRationCalcLink;
-   btnRationCalc.Visible := actRationCalc.Visible;
+   //actParlourLink.Visible := ShowParlourLink;
+   //btnParlourLink.Visible := actParlourLink.Visible;
+   //actRationCalc.Visible := ShowRationCalcLink;
+   //btnRationCalc.Visible := actRationCalc.Visible;
 end;
 
 procedure TMenuForm.SetupLinkButtons;
