@@ -989,6 +989,10 @@ unit MenuUnit;
  16/11/20 [V5.9 R7.3] /MK Change - Calving button - If its a Suckler herd only show the help drop-down-menu.
 
  16/12/20 [V5.9 R7.9] /MK Change - Show Parlour Link and Ration Calc icons but give "acquire this facility" error if the module is not installed i.e. not purchased. 
+
+ 21/12/20 [V5.9 R7.9] /MK Change - DoFilter - If the filter is Bulls In Use and some bulls don't have breeds, show information message and sort by breed code.
+                                 - ClearAnimalSelection - If the sort was changed by the filter of Bulls In Use then set sort back to original sorted column.
+
 }
 
 interface
@@ -1983,6 +1987,7 @@ type
     actCalvingHelp: TAction;
     pmSuckCalvingHelp: TPopupMenu;
     pmiSuckCalvingHelp: TMenuItem;
+    cxStyleBullNoBreed: TcxStyle;
    //--------------------------------------//
 
     procedure ExitButtonClick(Sender: TObject);
@@ -2691,6 +2696,8 @@ type
     AIMMovementsActivated : Boolean;
 
     FHintStyleController : TcxHintStyleController;
+
+    FSortedColumn : TcxGridColumn;
 
     procedure SetUpForm;
     procedure HideModules;
@@ -8273,6 +8280,15 @@ begin
                             AStyle := JohnesHigh;
                      end;
             end;
+
+         if ( FQuickFilter = qfBullsInUse ) then
+            try
+               if ( VarIsNull(ARecord.Values[cxAnimalGridViewBreedCode.Index]) ) then
+                  AStyle := cxStyleBullNoBreed;
+            except
+               on e : Exception do
+                  ShowDebugMessage(e.Message);
+            end;
       end;
 end;
 
@@ -10685,6 +10701,7 @@ begin
       begin
          cxAnimalGridView.DataController.ClearSorting(False);
          cxAnimalGridViewSortAnimalNo.SortOrder := soAscending;
+         FSortedColumn := cxAnimalGridViewSortAnimalNo;
       end;
 
    if ( teSearchText.Text = cTagPreFix_IE ) then
@@ -11290,6 +11307,40 @@ begin
       cbDefaultHerd.OnChange := cbDefaultHerd1Change;
       Screen.Cursor := crDefault;
       Update;
+
+      //   21/12/20 [V5.9 R7.9] /MK Change - If the filter is Bulls In Use and some bulls don't have breeds, show information message and sort by breed code.
+      if ( AFilter = qfBullsInUse ) then
+         with TQuery.Create(nil) do
+            try
+               DatabaseName := AliasName;
+               SQL.Clear;
+               SQL.Add('SELECT DISTINCT (A.ID)');
+               SQL.Add('FROM Animals A');
+               SQL.Add('INNER JOIN BullSemenStk B ON (B.AnimalID=A.ID)');
+               SQL.Add('WHERE (A.AnimalDeleted=FALSE)');
+               SQL.Add('AND   (A.Sex="Bull")');
+               SQL.Add('AND   (A.AnimalNo <> "")');
+               SQL.Add('AND   (B.InUse = True)');
+               SQL.Add('AND   (A.Breeding = True)');
+               SQL.Add('AND   ((A.PrimaryBreed IS NULL) OR (A.PrimaryBreed = 0))');
+               try
+                  Open;
+                  if ( RecordCount > 0 ) then
+                     begin
+                        cxAnimalGridView.DataController.ClearSorting(False);
+                        cxAnimalGridViewBreedCode.SortOrder := soAscending;
+                        cxAnimalGridViewBreedCode.SortIndex := 0;
+                        MessageDlg('There are bulls that do not have a breed selected (highlighted in red).'+cCRLF+
+                                   'These bulls WILL NOT appear on other bull lists including the Kingswood App.'+cCRLF+
+                                   'To add a breed double-click the bull, select the breed and click Save',mtInformation,[mbOK],0);
+                     end;
+               except
+                  on e : Exception do
+                     ShowDebugMessage(e.Message);
+               end;
+            finally
+               Free;
+            end;
    end;
 end;
 
@@ -11416,8 +11467,10 @@ begin
             Add('AND   (A.AnimalNo <> "")');
             Add('AND   (B.InUse = True)');
             Add('AND   (A.Breeding = True)');
+            {
             //   28/09/18 [V5.8 R3.0] /MK Change - Bulls In Use filter changed to be like the Service, Planned Bull and Stock Bull queries in HerdLookup i.e. check for null breed.
             Add('AND   ((A.PrimaryBreed IS NOT NULL) OR (A.PrimaryBreed > 0))');
+            }
             ApplySortToAnimalFileByIdAndOpenQuery();
             // Set fFilters.AIBullSQL to WinData.AnimalFileByID.SQL so fFilters.ApplyFilter
             // can look at this SQL if other filter applied on top of AIBullSQL.
@@ -12465,6 +12518,7 @@ begin
                   WinData.FMainGridSortBy := mgsbSex
                else if ( cxAnimalGridView.Columns[i].DataBinding.FieldName = 'Name' ) then
                   WinData.FMainGridSortBy := mgsbName;
+               FSortedColumn := cxAnimalGridView.Columns[i];
             end;
       end;
 
@@ -14180,6 +14234,7 @@ procedure TMenuForm.cxAnimalGridViewColumnHeaderClick(
   Sender: TcxGridTableView; AColumn: TcxGridColumn);
 begin
    WinData.FMainGridSortOrder := AColumn.SortOrder;
+   FSortedColumn := AColumn;
 end;
 
 procedure TMenuForm.actReviewMedicineExecute(Sender: TObject);
@@ -14472,6 +14527,14 @@ begin
    //if not(btnEventDiary.Enabled) then
       //btnEventDiary.Enabled := True;
    btnClearSelect.Visible := False;
+
+   //   21/12/20 [V5.9 R7.9] /MK Change - If the sort was changed by the filter of Bulls In Use then set sort back to original sorted column.
+   cxAnimalGridView.DataController.ClearSorting(False);
+   if ( FSortedColumn <> nil ) then
+      begin
+         FSortedColumn.SortOrder := soAscending;
+         FSortedColumn.SortIndex := 0;
+      end;
 end;
 
 procedure TMenuForm.SyncData(ADirection: TSyncDirection);
