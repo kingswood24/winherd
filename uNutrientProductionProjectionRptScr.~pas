@@ -11,6 +11,8 @@
 
    20/11/20 [V5.9 R7.5] /MK Change - If there are no Waste Productions Rates give error with info on how to enter the rates.
                                    - HasWasteProdRates - No function to check whether the user has HasWasteProdRates to view the report.
+
+   22/12/20 [V5.9 R7.9] /MK Change - Changed Forage Area from Spin Edit to Current Edit so as not to show the spin buttons - GL Request.                                   
 }
 
 unit uNutrientProductionProjectionRptScr;
@@ -72,7 +74,6 @@ type
     pb: TProgressBar;
     GenQuery: TQuery;
     seAvgNonBovineProduction: TcxSpinEdit;
-    seForageArea: TcxSpinEdit;
     sbWasteProdRates: TRxSpeedButton;
     ToolButton3: TToolButton;
     GroupBox1: TGroupBox;
@@ -195,6 +196,8 @@ type
     cxLabel6: TcxLabel;
     cbFavourite: TcxCheckBox;
     cbFilter: TcxCheckBox;
+    lForecastInfo: TcxLabel;
+    ceForageArea: TcxCurrencyEdit;
     procedure cbNitrogenClick(Sender: TObject);
     procedure cbPhosphorusClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -1049,8 +1052,8 @@ begin
    // fill in HerdID and Version labels
    fmNutrientProductionProjectionRpt.lProgramVer.Caption := 'Kingswood Herd Management ' + HerdVerNo;
    fmNutrientProductionProjectionRpt.lHerdID.Caption := ComboHerd.Text;
-   if seForageArea.Text <> '' then
-      fmNutrientProductionProjectionRpt.qrlHectares.Caption := seForageArea.Text
+   if ceForageArea.Text <> '' then
+      fmNutrientProductionProjectionRpt.qrlHectares.Caption := ceForageArea.Text
    else
       fmNutrientProductionProjectionRpt.qrlHectares.Caption := '';
    fmNutrientProductionProjectionRpt.CurrentYear := ThisYear;
@@ -1097,7 +1100,7 @@ begin
          nForecastWaste12 := ceDecTotalForecast.Value;
       if ( seAvgNonBovineProduction.Value > 0 ) then
          AvgNonBovine     := seAvgNonBovineProduction.Value / 12;
-      ForageAreaHa     := seForageArea.Value;
+      ForageAreaHa     := ceForageArea.Value;
    except
    end;
 
@@ -1348,7 +1351,7 @@ begin
       begin
          ResetCaptions(ProductionType, ReportPeriodAsString );
          lHerdID.Caption := ComboHerd.Text;
-         qrlHectares.Caption := seForageArea.Text;
+         qrlHectares.Caption := ceForageArea.Text;
       end;
 end;
 
@@ -1950,11 +1953,11 @@ begin
             seAvgNonBovineProduction.Value := StrToFloat(ConfigFile.Values['NonBovineProduction']);
          if ConfigFile.Values['ForageArea'] <> '' then
             begin
-               seForageArea.Value := StrToFloat(ConfigFile.Values['ForageArea']);
+               ceForageArea.Value := StrToFloat(ConfigFile.Values['ForageArea']);
                if WinData.OwnerFile.Locate('ID', WinData.UserDefaultHerdID, [loCaseInsensitive]) then
                   begin
                      if WinData.OwnerFile.FieldByName('ForageAreaHa').AsFloat > 0 then
-                        seForageArea.Value := WinData.OwnerFile.FieldByName('ForageAreaHa').AsFloat;
+                        ceForageArea.Value := WinData.OwnerFile.FieldByName('ForageAreaHa').AsFloat;
                   end;
             end;
          WasteValuesLoaded := True;
@@ -2081,7 +2084,7 @@ begin
       end;
 
    ConfigFile.Values['NonBovineProduction'] := FloatToStr(seAvgNonBovineProduction.Value);
-   ConfigFile.Values['ForageArea'] := FloatToStr(seForageArea.Value);
+   ConfigFile.Values['ForageArea'] := FloatToStr(ceForageArea.Value);
    ConfigFile.Values['StartYear'] := cmboYear.Text;
    ConfigFile.Values['StartMonth'] := cmboMonth.Text;
 
@@ -2219,7 +2222,7 @@ end;
 
 procedure TfmNutrientProductionProjectionRptScr.OutputReport;
 begin
-   //   20/11/20 [V5.9 R7.4] /MK Change - If there are no Waste Productions Rates give error with info on how to enter the rates. 
+   //   20/11/20 [V5.9 R7.5] /MK Change - If there are no Waste Productions Rates give error with info on how to enter the rates. 
    if ( not(HasWasteProdRates) ) then
       begin
          MessageDlg('Waste Production Rates are not entered.'+cCRLF+
@@ -2242,7 +2245,7 @@ begin
       fmNutrientProductionProjectionRpt := TfmNutrientProductionProjectionRpt.Create(nil);
 
    seAvgNonBovineProduction.PostEditValue;
-   seForageArea.PostEditValue;
+   ceForageArea.PostEditValue;
    ceJanTotalForecast.PostEditValue;
    ceFebTotalForecast.PostEditValue;
    ceMarTotalForecast.PostEditValue;

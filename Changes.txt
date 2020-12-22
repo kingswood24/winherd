@@ -1,3 +1,8 @@
+Version V5.9 R7.9
+
+22/12/20 /MK Change - uNutrientProductionProjectionRptScr - Changed Forage Area from Spin Edit to Current Edit so as not to show the spin buttons - GL request.
+                                                          - Added a label under the Forecast Purchases & Sales to explain that movements are assumed to ocurr on the first date of the month - GL request.
+
 Version V5.9 R7.8
 
 04/12/20 /MK Change - uHerdSync - CreateHealthEvents - If multi treatment then save first event as dryoff and any following treatments as remedy events.

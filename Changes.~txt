@@ -8,6 +8,8 @@ Version V5.9 R7.8
                     - uRemittance, DaZMisc - Added Jennings to the list of factories that a file can be requested from.   
 15/12/20 /MK Change - GenTypesConst - Changed cUnitedDairiesURL URL as requested by George (TGM).
                     - uCallToExternalProgram - CallTeamViewer - Changed TeamViewer URL to look at new Kingswood log version of TeamViewer as TeamViewer9 is not supported.
+16/12/20 /MK Bug Fix - SaleEligibility - Fixed problem where the Days To FQAS and Date of FQAS headings were appearing report but the data wasn't - TGM reported bug.
+                                       - Fixed problem where "Show animals with Days To FQAS on or before" - TGM reported bug.
 
 Version V5.9 R7.7
 
