@@ -57,7 +57,7 @@ AutoIncBuild=0
 MajorVer=5
 MinorVer=9
 Release=7
-Build=8
+Build=9
 Debug=0
 PreRelease=1
 Special=0
@@ -68,13 +68,13 @@ CodePage=1252
 [Version Info Keys]
 CompanyName=Kingswood Computing Ltd
 FileDescription=Kingswood Herd Management
-FileVersion=5.9.7.8
+FileVersion=5.9.7.9
 InternalName=Winherd
 LegalCopyright=Kingswood Computing Ltd.
 LegalTrademarks=
 OriginalFilename=Winherd
 ProductName=Winherd.exe
-ProductVersion=V5.9 R7.8
+ProductVersion=V5.9 R7.9
 Comments=Kingswood Computing Ltd.
 [Excluded Packages]
 C:\PDBDataManager3\D5\PDBDataManD5.bpl=PDBDataManager v3.0

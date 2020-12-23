@@ -900,7 +900,7 @@ const
    cAdvisoryAccessMsg = 'This action cannot be taken when accessed using the advisory database.';
 
    //   15/12/20 [V5.9 R7.8] /MK Change - Changed the URL as requested by George (TGM).
-   cUnitedDairiesURL = 'http://www.thecis.co.uk/thecis/secure/UDF_Login.aspx?ReturnUrl=MainMenu.aspx'
+   cUnitedDairiesURL = 'http://www.thecis.co.uk/thecis/secure/UDF_Login.aspx?ReturnUrl=MainMenu.aspx';
    cNMRURL = 'http://www.nmr.co.uk/data-download/';
 
    // ************* ReportName Consts Start *************

@@ -2,7 +2,7 @@ object fmNutrientProductionProjectionRptScr: TfmNutrientProductionProjectionRptS
   Left = 328
   Top = 111
   Width = 769
-  Height = 690
+  Height = 709
   Caption = 'Livestock Nutrient Production - Projected'
   Color = clBtnFace
   Font.Charset = ANSI_CHARSET
@@ -309,15 +309,15 @@ object fmNutrientProductionProjectionRptScr: TfmNutrientProductionProjectionRptS
     Left = 0
     Top = 53
     Width = 761
-    Height = 606
+    Height = 625
     Align = alClient
     BevelInner = bvLowered
     TabOrder = 1
     object lProgBar: TLabel
       Left = 390
-      Top = 560
+      Top = 584
       Width = 121
-      Height = 16
+      Height = 17
       Alignment = taRightJustify
       AutoSize = False
       Caption = 'Date 1 compiling'
@@ -331,9 +331,9 @@ object fmNutrientProductionProjectionRptScr: TfmNutrientProductionProjectionRptS
     end
     object lPleaseWait: TLabel
       Left = 10
-      Top = 560
+      Top = 584
       Width = 365
-      Height = 18
+      Height = 19
       AutoSize = False
       Caption = 'Please wait while the information is being processed....'
       Font.Charset = ANSI_CHARSET
@@ -376,9 +376,9 @@ object fmNutrientProductionProjectionRptScr: TfmNutrientProductionProjectionRptS
     end
     object pb: TProgressBar
       Left = 515
-      Top = 557
+      Top = 581
       Width = 227
-      Height = 21
+      Height = 22
       Min = 0
       Max = 100
       TabOrder = 0
@@ -390,6 +390,7 @@ object fmNutrientProductionProjectionRptScr: TfmNutrientProductionProjectionRptS
       ParentFont = False
       Properties.ImmediatePost = True
       Properties.ValueType = vtFloat
+      Style.BorderStyle = ebsFlat
       Style.Font.Charset = ANSI_CHARSET
       Style.Font.Color = clWindowText
       Style.Font.Height = -11
@@ -405,29 +406,6 @@ object fmNutrientProductionProjectionRptScr: TfmNutrientProductionProjectionRptS
       StyleHot.LookAndFeel.Kind = lfFlat
       StyleHot.LookAndFeel.NativeStyle = False
       TabOrder = 2
-      Width = 70
-    end
-    object seForageArea: TcxSpinEdit
-      Left = 655
-      Top = 94
-      ParentFont = False
-      Properties.ImmediatePost = True
-      Properties.ValueType = vtFloat
-      Style.Font.Charset = ANSI_CHARSET
-      Style.Font.Color = clWindowText
-      Style.Font.Height = -11
-      Style.Font.Name = 'Verdana'
-      Style.Font.Style = []
-      Style.LookAndFeel.Kind = lfFlat
-      Style.LookAndFeel.NativeStyle = False
-      Style.IsFontAssigned = True
-      StyleDisabled.LookAndFeel.Kind = lfFlat
-      StyleDisabled.LookAndFeel.NativeStyle = False
-      StyleFocused.LookAndFeel.Kind = lfFlat
-      StyleFocused.LookAndFeel.NativeStyle = False
-      StyleHot.LookAndFeel.Kind = lfFlat
-      StyleHot.LookAndFeel.NativeStyle = False
-      TabOrder = 3
       Width = 70
     end
     object GroupBox1: TGroupBox
@@ -494,7 +472,7 @@ object fmNutrientProductionProjectionRptScr: TfmNutrientProductionProjectionRptS
       StyleDisabled.LookAndFeel.NativeStyle = False
       StyleFocused.LookAndFeel.NativeStyle = False
       StyleHot.LookAndFeel.NativeStyle = False
-      TabOrder = 4
+      TabOrder = 3
       Width = 101
     end
     object cmboMonth: TcxComboBox
@@ -517,7 +495,7 @@ object fmNutrientProductionProjectionRptScr: TfmNutrientProductionProjectionRptS
       StyleDisabled.LookAndFeel.NativeStyle = False
       StyleFocused.LookAndFeel.NativeStyle = False
       StyleHot.LookAndFeel.NativeStyle = False
-      TabOrder = 5
+      TabOrder = 4
       Width = 101
     end
     object cxLabel8: TcxLabel
@@ -571,13 +549,13 @@ object fmNutrientProductionProjectionRptScr: TfmNutrientProductionProjectionRptS
       StyleDisabled.LookAndFeel.NativeStyle = False
       StyleFocused.LookAndFeel.NativeStyle = False
       StyleHot.LookAndFeel.NativeStyle = False
-      TabOrder = 8
+      TabOrder = 7
       Width = 519
     end
     object Memo: TcxMemo
       Left = 482
       Top = 95
-      TabOrder = 9
+      TabOrder = 8
       Visible = False
       Height = 21
       Width = 19
@@ -586,7 +564,7 @@ object fmNutrientProductionProjectionRptScr: TfmNutrientProductionProjectionRptS
       Left = 0
       Top = 145
       Width = 749
-      Height = 407
+      Height = 429
       BevelOuter = bvNone
       Font.Charset = ANSI_CHARSET
       Font.Color = clWindowText
@@ -594,7 +572,7 @@ object fmNutrientProductionProjectionRptScr: TfmNutrientProductionProjectionRptS
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
-      TabOrder = 10
+      TabOrder = 9
       Visible = False
       object Bevel5: TBevel
         Left = 10
@@ -2841,6 +2819,20 @@ object fmNutrientProductionProjectionRptScr: TfmNutrientProductionProjectionRptS
         Height = 31
         Width = 131
       end
+      object lForecastInfo: TcxLabel
+        Left = 57
+        Top = 408
+        Caption = 
+          'NB : Please note forecast purchases/sales are assumed to ocurr o' +
+          'n the first date of each month.'
+        ParentFont = False
+        Style.Font.Charset = ANSI_CHARSET
+        Style.Font.Color = clRed
+        Style.Font.Height = -13
+        Style.Font.Name = 'Tahoma'
+        Style.Font.Style = [fsBold]
+        Style.IsFontAssigned = True
+      end
     end
     object cbFavourite: TcxCheckBox
       Left = 7
@@ -2848,7 +2840,7 @@ object fmNutrientProductionProjectionRptScr: TfmNutrientProductionProjectionRptS
       AutoSize = False
       Caption = 'Add Report As Favourite'
       Properties.OnChange = cbFavouritePropertiesChange
-      TabOrder = 11
+      TabOrder = 10
       Height = 21
       Width = 212
     end
@@ -2864,8 +2856,24 @@ object fmNutrientProductionProjectionRptScr: TfmNutrientProductionProjectionRptS
       Style.Font.Name = 'Verdana'
       Style.Font.Style = []
       Style.IsFontAssigned = True
-      TabOrder = 12
+      TabOrder = 11
       Width = 177
+    end
+    object ceForageArea: TcxCurrencyEdit
+      Left = 655
+      Top = 93
+      ParentFont = False
+      Properties.DisplayFormat = '0.00'
+      Properties.EditFormat = '0.00'
+      Style.BorderStyle = ebsFlat
+      Style.Font.Charset = ANSI_CHARSET
+      Style.Font.Color = clWindowText
+      Style.Font.Height = -11
+      Style.Font.Name = 'Verdana'
+      Style.Font.Style = []
+      Style.IsFontAssigned = True
+      TabOrder = 12
+      Width = 70
     end
   end
   object GenQuery: TQuery
