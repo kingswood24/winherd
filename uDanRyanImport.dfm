@@ -1,5 +1,4 @@
 inherited fmDanRyanImport: TfmDanRyanImport
-  Left = 457
   Top = 170
   Width = 644
   Height = 566

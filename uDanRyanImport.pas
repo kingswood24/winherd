@@ -28,6 +28,8 @@
 
    28/08/17 [V5.7 R2.1] /MK Bug Fix - GetAnimalID - This search was only working for tag numbers not animal numbers.
                             Additional Feature - Added uProgressIndicator to show progress of reading the file and saving the events.
+
+   16/12/20 [V5.9 R7.9] /MK Change - FilterGridTable - Default the ActivePageIndex to Pregnant as this event should always exist.
 }
 
 unit uDanRyanImport;
@@ -551,6 +553,9 @@ begin
    EventGridDBTableView.DataController.DataSource := nil;
    FEventTable.Filtered := False;
    FEventTable.Filter := '';
+
+   //   16/12/20 [V5.9 R7.9] /MK Change - Default the ActivePageIndex to Pregnant as this event should always exist.
+   pcEvents.ActivePageIndex := tsPregnant.PageIndex;
 
    if pcEvents.ActivePage <> nil then
       begin

@@ -11824,6 +11824,11 @@ object MenuForm: TMenuForm
       Font.Style = [fsBold]
       TextColor = clWhite
     end
+    object cxStyleBullNoBreed: TcxStyle
+      AssignedValues = [svColor, svTextColor]
+      Color = clRed
+      TextColor = clWhite
+    end
   end
   object cxEditRepository1: TcxEditRepository
     Left = 1252
@@ -12129,7 +12134,7 @@ object MenuForm: TMenuForm
       PrinterPage.PageSize.Y = 297000
       PrinterPage._dxMeasurementUnits_ = 0
       PrinterPage._dxLastMU_ = 2
-      ReportDocument.CreationDate = 44161.675614456
+      ReportDocument.CreationDate = 44186.4365216551
       OptionsOnEveryPage.Footers = False
       OptionsOnEveryPage.FilterBar = False
       OptionsPreview.Visible = False
