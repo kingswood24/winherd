@@ -1,8 +1,8 @@
 [Closed Files]
-File_0=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Changes.txt',0,1,1,1,6,0,0
-File_1=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\MenuUnit.pas',0,1,973,1,995,0,0
-File_2=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uNutrientProductionProjectionRptScr.pas',0,1,1234,35,1248,1,0
-File_3=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\DairyData.pas',0,1,1151,1,1171,0,0
+File_0=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\MenuUnit.pas',0,1,16344,56,16361,1,0
+File_1=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\DairyData.pas',0,1,1,1,1,1,0
+File_2=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Changes.txt',0,1,1,1,6,0,0
+File_3=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uNutrientProductionProjectionRptScr.pas',0,1,1234,35,1248,1,0
 File_4=SourceModule,'C:\Program Files\Developer Express.VCL\ExpressDataController\Sources\cxCustomData.pas',0,1,436,1,456,0,0
 File_5=SourceModule,'c:\program files (x86)\borland\delphi5\Source\Vcl\controls.pas',0,1,5592,1,5612,0,0
 File_6=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Reports\SaleEligibility.pas',0,1,1,1,22,1,0
@@ -25,10 +25,6 @@ FormState=0
 FormOnTop=0
 
 [C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.todo]
-FormState=0
-FormOnTop=0
-
-[C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uImageStore.pas]
 FormState=0
 FormOnTop=0
 
@@ -153,8 +149,8 @@ LRDockWidth=219
 Dockable=1
 SplitPos=85
 ArrangeBy=Name
-SelectedItem=Caption
-ExpandedItems=DataBinding,Font.Style,LookAndFeel,OptionsView,Properties,Properties.SpinButtons,Properties.ValueChecked,Properties.ValueGrayed,Properties.ValueUnchecked
+SelectedItem=
+ExpandedItems=DataBinding,Font.Style,LookAndFeel,OptionsView,Properties,Properties.ValueChecked,Properties.ValueGrayed,Properties.ValueUnchecked
 HiddenCategories=Legacy
 ShowStatusBar=1
 
@@ -307,11 +303,11 @@ Visible=0
 State=0
 Left=0
 Top=0
-Width=1705
+Width=1689
 Height=111
 MaxLeft=-1
 MaxTop=-1
-ClientWidth=1705
+ClientWidth=1689
 ClientHeight=111
 TBDockHeight=140
 LRDockWidth=443
@@ -357,6 +353,6 @@ TBDockHeight=926
 LRDockWidth=219
 Dockable=1
 TabPosition=0
-ActiveTab=Object Inspector
+ActiveTab=Project Manager
 TabDockClients=PropertyInspector,ProjectManager
 
