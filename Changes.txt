@@ -4,6 +4,7 @@ Version V5.9 R8.0
                     - uDanRyanImport - FilterGridTable - Default the ActivePageIndex to Pregnant as this event should always exist.
 21/12/20 /MK Change - MenuUnit - DoFilter - If the filter is Bulls In Use and some bulls don't have breeds, show information message and sort by breed code.
                                - ClearAnimalSelection - If the sort was changed by the filter of Bulls In Use then set sort back to original sorted column.
+11/01/21 /MK Bug Fix - DairyData - qHerdVaccineReminders - Changed SQL to include all vaccination disease lookup codes.
 
 Version V5.9 R7.9
 
