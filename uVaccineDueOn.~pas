@@ -17,6 +17,10 @@
 
    15/04/15 [V5.4 R3.8] /MK Bug Fix - QueryData - Allowed breakdown by the days/weeks to remind - DOM reported.
                                     - actCreateEvents - Show message based on selected records on the grid and not the total records in the grid - DOM reported.
+
+   18/05/20 [V5.9 R4.7] /MK Change - Don't save the repeat event for animals that left the herd before the treatment date - DOM request.
+                                   - Show progress bar when saving the events.
+                                   - Show memo box after the events are saved shows the amount of events saved or not saved.                                    
 }
 
 unit uVaccineDueOn;
@@ -331,7 +335,11 @@ begin
                Params[0].AsInteger := AVaccineID;
             end;
 
-         SQL.Add('AND (H.ReportInDays = '+IntToStr(AReminderDays)+')');
+         //   19/01/21 [V5.9 R8.0] /MK Bug Fix - Zero ReminderDays is saved into the database as Null. The query needs to check for that also.
+         if ( AReminderDays > 0 ) then
+            SQL.Add('AND (H.ReportInDays = '+IntToStr(AReminderDays)+')')
+         else
+            SQL.Add('AND ((H.ReportInDays = 0) OR (H.ReportInDays IS NULL))');
 
          Params[1].AsDateTime := AEventDate;
 

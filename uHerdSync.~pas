@@ -130,6 +130,8 @@
    04/12/20 [V5.9 R7.8] /MK Change - CreateHealthEvents - If multi treatment then save first event as dryoff and any following treatments as remedy events.
                                                         - Also change the comment of following treatments of dry off events to Remedy Event similar to non Dry Off Events.
                                                         - Set new DryOffSaved variable boolean to true if event is dry off and its the first treatment.
+                                   - AddEventToEventsExt - No need to check for EventId as we allow events to come in here that were not saved
+                                                           because the animal doesn't exist in the database so push back the event as synced.
 }
 
 unit uHerdSync;
@@ -9725,7 +9727,7 @@ var
 
 begin
    //   04/12/20 [V5.9 R7.8] /MK Change - No need to check for EventId as we allow events to come in here that were not saved
-   //                                     because the animal doesn't exist in the database so push back the event as synced. 
+   //                                     because the animal doesn't exist in the database so push back the event as synced.
    if ( Length(AClientID) = 0 ) then Exit;
 
    tEventsExt := TTable.Create(nil);

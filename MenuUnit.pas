@@ -741,7 +741,7 @@ unit MenuUnit;
 
  22/09/17 [V5.7 R3.0] /MK Change - Added a Feed Allocation button to Groups container.
 
- 25/09/17 [V5.7 R3.1] /MK Additional Feature - Made the links button and its Mart File and Cows 365 buttons availabe for NIreland herds.                                    
+ 25/09/17 [V5.7 R3.1] /MK Additional Feature - Made the links button and its Mart File and Cows 365 buttons availabe for NIreland herds.
 
  06/10/17 [V5.7 R3.6] /MK Additional Feature - Added column to Feed Events for Total Cost and added a footer to the grid to sum Total Cost.   
                           Change - cbFeedEventsClick- Don't show All Events if Feed Events is ticked to stop confusion of un-ticking Feed Events to go back to normal events - GL request.
@@ -6976,7 +6976,7 @@ begin
    Result := False;
    ParlinkPath := ExtractFilePath(ParamStr(0))+'Parlink.exe';
    try
-      if FileExists(ParlinkPath) and ( Def.Definition.dUseParlour ) and ( FSelectedHerdType = htDairy ) then
+      if FileExists(ParlinkPath) and ( FSelectedHerdType = htDairy ) then
          Result := True
       else
          Result := False;
@@ -6991,7 +6991,7 @@ begin
    Result := False;
    RationCalcPath := ExtractFilePath(ParamStr(0))+'Ration.exe';
    try
-      if FileExists(RationCalcPath) and ( Def.Definition.dUseRationCalc ) and ( FSelectedHerdType = htDairy ) then
+      if FileExists(RationCalcPath) and ( FSelectedHerdType = htDairy ) then
          Result := True
       else
          Result := False;
@@ -12631,6 +12631,12 @@ var
    sParlourType : String;
    slWestfaliaFile : TStringList;
 begin
+   if ( not(Def.Definition.dUseParlour) ) then
+      begin
+         MessageDlg(cMissingModulePayMsg,mtInformation,[mbOK],0);
+         Exit;
+      end;
+
    sParlourType := UpperCase(FParlourInfo.ParlourType);
    if ADraftGroupName <> '' then
       WinData.CallProg.ParlourLink(Handle,ADraftGroupName)
@@ -12670,6 +12676,12 @@ end;
 
 procedure TMenuForm.ShowRationCalc;
 begin
+   if ( not(Def.Definition.dUseRationCalc) ) then
+      begin
+         MessageDlg(cMissingModulePayMsg,mtInformation,[mbOK],0);
+         Exit;
+      end;
+
    WinData.CallProg.RationCalc;
 end;
 
