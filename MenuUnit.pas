@@ -1026,7 +1026,7 @@ uses
   uModuleDefUpdate, uHerdNewFeatures, uClearDiseaseTestDate, uGroupsNotUsed,
   uConditionScoreReport, uSPParser, uImportFileMemo, uAddSire, uAHDBImport,
   uTestGridWithDataSet, uTestForm, uPopupAnimalEdit, uAIMHeifTempTransfers,
-  uMessageScr, uModifyGridCols;
+  uMessageScr, uModifyGridCols, KRoutines;
 
 type
   TDraftGroupType = ( dgtAddToDraftGroup, dgtClearDraftGroup, dgtClearAddToDraftGroup );
@@ -3008,7 +3008,7 @@ uses
     uDownload,  FertAnalysisRpt, SaleEligibility, uAccsReps, { AnimalWaste, }
     uLiveStockValues, uCreateEvents,
     uQuotaMan, uPreSale, uHerdRec,
-    uGlobalSettings, uFeedAllocEdit, KRoutines,
+    uGlobalSettings, uFeedAllocEdit,
     uCrushDiskWeigh, uPedUpgradeReport, uHerdSelect, uMilkTankRead, KDBRoutines,
     uCMMSPermits, uBlade, { uPhoneLinkDownload, } uRationPerformMonitor,uUpdateAnimalNo,
     uAPHISRegistration, uDairyHerdHealthCert, SCCAnalysis, uPDAReportDefaults,
@@ -16310,6 +16310,7 @@ begin
    //ProcessAimMovements;
    //ProcessAIMHerdReconcile();
    //TfmAIMHeifTempTransfers.SaveTempTransfers;
+   SetDefaultWebBrowser('Edge');
 end;
 
 procedure TMenuForm.actAddA1A2ResultExecute(Sender: TObject);

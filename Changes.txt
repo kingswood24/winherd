@@ -6,6 +6,7 @@ Version V5.9 R8.0
                                - ClearAnimalSelection - If the sort was changed by the filter of Bulls In Use then set sort back to original sorted column.
 11/01/21 /MK Bug Fix - DairyData - qHerdVaccineReminders - Changed SQL to include all vaccination disease lookup codes.
 19/01/21 /MK Bug Fix - uVaccineDueOn - QueryData - Zero ReminderDays is saved into the database as Null. The query needs to check for that also.
+22/01/21 /MK Bug Fix - DairyData - qHerdVaccineReminders & qHerdDosageReminders - Changed SQL to exclude events that don't have a ReportInDays.
 
 Version V5.9 R7.9
 
