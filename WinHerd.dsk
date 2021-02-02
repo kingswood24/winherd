@@ -1,21 +1,26 @@
 [Closed Files]
-File_0=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\DairyData.pas',0,1,999,1,1014,1,0
-File_1=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Changes.txt',0,1,1,36,9,0,0
-File_2=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\GenTypesConst.pas',0,1,74,1,94,0,0
-File_3=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uVaccineDueOn.pas',0,1,467,1,478,1,0
-File_4=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uHerdSync.pas',0,1,7844,4,7853,0,0
-File_5=SourceModule,'C:\Kingswood\Delphi Development\Common\KRoutines.pas',0,1,7025,1,7048,0,0
-File_6=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\MenuUnit.pas',0,1,16294,45,16314,1,0
-File_7=SourceModule,'C:\Program Files\Developer Express.VCL\ExpressPageControl 2\Sources\cxPC.pas',0,1,3622,1,3642,0,0
-File_8=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uFileAttachmentImport.pas',0,1,180,47,200,1,0
-File_9=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uUpdateTables.pas',0,1,12746,25,12751,0,0
+File_0=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\winherd\uHerdSync.pas',0,1,2456,9,2460,0,0
+File_1=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\winherd\uEventsByGroup.pas',0,1,1,13,8,1,0
+File_2=SourceModule,'c:\program files (x86)\borland\delphi5\Source\Vcl\Consts.pas',0,1,329,1,352,0,0
+File_3=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\DairyData.pas',0,1,999,1,1014,1,0
+File_4=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Changes.txt',0,1,1,36,9,0,0
+File_5=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\GenTypesConst.pas',0,1,74,1,94,0,0
+File_6=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uVaccineDueOn.pas',0,1,467,1,478,1,0
+File_7=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uHerdSync.pas',0,1,7844,4,7853,0,0
+File_8=SourceModule,'C:\Kingswood\Delphi Development\Common\KRoutines.pas',0,1,7025,1,7048,0,0
 
 [Modules]
-Module0=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.dpr
-Count=1
+Module0=C:\Kingswood\Delphi Development\Delphi 5\winherd\Splash.pas
+Module1=C:\Kingswood\Delphi Development\Delphi 5\winherd\WinHerd.dpr
+Count=2
 EditWindowCount=1
 
-[C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.dpr]
+[C:\Kingswood\Delphi Development\Delphi 5\winherd\Splash.pas]
+ModuleType=SourceModule
+FormState=0
+FormOnTop=0
+
+[C:\Kingswood\Delphi Development\Delphi 5\winherd\WinHerd.dpr]
 ModuleType=SourceModule
 FormState=0
 FormOnTop=0
@@ -24,40 +29,48 @@ FormOnTop=0
 FormState=0
 FormOnTop=0
 
-[C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.todo]
+[C:\Kingswood\Delphi Development\Delphi 5\winherd\WinHerd.todo]
 FormState=0
 FormOnTop=0
 
 [EditWindow0]
-ViewCount=1
-CurrentView=0
+ViewCount=2
+CurrentView=1
 View0=0
+View1=1
 CodeExplorer=CodeExplorer@EditWindow0
 MessageView=MessageView@EditWindow0
 Create=1
 Visible=1
 State=0
-Left=192
-Top=107
-Width=1733
-Height=944
+Left=246
+Top=109
+Width=1679
+Height=935
 MaxLeft=-1
 MaxTop=-1
-ClientWidth=1725
-ClientHeight=913
+ClientWidth=1671
+ClientHeight=904
 LeftPanelSize=0
 LeftPanelClients=CodeExplorer@EditWindow0
 LeftPanelData=00000400010000000C000000436F64654578706C6F7265720000000000000000000000000000000000FFFFFFFF
 RightPanelSize=0
-BottomPanelSize=140
-BottomPanelClients=DockSite0
-BottomPanelData=0000040000000000BD06000000000000028C000000000000000100000000BD06000009000000446F636B5369746530FFFFFFFF
+BottomPanelSize=52
+BottomPanelClients=MessageView@EditWindow0
+BottomPanelData=000004000000000000000000000000000000000000000000000100000000000000000B0000004D65737361676556696577FFFFFFFF
 
 [View0]
-Module=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.dpr
-CursorX=45
-CursorY=8
+Module=C:\Kingswood\Delphi Development\Delphi 5\winherd\WinHerd.dpr
+CursorX=26
+CursorY=6
 TopLine=1
+LeftCol=1
+
+[View1]
+Module=C:\Kingswood\Delphi Development\Delphi 5\winherd\Splash.pas
+CursorX=38
+CursorY=83
+TopLine=46
 LeftCol=1
 
 [Watches]
@@ -92,32 +105,15 @@ Visible=1
 State=0
 Left=0
 Top=0
-Width=177
-Height=884
+Width=230
+Height=874
 MaxLeft=-1
 MaxTop=-1
-ClientWidth=177
-ClientHeight=884
+ClientWidth=230
+ClientHeight=874
 TBDockHeight=318
 LRDockWidth=446
 Dockable=1
-
-[CPUWindow]
-Create=1
-Visible=0
-State=0
-Left=693
-Top=363
-Width=533
-Height=353
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=525
-ClientHeight=322
-DumpPane=79
-DisassemblyPane=187
-RegisterPane=231
-FlagPane=64
 
 [AlignmentPalette]
 Create=1
@@ -138,148 +134,21 @@ Visible=1
 State=0
 Left=0
 Top=0
-Width=177
-Height=884
+Width=230
+Height=874
 MaxLeft=-1
 MaxTop=-1
-ClientWidth=175
-ClientHeight=882
-TBDockHeight=926
-LRDockWidth=219
+ClientWidth=228
+ClientHeight=872
+TBDockHeight=695
+LRDockWidth=190
 Dockable=1
-SplitPos=85
+SplitPos=117
 ArrangeBy=Name
-SelectedItem=
-ExpandedItems=DataBinding,Font.Style,LookAndFeel,OptionsView,Properties,Properties.ValueChecked,Properties.ValueGrayed,Properties.ValueUnchecked
+SelectedItem=Caption
+ExpandedItems=
 HiddenCategories=Legacy
 ShowStatusBar=1
-
-[WatchWindow]
-Create=1
-Visible=1
-State=0
-Left=0
-Top=0
-Width=1705
-Height=111
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=1705
-ClientHeight=111
-TBDockHeight=109
-LRDockWidth=286
-Dockable=1
-
-[BreakpointWindow]
-Create=1
-Visible=1
-State=0
-Left=0
-Top=0
-Width=1705
-Height=111
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=1705
-ClientHeight=111
-TBDockHeight=109
-LRDockWidth=1019
-Dockable=1
-Column0Width=146
-Column1Width=75
-Column2Width=200
-Column3Width=200
-Column4Width=75
-Column5Width=75
-
-[CallStackWindow]
-Create=1
-Visible=1
-State=0
-Left=0
-Top=0
-Width=1705
-Height=111
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=1705
-ClientHeight=111
-TBDockHeight=161
-LRDockWidth=286
-Dockable=1
-
-[ThreadStatusWindow]
-Create=1
-Visible=0
-State=0
-Left=234
-Top=545
-Width=1697
-Height=142
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=1689
-ClientHeight=111
-TBDockHeight=152
-LRDockWidth=1019
-Dockable=1
-Column0Width=145
-Column1Width=100
-Column2Width=115
-Column3Width=250
-
-[ModuleWindow]
-Create=1
-Visible=1
-State=0
-Left=0
-Top=0
-Width=1705
-Height=111
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=1705
-ClientHeight=111
-TBDockHeight=355
-LRDockWidth=638
-Dockable=1
-Column0Width=125
-Column1Width=100
-Column2Width=155
-EntryPointPane=225
-CompUnitPane=104
-
-[DebugLogView]
-Create=1
-Visible=1
-State=0
-Left=0
-Top=0
-Width=1705
-Height=111
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=1705
-ClientHeight=111
-TBDockHeight=109
-LRDockWidth=417
-Dockable=1
-
-[LocalVarsWindow]
-Create=1
-Visible=1
-State=0
-Left=0
-Top=0
-Width=1705
-Height=111
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=1705
-ClientHeight=111
-TBDockHeight=192
-LRDockWidth=413
-Dockable=1
 
 [CodeExplorer@EditWindow0]
 Create=1
@@ -288,69 +157,49 @@ State=0
 Left=0
 Top=12
 Width=140
-Height=736
+Height=801
 MaxLeft=-1
 MaxTop=-1
 ClientWidth=140
-ClientHeight=736
+ClientHeight=801
 TBDockHeight=305
 LRDockWidth=140
 Dockable=1
 
 [MessageView@EditWindow0]
 Create=1
-Visible=0
+Visible=1
 State=0
-Left=0
+Left=12
 Top=0
-Width=1705
-Height=111
+Width=1659
+Height=52
 MaxLeft=-1
 MaxTop=-1
-ClientWidth=1705
-ClientHeight=111
-TBDockHeight=111
+ClientWidth=1659
+ClientHeight=52
+TBDockHeight=52
 LRDockWidth=443
 Dockable=1
 
 [DockHosts]
-DockHostCount=2
+DockHostCount=1
 
 [DockSite0]
 DockSiteType=1
 Create=1
 Visible=1
 State=0
-Left=12
-Top=0
-Width=1713
-Height=140
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=1713
-ClientHeight=140
-TBDockHeight=140
-LRDockWidth=1027
-Dockable=1
-TabPosition=0
-ActiveTab=Call Stack
-TabDockClients=BreakpointWindow,WatchWindow,DebugLogView,LocalVarsWindow,ModuleWindow,CallStackWindow,MessageView@EditWindow0
-
-[DockSite1]
-DockSiteType=1
-Create=1
-Visible=1
-State=0
 Left=0
-Top=107
-Width=193
-Height=944
+Top=110
+Width=246
+Height=934
 MaxLeft=-1
 MaxTop=-1
-ClientWidth=185
-ClientHeight=913
-TBDockHeight=926
-LRDockWidth=219
+ClientWidth=238
+ClientHeight=903
+TBDockHeight=937
+LRDockWidth=246
 Dockable=1
 TabPosition=0
 ActiveTab=Project Manager

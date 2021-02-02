@@ -40,7 +40,7 @@ ImageBase=4194304
 ExeDescription=
 [Directories]
 OutputDir=C:\Kingswood Herd Management
-UnitOutputDir=C:\Kingswood\Output\Winherd\Development\DCU
+UnitOutputDir=
 PackageDLLOutputDir=
 PackageDCPOutputDir=
 SearchPath=
@@ -77,14 +77,9 @@ ProductName=Winherd.exe
 ProductVersion=V5.9 R8.0
 Comments=Kingswood Computing Ltd.
 [Excluded Packages]
-C:\PDBDataManager3\D5\PDBDataManD5.bpl=PDBDataManager v3.0
-C:\Program Files (x86)\EXTRAFIL\DELPHI5\LIB\xtrafil.bpl=Extra Filters for QuickReport
 C:\Program Files\Developer Express.VCL\Library\Delphi5\dcldxDBOrd5.bpl=ExpressDBOrgChart by Developer Express Inc.
-$(DELPHI)\Projects\Bpl\KpeedButton.bpl=(untitled)
 $(DELPHI)\Projects\Bpl\dclIndy50.bpl=Internet Direct (Indy) for D5 Property and Component Editors
-$(DELPHI)\Projects\Bpl\Adom_5_1Delphi5.bpl=Open XML Alternative Document Object Model (ADOM 5.1)
-$(DELPHI)\Projects\Bpl\DbproProfessional_d5.bpl=Database Pro Components
-$(DELPHI)\Bin\dcldss50.bpl=Borland Decision Cube Components
+$(DELPHI)\Projects\Bpl\Ean5.bpl=Ean components
 $(DELPHI)\Bin\dclite50.bpl=Borland Integrated Translation Environment
 [HistoryLists\hlDebugSourcePath]
 Count=1
