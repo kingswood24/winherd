@@ -13,6 +13,8 @@
 
    07/12/16 [V5.5 R2.1] /MK Change - OutputResult - ReminderListingType - Only show cows that are not pregnant and don't have a To Be Culled event - TGM/GL request.
                                                   - WarningListingType - Only inlcude animals that don't have a To Be Culled date - TGM/GL request.
+
+   05/02/21 [V5.9 R8.1] /MK Bug Fix - TBreedingData.Create - Temp Breeding Tables were not created before report is built.
 }
 
 unit uActionWarningReminders;
@@ -114,7 +116,7 @@ const
 implementation
 uses
    GenTypesConst;
-   
+
 { TBreedingData }
 
 
@@ -124,6 +126,9 @@ begin
    if ( FBreedingDataHelper <> nil ) then
       FreeAndNil(FBreedingDataHelper);
    FBreedingDataHelper := TBreedingDataHelper.Create;
+
+   //   05/02/21 [V5.9 R8.1] /MK Bug Fix - Temp Breeding Tables were not created before report is built.
+   FBreedingDataHelper.CreateTempBreedingDataTables;
 
    GenQuery := TQuery.Create(nil);
    GenQuery.DatabaseName :=  AliasName;
@@ -211,7 +216,9 @@ procedure TBreedingData.GetActionData;
          LastHeatDate : TDateTime;
          CycleDateDiff : Double;
          Result : Boolean;
+         AnimalId : Integer;
       begin
+         AnimalId := TempTable.FieldByName('AnimalId').AsInteger;
          LastServiceDate := TempTable.FieldByName('ServiceDate').AsDateTime;
          LastHeatDate := TempTable.FieldByName('HeatDate').AsDateTime;
          DateDiff := 0;
@@ -275,7 +282,9 @@ procedure TBreedingData.GetActionData;
       LastHeatDate : TDateTime;
       CycleDateDiff : Double;
       Result : Boolean;
+      AnimalId : Integer;
    begin
+      AnimalId := TempTable.FieldByName('AnimalId').AsInteger;
 
       HasHeat := TempTable.FieldByName('HeatDate').AsDateTime > 0;
       IsServed := TempTable.FieldByName('ServiceDate').AsDateTime > 0;
@@ -447,6 +456,8 @@ var
    {To Be Culled Vars}
    ToBeCulledDate : TDateTime;
 
+   AnimalId : Integer;
+
 begin
    EmptyTempTable;
    with GenQuery do
@@ -489,6 +500,8 @@ begin
    while NOT TempTable.EOF do
       try
          TempTable.Edit;
+         AnimalId := TempTable.FieldByName('AnimalId').AsInteger;
+
          TempTable.FieldByName('Include').AsBoolean := FALSE;
 
          FBreedingDataHelper.GetBullingInfo(TempTable.FieldByName('AnimalId').AsInteger,
