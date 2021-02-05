@@ -310,7 +310,8 @@ begin
    WinData.CanShowStandardReportHint := False;
    StartTime := GetTickCount;
    PreviewListData(True);
-   ApplicationLog.LogDebugTickCountTimer(
+   EndTime := GetTickCount;
+   ApplicationLog.LogDebugTickCountTimer('Action Warnings Timer : ',StartTime,EndTime);
    EnableViewPrintButtons(True);
 end;
 

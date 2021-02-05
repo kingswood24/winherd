@@ -1026,7 +1026,7 @@ uses
   uModuleDefUpdate, uHerdNewFeatures, uClearDiseaseTestDate, uGroupsNotUsed,
   uConditionScoreReport, uSPParser, uImportFileMemo, uAddSire, uAHDBImport,
   uTestGridWithDataSet, uTestForm, uPopupAnimalEdit, uAIMHeifTempTransfers,
-  uMessageScr, uModifyGridCols;
+  uMessageScr, uModifyGridCols, KRoutines;
 
 type
   TDraftGroupType = ( dgtAddToDraftGroup, dgtClearDraftGroup, dgtClearAddToDraftGroup );
@@ -1988,6 +1988,10 @@ type
     pmSuckCalvingHelp: TPopupMenu;
     pmiSuckCalvingHelp: TMenuItem;
     cxStyleBullNoBreed: TcxStyle;
+    pmNatIdSort: TPopupMenu;
+    pmiNatIdSort: TMenuItem;
+    pmiNatIdLast4Digits: TMenuItem;
+    pmiNatIdCheckDigit: TMenuItem;
    //--------------------------------------//
 
     procedure ExitButtonClick(Sender: TObject);
@@ -2595,6 +2599,9 @@ type
     procedure pmiA1A2ResultFileClick(Sender: TObject);
     procedure actModifyGridExecute(Sender: TObject);
     procedure actCalvingHelpExecute(Sender: TObject);
+    procedure pmiNatIdSortClick(Sender: TObject);
+    procedure pmiNatIdCheckDigitClick(Sender: TObject);
+    procedure pmiNatIdLast4DigitsClick(Sender: TObject);
   private
     { Private declarations }
     Reg : TRegistry;
@@ -3008,7 +3015,7 @@ uses
     uDownload,  FertAnalysisRpt, SaleEligibility, uAccsReps, { AnimalWaste, }
     uLiveStockValues, uCreateEvents,
     uQuotaMan, uPreSale, uHerdRec,
-    uGlobalSettings, uFeedAllocEdit, KRoutines,
+    uGlobalSettings, uFeedAllocEdit,
     uCrushDiskWeigh, uPedUpgradeReport, uHerdSelect, uMilkTankRead, KDBRoutines,
     uCMMSPermits, uBlade, { uPhoneLinkDownload, } uRationPerformMonitor,uUpdateAnimalNo,
     uAPHISRegistration, uDairyHerdHealthCert, SCCAnalysis, uPDAReportDefaults,
@@ -6976,7 +6983,7 @@ begin
    Result := False;
    ParlinkPath := ExtractFilePath(ParamStr(0))+'Parlink.exe';
    try
-      if FileExists(ParlinkPath) and ( Def.Definition.dUseParlour ) and ( FSelectedHerdType = htDairy ) then
+      if FileExists(ParlinkPath) and ( FSelectedHerdType = htDairy ) then
          Result := True
       else
          Result := False;
@@ -6991,7 +6998,7 @@ begin
    Result := False;
    RationCalcPath := ExtractFilePath(ParamStr(0))+'Ration.exe';
    try
-      if FileExists(RationCalcPath) and ( Def.Definition.dUseRationCalc ) and ( FSelectedHerdType = htDairy ) then
+      if FileExists(RationCalcPath) and ( FSelectedHerdType = htDairy ) then
          Result := True
       else
          Result := False;
@@ -12631,6 +12638,12 @@ var
    sParlourType : String;
    slWestfaliaFile : TStringList;
 begin
+   if ( not(Def.Definition.dUseParlour) ) then
+      begin
+         MessageDlg(cMissingModulePayMsg,mtInformation,[mbOK],0);
+         Exit;
+      end;
+
    sParlourType := UpperCase(FParlourInfo.ParlourType);
    if ADraftGroupName <> '' then
       WinData.CallProg.ParlourLink(Handle,ADraftGroupName)
@@ -12670,6 +12683,12 @@ end;
 
 procedure TMenuForm.ShowRationCalc;
 begin
+   if ( not(Def.Definition.dUseRationCalc) ) then
+      begin
+         MessageDlg(cMissingModulePayMsg,mtInformation,[mbOK],0);
+         Exit;
+      end;
+
    WinData.CallProg.RationCalc;
 end;
 
@@ -16495,6 +16514,21 @@ begin
    else
       MessageDlg('Unable to open calving online help.'+cCRLF+
                  'Please make sure your connected to the internet.',mtError,[mbOK],0);
+end;
+
+procedure TMenuForm.pmiNatIdSortClick(Sender: TObject);
+begin
+// General NatIdNum Sort.
+end;
+
+procedure TMenuForm.pmiNatIdCheckDigitClick(Sender: TObject);
+begin
+// NatIdNum Sort Check Digit.
+end;
+
+procedure TMenuForm.pmiNatIdLast4DigitsClick(Sender: TObject);
+begin
+// NatIdNum Last 4 Digit Sort.
 end;
 
 initialization

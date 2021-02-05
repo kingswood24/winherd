@@ -11330,7 +11330,7 @@ begin
                         cxAnimalGridView.DataController.ClearSorting(False);
                         cxAnimalGridViewBreedCode.SortOrder := soAscending;
                         cxAnimalGridViewBreedCode.SortIndex := 0;
-                        MessageDlg('There are bulls that do not have a breed selected.'+cCRLF+
+                        MessageDlg('There are bulls that do not have a breed selected (highlighted in red).'+cCRLF+
                                    'These bulls WILL NOT appear on other bull lists including the Kingswood App.'+cCRLF+
                                    'To add a breed double-click the bull, select the breed and click Save',mtInformation,[mbOK],0);
                      end;

@@ -12134,7 +12134,7 @@ object MenuForm: TMenuForm
       PrinterPage.PageSize.Y = 297000
       PrinterPage._dxMeasurementUnits_ = 0
       PrinterPage._dxLastMU_ = 2
-      ReportDocument.CreationDate = 44186.6277760417
+      ReportDocument.CreationDate = 44204.4131703125
       OptionsOnEveryPage.Footers = False
       OptionsOnEveryPage.FilterBar = False
       OptionsPreview.Visible = False
@@ -13184,6 +13184,22 @@ object MenuForm: TMenuForm
     Top = 89
     object pmiSuckCalvingHelp: TMenuItem
       Action = actCalvingHelp
+    end
+  end
+  object pmNatIdSort: TPopupMenu
+    Left = 895
+    Top = 59
+    object pmiNatIdSort: TMenuItem
+      Caption = 'National Id.'
+      OnClick = pmiNatIdSortClick
+    end
+    object pmiNatIdCheckDigit: TMenuItem
+      Caption = 'National Id. (Check Digit)'
+      OnClick = pmiNatIdCheckDigitClick
+    end
+    object pmiNatIdLast4Digits: TMenuItem
+      Caption = 'National Id. (Last 4 Digits)'
+      OnClick = pmiNatIdLast4DigitsClick
     end
   end
 end

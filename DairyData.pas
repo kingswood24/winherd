@@ -1007,6 +1007,10 @@ unit DairyData;
                                                     wasn't told if the table before OwnerFile was also corrupted. Shane had a look at the change
                                                     I made and found that the setting of OwnerFile.Active to AlreadyOpen was causing other forms
                                                     that locate on the OwnerFile were getting the error "OwnerFile : Cannot perform this operation on a closed database".
+
+ 11/01/21 [V5.9 R8.0] /MK Bug Fix - qHerdVaccineReminders - Changed SQL to include all vaccination disease lookup codes.
+
+ 22/01/21 [V5.9 R8.0] /MK Bug Fix - qHerdVaccineReminders & qHerdDosageReminders - Changed SQL to exclude events that don't have a ReportInDays.
 }
 
 interface

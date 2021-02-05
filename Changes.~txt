@@ -1,8 +1,14 @@
-Version V5.9 R7.9
+Version V5.9 R8.0
 
 16/12/20 /MK Change - MainUnit - Show Parlour Link and Ration Calc icons but give "acquire this facility" error if the module is not installed i.e. not purchased.
                     - uDanRyanImport - FilterGridTable - Default the ActivePageIndex to Pregnant as this event should always exist.
+21/12/20 /MK Change - MenuUnit - DoFilter - If the filter is Bulls In Use and some bulls don't have breeds, show information message and sort by breed code.
+                               - ClearAnimalSelection - If the sort was changed by the filter of Bulls In Use then set sort back to original sorted column.
 
+Version V5.9 R7.9
+
+22/12/20 /MK Change - uNutrientProductionProjectionRptScr - Changed Forage Area from Spin Edit to Current Edit so as not to show the spin buttons - GL request.
+                                                          - Added a label under the Forecast Purchases & Sales to explain that movements are assumed to ocurr on the first date of the month - GL request.
 Version V5.9 R7.8
 
 04/12/20 /MK Change - uHerdSync - CreateHealthEvents - If multi treatment then save first event as dryoff and any following treatments as remedy events.
