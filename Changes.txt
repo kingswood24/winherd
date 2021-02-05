@@ -1,3 +1,7 @@
+Version V5.9 R8.2
+
+05/02/21 /MK Bug Fix - uHerdSync - AddEventToEventsExt - Using Client instead of ClientId and not using double quotes around AClientId.
+
 Version V5.9 R8.1
 
 05/02/21 /MK Bug Fix - uActionWarningsReminders - TBreedingData.Create - Temp Breeding Tables were not created before report is built.
