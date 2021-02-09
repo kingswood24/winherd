@@ -132,6 +132,8 @@
                                                         - Set new DryOffSaved variable boolean to true if event is dry off and its the first treatment.
                                    - AddEventToEventsExt - No need to check for EventId as we allow events to come in here that were not saved
                                                            because the animal doesn't exist in the database so push back the event as synced.
+
+   05/02/21 [V5.9 R8.2] /MK Bug Fix - AddEventToEventsExt - Using Client instead of ClientId and not using double quotes around AClientId.
 }
 
 unit uHerdSync;
@@ -9753,7 +9755,8 @@ begin
                   if ( AEventId > 0 ) then
                      SQL.Add('WHERE EventId = '+IntToStr(AEventID))
                   else
-                     SQL.Add('WHERE Client = '+AClientId);
+                     //   05/02/21 [V5.9 R8.2] /MK Bug Fix - Using Client instead of ClientId and not using double quotes around AClientId.
+                     SQL.Add('WHERE ClientId = "'+AClientId+'"');
                   try
                      Open;
                      if ( RecordCount > 0 ) then

@@ -1,3 +1,11 @@
+Version V5.9 R8.2
+
+05/02/21 /MK Bug Fix - AddEventToEventsExt - Using Client instead of ClientId and not using double quotes around AClientId.
+
+Version V5.9 R8.1
+
+05/02/21 /MK Bug Fix - uActionWarningsReminders - TBreedingData.Create - Temp Breeding Tables were not created before report is built.
+
 Version V5.9 R8.0
 
 16/12/20 /MK Change - MainUnit - Show Parlour Link and Ration Calc icons but give "acquire this facility" error if the module is not installed i.e. not purchased.
@@ -6,6 +14,7 @@ Version V5.9 R8.0
                                - ClearAnimalSelection - If the sort was changed by the filter of Bulls In Use then set sort back to original sorted column.
 11/01/21 /MK Bug Fix - DairyData - qHerdVaccineReminders - Changed SQL to include all vaccination disease lookup codes.
 19/01/21 /MK Bug Fix - uVaccineDueOn - QueryData - Zero ReminderDays is saved into the database as Null. The query needs to check for that also.
+22/01/21 /MK Bug Fix - DairyData - qHerdVaccineReminders & qHerdDosageReminders - Changed SQL to exclude events that don't have a ReportInDays.
 
 Version V5.9 R7.9
 
