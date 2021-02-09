@@ -134,6 +134,8 @@
                                                            because the animal doesn't exist in the database so push back the event as synced.
 
    05/02/21 [V5.9 R8.2] /MK Bug Fix - AddEventToEventsExt - Using Client instead of ClientId and not using double quotes around AClientId.
+
+   09/02/21 [V5.9 R8.3] /SP Change - CreateHerdSyncData - Added ReportInDays to the Health events to be synced to the server.
 }
 
 unit uHerdSync;
@@ -2499,6 +2501,7 @@ begin
                                  FChildNode.Set_text(FSyncDataQuery.FieldByName('NoTimes').AsString);
                                  FInputEventNode.appendChild(FChildNode);
 
+                                 //   09/02/21 [V5.9 R8.3] /SP Change - Added ReportInDays to the Health events to be synced to the server.
                                  FChildNode := FDocument.createElement('reminderDays');
                                  FChildNode.Set_text(FSyncDataQuery.FieldByName('ReportInDays').AsString);
                                  FInputEventNode.appendChild(FChildNode);
