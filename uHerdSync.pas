@@ -2388,7 +2388,7 @@ begin
                   FSyncDataQuery.SQL.Add('G3.Description AS ApplicMethod,                                  ');
                   FSyncDataQuery.SQL.Add('MA1.AdminCode AS VetCode, MA2.AdminCode AS AdminByCode,          ');
                   FSyncDataQuery.SQL.Add('G4.Description DiseaseDesc1, G5.Description DiseaseDesc2,        ');
-                  FSyncDataQuery.SQL.Add('MP.BatchNo                                                       ');
+                  FSyncDataQuery.SQL.Add('MP.BatchNo, H.ReportInDays                                       ');
                   FSyncDataQuery.SQL.Add('FROM Events E                                                    ');
                   FSyncDataQuery.SQL.Add('INNER JOIN Animals A  ON   (E.AnimalId=A.Id)                     ');
                   FSyncDataQuery.SQL.Add('LEFT JOIN  Health H   ON   (E.Id=H.EventId)                      ');
@@ -2497,6 +2497,10 @@ begin
 
                                  FChildNode := FDocument.createElement('noOfTimes');
                                  FChildNode.Set_text(FSyncDataQuery.FieldByName('NoTimes').AsString);
+                                 FInputEventNode.appendChild(FChildNode);
+
+                                 FChildNode := FDocument.createElement('reminderDays');
+                                 FChildNode.Set_text(FSyncDataQuery.FieldByName('ReportInDays').AsString);
                                  FInputEventNode.appendChild(FChildNode);
 
                                  // Special case here, MK stored the vaccination code in either the health or farm code field
