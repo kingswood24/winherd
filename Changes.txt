@@ -1,3 +1,11 @@
+Version V5.9 R8.4
+
+11/02/21 /MK Change - ElectronicRemittanceConverter - Convert - Country code was never added to the converter.
+                    - uRemittance - BuildGridFromFile - Added a check for NI country code as well for Foyle Groups file.
+12/02/21 /MK Change - ElectronicRemittanceConverter - Added consts for GB file parameters.
+                                                    - New type created for TBeefRemitCountry for either Ireland or GB.
+                                                    - Convert - If TBeefRemitCountry is GB then set fields in field depending on GB consts.
+
 Version V5.9 R8.3
 
 09/02/21 /SP Change - uHerdSync - CreateHerdSyncData - Added ReportInDays to the Health events to be synced to the server.

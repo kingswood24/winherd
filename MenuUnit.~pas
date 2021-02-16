@@ -1026,7 +1026,7 @@ uses
   uModuleDefUpdate, uHerdNewFeatures, uClearDiseaseTestDate, uGroupsNotUsed,
   uConditionScoreReport, uSPParser, uImportFileMemo, uAddSire, uAHDBImport,
   uTestGridWithDataSet, uTestForm, uPopupAnimalEdit, uAIMHeifTempTransfers,
-  uMessageScr, uModifyGridCols;
+  uMessageScr, uModifyGridCols, KRoutines, uRemittanceConvert;
 
 type
   TDraftGroupType = ( dgtAddToDraftGroup, dgtClearDraftGroup, dgtClearAddToDraftGroup );
@@ -16310,7 +16310,7 @@ begin
    //ProcessAimMovements;
    //ProcessAIMHerdReconcile();
    //TfmAIMHeifTempTransfers.SaveTempTransfers;
-   SetDefaultWebBrowser('Edge');
+   TfmRemittanceConvert.ShowConverter;
 end;
 
 procedure TMenuForm.actAddA1A2ResultExecute(Sender: TObject);

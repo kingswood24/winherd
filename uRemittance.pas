@@ -31,6 +31,8 @@
    11/08/20 [V5.9 R5.3] /MK Bug Fix - When checking for the .csv in the file name allow for the uppercase version of .csv also - Denis O'Brien / CJ Meats.
 
    04/12/20 [V5.9 R7.8] /MK Change - Added Jennings to the list of factories that a file can be requested from.   
+
+   11/02/21 [V5.9 R8.4] /MK Change - BuildGridFromFile - Added a check for NI country code as well for Foyle Groups file.
 }
 
 unit uRemittance;
@@ -431,7 +433,8 @@ begin
        IdentifierByName('COUNTRY',sCountry);     //KVB
        sCountry := Trim(sCountry);
 
-       if sCountry = 'GB' then
+       //   11/02/21 [V5.9 R8.4] /MK Change - Added a check for NI country code as well for Foyle Groups file.
+       if ( sCountry = 'GB' ) or ( sCountry = 'NI' ) then
           BeefRemitCarcaseLineType := clGB
        else
           BeefRemitCarcaseLineType := clIrl;

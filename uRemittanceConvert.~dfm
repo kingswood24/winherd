@@ -17,14 +17,14 @@ object fmRemittanceConvert: TfmRemittanceConvert
   TextHeight = 13
   object teConvertFile: TcxTextEdit
     Left = 18
-    Top = 30
+    Top = 27
     Properties.ReadOnly = True
     Style.LookAndFeel.NativeStyle = True
     StyleDisabled.LookAndFeel.NativeStyle = True
     StyleFocused.LookAndFeel.NativeStyle = True
     StyleHot.LookAndFeel.NativeStyle = True
     TabOrder = 0
-    Width = 569
+    Width = 453
   end
   object teConvertedFileName: TcxTextEdit
     Left = 18
@@ -38,8 +38,8 @@ object fmRemittanceConvert: TfmRemittanceConvert
     Width = 121
   end
   object cxButton1: TcxButton
-    Left = 272
-    Top = 54
+    Left = 20
+    Top = 49
     Width = 75
     Height = 25
     Caption = 'Browse'
@@ -78,7 +78,7 @@ object fmRemittanceConvert: TfmRemittanceConvert
   end
   object cxLabel1: TcxLabel
     Left = 18
-    Top = 14
+    Top = 11
     Caption = 'Select the file to convert'
   end
   object cxLabel2: TcxLabel
@@ -98,17 +98,19 @@ object fmRemittanceConvert: TfmRemittanceConvert
     Height = 25
     Caption = 'Save Output'
     TabOrder = 8
+    OnClick = btnSaveOutputClick
     LookAndFeel.NativeStyle = True
   end
   object OpenDialog: TOpenDialog
     Filter = 'CSV|*.CSV|All Files|*.*'
-    Left = 378
-    Top = 40
+    InitialDir = 'C:\Kingswood Herd Management'
+    Left = 480
+    Top = 16
   end
   object Parser: TSPParser
     Sepchar = ','
     CharSearch = True
-    Left = 436
-    Top = 14
+    Left = 512
+    Top = 18
   end
 end

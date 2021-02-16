@@ -1,5 +1,7 @@
 {
+   06/01/20 [V5.9 R1.6] /MK Additional Feature - Added Total Value, Total Deductions and Cheque Amount summary items before Remittance End - Una Carter request.
 
+   11/02/21 [V5.9 R8.4] /MK Change - Convert - Country code was never added to the converter.
 }
 
 unit ElectronicRemittanceConverter;
@@ -9,6 +11,7 @@ uses
   Windows, Messages, SysUtils, Classes, Dialogs, uSPParser;
 
 type
+  TBeefRemitCountry = (brcIreland, brcGB);
   TElectronicRemittanceConverter = class
   private
     FParser: TSPParser;
@@ -16,6 +19,7 @@ type
     FElectronicRemittanceFile : TStringList;
     FCSVFileName: string;
     FLine : string;
+    FBeefRemitCountry : TBeefRemitCountry;
     procedure SetCSVFileName(const Value: string);
   protected
     procedure AddToLine(const SubString : String);
@@ -26,7 +30,6 @@ type
     procedure SaveToFile(AFileName : string);
     function ElectronicRemittanceAsString : WideString;
     property CSVFileName : string read FCSVFileName write SetCSVFileName;
-
   end;
 
 const
@@ -58,8 +61,23 @@ const
   idLIVEWEIGHT : array[0..2] of integer = (102,15,JustifyRight);
   idTOTALDEDUCTIONS : array[0..2] of integer = (118,15,JustifyRight);
 
+  idGBDNATIONAL  : array[0..2] of integer = (1,24,JustifyLeft);
+  idGBDCARCASE   : array[0..2] of integer = (26,8,JustifyLeft);
+  idGBDSEX       : array[0..2] of integer = (36,5,JustifyLeft);
+  idGBDGRADE     : array[0..2] of integer = (42,4,JustifyLeft);
+  idGBDLWEIGHT   : array[0..2] of integer = (49,7,JustifyRight);
+  idGBDRWEIGHT   : array[0..2] of integer = (58,8,JustifyRight);
+  idGBDCONDEMNED : array[0..2] of integer = (67,10,JustifyLeft);
+  idGBDCWEIGHT   : array[0..2] of integer = (78,8,JustifyRight);
+  idGBDPRICEPER  : array[0..2] of integer = (87,9,JustifyRight);
+  idGBDVALUE     : array[0..2] of integer = (97,14,JustifyRight);
+  idGBDLIVEWEIGHT : array[0..2] of integer = (112,15,JustifyRight);
+  idGBDTOTALDEDUCTIONS : array[0..2] of integer = (128,15,JustifyRight);
+
 implementation
-uses KRoutines;
+
+uses
+   KRoutines;
 
 { TElectronicRemittanceConverter }
 
@@ -121,6 +139,17 @@ begin
    AddToLine(PadRight('CREATED BY', ' ',20));
    AddToLine('KINGSWOOD');
    FElectronicRemittanceFile.Add(FLine);
+
+   // Country
+   //   11/02/21 [V5.9 R8.4] /MK Change - Country code was never added to the converter.
+   FLine := '';
+   AddToLine(PadRight('COUNTRY', ' ',20));
+   AddToLine(FParser.Fields[cCountryID]);
+   FElectronicRemittanceFile.Add(FLine);
+   if ( FParser.Fields[cCountryID] = 'GB' ) or ( FParser.Fields[cCountryID] = 'NI' ) then
+      FBeefRemitCountry := brcGB
+   else
+      FBeefRemitCountry := brcIreland;
 
    // Remittance
    FLine := '';
@@ -208,7 +237,10 @@ begin
             begin
                FParser.Parse( FRemittanceFile.Strings[i] );
 
-               TempStr := PadRight(FParser.Fields[2], ' ', idNATIONAL[1]);
+               if ( FBeefRemitCountry = brcGB ) then
+                  TempStr := PadRight(FParser.Fields[2], ' ', idGBDNATIONAL[1])
+               else
+                  TempStr := PadRight(FParser.Fields[2], ' ', idNATIONAL[1]);
                AddToLine(TempStr);
 
                TempStr := ' ';
@@ -220,25 +252,37 @@ begin
                TempStr := '  ';
                AddToLine(TempStr);
 
-               TempStr := PadRight(FParser.Fields[4], ' ', idSEX[1]);
+               if ( FBeefRemitCountry = brcGB ) then
+                  TempStr := PadRight(FParser.Fields[4], ' ', idGBDSEX[1])
+               else
+                  TempStr := PadRight(FParser.Fields[4], ' ', idSEX[1]);
                AddToLine(TempStr);
 
                TempStr := ' ';
                AddToLine(TempStr);
 
-               TempStr := PadRight(FParser.Fields[5], ' ', idGRADE[1]);
+               if ( FBeefRemitCountry = brcGB ) then
+                  TempStr := PadRight(FParser.Fields[5], ' ', idGBDGRADE[1])
+               else
+                  TempStr := PadRight(FParser.Fields[5], ' ', idGRADE[1]);
                AddToLine(TempStr);
 
                TempStr := '   ';
                AddToLine(TempStr);
 
-               TempStr := PadLeft(FParser.Fields[6], ' ', idLWEIGHT[1]);
+               if ( FBeefRemitCountry = brcGB ) then
+                  TempStr := PadLeft(FParser.Fields[6], ' ', idGBDLWEIGHT[1])
+               else
+                  TempStr := PadLeft(FParser.Fields[6], ' ', idLWEIGHT[1]);
                AddToLine(TempStr);
 
                TempStr := '  ';
                AddToLine(TempStr);
 
-               TempStr := PadLeft(FParser.Fields[7], ' ', idRWEIGHT[1]);
+               if ( FBeefRemitCountry = brcGB ) then
+                  TempStr := PadLeft(FParser.Fields[7], ' ', idGBDRWEIGHT[1])
+               else
+                  TempStr := PadLeft(FParser.Fields[7], ' ', idRWEIGHT[1]);
                AddToLine(TempStr);
 
                TempStr := ' ';
@@ -250,19 +294,28 @@ begin
                TempStr := ' ';
                AddToLine(TempStr);
 
-               TempStr := PadLeft(FParser.Fields[9], ' ', idCWEIGHT[1]);
+               if ( FBeefRemitCountry = brcGB ) then
+                  TempStr := PadLeft(FParser.Fields[9], ' ', idGBDCWEIGHT[1])
+               else
+                  TempStr := PadLeft(FParser.Fields[9], ' ', idCWEIGHT[1]);
                AddToLine(TempStr);
 
                TempStr := ' ';
                AddToLine(TempStr);
 
-               TempStr := PadLeft(FParser.Fields[10], ' ', idPRICEPER[1]);
+               if ( FBeefRemitCountry = brcGB ) then
+                  TempStr := PadLeft(FParser.Fields[10], ' ', idGBDPRICEPER[1])
+               else
+                  TempStr := PadLeft(FParser.Fields[10], ' ', idPRICEPER[1]);
                AddToLine(TempStr);
 
                TempStr := ' ';
                AddToLine(TempStr);
 
-               TempStr := PadLeft(FParser.Fields[11], ' ', idVALUE[1]);
+               if ( FBeefRemitCountry = brcGB ) then
+                  TempStr := PadLeft(FParser.Fields[11], ' ', idGBDVALUE[1])
+               else
+                  TempStr := PadLeft(FParser.Fields[11], ' ', idVALUE[1]);
                AddToLine(TempStr);
                if ( Length(Trim(TempStr)) > 0 ) then
                   fSumValue := fSumValue + StrToFloat(TempStr);
@@ -270,13 +323,19 @@ begin
                TempStr := ' ';
                AddToLine(TempStr);
 
-               TempStr := PadLeft(FParser.Fields[12], ' ', idLIVEWEIGHT[1]);
+               if ( FBeefRemitCountry = brcGB ) then
+                  TempStr := PadLeft(FParser.Fields[12], ' ', idGBDLIVEWEIGHT[1])
+               else
+                  TempStr := PadLeft(FParser.Fields[12], ' ', idLIVEWEIGHT[1]);
                AddToLine(TempStr);
 
                TempStr := ' ';
                AddToLine(TempStr);
 
-               TempStr := PadLeft(FParser.Fields[13], ' ', idTOTALDEDUCTIONS[1]);
+               if ( FBeefRemitCountry = brcGB ) then
+                  TempStr := PadLeft(FParser.Fields[13], ' ', idGBDTOTALDEDUCTIONS[1])
+               else
+                  TempStr := PadLeft(FParser.Fields[13], ' ', idTOTALDEDUCTIONS[1]);
                AddToLine(TempStr);
                if ( Length(Trim(TempStr)) > 0 ) then
                   fSumDeducts := fSumDeducts + StrToFloat(TempStr);

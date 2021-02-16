@@ -1,4 +1,9 @@
-Version V5.9 R8.2
+Version V5.9 R8.4
+
+11/02/21 /MK Change - ElectronicRemittanceConverter - Convert - Country code was never added to the converter.
+                    - uRemittance - BuildGridFromFile - Added a check for NI country code as well for Foyle Groups file.
+
+Version V5.9 R8.3
 
 09/02/21 /SP Change - uHerdSync - CreateHerdSyncData - Added ReportInDays to the Health events to be synced to the server.
 09/02/21 /MK Change - DairyData - CheckFiles - Set all vaccination events that have a report in days of a week or more as modified so they up to the server again with the report in days - SP request.
