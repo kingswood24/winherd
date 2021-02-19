@@ -2823,7 +2823,7 @@ object fmNutrientProductionProjectionRptScr: TfmNutrientProductionProjectionRptS
         Left = 57
         Top = 408
         Caption = 
-          'NB : Please note forecast purchases/sales are assumed to ocurr o' +
+          'NB : Please note forecast purchases/sales are assumed to occur o' +
           'n the first date of each month.'
         ParentFont = False
         Style.Font.Charset = ANSI_CHARSET

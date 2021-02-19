@@ -1,14 +1,14 @@
 [Closed Files]
-File_0=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Changes.txt',0,1,1,1,6,0,0
-File_1=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\MenuUnit.pas',0,1,973,1,995,0,0
-File_2=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uNutrientProductionProjectionRptScr.pas',0,1,1234,35,1248,1,0
-File_3=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\DairyData.pas',0,1,1151,1,1171,0,0
-File_4=SourceModule,'C:\Program Files\Developer Express.VCL\ExpressDataController\Sources\cxCustomData.pas',0,1,436,1,456,0,0
-File_5=SourceModule,'c:\program files (x86)\borland\delphi5\Source\Vcl\controls.pas',0,1,5592,1,5612,0,0
-File_6=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Reports\SaleEligibility.pas',0,1,1,1,22,1,0
-File_7=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\CaprineTag.pas',0,1,1,1,1,0,0
-File_8=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uDanRyanImport.pas',0,1,1,1,33,1,0
-File_9=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\GenTypesConst.pas',0,1,593,99,613,0,0
+File_0=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uFileAttachmentImport.pas',0,1,138,1,172,1,0
+File_1=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\MenuUnit.pas',0,1,14126,45,14151,0,0
+File_2=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uAIMAnimalMovementEdit.pas',0,1,1,38,19,1,0
+File_3=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Changes.txt',0,1,1,1,6,0,0
+File_4=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uNutrientProductionProjectionRptScr.pas',0,1,1234,35,1248,1,0
+File_5=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\DairyData.pas',0,1,1151,1,1171,0,0
+File_6=SourceModule,'C:\Program Files\Developer Express.VCL\ExpressDataController\Sources\cxCustomData.pas',0,1,436,1,456,0,0
+File_7=SourceModule,'c:\program files (x86)\borland\delphi5\Source\Vcl\controls.pas',0,1,5592,1,5612,0,0
+File_8=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Reports\SaleEligibility.pas',0,1,1,1,22,1,0
+File_9=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\CaprineTag.pas',0,1,1,1,1,0,0
 
 [Modules]
 Module0=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.dpr
@@ -25,10 +25,6 @@ FormState=0
 FormOnTop=0
 
 [C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.todo]
-FormState=0
-FormOnTop=0
-
-[C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uImageStore.pas]
 FormState=0
 FormOnTop=0
 
@@ -54,13 +50,13 @@ LeftPanelClients=CodeExplorer@EditWindow0
 LeftPanelData=00000400010000000C000000436F64654578706C6F7265720000000000000000000000000000000000FFFFFFFF
 RightPanelSize=0
 BottomPanelSize=140
-BottomPanelClients=DockSite0
-BottomPanelData=0000040000000000BD06000000000000028C000000000000000100000000BD06000009000000446F636B5369746530FFFFFFFF
+BottomPanelClients=DockSite1
+BottomPanelData=0000040000000000BD06000000000000028C000000000000000100000000BD06000009000000446F636B5369746531FFFFFFFF
 
 [View0]
 Module=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.dpr
-CursorX=1
-CursorY=1
+CursorX=46
+CursorY=23
 TopLine=1
 LeftCol=1
 
@@ -69,8 +65,9 @@ Count=1
 Watch0='HerdSync.FSyncDataQuery.FieldByName(''EventType'').AsInteger',256,0,18,1,0
 
 [Breakpoints]
-Count=1
+Count=2
 Breakpoint0='C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Reports\SaleEligibility.pas',946,'',0,1,'',1,0,0,'',1,'','',''
+Breakpoint1='C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uFileAttachmentImport.pas',114,'',0,1,'',1,0,0,'',1,'','',''
 
 [AddressBreakpoints]
 Count=0
@@ -83,8 +80,8 @@ Left=0
 Top=0
 Width=1920
 Height=115
-MaxLeft=-4
-MaxTop=-4
+MaxLeft=-1
+MaxTop=-1
 MaxWidth=1928
 MaxHeight=115
 ClientWidth=1920
@@ -153,8 +150,8 @@ LRDockWidth=219
 Dockable=1
 SplitPos=85
 ArrangeBy=Name
-SelectedItem=Caption
-ExpandedItems=DataBinding,Font.Style,LookAndFeel,OptionsView,Properties,Properties.SpinButtons,Properties.ValueChecked,Properties.ValueGrayed,Properties.ValueUnchecked
+SelectedItem=
+ExpandedItems=DataBinding,Font.Style,LookAndFeel,OptionsView,Properties,Properties.ValueChecked,Properties.ValueGrayed,Properties.ValueUnchecked
 HiddenCategories=Legacy
 ShowStatusBar=1
 
@@ -303,7 +300,7 @@ Dockable=1
 
 [MessageView@EditWindow0]
 Create=1
-Visible=0
+Visible=1
 State=0
 Left=0
 Top=0
@@ -313,7 +310,7 @@ MaxLeft=-1
 MaxTop=-1
 ClientWidth=1705
 ClientHeight=111
-TBDockHeight=140
+TBDockHeight=111
 LRDockWidth=443
 Dockable=1
 
@@ -321,26 +318,6 @@ Dockable=1
 DockHostCount=2
 
 [DockSite0]
-DockSiteType=1
-Create=1
-Visible=1
-State=0
-Left=12
-Top=0
-Width=1713
-Height=140
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=1713
-ClientHeight=140
-TBDockHeight=140
-LRDockWidth=1027
-Dockable=1
-TabPosition=0
-ActiveTab=Call Stack
-TabDockClients=BreakpointWindow,WatchWindow,DebugLogView,LocalVarsWindow,ModuleWindow,CallStackWindow,MessageView@EditWindow0
-
-[DockSite1]
 DockSiteType=1
 Create=1
 Visible=1
@@ -357,6 +334,26 @@ TBDockHeight=926
 LRDockWidth=219
 Dockable=1
 TabPosition=0
-ActiveTab=Object Inspector
+ActiveTab=Project Manager
 TabDockClients=PropertyInspector,ProjectManager
+
+[DockSite1]
+DockSiteType=1
+Create=1
+Visible=1
+State=0
+Left=12
+Top=0
+Width=1713
+Height=140
+MaxLeft=-1
+MaxTop=-1
+ClientWidth=1713
+ClientHeight=140
+TBDockHeight=140
+LRDockWidth=1027
+Dockable=1
+TabPosition=0
+ActiveTab=Messages
+TabDockClients=BreakpointWindow,WatchWindow,DebugLogView,LocalVarsWindow,ModuleWindow,CallStackWindow,MessageView@EditWindow0
 
