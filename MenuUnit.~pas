@@ -3029,7 +3029,7 @@ uses
     EventRecording, uFileAttachmentImport, uNationalID,
     uBeefSalesCatalogue, uUKSireRegister, uReports, udatafix, uPreferences,
     uBeefProfitMonitor, uBeefAISireRegister, uAWReviewEvents,
-    uRemittanceConvert, uAnimalEventTransfer, LMDWebDownloadFormUnit,
+    uAnimalEventTransfer, LMDWebDownloadFormUnit,
     UserMsgConst, uKingswoodController, uDataDownload,
     uFertilityCheckReport, uFertilityCheckEdit, uEventForm,
     uFertilityAnalysis, uLactationConsistencyChecker, uCTSRegInfo,
@@ -9034,7 +9034,7 @@ begin
    HideHintStyleController;
    FShutdownInProgress := True;
    DoAutoBackup := False;
-   
+
    if ( WinData.ActiveFilter ) then
       WinData.ActiveFilter := False;
 

@@ -1,3 +1,7 @@
+Version V5.9 R8.5
+
+19/02/21 /MK Change - KRoutines - GetInternetIPAddress - Added try except around this function because of "Connection Closed Gracefully" error - Kathleen Buckley.
+
 Version V5.9 R8.4
 
 11/02/21 /MK Change - ElectronicRemittanceConverter - Convert - Country code was never added to the converter.

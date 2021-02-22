@@ -9034,7 +9034,7 @@ begin
    HideHintStyleController;
    FShutdownInProgress := True;
    DoAutoBackup := False;
-   
+
    if ( WinData.ActiveFilter ) then
       WinData.ActiveFilter := False;
 

@@ -1011,6 +1011,8 @@ unit DairyData;
  11/01/21 [V5.9 R8.0] /MK Bug Fix - qHerdVaccineReminders - Changed SQL to include all vaccination disease lookup codes.
 
  22/01/21 [V5.9 R8.0] /MK Bug Fix - qHerdVaccineReminders & qHerdDosageReminders - Changed SQL to exclude events that don't have a ReportInDays.
+
+ 09/02/21 [V5.9 R8.3] /MK Change - CheckFiles - Set all vaccination events that have a report in days of a week or more as modified so they up to the server again with the report in days - SP request.
 }
 
 interface
@@ -30628,13 +30630,16 @@ function TWinData.GetIsBlacklistedIP: boolean;
 var
    ip : string;
 begin
-   if ( not(Preferences.PreferenceExists(cIPAddress)) ) then
-      Preferences.ValueAsString[cIPAddress] := GetInternetIPAddress();
-   ip := Preferences.ValueAsString[cIPAddress];
+   try
+      if ( not(Preferences.PreferenceExists(cIPAddress)) ) then
+         Preferences.ValueAsString[cIPAddress] := GetInternetIPAddress();
+      ip := Preferences.ValueAsString[cIPAddress];
 
-   Result := (ip = '217.115.122.46') or // Kingswood IP address
-             (ip = '62.231.60.150') or // Old Kingswood IP address
-             (ip = '86.180.106.108'); // TGM IP address as of 22/07/2014
+      Result := (ip = '217.115.122.46') or // Kingswood IP address
+                (ip = '62.231.60.150') or // Old Kingswood IP address
+                (ip = '86.180.106.108'); // TGM IP address as of 22/07/2014
+   except
+   end;
 end;
 
 // 22/07/2014 - SP
