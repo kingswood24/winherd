@@ -136,6 +136,10 @@
    05/02/21 [V5.9 R8.2] /MK Bug Fix - AddEventToEventsExt - Using Client instead of ClientId and not using double quotes around AClientId.
 
    09/02/21 [V5.9 R8.3] /SP Change - CreateHerdSyncData - Added ReportInDays to the Health events to be synced to the server.
+
+   23/02/21 [V5.9 R8.5] /MK Change - CreateExistingClientIdElement - Changed format of eventDate node to 4 digit year to match server format
+                                                                   - Changed format of dateofBirth node to 4 digit year to match server format
+                                                                   - OpenCalvingQuery - Change LEFT JOIN to INNER JOIN to make the query quicker.
 }
 
 unit uHerdSync;
@@ -9860,15 +9864,16 @@ var
       qEvent.Close;
       qEvent.SQL.Clear;
       qEvent.SQL.Add('SELECT A.ID, A.NatIDNum, A.AnimalNo, A.LactNo,');
-      qEvent.SQL.Add('	 E.EventDate, E.EventDesc, G.Description Survey,');
-      qEvent.SQL.Add('	 C.ID'+AFieldId+' CalfID'+AFieldId+', C'+AFieldId+'.NatIDNum C'+AFieldId+'NatID, C'+AFieldId+'.Sex C'+AFieldId+'Sex,');
-      qEvent.SQL.Add('  C'+AFieldId+'.DateOfBirth C'+AFieldId+'DOB, C'+AFieldId+'.AnimalNo C'+AFieldId+'ANo,');
-      qEvent.SQL.Add('	 C'+AFieldId+'B.Code C'+AFieldId+'Breed, C'+AFieldId+'G.LookupCode C'+AFieldId+'Colour, C'+AFieldId+'.Name C'+AFieldId+'Name,');
-      qEvent.SQL.Add('  C'+AFieldId+'.HerdBookNo C'+AFieldId+'HerdBook, C'+AFieldId+'.BirthWeight C'+AFieldId+'Weight, C'+AFieldId+'.InHerd C'+AFieldId+'InHerd,');
-      qEvent.SQL.Add('	 S.AnimalNo BullNo, S.NatIDNum BullNatID, SB.Code BullBreed');
+      qEvent.SQL.Add('	     E.EventDate, E.EventDesc, G.Description Survey,');
+      qEvent.SQL.Add('	     C.ID'+AFieldId+' CalfID'+AFieldId+', C'+AFieldId+'.NatIDNum C'+AFieldId+'NatID, C'+AFieldId+'.Sex C'+AFieldId+'Sex,');
+      qEvent.SQL.Add('	     C'+AFieldId+'.DateOfBirth C'+AFieldId+'DOB, C'+AFieldId+'.AnimalNo C'+AFieldId+'ANo,');
+      qEvent.SQL.Add('	     C'+AFieldId+'B.Code C'+AFieldId+'Breed, C'+AFieldId+'G.LookupCode C'+AFieldId+'Colour, C'+AFieldId+'.Name C'+AFieldId+'Name,');
+      qEvent.SQL.Add('	     C'+AFieldId+'.HerdBookNo C'+AFieldId+'HerdBook, C'+AFieldId+'.BirthWeight C'+AFieldId+'Weight, C'+AFieldId+'.InHerd C'+AFieldId+'InHerd,');
+      qEvent.SQL.Add('	     S.AnimalNo BullNo, S.NatIDNum BullNatID, SB.Code BullBreed');
       qEvent.SQL.Add('FROM Animals A');
-      qEvent.SQL.Add('LEFT JOIN Events E ON (E.AnimalID = A.ID)');
-      qEvent.SQL.Add('LEFT JOIN Calvings C ON (C.EventID = E.ID)');
+      //   23/02/21 [V5.9 R8.5] /MK Change - Change LEFT JOIN to INNER JOIN to make the query quicker.
+      qEvent.SQL.Add('INNER JOIN Events E ON (E.AnimalID = A.ID)');
+      qEvent.SQL.Add('INNER JOIN Calvings C ON (C.EventID = E.ID)');
       qEvent.SQL.Add('LEFT JOIN GenLook G ON (G.ID = C.BirthType)');
       qEvent.SQL.Add('LEFT JOIN Animals C'+AFieldId+' ON (C'+AFieldId+'.ID = C.ID'+AFieldId+')');
       qEvent.SQL.Add('LEFT JOIN Breeds C'+AFieldId+'B ON (C'+AFieldId+'B.ID = C'+AFieldId+'.PrimaryBreed)');
@@ -9912,8 +9917,9 @@ begin
                                   ChildNode := Doc.createElement('animalLactNo');
                                   ChildNode.Set_text(IntToStr(qEvent.FieldByName('LactNo').AsInteger));
                                   Result.appendChild(ChildNode);
+                                  //   23/02/21 [V5.9 R8.5] /MK Change - Changed format of eventDate node to 4 digit year to match server format
                                   ChildNode := Doc.createElement('eventDate');
-                                  ChildNode.Set_text(FormatDateTime('dd/MM/yy',qEvent.FieldByName('EventDate').AsDateTime));
+                                  ChildNode.Set_text(FormatDateTime('dd/MM/yyyy',qEvent.FieldByName('EventDate').AsDateTime));
                                   Result.appendChild(ChildNode);
                                   ChildNode := Doc.createElement('eventDescription');
                                   ChildNode.Set_text(qEvent.FieldByName('EventDesc').AsString);
@@ -9963,8 +9969,9 @@ begin
                                               Node := Doc.createElement('sex');
                                               Node.Set_text(qEvent.FieldByName('C'+si+'Sex').AsString);
                                               TempNode.appendChild(Node);
+                                              //   23/02/21 [V5.9 R8.5] /MK Change - Changed format of dateofBirth node to 4 digit year to match server format
                                               Node := Doc.createElement('dateOfBirth');
-                                              Node.Set_text(FormatDateTime('dd/MM/yy',qEvent.FieldByName('C'+si+'DOB').AsDateTime));
+                                              Node.Set_text(FormatDateTime('dd/MM/yyyy',qEvent.FieldByName('C'+si+'DOB').AsDateTime));
                                               TempNode.appendChild(Node);
                                               Node := Doc.createElement('breedCode');
                                               Node.Set_text(qEvent.FieldByName('C'+si+'Breed').AsString);
