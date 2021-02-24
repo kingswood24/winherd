@@ -82,7 +82,9 @@
 
   07/06/19 [V5.8 R9.3] /MK Change - ActivateDeactiveBulls - Made this procedure quicker - Pauline Ryan took over 2 minutes to run now takes a second.
 
-  23/08/19 [V5.9 R0.1] /MK Change - btnMilkRecordsClick - Give back result if Milk Recording file is saved.  
+  23/08/19 [V5.9 R0.1] /MK Change - btnMilkRecordsClick - Give back result if Milk Recording file is saved.
+
+  29/01/20 [V5.9 R2.1] /MK Change - Added sICBF_GENERATION EventSource to Planned Bull, Service and Weighing Records import.    
 }
 
 unit uICBFPCDownloadImporter;
@@ -1694,6 +1696,7 @@ begin
    if FileExists(ICBFFileName) then
       begin
          lFileStatus.Caption := 'File found: "'+ ExcludeTrailingBackslash(ICBFFileName) + '"';
+         StatusBar.Panels[0].Text := ExcludeTrailingBackslash(ICBFFileName);
          EnableGroupBox(True, 1);
          EnableGroupBox(True, 2);
          EnableGroupBox(True, 3);

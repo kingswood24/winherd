@@ -79,6 +79,7 @@ begin
    with TfmFileAttachmentImport.Create(nil) do
       try
          Result := '';
+         FFileCount := 0;
          FImportType := AImportType;
          FHerdIdentity := AHerdIdentity;
          BuildFileList;
@@ -89,10 +90,8 @@ begin
             Result := '';
       finally
          if ModalResult = mrOK then
-            begin
-               if cxListView1.Selected <> nil then
-                  Result := string( cxListView1.Selected.Data);
-            end;
+            if cxListView1.Selected <> nil then
+               Result := ( PString(cxListView1.Selected.Data)^ );
          Free;
       end;
 end;
@@ -110,6 +109,24 @@ var
    FileCreationDate,
    FileModifiedDate : TDateTime;
    MemData : TdxMemData;
+   ListItems : TStringList;
+
+   procedure AddItemToListView(const Text, DataText: string; ASubItems : TStrings);
+   var
+      pStr: PString;
+      i : Integer;
+   begin
+      { Allocate memory to hold our dynamic string data }
+      New(pStr);
+      pStr^ := DataText;
+      with cxListView1.Items.Add do begin
+        Caption := Text;
+        Data := pStr;
+        for i := 0 to ASubItems.Count-1 do
+           SubItems.Add(ASubItems[i]);
+      end;
+   end;
+
 begin
    SetupListView;
 
@@ -143,9 +160,10 @@ begin
       try
          ClearMemDataFieldDefs(MemData);
 
-         CreateMemDataFieldDef(MemData,'FileName',ftString,200);
-         CreateMemDataFieldDef(MemData,'FileType',ftDateTime);
-         CreateMemDataFieldDef(MemData,'FileDate',ftString,10);
+         CreateMemDataFieldDef(MemData,'FileCaption',ftString,1000);
+         CreateMemDataFieldDef(MemData,'FileName',ftString,1000);
+         CreateMemDataFieldDef(MemData,'FileDate',ftDateTime);
+         CreateMemDataFieldDef(MemData,'FileType',ftString,10);
 
          MemData.SortedField := 'FileDate';
          MemData.SortOptions := [soDesc];
@@ -156,7 +174,6 @@ begin
          if ( FImportType = itICBF ) then
             begin
                //  format the remaining icbf file names
-               FFileCount := 0;
                for i := 0 to FFileList.Count-1 do
                   begin
                      // remove any files previously read.
@@ -193,19 +210,17 @@ begin
                            FileCreationDate := EncodeDate(Y,M,D);
 
                            MemData.Append;
-                           MemData.FieldByName('FileName').AsString := FileName;
+                           MemData.FieldByName('FileCaption').AsString := HerdIdentifier;
+                           MemData.FieldByName('FileName').AsString := FFileList.Strings[i];
                            MemData.FieldByName('FileType').AsString := FileType;
-                           MemData.FieldByName('FileDate').AsDateTime := FileModifiedDate;
+                           MemData.FieldByName('FileDate').AsDateTime := FileCreationDate;
                            MemData.Post;
-                           Inc(FFileCount);
                         except
                         end;
-
                   end;
             end
          else
             begin
-               FFileCount := 0;
                for i := 0 to FFileList.Count-1 do
                   begin
                      // remove any files previously read.
@@ -222,26 +237,35 @@ begin
 
                      FileModifiedDate := GetFileModifiedDate(FFileList.Strings[i]);
                      MemData.Append;
-                     MemData.FieldByName('FileName').AsString := FileName;
+                     MemData.FieldByName('FileCaption').AsString := FileName;
+                     MemData.FieldByName('FileName').AsString := FFileList.Strings[i];
                      MemData.FieldByName('FileDate').AsDateTime := FileModifiedDate;
                      MemData.Post;
-                     Inc(FFileCount);
                   end;
             end;
 
       cxListView1.Items.Clear;
-      MemData.First;
-      while ( not(MemData.Eof) ) do
-         begin
-            ListItem := cxListView1.Items.Add;
-            ListItem.Caption := MemData.FieldByName('FileName').AsString;
-            ListItem.Data := pointer(MemData.FieldByName('FileName').AsString);
-            if ( MemData.FieldByName('FileDate').AsDateTime > 0 ) then
-               ListItem.SubItems.Add(FormatDateTime('dd of mmm yyyy', MemData.FieldByName('FileDate').AsDateTime));
-            if ( Length(MemData.FieldByName('FileType').AsString) > 0 ) then
-               ListItem.SubItems.Add(FileType);
-            MemData.Next;
-         end;
+      ListItems := TStringList.Create();
+      try
+         MemData.First;
+         while ( not(MemData.Eof) ) do
+            begin
+               if ( FImportType = itICBF ) then
+                  ListItems.Add(FormatDateTime('dd of mmm yyyy', MemData.FieldByName('FileDate').AsDateTime))
+               else
+                  ListItems.Add(FormatDateTime('dd/MM/yyyy', MemData.FieldByName('FileDate').AsDateTime));
+               ListItems.Add(MemData.FieldByName('FileType').AsString);
+               AddItemToListView(MemData.FieldByName('FileCaption').AsString,
+                                 MemData.FieldByName('FileName').AsString,
+                                 ListItems);
+               ListItems.Clear;
+               Inc(FFileCount);
+               MemData.Next;
+            end;
+      finally
+         if ( ListItems <> nil ) then
+            FreeAndNil(ListItems);
+      end;
    finally
       MemData.Active := False;
       FreeAndNil(MemData);
@@ -280,7 +304,7 @@ begin
          ListColumn.Caption := 'Name';
          ListColumn.Width := 300;
          ListColumn := cxListView1.Columns.Add;
-         ListColumn.Caption := 'Date created';
+         ListColumn.Caption := 'Date modified';
          ListColumn.Width := 120;
       end;
 end;
@@ -356,7 +380,7 @@ procedure TfmFileAttachmentImport.actMarkFileAsReadExecute(Sender: TObject);
 begin
    if ( MessageDlg('Are you sure you want to mark this file as read?',mtConfirmation,[mbYes,mbNo],0) = mrYes ) then
       begin
-         MarkAttachmentAsRead(string(cxListView1.Selected.Data));
+         MarkAttachmentAsRead(PString(cxListView1.Selected.Data)^);
          BuildFileList;
       end;
 end;
