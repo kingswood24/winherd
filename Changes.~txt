@@ -1,3 +1,11 @@
+Version V5.9 R8.7
+
+26/02/21 /MK Change - Removed filter on the A1A2 column as it wasn't working.
+
+Version V5.9 R8.6
+
+26/02/21 /MK Additional Feature - uNutrientProductionProjectionRptScr - Enabled help button with new nutprodrep.htm page.
+
 Version V5.9 R8.5
 
 19/02/21 /MK Change - KRoutines - GetInternetIPAddress - Added try except around this function because of "Connection Closed Gracefully" error - Kathleen Buckley.

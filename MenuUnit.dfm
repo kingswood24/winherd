@@ -1988,6 +1988,7 @@ object MenuForm: TMenuForm
             HeaderAlignmentVert = vaCenter
             Options.Editing = False
             Options.Filtering = False
+            Options.FilteringMRUItemsList = False
             Width = 70
           end
           object cxAnimalGridViewQANoMovements: TcxGridDBColumn
@@ -2002,6 +2003,8 @@ object MenuForm: TMenuForm
             DataBinding.FieldName = 'A1A2Result'
             HeaderAlignmentVert = vaCenter
             Options.Editing = False
+            Options.Filtering = False
+            Options.FilteringMRUItemsList = False
             Width = 60
           end
           object cxAnimalGridViewPurchCommission: TcxGridDBColumn
@@ -12134,7 +12137,7 @@ object MenuForm: TMenuForm
       PrinterPage.PageSize.Y = 297000
       PrinterPage._dxMeasurementUnits_ = 0
       PrinterPage._dxLastMU_ = 2
-      ReportDocument.CreationDate = 44246.6179773495
+      ReportDocument.CreationDate = 44253.740473588
       OptionsOnEveryPage.Footers = False
       OptionsOnEveryPage.FilterBar = False
       OptionsPreview.Visible = False

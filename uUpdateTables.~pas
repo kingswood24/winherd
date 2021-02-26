@@ -1609,6 +1609,16 @@ begin
          except
             Result := False;
          end;
+
+   if ( not(FieldExists('A1A2Result')) ) then
+      with UpdateQuery do
+         try
+            SQL.Clear;
+            SQL.Add('ALTER TABLE "'+UpdateTable+'" ADD A1A2Result CHAR(5)');
+            ExecSQL;
+         except
+            Result := False;
+         end;
 end;
 
 function UpdateMilkDiskLayout : Boolean;
@@ -3912,6 +3922,9 @@ begin
          AddListType('-90M', 'Sexed 90% Male', LSexedSemen, False, True);
          AddListType('-75M', 'Sexed 75% Male', LSexedSemen, False, True);
 
+         //   02/12/20 [V5.9 R7.7] /MK Bug Fix - Changed Foot to Hoof and fixed spelling misate of Paring - GL request.
+         UpdateGenLookupItemDesc('TU1', 'Foot Pairing', 'Hoof Paring', LTreatmentUsed);
+
          //   31/01/19 [V5.8 R6.5] /MK Additional Feature - Added in new genlook items for the Treatment Used.
          AddListType('TU1', 'Hoof Paring', LTreatmentUsed, False, True);
          AddListType('TU2', 'Pare and Antibiotics', LTreatmentUsed, False, True);
@@ -3922,9 +3935,6 @@ begin
          AddListType('MD2', 'Spilled', LMediDiposalReasons, False, True);
          AddListType('MD3', 'Stolen', LMediDiposalReasons, False, True);
          AddListType('MD4', 'Unknown', LMediDiposalReasons, False, True);
-
-         //   02/12/20 [V5.9 R7.7] /MK Bug Fix - Changed Foot to Hoof and fixed spelling misate of Paring - GL request.
-         UpdateGenLookupItemDesc('TU1', 'Foot Pairing', 'Hoof Paring', LTreatmentUsed);
 
       except
          on e : Exception do

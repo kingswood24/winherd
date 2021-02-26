@@ -369,6 +369,10 @@ type
     FilterTableSCCFrom: TFloatField;
     FilterTableSCCFilter: TBooleanField;
     FilterTableSCCTo: TFloatField;
+    gbA1A2Results: TGroupBox;
+    cmboA1A2Result: TcxDBComboBox;
+    lA1A2Result: TLabel;
+    FilterTableA1A2Result: TStringField;
     procedure bApplyFilterClick(Sender: TObject);
     procedure sbExitClick(Sender: TObject);
     procedure FormActivate(Sender: TObject);
@@ -498,6 +502,7 @@ type
     function GetBreedingSelected: Boolean;
     function GetFilterBySCC: Boolean;
     procedure SetFilterBySCC;
+    function GetFilterByA1A2Result: Boolean;
 
   public
     { Public declarations }
@@ -515,7 +520,8 @@ type
     BeefSQL,
     LeftHerdSQL,
     NoneHerdSQL,
-    EBISQL : String;
+    EBISQL,
+    A1A2ResultSQL : String;
 
     CheckForEvents : Boolean;
     FemaleStatus : TFemaleStatus; // SP 25/09/2002
@@ -541,6 +547,7 @@ type
     property FilterByOverallGainPerDay : Boolean read GetFilterByOverallGainPerDay;
     property BreedingSelected : Boolean read GetBreedingSelected;
     property FilterBySCC : Boolean read GetFilterBySCC;
+    property FilterByA1A2Result : Boolean read GetFilterByA1A2Result;
   end;
 
 var
@@ -624,6 +631,7 @@ begin
              FieldByName('DaysOnFarmFrom').AsInteger := 0;
              FieldByName('DaysOnFarmTo').AsInteger := 0;
              FieldByName('DaysOnFarmFilterSelected').AsInteger  := 0;
+             FieldByName('A1A2Result').AsString := '';
              Post;
           end;
 
@@ -735,6 +743,7 @@ begin
     AgeInMonthsFilterSQL := '';
     EBISQL := '';
     DaysOnFarmSQL := '';
+    A1A2ResultSQL := '';
 end;
 
 procedure TfFilters.bApplyFilterClick(Sender: TObject);
@@ -977,6 +986,13 @@ begin
             end;
       end;
 
+   A1A2ResultSQL := '';
+   if ( Length(FilterTable.FieldByName('A1A2Result').AsString) > 0 ) then
+      begin
+         A1A2ResultSQL := 'AND ID IN (SELECT AnimalID FROM DNAResults WHERE A1A2 = "'+cmboA1A2Result.Text+'")';
+         WinData.ActiveFilter := True;
+      end;
+
    AddedItems := FALSE;
    for i := 0 to pEventType.ControlCount-1 do
       begin
@@ -1134,6 +1150,7 @@ begin
          FilterTable.FieldByName('PD').AsBoolean        := FALSE;
          FilterTable.FieldByName('DryingOff').AsBoolean := FALSE;
          FilterTable.FieldByName('Calving').AsBoolean   := FALSE;
+         FilterTable.FieldByName('A1A2Result').AsString := '';
       end;
 
    ResetAllSpinButtonFilters;
@@ -1404,6 +1421,7 @@ begin
                       FieldByName('SCCFilter').AsBoolean := False;
                       FieldByName('SCCFrom').AsFloat := 0;
                       FieldByName('SCCTo').AsFloat := 0;
+                      FieldByName('A1A2Result').AsString;
                       rgMonthFilter.ItemIndex := 0;
                    end
                 else
@@ -1745,6 +1763,10 @@ begin
    lSCCTo.Enabled := ( Enabled ) or ( MenuForm.FQuickFilter = qfNone );
    SCCTo.Enabled := ( Enabled ) or ( MenuForm.FQuickFilter = qfNone );
    sbSCCTo.Enabled := ( Enabled ) or ( MenuForm.FQuickFilter = qfNone );
+
+   gbA1A2Results.Enabled := ( Enabled ) or ( MenuForm.FQuickFilter = qfNone );
+   lA1A2Result.Enabled := ( Enabled ) or ( MenuForm.FQuickFilter = qfNone );
+   cmboA1A2Result.Enabled := ( Enabled ) or ( MenuForm.FQuickFilter = qfNone );
 
 end;
 
@@ -3006,6 +3028,11 @@ begin
          FilterTable.FieldByName('SCCFilter').AsBoolean := True;
          FilterTable.Post;
       end;
+end;
+
+function TfFilters.GetFilterByA1A2Result: Boolean;
+begin
+   Result := ( Length(FilterTable.FieldByName('A1A2Result').AsString) > 0 );
 end;
 
 end.

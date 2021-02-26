@@ -1,4 +1,8 @@
-Version [V5.9 R8.6]
+Version V5.9 R8.7
+
+26/02/21 /MK Change - MenuUnit - Removed filter on the A1A2 column as it wasn't working.
+
+Version V5.9 R8.6
 
 26/02/21 /MK Additional Feature - uNutrientProductionProjectionRptScr - Enabled help button with new nutprodrep.htm page.
 

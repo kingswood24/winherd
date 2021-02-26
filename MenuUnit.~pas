@@ -993,6 +993,7 @@ unit MenuUnit;
  21/12/20 [V5.9 R7.9] /MK Change - DoFilter - If the filter is Bulls In Use and some bulls don't have breeds, show information message and sort by breed code.
                                  - ClearAnimalSelection - If the sort was changed by the filter of Bulls In Use then set sort back to original sorted column.
 
+ 26/02/21 [V5.9 R8.7] /MK Change - Removed filter on the A1A2 column as it wasn't working.                                 
 }
 
 interface
@@ -5174,6 +5175,9 @@ var
                   else
                      Add('AND A.ID IN (0)')
                end;
+
+            if fFilters.FilterByA1A2Result then
+               FilterString := fFilters.A1A2ResultSQL;
          end;
    end;
 
@@ -5478,6 +5482,9 @@ begin
                                  begin
                                     WinData.AnimalFileByID.SQL.Add('AND A.ID NOT IN (SELECT AnimalID FROM '+WinData.GroupLinks.TableName+') ');
                                  end;
+
+                              if ( fFilters.FilterByA1A2Result ) then
+                                 WinData.AnimalFileByID.SQL.Add(fFilters.A1A2ResultSQL);
 
                               ApplySortToAnimalFileByIdAndOpenQuery();
 
@@ -13686,7 +13693,7 @@ begin
              ( FFilters.DOBSQL <> '' ) or ( FFilters.SexSQL <> '' ) or ( FFilters.RetagSQL <> '' ) or ( FFilters.AIBullSQL <> '' ) or
              ( FFilters.AncestorsSQL <> '' ) or ( FFilters.BreedingSQL <> '' ) or ( FFilters.NonBreedingSQL <> '' ) or
              ( FFilters.DairySQL <> '' ) or ( FFilters.BeefSQL <> '' ) or ( FFilters.LeftHerdSQL <> '' ) or
-             ( FFilters.NoneHerdSQL <> '' ) or ( FSQLFilter.SQLOp <> sqlNone ) or ( FFilters.DaysOnFarmSQL <> '' );
+             ( FFilters.NoneHerdSQL <> '' ) or ( FSQLFilter.SQLOp <> sqlNone ) or ( FFilters.DaysOnFarmSQL <> '' ) or ( FFilters.A1A2ResultSQL <> '' );
 end;
 
 procedure TMenuForm.actImportICBFDataExecute(Sender: TObject);
