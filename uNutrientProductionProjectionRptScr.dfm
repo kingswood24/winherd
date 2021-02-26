@@ -266,6 +266,7 @@ object fmNutrientProductionProjectionRptScr: TfmNutrientProductionProjectionRptS
         EC72207F207F247F247F207F207B0F73FF7FFF7FFF7FFF7FFF7FFF7FFF7FFF7F
         FF7FFF7FFF7FFF7FFF7FFF7FDE7F54770B77247F247F0A775477DE7FFF7FFF7F
         FF7F}
+      OnClick = sbHelpClick
     end
     object ToolButton5: TToolButton
       Left = 410

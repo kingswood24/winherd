@@ -1,14 +1,14 @@
 [Closed Files]
-File_0=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\GenTypesConst.pas',0,1,219,19,252,0,0
-File_1=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Changes.txt',0,1,1,1,1,0,0
-File_2=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\MenuUnit.pas',0,1,1,1,1,0,0
-File_3=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\DairyData.pas',0,1,30609,1,30640,1,0
-File_4=SourceModule,'C:\Kingswood\Delphi Development\Common\KRoutines.pas',0,1,1,1,35,0,0
-File_5=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uRemittanceRecord.pas',0,1,1528,46,1554,1,0
-File_6=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\BeefRemitLine.pas',0,1,8,47,27,0,0
-File_7=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uRemittanceConvert.pas',0,1,1,1,11,1,0
-File_8=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\ElectronicRemittanceConverter.pas',0,1,1,35,11,0,0
-File_9=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uRemittanceLoad.pas',0,1,90,1,81,1,0
+File_0=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\GenTypesConst.pas',0,1,41,1,41,0,0
+File_1=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Changes.txt',0,1,1,1,6,0,0
+File_2=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uHerdSync.pas',0,1,120,1,143,0,0
+File_3=SourceModule,'C:\Kingswood\Delphi Development\Common\KRoutines.pas',0,1,4443,1,4466,0,0
+File_4=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\MenuUnit.pas',0,1,1,1,1,0,0
+File_5=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\DairyData.pas',0,1,30609,1,30640,1,0
+File_6=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uRemittanceRecord.pas',0,1,1528,46,1554,1,0
+File_7=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\BeefRemitLine.pas',0,1,8,47,27,0,0
+File_8=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uRemittanceConvert.pas',0,1,1,1,11,1,0
+File_9=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\ElectronicRemittanceConverter.pas',0,1,1,35,11,0,0
 
 [Modules]
 Module0=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.dpr
@@ -50,13 +50,13 @@ LeftPanelClients=CodeExplorer@EditWindow0
 LeftPanelData=00000400010000000C000000436F64654578706C6F7265720000000000000000000000000000000000FFFFFFFF
 RightPanelSize=0
 BottomPanelSize=140
-BottomPanelClients=DockSite0
-BottomPanelData=0000040000000000BD06000000000000028C000000000000000100000000BD06000009000000446F636B5369746530FFFFFFFF
+BottomPanelClients=DockSite1
+BottomPanelData=0000040000000000BD06000000000000028C000000000000000100000000BD06000009000000446F636B5369746531FFFFFFFF
 
 [View0]
 Module=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.dpr
-CursorX=1
-CursorY=1
+CursorX=50
+CursorY=12
 TopLine=1
 LeftCol=1
 
@@ -78,8 +78,8 @@ Left=0
 Top=0
 Width=1920
 Height=115
-MaxLeft=-4
-MaxTop=-4
+MaxLeft=-1
+MaxTop=-1
 MaxWidth=1928
 MaxHeight=115
 ClientWidth=1920
@@ -287,11 +287,11 @@ State=0
 Left=0
 Top=12
 Width=140
-Height=736
+Height=740
 MaxLeft=-1
 MaxTop=-1
 ClientWidth=140
-ClientHeight=736
+ClientHeight=740
 TBDockHeight=305
 LRDockWidth=140
 Dockable=1
@@ -302,13 +302,13 @@ Visible=0
 State=0
 Left=0
 Top=0
-Width=1689
+Width=1705
 Height=111
 MaxLeft=-1
 MaxTop=-1
-ClientWidth=1689
+ClientWidth=1705
 ClientHeight=111
-TBDockHeight=140
+TBDockHeight=111
 LRDockWidth=443
 Dockable=1
 
@@ -316,26 +316,6 @@ Dockable=1
 DockHostCount=2
 
 [DockSite0]
-DockSiteType=1
-Create=1
-Visible=1
-State=0
-Left=12
-Top=0
-Width=1713
-Height=140
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=1713
-ClientHeight=140
-TBDockHeight=140
-LRDockWidth=1027
-Dockable=1
-TabPosition=0
-ActiveTab=Call Stack
-TabDockClients=BreakpointWindow,WatchWindow,DebugLogView,LocalVarsWindow,ModuleWindow,CallStackWindow,MessageView@EditWindow0
-
-[DockSite1]
 DockSiteType=1
 Create=1
 Visible=1
@@ -354,4 +334,24 @@ Dockable=1
 TabPosition=0
 ActiveTab=Project Manager
 TabDockClients=PropertyInspector,ProjectManager
+
+[DockSite1]
+DockSiteType=1
+Create=1
+Visible=1
+State=0
+Left=12
+Top=0
+Width=1713
+Height=140
+MaxLeft=-1
+MaxTop=-1
+ClientWidth=1713
+ClientHeight=140
+TBDockHeight=140
+LRDockWidth=1027
+Dockable=1
+TabPosition=0
+ActiveTab=Call Stack
+TabDockClients=BreakpointWindow,WatchWindow,DebugLogView,LocalVarsWindow,ModuleWindow,CallStackWindow,MessageView@EditWindow0
 
