@@ -2,8 +2,8 @@ Version V5.9 R8.5
 
 19/02/21 /MK Change - KRoutines - GetInternetIPAddress - Added try except around this function because of "Connection Closed Gracefully" error - Kathleen Buckley.
 23/02/21 /MK Change - uHerdSync - CreateExistingClientIdElement - Changed format of eventDate node to 4 digit year to match server format
-                                                                   - Changed format of dateofBirth node to 4 digit year to match server format
-                                                                   - OpenCalvingQuery - Change LEFT JOIN to INNER JOIN to make the query quicker.
+                                                                - Changed format of dateofBirth node to 4 digit year to match server format
+                                                                - OpenCalvingQuery - Change LEFT JOIN to INNER JOIN to make the query quicker.
 
 Version V5.9 R8.4
 

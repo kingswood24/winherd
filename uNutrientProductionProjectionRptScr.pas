@@ -13,7 +13,9 @@
                                    - HasWasteProdRates - No function to check whether the user has HasWasteProdRates to view the report.
 
    22/12/20 [V5.9 R7.9] /MK Change - Changed Forage Area from Spin Edit to Current Edit so as not to show the spin buttons - GL request.
-                                   - Added a label under the Forecast Purchases & Sales to explain that movements are assumed to ocurr on the first date of the month - GL request.   
+                                   - Added a label under the Forecast Purchases & Sales to explain that movements are assumed to ocurr on the first date of the month - GL request.
+
+   26/02/21 [V5.9 R8.6] /MK Additional Feature - Enabled help button with new nutprodrep.htm page.                                      
 }
 
 unit uNutrientProductionProjectionRptScr;
@@ -228,6 +230,7 @@ type
     procedure sbViewMouseLeave(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure cbFavouritePropertiesChange(Sender: TObject);
+    procedure sbHelpClick(Sender: TObject);
   private
     { Private declarations }
     ConfigFile : TStringList;
@@ -3214,6 +3217,11 @@ begin
       end;
    Application.ProcessMessages;
    Update;
+end;
+
+procedure TfmNutrientProductionProjectionRptScr.sbHelpClick(Sender: TObject);
+begin
+   WinData.HTMLHelp('nutprodrep.htm')
 end;
 
 end.
