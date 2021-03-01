@@ -989,7 +989,7 @@ begin
    A1A2ResultSQL := '';
    if ( Length(FilterTable.FieldByName('A1A2Result').AsString) > 0 ) then
       begin
-         A1A2ResultSQL := 'AND ID IN (SELECT AnimalID FROM DNAResults WHERE A1A2 = "'+cmboA1A2Result.Text+'"';
+         A1A2ResultSQL := 'AND ID IN (SELECT AnimalID FROM DNAResults WHERE A1A2 = "'+cmboA1A2Result.Text+'")';
          WinData.ActiveFilter := True;
       end;
 
