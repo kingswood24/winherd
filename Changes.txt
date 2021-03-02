@@ -1,6 +1,11 @@
-Version V5.9 R8.7
+Version V5.9 R9.1
 
 26/02/21 /MK Change - MenuUnit - Removed filter on the A1A2 column as it wasn't working.
+
+Version V5.9 R9.0
+
+25/02/21 MK Change - uCTSBirthReg - LoadBirthsToBeRegistered - If the sire has a tag number the use that as the identifier else use Animal No./Short Name - Wendy Radley/Muldowney.
+                                  - Changed caption of Sire NatId to Sire Identifier to show the user that the sire can be the tag or animal no.
 
 Version V5.9 R8.6
 

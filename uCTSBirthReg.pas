@@ -29,6 +29,9 @@
    13/03/19 [V5.8 R8.0] /MK Change - New private variable FNullRecordsFound used when loading animals and registering calves to show error if null NatID, Sex or Breed.
                                    - New procedure, SortByNullRecordsFound, uused when loading animals and registering calves to sort grid by NullRecords.
                             Bug Fix - NullRecords check when registering calves should only apply to selected records - Joey (Muldowney's Garrel herd).       
+
+   25/02/21 [V5.9 R9.0] /MK Change - LoadBirthsToBeRegistered - If the sire has a tag number the use that as the identifier else use Animal No./Short Name - Wendy Radley/Muldowney.
+                                   - Changed caption of Sire NatId to Sire Identifier to show the user that the sire can be the tag or animal no.
 }
 
 unit uCTSBirthReg;
@@ -361,6 +364,8 @@ begin
 end;
 
 procedure TfmCTSWSBirthReg.LoadBirthsToBeRegistered;
+var
+   sSireId : String;
 
    // Check Breed code is len 1-5 UPPER
    // Sex Length 1 value f or m
@@ -532,13 +537,29 @@ procedure TfmCTSWSBirthReg.LoadBirthsToBeRegistered;
                                     QueryDamSire.Params[0].AsInteger := FieldByName('SireID').AsInteger;
                                     QueryDamSire.Open;
 
+                                    //   25/02/21 [V5.9 R9.0] /MK Change - If the sire has a tag number the use that as the identifier else use Animal No./Short Name - Wendy Radley/Muldowney.
+                                    if ( (Length(QueryDamSire.FieldByName('NatIDNum').AsString) > 0) and
+                                         ((IsValidIrishHerdID(QueryDamSire.FieldByName('NatIDNum').AsString)) or (IsValidUKHerdID(QueryDamSire.FieldByName('NatIDNum').AsString))) ) then
+                                       begin
+                                          sSireId := QueryDamSire.FieldByName('NatIDNum').AsString;
+                                          tmpCTSBirths.FieldByName('SireSortNatIDNum').AsString := QueryDamSire.FieldByName('SortNatID').AsString;
+                                       end
+                                    else if ( Length(QueryDamSire.FieldByName('AnimalNo').AsString) > 0 ) then
+                                       begin
+                                          sSireId := QueryDamSire.FieldByName('AnimalNo').AsString;
+                                          tmpCTSBirths.FieldByName('SireSortNatIDNum').AsString := QueryDamSire.FieldByName('SortAnimalNo').AsString;
+                                       end
+                                    else if ( Length(QueryDamSire.FieldByName('Name').AsString) > 0 ) then
+                                       sSireId := Copy(QueryDamSire.FieldByName('Name').AsString,0,14)
+                                    else if ( Length(QueryDamSire.FieldByName('UKAISireCode').AsString) > 0 ) then
+                                       sSireId := QueryDamSire.FieldByName('UKAISireCode').AsString;
+
                                     tmpCTSBirths.FieldByName('SireID').AsInteger := FieldByName('SireID').AsInteger;
                                     if ( bbRemoveNatIdFormatting.Down ) then
-                                       tmpCTSBirths.FieldByName('OutputSireNatIDNum').AsString := WinData.StripAllSpaces(QueryDamSire.FieldByName('NatIDNum').AsString)
+                                       tmpCTSBirths.FieldByName('OutputSireNatIDNum').AsString := WinData.StripAllSpaces(sSireId)
                                     else
-                                       tmpCTSBirths.FieldByName('OutputSireNatIDNum').AsString := QueryDamSire.FieldByName('NatIDNum').AsString;
-                                    tmpCTSBirths.FieldByName('SireNatIDNum').AsString := QueryDamSire.FieldByName('NatIDNum').AsString;
-                                    tmpCTSBirths.FieldByName('SireSortNatIDNum').AsString := QueryDamSire.FieldByName('SortNatID').AsString;
+                                       tmpCTSBirths.FieldByName('OutputSireNatIDNum').AsString := sSireId;
+                                    tmpCTSBirths.FieldByName('SireNatIDNum').AsString := sSireId;
                                  end;
 
                               tmpCTSBirths.Post;
