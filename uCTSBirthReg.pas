@@ -821,8 +821,6 @@ begin
 end;
 
 procedure TfmCTSWSBirthReg.actRegisterCTSExecute(Sender: TObject);
-var
-   i : Integer;
 label
    GoToError;
 begin
@@ -1269,6 +1267,7 @@ var
    NatIDNum : string;
    ID : Integer;
 begin
+   Id := 0;
    NatIDNum := tmpCTSBirths.FieldByName(ANatIDFieldName).AsString;
    if ( Trim(NatIDNum) <> '' ) and ( InputQuery('Change Nat. Id. No.', 'New Nat. Id. No.', NatIDNum) ) then
       begin

@@ -1,6 +1,8 @@
 Version V5.9 R9.1
 
 26/02/21 /MK Change - MenuUnit - Removed filter on the A1A2 column as it wasn't working.
+02/03/21 /MK Additional Feature - uFilters - I added a filter for A1A2 results because the cxGrid filter wasn't working - Padraic Harnan.
+                                - Added changes to allow filter for A1A2Result from Filter screen - Padraic Harnan.                                 
 
 Version V5.9 R9.0
 

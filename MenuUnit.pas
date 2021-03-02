@@ -993,7 +993,9 @@ unit MenuUnit;
  21/12/20 [V5.9 R7.9] /MK Change - DoFilter - If the filter is Bulls In Use and some bulls don't have breeds, show information message and sort by breed code.
                                  - ClearAnimalSelection - If the sort was changed by the filter of Bulls In Use then set sort back to original sorted column.
 
- 26/02/21 [V5.9 R8.7] /MK Change - Removed filter on the A1A2 column as it wasn't working.                                 
+ 26/02/21 [V5.9 R8.7] /MK Change - Removed filter on the A1A2 column as it wasn't working.
+
+ 02/03/21 [V5.9 R9.1] /MK Additional Feature - Added changes to allow filter for A1A2Result from Filter screen - Padraic Harnan.                                 
 }
 
 interface

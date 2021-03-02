@@ -134,6 +134,8 @@ unit uFilters;
 
  27/11/19 [V5.9 R1.3] /MK Change - Only show breeds that are in use - TOK/GL request.
                                  - Clear the filter on the WinData.Breeds table when the Filter screen closes.
+
+ 02/03/21 [V5.9 R9.1] /MK Additional Feature - I added a filter for A1A2 results because the cxGrid filter wasn't working - Padraic Harnan.
 }
 
 interface
@@ -1319,6 +1321,8 @@ begin
 
       gbSCCFilter.Visible := ( HerdType = htDairy );
 
+      gbA1A2Results.Visible := ( HerdType = htDairy );
+
    except
       ShowMessage('Cannot get the Defaults');
       FilterTable.Close;
@@ -2496,6 +2500,7 @@ begin
    rbCurrLacts.Visible := not(IsBeefHerd);
    rbAllLacts.Visible := not(IsBeefHerd);
    gbSCCFilter.Visible := not(IsBeefHerd);
+   gbA1A2Results.Visible := not(IsBeefHerd);
 
    //gFilter.Top := gbEventDates.Top + gbEventDates.Height + 6;
 

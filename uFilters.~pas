@@ -1319,6 +1319,8 @@ begin
 
       gbSCCFilter.Visible := ( HerdType = htDairy );
 
+      gbA1A2Results.Visible := ( HerdType = htDairy );
+
    except
       ShowMessage('Cannot get the Defaults');
       FilterTable.Close;
@@ -2496,6 +2498,7 @@ begin
    rbCurrLacts.Visible := not(IsBeefHerd);
    rbAllLacts.Visible := not(IsBeefHerd);
    gbSCCFilter.Visible := not(IsBeefHerd);
+   gbA1A2Results.Visible := not(IsBeefHerd);
 
    //gFilter.Top := gbEventDates.Top + gbEventDates.Height + 6;
 
