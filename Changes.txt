@@ -1,3 +1,57 @@
+Version V5.9 R9.4
+
+04/03/21 /MK Bug Fix - MenuUnit - StockBullsInUseFilter - Only show bulls that are In Use ignore the InHerd flag - GL/Cantwells Court.
+
+Version V5.9 R9.3
+
+04/03/21 /MK Additional Feature - uSalesReport - Cattle Costs - Change Sale Date to Date Of Birth "easy 5 minute change" - GL/C&J Meats.
+
+Version V5.9 R9.2
+
+03/03/21 /MK Change - ElectronicRemittanceConverter - Convert - If a null date is found as the Event Date give error and don't covert the file - Grace (C&J Meats).
+             Additional Feature - uAIMAnimalMovements - RecordMovementsOn - If a bull is bought into the herd set its animal number to last 5 digits and set it as breeding.
+                                - uAIMHerdRecImport - ProcessAnimals - If a bull is bought into the herd set its animal number to last 5 digits and set it as breeding. 
+
+Version V5.9 R9.1
+
+26/02/21 /MK Change - MenuUnit - Removed filter on the A1A2 column as it wasn't working.
+02/03/21 /MK Additional Feature - uFilters - I added a filter for A1A2 results because the cxGrid filter wasn't working - Padraic Harnan.
+                                - Added changes to allow filter for A1A2Result from Filter screen - Padraic Harnan.                                 
+
+Version V5.9 R9.0
+
+25/02/21 MK Change - uCTSBirthReg - LoadBirthsToBeRegistered - If the sire has a tag number the use that as the identifier else use Animal No./Short Name - Wendy Radley/Muldowney.
+                                  - Changed caption of Sire NatId to Sire Identifier to show the user that the sire can be the tag or animal no.
+
+Version V5.9 R8.6
+
+25/02/21 /MK Change - uFileAttachmentImport - BuildFileList - Used a MemDataSet to allows sort by the date in descending order - Mary Brady request.
+26/02/21 /MK Additional Feature - uNutrientProductionProjectionRptScr - Enabled help button with new nutprodrep.htm page.
+
+Version V5.9 R8.5
+
+19/02/21 /MK Change - KRoutines - GetInternetIPAddress - Added try except around this function because of "Connection Closed Gracefully" error - Kathleen Buckley.
+23/02/21 /MK Change - uHerdSync - CreateExistingClientIdElement - Changed format of eventDate node to 4 digit year to match server format
+                                                                - Changed format of dateofBirth node to 4 digit year to match server format
+                                                                - OpenCalvingQuery - Change LEFT JOIN to INNER JOIN to make the query quicker.
+
+Version V5.9 R8.4
+
+11/02/21 /MK Change - ElectronicRemittanceConverter - Convert - Country code was never added to the converter.
+                    - uRemittance - BuildGridFromFile - Added a check for NI country code as well for Foyle Groups file.
+12/02/21 /MK Change - ElectronicRemittanceConverter - Added consts for GB file parameters.
+                                                    - New type created for TBeefRemitCountry for either Ireland or GB.
+                                                    - Convert - If TBeefRemitCountry is GB then set fields in field depending on GB consts.
+
+Version V5.9 R8.3
+
+09/02/21 /SP Change - uHerdSync - CreateHerdSyncData - Added ReportInDays to the Health events to be synced to the server.
+09/02/21 /MK Change - DairyData - CheckFiles - Set all vaccination events that have a report in days of a week or more as modified so they up to the server again with the report in days - SP request.
+
+Version V5.9 R8.2
+
+05/02/21 /MK Bug Fix - uHerdSync - AddEventToEventsExt - Using Client instead of ClientId and not using double quotes around AClientId.
+
 Version V5.9 R8.1
 
 05/02/21 /MK Bug Fix - uActionWarningsReminders - TBreedingData.Create - Temp Breeding Tables were not created before report is built.

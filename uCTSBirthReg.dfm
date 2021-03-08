@@ -1,5 +1,5 @@
 object fmCTSWSBirthReg: TfmCTSWSBirthReg
-  Left = 390
+  Left = 110
   Top = 172
   Width = 839
   Height = 577
@@ -255,6 +255,7 @@ object fmCTSWSBirthReg: TfmCTSWSBirthReg
             Options.ShowEditButtons = isebNever
           end
           object RegBirthGridDBTableViewSireNatIDNum: TcxGridDBColumn
+            Caption = 'Sire Identifier'
             DataBinding.FieldName = 'SireNatIDNum'
             Visible = False
             HeaderAlignmentVert = vaCenter
@@ -263,7 +264,7 @@ object fmCTSWSBirthReg: TfmCTSWSBirthReg
             Options.ShowEditButtons = isebNever
           end
           object RegBirthGridDBTableViewSireSortNatIDNum: TcxGridDBColumn
-            Caption = 'Sire Nat. Id. No.'
+            Caption = 'Sire Identifier'
             DataBinding.FieldName = 'SireSortNatIDNum'
             OnGetDisplayText = RegBirthGridDBTableViewSireSortNatIDNumGetDisplayText
             HeaderAlignmentVert = vaCenter
@@ -1155,13 +1156,17 @@ object fmCTSWSBirthReg: TfmCTSWSBirthReg
   object QueryDamSire: TQuery
     DatabaseName = 'Kingswd'
     SQL.Strings = (
-      'Select NatIDNum, SortNatID From Animals Where ID=:ID')
+      
+        'Select AnimalNo, SortAnimalNo, NatIdNum, SortNatId, Name, UKAISi' +
+        'reCode'
+      'From Animals'
+      'Where ID = :AID')
     Left = 5
     Top = 247
     ParamData = <
       item
         DataType = ftUnknown
-        Name = 'ID'
+        Name = 'AID'
         ParamType = ptUnknown
       end>
   end
@@ -1465,7 +1470,7 @@ object fmCTSWSBirthReg: TfmCTSWSBirthReg
       PrinterPage._dxMeasurementUnits_ = 0
       PrinterPage._dxLastMU_ = 2
       ReportDocument.Caption = 'Calves To Be Registered'
-      ReportDocument.CreationDate = 43537.4462863657
+      ReportDocument.CreationDate = 44257.3896890741
       ReportDocument.Creator = 'Kingswood Computing Ltd'
       OptionsOnEveryPage.Footers = False
       OptionsOnEveryPage.Caption = False
@@ -1494,7 +1499,7 @@ object fmCTSWSBirthReg: TfmCTSWSBirthReg
       PrinterPage._dxMeasurementUnits_ = 0
       PrinterPage._dxLastMU_ = 2
       ReportDocument.Caption = 'Calves Registered'
-      ReportDocument.CreationDate = 43537.4462863657
+      ReportDocument.CreationDate = 44257.3896890856
       ReportDocument.Creator = 'Kingswood Computing Ltd'
       OptionsOnEveryPage.Footers = False
       OptionsOnEveryPage.Caption = False

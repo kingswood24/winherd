@@ -741,7 +741,7 @@ unit MenuUnit;
 
  22/09/17 [V5.7 R3.0] /MK Change - Added a Feed Allocation button to Groups container.
 
- 25/09/17 [V5.7 R3.1] /MK Additional Feature - Made the links button and its Mart File and Cows 365 buttons availabe for NIreland herds.                                    
+ 25/09/17 [V5.7 R3.1] /MK Additional Feature - Made the links button and its Mart File and Cows 365 buttons availabe for NIreland herds.
 
  06/10/17 [V5.7 R3.6] /MK Additional Feature - Added column to Feed Events for Total Cost and added a footer to the grid to sum Total Cost.   
                           Change - cbFeedEventsClick- Don't show All Events if Feed Events is ticked to stop confusion of un-ticking Feed Events to go back to normal events - GL request.
@@ -993,6 +993,11 @@ unit MenuUnit;
  21/12/20 [V5.9 R7.9] /MK Change - DoFilter - If the filter is Bulls In Use and some bulls don't have breeds, show information message and sort by breed code.
                                  - ClearAnimalSelection - If the sort was changed by the filter of Bulls In Use then set sort back to original sorted column.
 
+ 26/02/21 [V5.9 R8.7] /MK Change - Removed filter on the A1A2 column as it wasn't working.
+
+ 02/03/21 [V5.9 R9.1] /MK Additional Feature - Added changes to allow filter for A1A2Result from Filter screen - Padraic Harnan.
+
+ 04/03/21 [V5.9 R9.4] /MK Bug Fix - StockBullsInUseFilter - Only show bulls that are In Use ignore the InHerd flag - GL/Cantwells Court.                                 
 }
 
 interface
@@ -1026,7 +1031,7 @@ uses
   uModuleDefUpdate, uHerdNewFeatures, uClearDiseaseTestDate, uGroupsNotUsed,
   uConditionScoreReport, uSPParser, uImportFileMemo, uAddSire, uAHDBImport,
   uTestGridWithDataSet, uTestForm, uPopupAnimalEdit, uAIMHeifTempTransfers,
-  uMessageScr, uModifyGridCols, KRoutines;
+  uMessageScr, uModifyGridCols, KRoutines, uRemittanceConvert;
 
 type
   TDraftGroupType = ( dgtAddToDraftGroup, dgtClearDraftGroup, dgtClearAddToDraftGroup );
@@ -1992,6 +1997,7 @@ type
     pmiNatIdSort: TMenuItem;
     pmiNatIdLast4Digits: TMenuItem;
     pmiNatIdCheckDigit: TMenuItem;
+    pmiStockSires: TMenuItem;
    //--------------------------------------//
 
     procedure ExitButtonClick(Sender: TObject);
@@ -2599,6 +2605,7 @@ type
     procedure pmiA1A2ResultFileClick(Sender: TObject);
     procedure actModifyGridExecute(Sender: TObject);
     procedure actCalvingHelpExecute(Sender: TObject);
+    procedure pmiStockSiresClick(Sender: TObject);
     procedure pmiNatIdSortClick(Sender: TObject);
     procedure pmiNatIdCheckDigitClick(Sender: TObject);
     procedure pmiNatIdLast4DigitsClick(Sender: TObject);
@@ -2846,6 +2853,7 @@ type
     procedure ProcessAIMCompCertNewCustomer;
 
     procedure RefreshAnimalGrid;
+    procedure StockBullsInUseFilter;
 
    public
     { Public declarations }
@@ -3036,7 +3044,7 @@ uses
     EventRecording, uFileAttachmentImport, uNationalID,
     uBeefSalesCatalogue, uUKSireRegister, uReports, udatafix, uPreferences,
     uBeefProfitMonitor, uBeefAISireRegister, uAWReviewEvents,
-    uRemittanceConvert, uAnimalEventTransfer, LMDWebDownloadFormUnit,
+    uAnimalEventTransfer, LMDWebDownloadFormUnit,
     UserMsgConst, uKingswoodController, uDataDownload,
     uFertilityCheckReport, uFertilityCheckEdit, uEventForm,
     uFertilityAnalysis, uLactationConsistencyChecker, uCTSRegInfo,
@@ -5181,6 +5189,9 @@ var
                   else
                      Add('AND A.ID IN (0)')
                end;
+
+            if fFilters.FilterByA1A2Result then
+               FilterString := fFilters.A1A2ResultSQL;
          end;
    end;
 
@@ -5485,6 +5496,9 @@ begin
                                  begin
                                     WinData.AnimalFileByID.SQL.Add('AND A.ID NOT IN (SELECT AnimalID FROM '+WinData.GroupLinks.TableName+') ');
                                  end;
+
+                              if ( fFilters.FilterByA1A2Result ) then
+                                 WinData.AnimalFileByID.SQL.Add(fFilters.A1A2ResultSQL);
 
                               ApplySortToAnimalFileByIdAndOpenQuery();
 
@@ -9041,7 +9055,7 @@ begin
    HideHintStyleController;
    FShutdownInProgress := True;
    DoAutoBackup := False;
-   
+
    if ( WinData.ActiveFilter ) then
       WinData.ActiveFilter := False;
 
@@ -11117,6 +11131,10 @@ begin
          begin
             BullsInUseFilter;
             btnShowAnimalsOptions.Caption := ACaption;
+         end
+      else if AFilter = qfStockBullInUse then
+         begin
+            StockBullsInUseFilter;
          end
       else if AFilter = qfDeletedAnimals then
          begin
@@ -13693,7 +13711,8 @@ begin
              ( FFilters.DOBSQL <> '' ) or ( FFilters.SexSQL <> '' ) or ( FFilters.RetagSQL <> '' ) or ( FFilters.AIBullSQL <> '' ) or
              ( FFilters.AncestorsSQL <> '' ) or ( FFilters.BreedingSQL <> '' ) or ( FFilters.NonBreedingSQL <> '' ) or
              ( FFilters.DairySQL <> '' ) or ( FFilters.BeefSQL <> '' ) or ( FFilters.LeftHerdSQL <> '' ) or
-             ( FFilters.NoneHerdSQL <> '' ) or ( FSQLFilter.SQLOp <> sqlNone ) or ( FFilters.DaysOnFarmSQL <> '' );
+             ( FFilters.NoneHerdSQL <> '' ) or ( FSQLFilter.SQLOp <> sqlNone ) or ( FFilters.DaysOnFarmSQL <> '' ) or
+             ( FFilters.A1A2ResultSQL <> '' );
 end;
 
 procedure TMenuForm.actImportICBFDataExecute(Sender: TObject);
@@ -16317,6 +16336,7 @@ begin
    //ProcessAimMovements;
    //ProcessAIMHerdReconcile();
    //TfmAIMHeifTempTransfers.SaveTempTransfers;
+   TfmRemittanceConvert.ShowConverter;
 end;
 
 procedure TMenuForm.actAddA1A2ResultExecute(Sender: TObject);
@@ -16514,6 +16534,41 @@ begin
    else
       MessageDlg('Unable to open calving online help.'+cCRLF+
                  'Please make sure your connected to the internet.',mtError,[mbOK],0);
+end;
+
+procedure TMenuForm.StockBullsInUseFilter;
+begin
+   try
+      Update;
+      cxAnimalGridView.DataController.BeginFullUpdate;
+      WinData.AnimalFileByID.DisableControls;
+      WinData.AnimalFileByID.Active := False;
+      with WinData.AnimalFileByID.SQL do
+         try
+            Clear;
+            Add('SELECT DISTINCT (A.ID), A.* FROM Animals A');
+            Add('INNER JOIN BullSemenStk B ON (B.AnimalID=A.ID)');
+            Add('WHERE (A.AnimalDeleted=FALSE)');
+            Add('AND   (A.Sex="'+cSex_Bull+'")');
+            Add('AND   (A.AnimalNo <> "")');
+            Add('AND   (B.InUse = True)');
+            Add('AND   (A.Breeding = True)');
+            Add('AND   (A.HerdID IN (SELECT DefaultHerdID FROM Defaults))');
+            ApplySortToAnimalFileByIdAndOpenQuery();
+            fFilters.AIBullSQL := '';
+            fFilters.AIBullSQL := WinData.AnimalFileByID.SQL.Text;
+         finally
+            WinData.AnimalFileByID.EnableControls;
+            cxAnimalGridView.DataController.EndFullUpdate;
+         end;
+   finally
+      Screen.Cursor := crDefault;
+   end;
+end;
+
+procedure TMenuForm.pmiStockSiresClick(Sender: TObject);
+begin
+   DoFilter(qfStockBullInUse,'Stock Bulls');
 end;
 
 procedure TMenuForm.pmiNatIdSortClick(Sender: TObject);

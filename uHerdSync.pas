@@ -132,6 +132,14 @@
                                                         - Set new DryOffSaved variable boolean to true if event is dry off and its the first treatment.
                                    - AddEventToEventsExt - No need to check for EventId as we allow events to come in here that were not saved
                                                            because the animal doesn't exist in the database so push back the event as synced.
+
+   05/02/21 [V5.9 R8.2] /MK Bug Fix - AddEventToEventsExt - Using Client instead of ClientId and not using double quotes around AClientId.
+
+   09/02/21 [V5.9 R8.3] /SP Change - CreateHerdSyncData - Added ReportInDays to the Health events to be synced to the server.
+
+   23/02/21 [V5.9 R8.5] /MK Change - CreateExistingClientIdElement - Changed format of eventDate node to 4 digit year to match server format
+                                                                   - Changed format of dateofBirth node to 4 digit year to match server format
+                                                                   - OpenCalvingQuery - Change LEFT JOIN to INNER JOIN to make the query quicker.
 }
 
 unit uHerdSync;
@@ -2386,7 +2394,7 @@ begin
                   FSyncDataQuery.SQL.Add('G3.Description AS ApplicMethod,                                  ');
                   FSyncDataQuery.SQL.Add('MA1.AdminCode AS VetCode, MA2.AdminCode AS AdminByCode,          ');
                   FSyncDataQuery.SQL.Add('G4.Description DiseaseDesc1, G5.Description DiseaseDesc2,        ');
-                  FSyncDataQuery.SQL.Add('MP.BatchNo                                                       ');
+                  FSyncDataQuery.SQL.Add('MP.BatchNo, H.ReportInDays                                       ');
                   FSyncDataQuery.SQL.Add('FROM Events E                                                    ');
                   FSyncDataQuery.SQL.Add('INNER JOIN Animals A  ON   (E.AnimalId=A.Id)                     ');
                   FSyncDataQuery.SQL.Add('LEFT JOIN  Health H   ON   (E.Id=H.EventId)                      ');
@@ -2495,6 +2503,11 @@ begin
 
                                  FChildNode := FDocument.createElement('noOfTimes');
                                  FChildNode.Set_text(FSyncDataQuery.FieldByName('NoTimes').AsString);
+                                 FInputEventNode.appendChild(FChildNode);
+
+                                 //   09/02/21 [V5.9 R8.3] /SP Change - Added ReportInDays to the Health events to be synced to the server.
+                                 FChildNode := FDocument.createElement('reminderDays');
+                                 FChildNode.Set_text(FSyncDataQuery.FieldByName('ReportInDays').AsString);
                                  FInputEventNode.appendChild(FChildNode);
 
                                  // Special case here, MK stored the vaccination code in either the health or farm code field
@@ -9749,7 +9762,8 @@ begin
                   if ( AEventId > 0 ) then
                      SQL.Add('WHERE EventId = '+IntToStr(AEventID))
                   else
-                     SQL.Add('WHERE Client = '+AClientId);
+                     //   05/02/21 [V5.9 R8.2] /MK Bug Fix - Using Client instead of ClientId and not using double quotes around AClientId.
+                     SQL.Add('WHERE ClientId = "'+AClientId+'"');
                   try
                      Open;
                      if ( RecordCount > 0 ) then
@@ -9850,15 +9864,16 @@ var
       qEvent.Close;
       qEvent.SQL.Clear;
       qEvent.SQL.Add('SELECT A.ID, A.NatIDNum, A.AnimalNo, A.LactNo,');
-      qEvent.SQL.Add('	 E.EventDate, E.EventDesc, G.Description Survey,');
-      qEvent.SQL.Add('	 C.ID'+AFieldId+' CalfID'+AFieldId+', C'+AFieldId+'.NatIDNum C'+AFieldId+'NatID, C'+AFieldId+'.Sex C'+AFieldId+'Sex,');
-      qEvent.SQL.Add('  C'+AFieldId+'.DateOfBirth C'+AFieldId+'DOB, C'+AFieldId+'.AnimalNo C'+AFieldId+'ANo,');
-      qEvent.SQL.Add('	 C'+AFieldId+'B.Code C'+AFieldId+'Breed, C'+AFieldId+'G.LookupCode C'+AFieldId+'Colour, C'+AFieldId+'.Name C'+AFieldId+'Name,');
-      qEvent.SQL.Add('  C'+AFieldId+'.HerdBookNo C'+AFieldId+'HerdBook, C'+AFieldId+'.BirthWeight C'+AFieldId+'Weight, C'+AFieldId+'.InHerd C'+AFieldId+'InHerd,');
-      qEvent.SQL.Add('	 S.AnimalNo BullNo, S.NatIDNum BullNatID, SB.Code BullBreed');
+      qEvent.SQL.Add('	     E.EventDate, E.EventDesc, G.Description Survey,');
+      qEvent.SQL.Add('	     C.ID'+AFieldId+' CalfID'+AFieldId+', C'+AFieldId+'.NatIDNum C'+AFieldId+'NatID, C'+AFieldId+'.Sex C'+AFieldId+'Sex,');
+      qEvent.SQL.Add('	     C'+AFieldId+'.DateOfBirth C'+AFieldId+'DOB, C'+AFieldId+'.AnimalNo C'+AFieldId+'ANo,');
+      qEvent.SQL.Add('	     C'+AFieldId+'B.Code C'+AFieldId+'Breed, C'+AFieldId+'G.LookupCode C'+AFieldId+'Colour, C'+AFieldId+'.Name C'+AFieldId+'Name,');
+      qEvent.SQL.Add('	     C'+AFieldId+'.HerdBookNo C'+AFieldId+'HerdBook, C'+AFieldId+'.BirthWeight C'+AFieldId+'Weight, C'+AFieldId+'.InHerd C'+AFieldId+'InHerd,');
+      qEvent.SQL.Add('	     S.AnimalNo BullNo, S.NatIDNum BullNatID, SB.Code BullBreed');
       qEvent.SQL.Add('FROM Animals A');
-      qEvent.SQL.Add('LEFT JOIN Events E ON (E.AnimalID = A.ID)');
-      qEvent.SQL.Add('LEFT JOIN Calvings C ON (C.EventID = E.ID)');
+      //   23/02/21 [V5.9 R8.5] /MK Change - Change LEFT JOIN to INNER JOIN to make the query quicker.
+      qEvent.SQL.Add('INNER JOIN Events E ON (E.AnimalID = A.ID)');
+      qEvent.SQL.Add('INNER JOIN Calvings C ON (C.EventID = E.ID)');
       qEvent.SQL.Add('LEFT JOIN GenLook G ON (G.ID = C.BirthType)');
       qEvent.SQL.Add('LEFT JOIN Animals C'+AFieldId+' ON (C'+AFieldId+'.ID = C.ID'+AFieldId+')');
       qEvent.SQL.Add('LEFT JOIN Breeds C'+AFieldId+'B ON (C'+AFieldId+'B.ID = C'+AFieldId+'.PrimaryBreed)');
@@ -9902,8 +9917,9 @@ begin
                                   ChildNode := Doc.createElement('animalLactNo');
                                   ChildNode.Set_text(IntToStr(qEvent.FieldByName('LactNo').AsInteger));
                                   Result.appendChild(ChildNode);
+                                  //   23/02/21 [V5.9 R8.5] /MK Change - Changed format of eventDate node to 4 digit year to match server format
                                   ChildNode := Doc.createElement('eventDate');
-                                  ChildNode.Set_text(FormatDateTime('dd/MM/yy',qEvent.FieldByName('EventDate').AsDateTime));
+                                  ChildNode.Set_text(FormatDateTime('dd/MM/yyyy',qEvent.FieldByName('EventDate').AsDateTime));
                                   Result.appendChild(ChildNode);
                                   ChildNode := Doc.createElement('eventDescription');
                                   ChildNode.Set_text(qEvent.FieldByName('EventDesc').AsString);
@@ -9953,8 +9969,9 @@ begin
                                               Node := Doc.createElement('sex');
                                               Node.Set_text(qEvent.FieldByName('C'+si+'Sex').AsString);
                                               TempNode.appendChild(Node);
+                                              //   23/02/21 [V5.9 R8.5] /MK Change - Changed format of dateofBirth node to 4 digit year to match server format
                                               Node := Doc.createElement('dateOfBirth');
-                                              Node.Set_text(FormatDateTime('dd/MM/yy',qEvent.FieldByName('C'+si+'DOB').AsDateTime));
+                                              Node.Set_text(FormatDateTime('dd/MM/yyyy',qEvent.FieldByName('C'+si+'DOB').AsDateTime));
                                               TempNode.appendChild(Node);
                                               Node := Doc.createElement('breedCode');
                                               Node.Set_text(qEvent.FieldByName('C'+si+'Breed').AsString);

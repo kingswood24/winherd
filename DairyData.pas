@@ -1011,6 +1011,8 @@ unit DairyData;
  11/01/21 [V5.9 R8.0] /MK Bug Fix - qHerdVaccineReminders - Changed SQL to include all vaccination disease lookup codes.
 
  22/01/21 [V5.9 R8.0] /MK Bug Fix - qHerdVaccineReminders & qHerdDosageReminders - Changed SQL to exclude events that don't have a ReportInDays.
+
+ 09/02/21 [V5.9 R8.3] /MK Change - CheckFiles - Set all vaccination events that have a report in days of a week or more as modified so they up to the server again with the report in days - SP request.
 }
 
 interface
@@ -2995,6 +2997,8 @@ type
     function ReportIsKeyReport(AReportName: String): Boolean;
 
     function DeleteExistingKeyReports : Boolean;
+
+    function UpdateVaccinationEvents_AsUpdated_ForSync : Boolean;
 
   public
     { Public declarations }
@@ -11545,6 +11549,10 @@ try
    //   23/11/20 [V5.9 R7.5] /MK Additional Feature - Update all service events that have sexed semen selected to have the new Sexed Semen service type.
    if ( UpdateOK ) and ( UpdateNo < 5974 ) then
       UpdateOK := UpdateServiceServTypeToSexedSemen;
+
+   //   09/02/21 [V5.9 R8.3] /MK Change - Set all vaccination events that have a report in days of a week or more as modified so they up to the server again with the report in days - SP request.
+   if ( UpdateOK ) and ( UpdateNo < 5983 ) then
+      UpdateOK := UpdateVaccinationEvents_AsUpdated_ForSync;
 
    if ( UpdateOK ) then
       UpdateDefaults;
@@ -32903,6 +32911,33 @@ begin
                   ApplicationLog.LogError('Error updating service type to sexed semen.');
                   ApplicationLog.LogException(e);
                   ApplicationLog.LogError(e.Message);
+               end;
+         end;
+      finally
+         Free;
+      end;
+end;
+
+function TWinData.UpdateVaccinationEvents_AsUpdated_ForSync: Boolean;
+begin
+   Result := False;
+   with TQuery.Create(nil) do
+      try
+         DatabaseName := AliasName;
+         SQL.Clear;
+         SQL.Add('UPDATE Events');
+         SQL.Add('SET Modified = TRUE, IsSynchronized = FALSE');
+         SQL.Add('WHERE EventType = 38');
+         SQL.Add('AND   ID IN (SELECT EventID FROM Health WHERE ReportInDays >= 7)');
+         try
+            ExecSQL;
+            Result := True;
+         except
+            on e : Exception do
+               begin
+                  ApplicationLog.LogException(e);
+                  ApplicationLog.LogError(e.Message);
+                  ApplicationLog.LogError('Error updating Vacciionation Events to sync as modified');
                end;
          end;
       finally

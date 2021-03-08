@@ -13,7 +13,9 @@
                                    - HasWasteProdRates - No function to check whether the user has HasWasteProdRates to view the report.
 
    22/12/20 [V5.9 R7.9] /MK Change - Changed Forage Area from Spin Edit to Current Edit so as not to show the spin buttons - GL request.
-                                   - Added a label under the Forecast Purchases & Sales to explain that movements are assumed to ocurr on the first date of the month - GL request.   
+                                   - Added a label under the Forecast Purchases & Sales to explain that movements are assumed to ocurr on the first date of the month - GL request.
+
+   26/02/21 [V5.9 R8.6] /MK Additional Feature - Enabled help button with new nutprodrep.htm page.                                      
 }
 
 unit uNutrientProductionProjectionRptScr;
@@ -228,6 +230,7 @@ type
     procedure sbViewMouseLeave(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure cbFavouritePropertiesChange(Sender: TObject);
+    procedure sbHelpClick(Sender: TObject);
   private
     { Private declarations }
     ConfigFile : TStringList;
@@ -1179,9 +1182,6 @@ var
    TwoYear,
    OneYear,
    SixMonth : TDateTime;
-   i2Plus,
-   i12To24,
-   i0To12 : Integer;
 
    //   19/02/15 [V5.4 R2.6] /MK Change - Exclude animals that have had a temporary move off holding on/after ADate or move back on holding after ADate.
    function ExcludeTempMovement(AAnimalID : Integer; ADate : TDateTime) : Boolean;
@@ -1241,6 +1241,7 @@ begin
    pb.Step := 1;
    pb.Position := 0;
 
+
    // convert calcdate - 17/04/00 - kr
    CalcDay   := Copy((FormatDateTime(cIrishDateStyle,(ADate))),0,2);
    CalcMonth := Copy((FormatDateTime(cIrishDateStyle,(ADate))),4,2);
@@ -1260,10 +1261,6 @@ begin
          TwoYear := StrToDate(CalcDay + '/' + CalcMonth + '/' + IntToStr(StrToInt(CalcYear) - 2));
          OneYear := StrToDate(CalcDay + '/' + CalcMonth + '/' + IntToStr(StrToInt(CalcYear) - 1));
       end;
-
-   i2Plus := 0;
-   i12To24 := 0;
-   i0To12 := 0;
 
    // loop to count animals to include
    With NutrientProjection do
@@ -1312,7 +1309,6 @@ begin
                            else if ( NutrientProjection.FieldByName('DOB').AsDateTime <= (TwoYear)) then
                               begin
                                  AProjectedTotals.Cattle2Plus := AProjectedTotals.Cattle2Plus+1; // more than two years old
-                                 Inc(i2Plus);
                                  if DebugMode then
                                     begin
                                        AnimalList.Add('C5 '+NutrientProjection.FieldByName('NatIDNum').AsString);
@@ -1321,7 +1317,6 @@ begin
                            else if ((NutrientProjection.FieldByName('DOB').AsDateTime > (TwoYear)) and (NutrientProjection.FieldByName('DOB').AsDateTime <= (OneYear))) then
                               begin
                                  AProjectedTotals.Cattle12To24 := AProjectedTotals.Cattle12To24+1;  // 1 to 2 years old
-                                 Inc(i12To24);
                                  if DebugMode then
                                     begin
                                        AnimalList.Add('C4 '+NutrientProjection.FieldByName('NatIDNum').AsString);
@@ -1330,7 +1325,6 @@ begin
                            else if ((NutrientProjection.FieldByName('DOB').AsDateTime > (OneYear)) and (NutrientProjection.FieldByName('DOB').AsDateTime <= (ADate))) then
                               begin
                                 AProjectedTotals.Cattle0To12 := AProjectedTotals.Cattle0To12+1; // 0 to 12 months old
-                                Inc(i0To12);
                                 if DebugMode then
                                    begin
                                       AnimalList.Add('C3 '+NutrientProjection.FieldByName('NatIDNum').AsString);
@@ -1344,19 +1338,11 @@ begin
                // step progress bar
                pb.StepIt;
             End;
-         if ( DebugMode ) then
-            begin
-               AnimalList.Clear;
-               AnimalList.Add('Cattle0To12 : '+IntToStr(i0To12));
-               AnimalList.Add('Cattle12To24 : '+IntToStr(i12To24));
-               AnimalList.Add('Cattle2Plus : '+IntToSTr(i2Plus));
-            end;
       End;
    if DebugMode then
       begin
          AnimalList.Sort;
-         if ( Pos('/01/',DateToStr(ADate)) > 0 ) then
-            AnimalList.SaveToFile('C:\NutProd'+ ComboHerd.Text + ' ' + StringReplaceNonAlphaChars(DateToStr(ADate), ' ') + '.dat');
+         AnimalList.SaveToFile('C:\NutProd'+ ComboHerd.Text + ' ' + StringReplaceNonAlphaChars(DateToStr(ADate), ' ') + '.dat');
          AnimalList.Clear;
       end;
    pb.Position := pb.Max;
@@ -3231,6 +3217,11 @@ begin
       end;
    Application.ProcessMessages;
    Update;
+end;
+
+procedure TfmNutrientProductionProjectionRptScr.sbHelpClick(Sender: TObject);
+begin
+   WinData.HTMLHelp('nutprodrep.htm')
 end;
 
 end.
