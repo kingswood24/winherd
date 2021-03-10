@@ -1,14 +1,14 @@
 [Closed Files]
-File_0=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\GenTypesConst.pas',0,1,31,21,66,0,0
+File_0=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uModifyGridCols.pas',0,1,1,21,5,1,0
 File_1=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Changes.txt',0,1,1,1,3,0,0
-File_2=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uActionWarningReminders.pas',0,1,1,1,1,0,0
-File_3=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uActionWarningReminderParams.pas',0,1,1,1,1,1,0
-File_4=SourceModule,'C:\Kingswood\Delphi Development\Common\uBreedingDataHelper.pas',0,1,545,1,569,0,0
-File_5=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uCAFREFertListData.pas',0,1,79,27,99,1,0
-File_6=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uHerdSync.pas',0,1,556,9,596,0,0
-File_7=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uReports.pas',0,1,1081,39,1104,1,0
-File_8=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Reports\BreedingAnalysisFilt.pas',0,1,1,1,1,1,0
-File_9=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\MenuUnit.pas',0,1,16386,5,16550,0,0
+File_2=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\MenuUnit.pas',0,1,1,1,1,0,0
+File_3=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uHUKIFarmEvents.pas',0,1,565,62,590,1,0
+File_4=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\DairyData.pas',0,1,502,74,522,1,0
+File_5=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Reports\StockInHerdFilt.pas',0,1,3203,57,3221,1,0
+File_6=SourceModule,'C:\Program Files\Developer Express.VCL\ExpressQuantumGrid 5\Sources\cxGridDBDataDefinitions.pas',0,1,456,1,476,0,0
+File_7=SourceModule,'c:\program files (x86)\borland\delphi5\Source\Vcl\dbgrids.pas',0,1,478,1,498,0,0
+File_8=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\GenTypesConst.pas',0,1,31,21,66,0,0
+File_9=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uActionWarningReminders.pas',0,1,1,1,1,0,0
 
 [Modules]
 Module0=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.dpr
@@ -28,6 +28,10 @@ FormOnTop=0
 FormState=0
 FormOnTop=0
 
+[C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uImageStore.pas]
+FormState=0
+FormOnTop=0
+
 [EditWindow0]
 ViewCount=1
 CurrentView=0
@@ -37,8 +41,8 @@ MessageView=MessageView@EditWindow0
 Create=1
 Visible=1
 State=0
-Left=192
-Top=107
+Left=187
+Top=106
 Width=1733
 Height=944
 MaxLeft=-1
@@ -50,8 +54,8 @@ LeftPanelClients=CodeExplorer@EditWindow0
 LeftPanelData=00000400010000000C000000436F64654578706C6F7265720000000000000000000000000000000000FFFFFFFF
 RightPanelSize=0
 BottomPanelSize=140
-BottomPanelClients=DockSite0
-BottomPanelData=0000040000000000BD06000000000000028C000000000000000100000000BD06000009000000446F636B5369746530FFFFFFFF
+BottomPanelClients=DockSite1
+BottomPanelData=0000040000000000BD06000000000000028C000000000000000100000000BD06000009000000446F636B5369746531FFFFFFFF
 
 [View0]
 Module=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.dpr
@@ -78,8 +82,8 @@ Left=0
 Top=0
 Width=1920
 Height=115
-MaxLeft=-4
-MaxTop=-4
+MaxLeft=-1
+MaxTop=-1
 MaxWidth=1928
 MaxHeight=115
 ClientWidth=1920
@@ -148,8 +152,8 @@ LRDockWidth=219
 Dockable=1
 SplitPos=85
 ArrangeBy=Name
-SelectedItem=
-ExpandedItems=DataBinding,Font.Style,LookAndFeel,OptionsView,Properties,Properties.ValueChecked,Properties.ValueGrayed,Properties.ValueUnchecked
+SelectedItem=Caption
+ExpandedItems=DataBinding,Font.Style,OptionsView,Properties.ValueChecked,Properties.ValueGrayed,Properties.ValueUnchecked
 HiddenCategories=Legacy
 ShowStatusBar=1
 
@@ -298,7 +302,7 @@ Dockable=1
 
 [MessageView@EditWindow0]
 Create=1
-Visible=0
+Visible=1
 State=0
 Left=0
 Top=0
@@ -308,7 +312,7 @@ MaxLeft=-1
 MaxTop=-1
 ClientWidth=1705
 ClientHeight=111
-TBDockHeight=111
+TBDockHeight=140
 LRDockWidth=443
 Dockable=1
 
@@ -316,26 +320,6 @@ Dockable=1
 DockHostCount=2
 
 [DockSite0]
-DockSiteType=1
-Create=1
-Visible=1
-State=0
-Left=12
-Top=0
-Width=1713
-Height=140
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=1713
-ClientHeight=140
-TBDockHeight=140
-LRDockWidth=1027
-Dockable=1
-TabPosition=0
-ActiveTab=Call Stack
-TabDockClients=BreakpointWindow,WatchWindow,DebugLogView,LocalVarsWindow,ModuleWindow,CallStackWindow,MessageView@EditWindow0
-
-[DockSite1]
 DockSiteType=1
 Create=1
 Visible=1
@@ -354,4 +338,24 @@ Dockable=1
 TabPosition=0
 ActiveTab=Project Manager
 TabDockClients=PropertyInspector,ProjectManager
+
+[DockSite1]
+DockSiteType=1
+Create=1
+Visible=1
+State=0
+Left=12
+Top=0
+Width=1713
+Height=140
+MaxLeft=-1
+MaxTop=-1
+ClientWidth=1713
+ClientHeight=140
+TBDockHeight=140
+LRDockWidth=1027
+Dockable=1
+TabPosition=0
+ActiveTab=Messages
+TabDockClients=BreakpointWindow,WatchWindow,DebugLogView,LocalVarsWindow,ModuleWindow,CallStackWindow,MessageView@EditWindow0
 
