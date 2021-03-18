@@ -1,7 +1,7 @@
 inherited fmMartImportByFileReview: TfmMartImportByFileReview
-  Left = 345
+  Left = 282
   Top = 162
-  Width = 1466
+  Width = 1529
   Height = 737
   Caption = ''
   OldCreateOrder = True
@@ -14,7 +14,7 @@ inherited fmMartImportByFileReview: TfmMartImportByFileReview
   TextHeight = 13
   inherited StatusBar: TdxStatusBar
     Top = 686
-    Width = 1458
+    Width = 1521
     Panels = <
       item
         PanelStyleClassName = 'TdxStatusBarTextPanelStyle'
@@ -25,7 +25,7 @@ inherited fmMartImportByFileReview: TfmMartImportByFileReview
   object pgDefaultTreatments: TcxPageControl [1]
     Left = 0
     Top = 507
-    Width = 1458
+    Width = 1521
     Height = 149
     ActivePage = tsHealth
     Align = alBottom
@@ -42,7 +42,7 @@ inherited fmMartImportByFileReview: TfmMartImportByFileReview
     OnDrawTabEx = pgDefaultTreatmentsDrawTabEx
     ClientRectBottom = 148
     ClientRectLeft = 1
-    ClientRectRight = 1457
+    ClientRectRight = 1520
     ClientRectTop = 29
     object tsHealth: TcxTabSheet
       Caption = 'Health Events'
@@ -56,7 +56,7 @@ inherited fmMartImportByFileReview: TfmMartImportByFileReview
       object HealthGrid: TcxGrid
         Left = 0
         Top = 0
-        Width = 1456
+        Width = 1519
         Height = 119
         Align = alClient
         TabOrder = 0
@@ -119,7 +119,7 @@ inherited fmMartImportByFileReview: TfmMartImportByFileReview
   object bcDefaultTreatments: TdxBarDockControl [2]
     Left = 0
     Top = 656
-    Width = 1458
+    Width = 1521
     Height = 30
     Align = dalBottom
     BarManager = BarManager
@@ -127,7 +127,7 @@ inherited fmMartImportByFileReview: TfmMartImportByFileReview
   object AnimalGridPanel: TPanel [3]
     Left = 0
     Top = 127
-    Width = 1458
+    Width = 1521
     Height = 380
     Align = alClient
     BevelOuter = bvNone
@@ -135,7 +135,7 @@ inherited fmMartImportByFileReview: TfmMartImportByFileReview
     object AnimalGrid: TcxGrid
       Left = 0
       Top = 0
-      Width = 1458
+      Width = 1521
       Height = 380
       Align = alClient
       BorderStyle = cxcbsNone
@@ -334,7 +334,6 @@ inherited fmMartImportByFileReview: TfmMartImportByFileReview
           DataBinding.FieldName = 'QualityAssured'
           PropertiesClassName = 'TcxCheckBoxProperties'
           HeaderAlignmentVert = vaCenter
-          Options.Editing = False
           Options.Filtering = False
           Options.FilteringMRUItemsList = False
           Options.IncSearch = False
@@ -404,7 +403,7 @@ inherited fmMartImportByFileReview: TfmMartImportByFileReview
   object pTop: TPanel [4]
     Left = 0
     Top = 49
-    Width = 1458
+    Width = 1521
     Height = 78
     Align = alTop
     TabOrder = 8
@@ -956,7 +955,7 @@ inherited fmMartImportByFileReview: TfmMartImportByFileReview
       PrinterPage._dxMeasurementUnits_ = 0
       PrinterPage._dxLastMU_ = 2
       ReportDocument.Caption = 'Animal Grid'
-      ReportDocument.CreationDate = 43802.4385581713
+      ReportDocument.CreationDate = 44273.6195890162
       OptionsFormatting.LookAndFeelKind = lfFlat
       OptionsOnEveryPage.Footers = False
       OptionsOnEveryPage.FilterBar = False

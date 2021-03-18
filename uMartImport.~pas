@@ -7,7 +7,9 @@
 
    07/12/10 [V4.0 R7.0] /MK Bug Fix - Fixed Issue With Total Weight Showing As Total Price and Total Price Showing As Total Weight in Review.
 
-   17/05/11 [V4.1 R0.2] /MK Bug Fix - Changed Caption of rbPurchase and rbSales From AHPIS To APHIS. 
+   17/05/11 [V4.1 R0.2] /MK Bug Fix - Changed Caption of rbPurchase and rbSales From AHPIS To APHIS.
+
+   13/12/19 [V5.9 R1.5] /MK Change - ImportFile - If there are no animals to import then don't show the Results screen - John Milliken.
 }
 
 unit uMartImport;

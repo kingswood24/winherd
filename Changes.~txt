@@ -1,3 +1,9 @@
+Version V5.9 R9.5
+
+10/03/21 /MK Additional Feature - uModifyGridCols - Added a Select/DeSelect All button.
+18/03/21 /MK Change - ImportFromXML - uMartImportByFile - Default the QualityAssured field to False so that if the QA field is not found at least the box is unticked.
+                    - uMartImportByFileReview - Allow editing of the Quality Assured field - GL/Albert Thompson.
+
 Version V5.9 R9.4
 
 04/03/21 /MK Bug Fix - MenuUnit - StockBullsInUseFilter - Only show bulls that are In Use ignore the InHerd flag - GL/Cantwells Court.

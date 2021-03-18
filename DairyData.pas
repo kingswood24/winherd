@@ -3142,8 +3142,7 @@ type
     MDGridCalvingDateData, MDGridServiceDateData, MDGridDryOffDateData,
     MDGridPregDiagDateData, MDGridBatchGroupData,
     MDGridJohnesResultData, MDGridStatusData,
-    MDGridCurrLactMilkData, MDGridA1A2ResultData,
-    MDGridSortNatIDData : TdxMemData;
+    MDGridCurrLactMilkData, MDGridA1A2ResultData : TdxMemData;
 
     FEventDataHelper : TEventDataHelper;
     FBreedingDataHelper : TBreedingDataHelper;
@@ -24194,8 +24193,7 @@ var
    QGridDryOffDateData,
    QGridPregDiagDateData,
    QGridJohnesResultData,
-   QGridA1A2ResultData,
-   QGridSortNatIDData : TQuery;
+   QGridA1A2ResultData : TQuery;
 
    fCumButterFat,
    fCumBfatWeight,
@@ -24417,11 +24415,6 @@ begin
             MDGridA1A2ResultData := TdxMemData.Create(nil)
          else
             MDGridA1A2ResultData.Close;
-
-         if MDGridSortNatIDData = nil then
-            MDGridSortNatIDData := TdxMemData.Create(nil)
-         else
-            MDGridSortNatIDData.Close;
 
          QGridConditionScoreData := TQuery.Create(nil);
          QGridConditionScoreData.DatabaseName := AliasName;
@@ -24897,36 +24890,6 @@ begin
          end;
 
          MDGridA1A2ResultData.Open;
-
-         ClearMemDataFieldDefs(MDGridSortNatIDData);
-         CreateMemDataFieldDef(MDGridSortNatIDData,'AnimalId',ftInteger);
-         CreateMemDataFieldDef(MDGridSortNatIDData,'NatIdCheckDigitSort',ftString,30);
-         CreateMemDataFieldDef(MDGridSortNatIDData,'NatIdLastFourDigitSort',ftString,30);
-         MDGridSortNatIDData.Open;
-
-         QGridSortNatIDData := TQuery.Create(nil);
-         try
-            QGridSortNatIDData.DatabaseName := AliasName;
-            QGridSortNatIDData.SQL.Clear;
-            QGridSortNatIDData.SQL.Add('SELECT Id, NatIdNum');
-            QGridSortNatIDData.SQL.Add('FROM Animals');
-            QGridSortNatIDData.SQL.Add('WHERE NatIdNum <> ""');
-            QGridSortNatIDData.Open;
-            QGridSortNatIDData.First;
-            while ( not(QGridSortNatIDData.Eof) ) do
-               begin
-                  MDGridSortNatIDData.Append;
-                  MDGridSortNatIDData.FieldByName('AnimalId').AsInteger := QGridSortNatIDData.FieldByName('ID').AsInteger;
-                  MDGridSortNatIDData.FieldByName('NatIdCheckDigitSort').AsString := SortByCheckDigit(QGridSortNatIDData.FieldByName('NatIdNum').AsString);
-                  MDGridSortNatIDData.FieldByName('NatIdLastFourDigitSort').AsString := SortByNatIDByFarmNo(QGridSortNatIDData.FieldByName('NatIdNum').AsString);
-                  QGridSortNatIDData.Next;
-               end;
-         finally
-            if ( QGridSortNatIDData <> nil ) then
-               FreeAndNil(QGridSortNatIDData);
-         end;
-
-         MDGridSortNatIDData.Open;
       end
    else
       begin
@@ -25556,35 +25519,6 @@ begin
                end;
          end;
 
-      sFieldName := 'NatIdCheckDigitSort';
-      if AnimalFileByID.FindField(sFieldName) = nil then
-         begin
-            with TStringField.Create(AnimalFileByID) do
-               begin
-                  FieldName := sFieldName;
-                  FieldKind := fkLookup;
-                  LookupDataSet := MDGridSortNatIDData;
-                  KeyFields := sKeyField;
-                  LookupKeyFields := sLookupKeyField;
-                  LookupResultField := sFieldName;
-                  DataSet := AnimalFileByID;
-               end;
-         end;
-
-      sFieldName := 'NatIdLastFourDigitSort';
-      if AnimalFileByID.FindField(sFieldName) = nil then
-         begin
-            with TStringField.Create(AnimalFileByID) do
-               begin
-                  FieldName := sFieldName;
-                  FieldKind := fkLookup;
-                  LookupDataSet := MDGridSortNatIDData;
-                  KeyFields := sKeyField;
-                  LookupKeyFields := sLookupKeyField;
-                  LookupResultField := sFieldName;
-                  DataSet := AnimalFileByID;
-               end;
-         end;
 end;
 
 procedure TWinData.AddToEventLookupData(AAnimalID, AEventType: Integer);

@@ -997,7 +997,7 @@ unit MenuUnit;
 
  02/03/21 [V5.9 R9.1] /MK Additional Feature - Added changes to allow filter for A1A2Result from Filter screen - Padraic Harnan.
 
- 04/03/21 [V5.9 R9.4] /MK Bug Fix - StockBullsInUseFilter - Only show bulls that are In Use ignore the InHerd flag - GL/Cantwells Court.
+ 04/03/21 [V5.9 R9.4] /MK Bug Fix - StockBullsInUseFilter - Only show bulls that are In Use ignore the InHerd flag - GL/Cantwells Court.                                 
 }
 
 interface
@@ -1993,9 +1993,11 @@ type
     pmSuckCalvingHelp: TPopupMenu;
     pmiSuckCalvingHelp: TMenuItem;
     cxStyleBullNoBreed: TcxStyle;
+    pmNatIdSort: TPopupMenu;
+    pmiNatIdSort: TMenuItem;
+    pmiNatIdLast4Digits: TMenuItem;
+    pmiNatIdCheckDigit: TMenuItem;
     pmiStockSires: TMenuItem;
-    cxAnimalGridViewNatIdCheckDigitSort: TcxGridDBColumn;
-    cxAnimalGridViewNatIdLastFourDigitSort: TcxGridDBColumn;
    //--------------------------------------//
 
     procedure ExitButtonClick(Sender: TObject);
@@ -2604,6 +2606,9 @@ type
     procedure actModifyGridExecute(Sender: TObject);
     procedure actCalvingHelpExecute(Sender: TObject);
     procedure pmiStockSiresClick(Sender: TObject);
+    procedure pmiNatIdSortClick(Sender: TObject);
+    procedure pmiNatIdCheckDigitClick(Sender: TObject);
+    procedure pmiNatIdLast4DigitsClick(Sender: TObject);
   private
     { Private declarations }
     Reg : TRegistry;
@@ -16564,6 +16569,21 @@ end;
 procedure TMenuForm.pmiStockSiresClick(Sender: TObject);
 begin
    DoFilter(qfStockBullInUse,'Stock Bulls');
+end;
+
+procedure TMenuForm.pmiNatIdSortClick(Sender: TObject);
+begin
+// General NatIdNum Sort.
+end;
+
+procedure TMenuForm.pmiNatIdCheckDigitClick(Sender: TObject);
+begin
+// NatIdNum Sort Check Digit.
+end;
+
+procedure TMenuForm.pmiNatIdLast4DigitsClick(Sender: TObject);
+begin
+// NatIdNum Last 4 Digit Sort.
 end;
 
 initialization
