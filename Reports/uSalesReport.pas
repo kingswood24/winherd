@@ -80,6 +80,8 @@ unit uSalesReport;
                                              - Added new menu item to Format Options for the new Cattle Costings report.
                                              - When new preference "Use purchase weight as live weight for Kill out" is ticked default this new Cattle Costings report on.
                                              - The new report needs a "Total Cost per kg Live Weight"
+
+ 04/03/21 [V5.9 R9.3] /MK Additional Feature - Cattle Costs - Change Sale Date to Date Of Birth "easy 5 minute change" - GL/C&J Meats.                                             
 }
 
 interface

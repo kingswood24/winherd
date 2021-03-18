@@ -1988,6 +1988,7 @@ object MenuForm: TMenuForm
             HeaderAlignmentVert = vaCenter
             Options.Editing = False
             Options.Filtering = False
+            Options.FilteringMRUItemsList = False
             Width = 70
           end
           object cxAnimalGridViewQANoMovements: TcxGridDBColumn
@@ -2002,6 +2003,8 @@ object MenuForm: TMenuForm
             DataBinding.FieldName = 'A1A2Result'
             HeaderAlignmentVert = vaCenter
             Options.Editing = False
+            Options.Filtering = False
+            Options.FilteringMRUItemsList = False
             Width = 60
           end
           object cxAnimalGridViewPurchCommission: TcxGridDBColumn
@@ -12134,7 +12137,7 @@ object MenuForm: TMenuForm
       PrinterPage.PageSize.Y = 297000
       PrinterPage._dxMeasurementUnits_ = 0
       PrinterPage._dxLastMU_ = 2
-      ReportDocument.CreationDate = 44246.6179773495
+      ReportDocument.CreationDate = 44259.7136619792
       OptionsOnEveryPage.Footers = False
       OptionsOnEveryPage.FilterBar = False
       OptionsPreview.Visible = False
@@ -13170,8 +13173,12 @@ object MenuForm: TMenuForm
         OnClick = psmManualAIClick
       end
     end
+    object pmiStockSires: TMenuItem
+      Caption = 'Stock Sires'
+      OnClick = pmiStockSiresClick
+    end
     object pmNonHerdStockBull: TMenuItem
-      Caption = 'Non-Herd Stock Sire'
+      Caption = 'Sire Breed Only'
       OnClick = pmNonHerdStockBullClick
     end
     object pmiNonHerdDam: TMenuItem
@@ -13184,6 +13191,22 @@ object MenuForm: TMenuForm
     Top = 89
     object pmiSuckCalvingHelp: TMenuItem
       Action = actCalvingHelp
+    end
+  end
+  object pmNatIdSort: TPopupMenu
+    Left = 895
+    Top = 59
+    object pmiNatIdSort: TMenuItem
+      Caption = 'National Id.'
+      OnClick = pmiNatIdSortClick
+    end
+    object pmiNatIdCheckDigit: TMenuItem
+      Caption = 'National Id. (Check Digit)'
+      OnClick = pmiNatIdCheckDigitClick
+    end
+    object pmiNatIdLast4Digits: TMenuItem
+      Caption = 'National Id. (Last 4 Digits)'
+      OnClick = pmiNatIdLast4DigitsClick
     end
   end
 end

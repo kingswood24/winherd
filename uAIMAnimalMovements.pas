@@ -53,6 +53,8 @@
    27/11/19 [V5.9 R1.3] /MK Change - RecordMovementsOn - Default the Breeding status of the animal depending on HerdType, False if Beef else True - GL/TOK request.
 
    24/01/20 [V5.9 R2.0] /MK Change - RecordMovementsOn - If the HerdType is Beef then default the lactno to zero, else calculate lactNo - Una Carter.
+
+   03/03/21 [V5.9 R9.2] /MK Additional Feature - RecordMovementsOn - If a bull is bought into the herd set its animal number to last 5 digits and set it as breeding.
 }
 
 unit uAIMAnimalMovements;
@@ -723,6 +725,7 @@ begin
                   AnimalRecord.NatIDNum := NatIdNo;
                   AnimalRecord.DateOfBirth := DateOfBirth;
                   AnimalRecord.Sex := Sex;
+                  AnimalRecord.Breeding := False;
 
                   //   02/02/16 [V5.5 R3.4] /MK Change - Autocalc lactation number for female animals.
                   //   24/01/20 [V5.9 R2.0] /MK Change - If the HerdType is Beef then default the lactno to zero, else calculate lactNo - Una Carter.
@@ -736,14 +739,22 @@ begin
                               NoOfYears := NoOfYears - 2;
                               if ( NoOfYears > 0 ) then
                                  AnimalRecord.LactNo := NoOfYears;
+                              AnimalRecord.Breeding := True;
                            end
+                     end;
+
+                  //   03/03/21 [V5.9 R9.2] /MK Additional Feature - If a bull is bought into the herd set its animal number to last 5 digits and set it as breeding.
+                  if ( UpperCase(AnimalRecord.Sex) = 'BULL' ) and ( FHerdType = htDairy ) then
+                     begin
+                        AnimalRecord.Breeding := True;
+                        AnimalRecord.AnimalNo := Copy(StripAllSpaces(AnimalRecord.NatIDNum),Length(StripAllSpaces(AnimalRecord.NatIDNum))-4,5)
                      end;
 
                   AnimalRecord.InHerd := True;
                   AnimalRecord.PrimaryBreed := GetBreedIdFromCode(BreedCode);
 
                   //   27/11/19 [V5.9 R1.3] /MK Change - Default the Breeding status of the animal depending on HerdType, False if Beef else True - GL/TOK request.
-                  AnimalRecord.Breeding := ( FHerdType <> htBeef );
+                  //AnimalRecord.Breeding := ( FHerdType <> htBeef );
 
                   AnimalRecord.IsSynchronized := False;
                   AnimalRecord.Save;

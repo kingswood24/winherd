@@ -1,5 +1,37 @@
-Version [V5.9 R8.6]
+Version V5.9 R9.5
 
+10/03/21 /MK Additional Feature - uModifyGridCols - Added a Select/DeSelect All button.
+18/03/21 /MK Change - uMartImportByFile - ImportFromXML - Default the QualityAssured field to False so that if the QA field is not found at least the box is unticked.
+                    - uMartImportByFileReview - Allow editing of the Quality Assured field - GL/Albert Thompson.
+
+Version V5.9 R9.4
+
+04/03/21 /MK Bug Fix - MenuUnit - StockBullsInUseFilter - Only show bulls that are In Use ignore the InHerd flag - GL/Cantwells Court.
+
+Version V5.9 R9.3
+
+04/03/21 /MK Additional Feature - uSalesReport - Cattle Costs - Change Sale Date to Date Of Birth "easy 5 minute change" - GL/C&J Meats.
+
+Version V5.9 R9.2
+
+03/03/21 /MK Change - ElectronicRemittanceConverter - Convert - If a null date is found as the Event Date give error and don't covert the file - Grace (C&J Meats).
+             Additional Feature - uAIMAnimalMovements - RecordMovementsOn - If a bull is bought into the herd set its animal number to last 5 digits and set it as breeding.
+                                - uAIMHerdRecImport - ProcessAnimals - If a bull is bought into the herd set its animal number to last 5 digits and set it as breeding. 
+
+Version V5.9 R9.1
+
+26/02/21 /MK Change - MenuUnit - Removed filter on the A1A2 column as it wasn't working.
+02/03/21 /MK Additional Feature - uFilters - I added a filter for A1A2 results because the cxGrid filter wasn't working - Padraic Harnan.
+                                - Added changes to allow filter for A1A2Result from Filter screen - Padraic Harnan.                                 
+
+Version V5.9 R9.0
+
+25/02/21 MK Change - uCTSBirthReg - LoadBirthsToBeRegistered - If the sire has a tag number the use that as the identifier else use Animal No./Short Name - Wendy Radley/Muldowney.
+                                  - Changed caption of Sire NatId to Sire Identifier to show the user that the sire can be the tag or animal no.
+
+Version V5.9 R8.6
+
+25/02/21 /MK Change - uFileAttachmentImport - BuildFileList - Used a MemDataSet to allows sort by the date in descending order - Mary Brady request.
 26/02/21 /MK Additional Feature - uNutrientProductionProjectionRptScr - Enabled help button with new nutprodrep.htm page.
 
 Version V5.9 R8.5

@@ -6,6 +6,8 @@
    12/02/21 [V5.9 R8.4] /MK Change - Added consts for GB file parameters.
                                    - New type created for TBeefRemitCountry for either Ireland or GB.
                                    - Convert - If TBeefRemitCountry is GB then set fields in field depending on GB consts.
+
+   03/03/21 [V5.9 R9.2] /MK Change - Convert - If a null date is found as the Event Date give error and don't covert the file - Grace (C&J Meats).
 }
 
 unit ElectronicRemittanceConverter;
@@ -118,6 +120,15 @@ begin
 
    FParser.Parse( FRemittanceFile.Strings[0] );
    // Create header part
+
+   //   03/03/21 [V5.9 R9.2] /MK Change - If a null date is found as the Event Date give error and don't covert the file - Grace (C&J Meats).
+   if ( FParser.Fields[cSlaughterDate] = '31/12/1899' ) then
+      begin
+         MessageDlg('Unable to convert file as invalid date found'+#13#10+
+                    'Please contact the factory that supplied the file.',mtError,[mbOK],0);
+         Exit;
+      end;
+
 
    FElectronicRemittanceFile.Add('[FILE START]');
    // Date

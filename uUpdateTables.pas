@@ -1609,6 +1609,16 @@ begin
          except
             Result := False;
          end;
+
+   if ( not(FieldExists('A1A2Result')) ) then
+      with UpdateQuery do
+         try
+            SQL.Clear;
+            SQL.Add('ALTER TABLE "'+UpdateTable.TableName+'" ADD A1A2Result CHAR(5)');
+            ExecSQL;
+         except
+            Result := False;
+         end;
 end;
 
 function UpdateMilkDiskLayout : Boolean;

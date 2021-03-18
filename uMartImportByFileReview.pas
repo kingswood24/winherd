@@ -43,7 +43,9 @@
    03/12/19 [V5.9 R1.4] /MK Additional Feature - Added QualityAssured and QADays fields to tMart table.
                                                - Added "Q.A" and "No. Movements" columns to grid.
                                                - Only show these columns if Country is Ireland.
-                                               - Added "Print Animal Grid" button which prints the grid of purchased animals - TOK request. 
+                                               - Added "Print Animal Grid" button which prints the grid of purchased animals - TOK request.
+
+   18/03/21 [V5.9 R9.5] /MK Change - Allow editing of the Quality Assured field - GL/Albert Thompson.                                                
 }
 
 unit uMartImportByFileReview;

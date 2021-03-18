@@ -151,6 +151,8 @@
                                                                APHIS made a change to export a 9th field called "Res" which means residency.
                                                                This field was being imported into the price field - John Milliken.
                                    - ImportFromXML - Only copy 40 characters of the Source Name as FarmSync only allows for 40 characters - SP request.
+
+   18/03/21 [V5.9 R9.5] /MK Change - ImportFromXML - Default the QualityAssured field to False so that if the QA field is not found at least the box is unticked.
 }
 
 unit uMartImportByFile;
@@ -1173,6 +1175,8 @@ begin
                                  FFileStatistics.TotalPriceRead := FFileStatistics.TotalPriceRead+FMartTable.FieldByName('Price').AsFloat;
                               end;
 
+                           //   18/03/21 [V5.9 R9.5] /MK Change - Default the QualityAssured field to False so that if the QA field is not found at least the box is unticked.
+                           FMartTable.FieldByName('QualityAssured').AsBoolean := False;
                            //   17/10/17 [V5.7 R3.9] /MK Additional Feature - Added check for new IE Quality Assurance field from NewLine.
                            XMLDOMNode := FDOMDocument.documentElement.childNodes[i].selectSingleNode('QA');
                            if XMLDOMNode <> nil then

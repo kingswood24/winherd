@@ -36,6 +36,8 @@
    20/01/20 [V5.9 R1.9] /MK Change - GetAnimal - Exclude animals that were deleted from GetAnimal as HerdRec ignores them to begin with.
 
    24/01/20 [V5.9 R2.0] /MK Change - ProcessPurchaseEvent - If the HerdType is Beef then default the lactno to zero, else calculate lactNo - Una Carter.
+
+   03/03/21 [V5.9 R9.2] /MK Additional Feature - ProcessAnimals - If a bull is bought into the herd set its animal number to last 5 digits and set it as breeding.
 }
 
 unit uAIMHerdRecImport;
@@ -558,6 +560,14 @@ var
             AnimalRecord.NatIDNum := sNatID;
             AnimalRecord.DateOfBirth := FTempAnimals.FieldByName('DateOfBirth').AsDateTime;
             AnimalRecord.Sex := FTempAnimals.FieldByName('Sex').AsString;
+            AnimalRecord.Breeding := False;
+
+            //   03/03/21 [V5.9 R9.2] /MK Additional Feature - If a bull is bought into the herd set its animal number to last 5 digits and set it as breeding.
+            if ( UpperCase(AnimalRecord.Sex) = 'BULL' ) and ( FHerdType = htDairy ) then
+               begin
+                  AnimalRecord.Breeding := True;
+                  AnimalRecord.AnimalNo := Copy(StripAllSpaces(AnimalRecord.NatIDNum),Length(StripAllSpaces(AnimalRecord.NatIDNum))-4,5)
+               end;
 
             //   24/01/20 [V5.9 R2.0] /MK Change - If the HerdType is Beef then default the lactno to zero, else calculate lactNo - Una Carter.
             if ( FHerdType = htBeef ) then
@@ -572,10 +582,11 @@ var
                         if ( NoOfYears > 0 ) then
                            AnimalRecord.LactNo := NoOfYears;
                      end;
+                  AnimalRecord.Breeding := True;
                end;
 
             //   27/11/19 [V5.9 R1.3] /MK Change - Default the Breeding status of the animal depending on HerdType, False if Beef else True - GL/TOK request.
-            AnimalRecord.Breeding := ( FHerdType <> htBeef );
+            //AnimalRecord.Breeding := ( FHerdType <> htBeef );
 
             //   19/12/19 [V5.9 R1.5] /MK Additional Feature - Add TBTestDate and BruTest Date to the animal record - John Joe Murphy.
             if ( FTempAnimals.FieldByName('TBTestDate').AsDateTime > 0 ) then

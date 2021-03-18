@@ -81,8 +81,7 @@ var
 
 implementation
 
-uses uGlobalSettings, DairyData, uHerdSetUp, kRoutines, uMartEmailRequest,
-  uFileAttachmentImport;
+uses uGlobalSettings, DairyData, uHerdSetUp, kRoutines, uMartEmailRequest, uFileAttachmentImport;
 
 {$R *.DFM}
 
