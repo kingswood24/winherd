@@ -302,13 +302,13 @@ Visible=0
 State=0
 Left=0
 Top=0
-Width=1689
+Width=1705
 Height=111
 MaxLeft=-1
 MaxTop=-1
-ClientWidth=1689
+ClientWidth=1705
 ClientHeight=111
-TBDockHeight=140
+TBDockHeight=111
 LRDockWidth=443
 Dockable=1
 
