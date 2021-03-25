@@ -82,6 +82,8 @@ unit uSalesReport;
                                              - The new report needs a "Total Cost per kg Live Weight"
 
  04/03/21 [V5.9 R9.3] /MK Additional Feature - Cattle Costs - Change Sale Date to Date Of Birth "easy 5 minute change" - GL/C&J Meats.                                             
+
+ 25/03/21 [V5.9 R9.6] /MK Change - LoadOtherData - Aoife (Bellingham) asked if the restriction of crush weights this could be increased to 28 days as the lads in the yard are behind with tagging.
 }
 
 interface
@@ -1683,7 +1685,10 @@ begin
                   //                                     to allow for a situation where if a supplier tells the buyer that the animal is purchased on a date
                   //                                     but the animal is not tranported to Bellingham for more than a week because the supplier is waiting
                   //                                     until they have a truck load of animals to move to Bellingham, Aoife said 14 days would cover this.
-                  qCrushWeight.Params[3].AsDateTime := IncDay(MyTable.FieldByName('PurchDate').AsDateTime,14);
+
+                  //   25/03/21 [V5.9 R9.6] /MK Change - Aoife (Bellingham) asked if the restriction of crush weights this could be increased
+                  //                                     to 28 days as the lads in the yard are behind with tagging.
+                  qCrushWeight.Params[3].AsDateTime := IncDay(MyTable.FieldByName('PurchDate').AsDateTime,28);
 
                   qCrushWeight.Open;
                   if ( qCrushWeight.RecordCount > 0 ) then
