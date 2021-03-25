@@ -57,7 +57,7 @@ AutoIncBuild=0
 MajorVer=5
 MinorVer=9
 Release=9
-Build=5
+Build=6
 Debug=0
 PreRelease=1
 Special=0
@@ -68,13 +68,13 @@ CodePage=1252
 [Version Info Keys]
 CompanyName=Kingswood Computing Ltd
 FileDescription=Kingswood Herd Management
-FileVersion=5.9.9.5
+FileVersion=5.9.9.6
 InternalName=Winherd
 LegalCopyright=Kingswood Computing Ltd.
 LegalTrademarks=
 OriginalFilename=Winherd
 ProductName=Winherd.exe
-ProductVersion=V5.9 R9.5
+ProductVersion=V5.9 R9.6
 Comments=Kingswood Computing Ltd.
 [Excluded Packages]
 $(DELPHI)\Projects\Bpl\Ean5.bpl=Ean components
