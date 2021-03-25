@@ -5522,8 +5522,8 @@ begin
    FertilityCheck.Open;
    MilkTemperament.Open;
    JohnesResult.Open;
-   ICBFDamEvent.Open;
-   ICBFStockBullEvent.Open;
+   //ICBFDamEvent.Open;
+   //ICBFStockBullEvent.Open;
    Weaning.Open;
    Weighings.Open;
 

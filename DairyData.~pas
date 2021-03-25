@@ -30630,16 +30630,13 @@ function TWinData.GetIsBlacklistedIP: boolean;
 var
    ip : string;
 begin
-   try
-      if ( not(Preferences.PreferenceExists(cIPAddress)) ) then
-         Preferences.ValueAsString[cIPAddress] := GetInternetIPAddress();
-      ip := Preferences.ValueAsString[cIPAddress];
+   if ( not(Preferences.PreferenceExists(cIPAddress)) ) then
+      Preferences.ValueAsString[cIPAddress] := GetInternetIPAddress();
+   ip := Preferences.ValueAsString[cIPAddress];
 
-      Result := (ip = '217.115.122.46') or // Kingswood IP address
-                (ip = '62.231.60.150') or // Old Kingswood IP address
-                (ip = '86.180.106.108'); // TGM IP address as of 22/07/2014
-   except
-   end;
+   Result := (ip = '217.115.122.46') or // Kingswood IP address
+             (ip = '62.231.60.150') or // Old Kingswood IP address
+             (ip = '86.180.106.108'); // TGM IP address as of 22/07/2014
 end;
 
 // 22/07/2014 - SP

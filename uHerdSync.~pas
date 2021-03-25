@@ -139,6 +139,7 @@
 
    23/02/21 [V5.9 R8.5] /MK Change - CreateExistingClientIdElement - Changed format of eventDate node to 4 digit year to match server format
                                                                    - Changed format of dateofBirth node to 4 digit year to match server format
+                                                                   - OpenCalvingQuery - Change LEFT JOIN to INNER JOIN to make the query quicker.
 }
 
 unit uHerdSync;
