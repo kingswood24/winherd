@@ -1470,7 +1470,7 @@ object fmCTSWSBirthReg: TfmCTSWSBirthReg
       PrinterPage._dxMeasurementUnits_ = 0
       PrinterPage._dxLastMU_ = 2
       ReportDocument.Caption = 'Calves To Be Registered'
-      ReportDocument.CreationDate = 44257.3896890741
+      ReportDocument.CreationDate = 44307.7205132639
       ReportDocument.Creator = 'Kingswood Computing Ltd'
       OptionsOnEveryPage.Footers = False
       OptionsOnEveryPage.Caption = False
@@ -1499,7 +1499,7 @@ object fmCTSWSBirthReg: TfmCTSWSBirthReg
       PrinterPage._dxMeasurementUnits_ = 0
       PrinterPage._dxLastMU_ = 2
       ReportDocument.Caption = 'Calves Registered'
-      ReportDocument.CreationDate = 44257.3896890856
+      ReportDocument.CreationDate = 44307.7205132755
       ReportDocument.Creator = 'Kingswood Computing Ltd'
       OptionsOnEveryPage.Footers = False
       OptionsOnEveryPage.Caption = False

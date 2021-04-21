@@ -1,3 +1,11 @@
+Version V5.9 R9.7
+
+21/04/21 /MK Bug Fix - uCTSBirthReg - LoadBirthsToBeRegistered - Removed validation of tag number as we don't have a validation for UK tags only Eire and NI tags - Angela Hughes.
+
+Version V5.9 R9.6
+
+25/03/21 /MK Change - uSalesReport - LoadOtherData - Aoife (Bellingham) asked if the restriction of crush weights this could be increased to 28 days as the lads in the yard are behind with tagging.
+
 Version V5.9 R9.5
 
 10/03/21 /MK Additional Feature - uModifyGridCols - Added a Select/DeSelect All button.

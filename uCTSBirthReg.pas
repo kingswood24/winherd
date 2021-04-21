@@ -28,10 +28,12 @@
 
    13/03/19 [V5.8 R8.0] /MK Change - New private variable FNullRecordsFound used when loading animals and registering calves to show error if null NatID, Sex or Breed.
                                    - New procedure, SortByNullRecordsFound, uused when loading animals and registering calves to sort grid by NullRecords.
-                            Bug Fix - NullRecords check when registering calves should only apply to selected records - Joey (Muldowney's Garrel herd).       
+                            Bug Fix - NullRecords check when registering calves should only apply to selected records - Joey (Muldowney's Garrel herd).
 
    25/02/21 [V5.9 R9.0] /MK Change - LoadBirthsToBeRegistered - If the sire has a tag number the use that as the identifier else use Animal No./Short Name - Wendy Radley/Muldowney.
                                    - Changed caption of Sire NatId to Sire Identifier to show the user that the sire can be the tag or animal no.
+
+   21/04/21 [V5.9 R9.7] /MK Bug Fix - LoadBirthsToBeRegistered - Removed validation of tag number as we don't have a validation for UK tags only Eire and NI tags - Angela Hughes.
 }
 
 unit uCTSBirthReg;
@@ -538,8 +540,8 @@ var
                                     QueryDamSire.Open;
 
                                     //   25/02/21 [V5.9 R9.0] /MK Change - If the sire has a tag number the use that as the identifier else use Animal No./Short Name - Wendy Radley/Muldowney.
-                                    if ( (Length(QueryDamSire.FieldByName('NatIDNum').AsString) > 0) and
-                                         ((IsValidIrishHerdID(QueryDamSire.FieldByName('NatIDNum').AsString)) or (IsValidUKHerdID(QueryDamSire.FieldByName('NatIDNum').AsString))) ) then
+                                    //   21/04/21 [V5.9 R9.7] /MK Bug Fix - Removed validation of tag number as we don't have a validation for UK tags only Eire and NI tags - Angela Hughes.
+                                    if ( Length(QueryDamSire.FieldByName('NatIDNum').AsString) > 0 ) then
                                        begin
                                           sSireId := QueryDamSire.FieldByName('NatIDNum').AsString;
                                           tmpCTSBirths.FieldByName('SireSortNatIDNum').AsString := QueryDamSire.FieldByName('SortNatID').AsString;
