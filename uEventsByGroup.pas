@@ -10155,26 +10155,30 @@ begin
    IsPregnant := False;
    NoOfCalves := 0;
    DaysInCalf := 0;
-   //   20/03/18 [V5.7 R8.4] /MK Change - Use new BreedingDataHelper procedure to get preg diag info by SQL for speed purposes.
-   FBreedingDataHelper.GetPregDiagInfo(ADataSet.FieldByName('AnimalID').AsInteger,
-                                       ADataSet.FieldByName('LactNo').AsInteger,
-                                       IsPregnant,IsRecheck,PregDiagDate,NoOfCalves,DaysInCalf);
-   if ( PregDiagDate > 0 ) then
-      begin
-         if ( WinData.EventType = TPregDiag ) then
-            begin
-               TempAnimals.FieldByName('RepeatPregDiag').AsBoolean := not(IsPregnant) or IsRecheck;
-               Inc(FPregDiagRepeatCount);
-            end
-         else if ( WinData.EventType = TService ) then
-            begin
-               if ( bPrevPregDiagEvent <> nil ) then
-                  begin
-                     TempAnimals.FieldByName('PrevPregDiagEvent').AsBoolean := IsPregnant;
-                     Inc(FPregDiagEventCount);
-                  end;
-            end;
-      end;
+
+   try
+      //   20/03/18 [V5.7 R8.4] /MK Change - Use new BreedingDataHelper procedure to get preg diag info by SQL for speed purposes.
+      FBreedingDataHelper.GetPregDiagInfo(ADataSet.FieldByName('AnimalID').AsInteger,
+                                          ADataSet.FieldByName('LactNo').AsInteger,
+                                          IsPregnant,IsRecheck,PregDiagDate,NoOfCalves,DaysInCalf);
+      if ( PregDiagDate > 0 ) then
+         begin
+            if ( WinData.EventType = TPregDiag ) then
+               begin
+                  TempAnimals.FieldByName('RepeatPregDiag').AsBoolean := not(IsPregnant) or IsRecheck;
+                  Inc(FPregDiagRepeatCount);
+               end
+            else if ( WinData.EventType = TService ) then
+               begin
+                  if ( bPrevPregDiagEvent <> nil ) then
+                     begin
+                        TempAnimals.FieldByName('PrevPregDiagEvent').AsBoolean := IsPregnant;
+                        Inc(FPregDiagEventCount);
+                     end;
+               end;
+         end;
+   except
+   end;
 end;
 
 procedure TfEventsByGroup.UpdateTempAnimalsServiceInfo(ADataSet : TDataSet);

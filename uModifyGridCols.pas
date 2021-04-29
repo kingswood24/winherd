@@ -1,5 +1,7 @@
 {
    10/03/21 [V5.9 R9.5] /MK Additional Feature - Added a Select/DeSelect All button.
+
+   31/03/21 [V5.9 R9.7] /MK Change - Changed Caption to "Change Grid Columns" - GL request.   
 }
 
 unit uModifyGridCols;

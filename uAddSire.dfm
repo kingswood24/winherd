@@ -3,8 +3,8 @@ object fmAddSire: TfmAddSire
   Top = 330
   BorderStyle = bsDialog
   Caption = 'Add Sire'
-  ClientHeight = 254
-  ClientWidth = 391
+  ClientHeight = 380
+  ClientWidth = 390
   Color = clBtnFace
   Font.Charset = ANSI_CHARSET
   Font.Color = clWindowText
@@ -19,13 +19,13 @@ object fmAddSire: TfmAddSire
   PixelsPerInch = 96
   TextHeight = 17
   object btnSave: TcxButton
-    Left = 171
-    Top = 204
+    Left = 170
+    Top = 330
     Width = 90
     Height = 32
     Anchors = [akRight, akBottom]
     Caption = 'Save'
-    TabOrder = 4
+    TabOrder = 3
     OnClick = btnSaveClick
     Glyph.Data = {
       36030000424D3603000000000000360000002800000010000000100000000100
@@ -57,8 +57,8 @@ object fmAddSire: TfmAddSire
     LookAndFeel.Kind = lfOffice11
   end
   object btnCancel: TcxButton
-    Left = 277
-    Top = 204
+    Left = 276
+    Top = 330
     Width = 90
     Height = 32
     Anchors = [akRight, akBottom]
@@ -100,49 +100,50 @@ object fmAddSire: TfmAddSire
     Properties.CharCase = ecUpperCase
     Properties.MaxLength = 10
     Style.BorderStyle = ebsFlat
-    TabOrder = 2
+    TabOrder = 1
     OnKeyPress = teSireCodeKeyPress
     Width = 140
   end
   object lSireCode: TcxLabel
-    Left = 78
+    Left = 22
     Top = 66
     AutoSize = False
     Caption = 'AI Code : '
     Properties.Alignment.Horz = taRightJustify
     Properties.Alignment.Vert = taVCenter
-    Height = 25
+    Height = 28
     Width = 70
   end
   object cmboBreed: TcxLookupComboBox
     Left = 170
     Top = 112
     RepositoryItem = HerdLookup.erPureBredBreedLookup
+    Properties.DropDownListStyle = lsFixedList
     Properties.ListColumns = <>
     Properties.OnChange = cmboBreedPropertiesChange
     Style.BorderStyle = ebsFlat
-    TabOrder = 3
+    TabOrder = 2
     Width = 90
   end
   object lBreed: TcxLabel
-    Left = 78
+    Left = 22
     Top = 112
     AutoSize = False
     Caption = 'Breed : '
     Properties.Alignment.Horz = taRightJustify
     Properties.Alignment.Vert = taVCenter
-    Height = 25
-    Width = 70
+    Height = 28
+    Width = 57
   end
   object lName: TcxLabel
-    Left = 78
+    Left = 22
     Top = 158
     AutoSize = False
     Caption = 'Name : '
     Properties.Alignment.Horz = taRightJustify
     Properties.Alignment.Vert = taVCenter
-    Height = 26
-    Width = 70
+    Height = 28
+    Width = 57
   end
   object teName: TcxTextEdit
     Left = 170
@@ -161,7 +162,7 @@ object fmAddSire: TfmAddSire
     Caption = 'Bull Name (Short) : '
     Properties.Alignment.Horz = taRightJustify
     Properties.Alignment.Vert = taVCenter
-    Height = 26
+    Height = 28
     Width = 125
   end
   object teShortName: TcxTextEdit
@@ -170,8 +171,59 @@ object fmAddSire: TfmAddSire
     Properties.CharCase = ecUpperCase
     Properties.MaxLength = 10
     Style.BorderStyle = ebsFlat
-    TabOrder = 1
+    TabOrder = 0
     OnKeyPress = teSireCodeKeyPress
     Width = 140
+  end
+  object gbAddSireNatId: TcxGroupBox
+    Left = 23
+    Top = 205
+    Style.BorderStyle = ebsFlat
+    TabOrder = 10
+    Height = 110
+    Width = 344
+    object lNatIDNum: TcxLabel
+      Left = 16
+      Top = 60
+      AutoSize = False
+      Caption = 'Nat. ID No :'
+      Properties.Alignment.Horz = taCenter
+      Properties.Alignment.Vert = taVCenter
+      Height = 28
+      Width = 91
+    end
+    object teNatIDNum: TcxTextEdit
+      Left = 130
+      Top = 62
+      Properties.CharCase = ecUpperCase
+      Properties.MaxLength = 20
+      Style.BorderStyle = ebsFlat
+      TabOrder = 1
+      OnKeyPress = teSireCodeKeyPress
+      Width = 151
+    end
+    object lSireNatIdInfoText: TcxLabel
+      Left = 15
+      Top = 25
+      AutoSize = False
+      Caption = 'Needed only if calf registration is being sent to ICBF'
+      ParentColor = False
+      Properties.Alignment.Horz = taCenter
+      Properties.Alignment.Vert = taVCenter
+      Style.BorderColor = clInfoBk
+      Style.Color = clInfoBk
+      Style.TextColor = clNavy
+      Height = 28
+      Width = 315
+    end
+  end
+  object cbAddSireNatId: TcxCheckBox
+    Left = 22
+    Top = 203
+    Caption = 'Add Sire Nat. ID No'
+    Properties.OnChange = cbAddSireNatIdPropertiesChange
+    Style.BorderStyle = ebsFlat
+    TabOrder = 11
+    Width = 121
   end
 end

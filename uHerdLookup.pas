@@ -191,9 +191,11 @@
   28/04/20 [V5.9 R4.0] /MK Additional Feature - New queries, qMainGridMilkDiskTrans & qMainGridMilkDisk, created to allow the main grid to show the milk history
                                                 for animals that were sold or have no milk history in the current lactation but have in the previous lactation.
 
-   17/08/20 [V5.9 R5.4] /MK Change - Changed qBatchNoMedDetails to output the DrugID of this purchase record.
-                                   - Changed qMedBatchNoTreats to allow DrugID to be passed in to get exact treatments of this purchase where DrugPurchId
-                                     appears twice in Health table for two different drugs - David Hemminway.                
+  17/08/20 [V5.9 R5.4] /MK Change - Changed qBatchNoMedDetails to output the DrugID of this purchase record.
+                                  - Changed qMedBatchNoTreats to allow DrugID to be passed in to get exact treatments of this purchase where DrugPurchId
+                                    appears twice in Health table for two different drugs - David Hemminway.
+
+  29/04/21 [V6.0 R0.3] /MK Change - CreateMDPureBredBreedData - Changed this table to include all pure bred breeds regardless if they are in use or not - GL/Alan McCormick.
 }
 
 unit uHerdLookup;
@@ -4667,7 +4669,7 @@ begin
          SQL.Clear;
          SQL.Add('SELECT ID, Code, Name');
          SQL.Add('FROM Breeds');
-         SQL.Add('WHERE InUse = True');
+         //SQL.Add('WHERE InUse = True');
          try
             Open;
             if ( RecordCount = 0 ) then Exit;

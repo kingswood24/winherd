@@ -997,7 +997,13 @@ unit MenuUnit;
 
  02/03/21 [V5.9 R9.1] /MK Additional Feature - Added changes to allow filter for A1A2Result from Filter screen - Padraic Harnan.
 
- 04/03/21 [V5.9 R9.4] /MK Bug Fix - StockBullsInUseFilter - Only show bulls that are In Use ignore the InHerd flag - GL/Cantwells Court.                                 
+ 04/03/21 [V5.9 R9.4] /MK Bug Fix - StockBullsInUseFilter - Only show bulls that are In Use ignore the InHerd flag - GL/Cantwells Court.
+
+ 31/03/21 [V5.9 R9.7] /MK Change - Changed Modify Grid to Change Grid - GL request.
+                                 - Changed "Sire Breed Only" to "Other Sires" - GL request.
+
+ 01/04/21 [V5.9 R9.7] /MK Change - Add Sub Menu to Stock Sires.
+                                 - Add menu items to new sub menu for List Stock Sires and Purchase Stock Bull.
 }
 
 interface
@@ -1998,6 +2004,8 @@ type
     pmiNatIdLast4Digits: TMenuItem;
     pmiNatIdCheckDigit: TMenuItem;
     pmiStockSires: TMenuItem;
+    pmiListStockBulls: TMenuItem;
+    pmiPurchaseStockBull: TMenuItem;
    //--------------------------------------//
 
     procedure ExitButtonClick(Sender: TObject);
@@ -2605,10 +2613,11 @@ type
     procedure pmiA1A2ResultFileClick(Sender: TObject);
     procedure actModifyGridExecute(Sender: TObject);
     procedure actCalvingHelpExecute(Sender: TObject);
-    procedure pmiStockSiresClick(Sender: TObject);
     procedure pmiNatIdSortClick(Sender: TObject);
     procedure pmiNatIdCheckDigitClick(Sender: TObject);
     procedure pmiNatIdLast4DigitsClick(Sender: TObject);
+    procedure pmiListStockBullsClick(Sender: TObject);
+    procedure pmiPurchaseStockBullClick(Sender: TObject);
   private
     { Private declarations }
     Reg : TRegistry;
@@ -16566,11 +16575,6 @@ begin
    end;
 end;
 
-procedure TMenuForm.pmiStockSiresClick(Sender: TObject);
-begin
-   DoFilter(qfStockBullInUse,'Stock Bulls');
-end;
-
 procedure TMenuForm.pmiNatIdSortClick(Sender: TObject);
 begin
 // General NatIdNum Sort.
@@ -16584,6 +16588,16 @@ end;
 procedure TMenuForm.pmiNatIdLast4DigitsClick(Sender: TObject);
 begin
 // NatIdNum Last 4 Digit Sort.
+end;
+
+procedure TMenuForm.pmiListStockBullsClick(Sender: TObject);
+begin
+   DoFilter(qfStockBullInUse,'Stock Bulls');
+end;
+
+procedure TMenuForm.pmiPurchaseStockBullClick(Sender: TObject);
+begin
+   actPurchase.Execute;
 end;
 
 initialization

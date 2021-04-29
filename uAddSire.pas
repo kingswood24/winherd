@@ -1,6 +1,11 @@
 {
    09/01/20 [V5.9 R1.6] /MK Change - Added a Bull Name (Short) where the country is not Ireland - TGM request.
                                    - Had to modify the screen height, width and control positions for this change.
+
+   01/04/21 [V6.0 R0.1] /MK Change - Added NatIDNum box for NonHerdSire SireType so tag number can be added.
+                                   - Added validation for new NatIDNum box.
+                                   - Added CheckBox to show/hide new NatIDnum box.
+                                   - Only show explanatory text regarding ICBF for Irish herds. 
 }
 
 unit uAddSire;
@@ -11,7 +16,8 @@ uses
   Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs, EventRecording,
   db, dbTables, StdCtrls, cxButtons, uHerdLookup, cxLabel, cxControls,
   cxContainer, cxEdit, cxTextEdit, cxMaskEdit, cxDropDownEdit,
-  cxLookupEdit, cxDBLookupEdit, cxDBLookupComboBox, SQLHelper, GenTypesConst;
+  cxLookupEdit, cxDBLookupEdit, cxDBLookupComboBox, SQLHelper, GenTypesConst,
+  cxGroupBox, cxCheckBox, KRoutines, uAnimal;
 
 type
   TSireType = (stAISire, stNonHerdSire);
@@ -26,6 +32,11 @@ type
     teName: TcxTextEdit;
     lShortName: TcxLabel;
     teShortName: TcxTextEdit;
+    gbAddSireNatId: TcxGroupBox;
+    lNatIDNum: TcxLabel;
+    teNatIDNum: TcxTextEdit;
+    lSireNatIdInfoText: TcxLabel;
+    cbAddSireNatId: TcxCheckBox;
     procedure btnSaveClick(Sender: TObject);
     procedure btnCancelClick(Sender: TObject);
     procedure FormActivate(Sender: TObject);
@@ -33,6 +44,7 @@ type
     procedure teSireCodeKeyPress(Sender: TObject; var Key: Char);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure cbAddSireNatIdPropertiesChange(Sender: TObject);
   private
     { Private declarations }
     FCountry : TCountry;
@@ -48,7 +60,6 @@ var
 
 const
   cPedFormHeight = 252;
-  cDefFormHeight = 205;
 
 implementation
 
@@ -75,71 +86,71 @@ procedure TfmAddSire.FormActivate(Sender: TObject);
 var
    i : Integer;
 begin
-   case FSireType of
-      stAISire : begin
-                    lSireCode.Caption := 'AI Code : ';
-                    lSireCode.Enabled := True;
-                    if ( FCountry = Ireland ) then
-                       begin
-                          lSireCode.Top := 20;
-                          lSireCode.Left := 22;
-                          teSireCode.Top := 20;
-                          teSireCode.Left := 112;
-                          lBreed.Top := 66;
-                          lBreed.Left := 22;
-                          cmboBreed.Top := 66;
-                          cmboBreed.Left := 112;
-                          lName.Top := 112;
-                          lName.Left := 22;
-                          teName.Top := 112;
-                          teName.Left := 112;
-                       end
-                    else
-                       begin
-                          lShortName.Top := 20;
-                          lShortName.Left := 22;
-                          teShortName.Top := 20;
-                          teShortName.Left := 170;
-                          lSireCode.Top := 66;
-                          lSireCode.Left := 78;
-                          teSireCode.Top := 66;
-                          teSireCode.Left := 170;
-                          lBreed.Top := 112;
-                          lBreed.Left := 78;
-                          cmboBreed.Top := 112;
-                          cmboBreed.Left := 170;
-                          lName.Top := 156;
-                          lName.Left := 78;
-                          teName.Top := 156;
-                          teName.Left := 170;
-                       end;
-                    teSireCode.Enabled := True;
-                    teSireCode.Width := 140;
-                    Caption := 'AI Sire Manual Entry';
-                 end;
-      stNonHerdSire : begin
-                         lSireCode.Top := 74;
-                         lSireCode.Left := 22;
-                         teSireCode.Top := 74;
-                         teSireCode.Left := 112;
-                         lBreed.Top := 28;
-                         lBreed.Left := 22;
-                         cmboBreed.Top := 28;
-                         cmboBreed.Left := 112;
-                         lSireCode.Caption := 'Code : ';
-                         lSireCode.Enabled := False;
-                         teSireCode.Enabled := False;
-                         teSireCode.Width := cmboBreed.Width;
-                         Caption := 'Non-Herd Stock Sire';
-                      end;
-   end;
-
    Height := 238;
 
    lName.Visible := ( FSireType = stAISire ) and ( Length(HerdLookup.PedigreePrefixByHerdId(HerdLookup.DefaultHerdID)) > 1 );
    teName.Visible := lName.Visible;
    lShortName.Visible := ( FSireType = stAISire ) and ( FCountry <> Ireland );
    teShortName.Visible := lShortName.Visible;
+   cbAddSireNatId.Visible := ( FSireType = stNonHerdSire );
+   gbAddSireNatId.Visible := False;
+   lSireNatIdInfoText.Visible := ( FCountry = Ireland );
+
+   case FSireType of
+      stAISire : begin
+                    lSireCode.Caption := 'AI Code : ';
+                    lSireCode.Enabled := True;
+                    if ( FCountry = Ireland ) then
+                       begin
+                          if ( lName.Visible ) then
+                             teSireCode.Left := teSireCode.Left-50
+                          else
+                             teSireCode.Left := teSireCode.Left-20;
+                          lSireCode.Top := 20;
+                          teSireCode.Top := 20;
+                          lBreed.Top := 66;
+                          cmboBreed.Top := 66;
+                          cmboBreed.Left := teSireCode.Left;
+                          lName.Top := 112;
+                          teName.Top := 112;
+                          teName.Left := teSireCode.Left;
+                       end
+                    else
+                       begin
+                          lShortName.Top := 20;
+                          teShortName.Top := 20;
+                          lSireCode.Top := 66;
+                          teSireCode.Top := 66;
+                          lBreed.Top := 112;
+                          cmboBreed.Top := 112;
+                          lName.Top := 156;
+                          teName.Top := 156;
+                       end;
+                    teSireCode.Enabled := True;
+                    teSireCode.Width := 140;
+                    Caption := 'AI Sire Manual Entry';
+                 end;
+      stNonHerdSire : begin
+                         lBreed.Top := 28;
+                         lBreed.Width := lSireCode.Width;
+                         cmboBreed.Top := 28;
+                         cmboBreed.Left := cmboBreed.Left-50;
+                         lSireCode.Top := 74;
+                         teSireCode.Top := 74;
+                         teSireCode.Left := cmboBreed.Left;
+                         cbAddSireNatId.Top := 118;
+                         cbAddSireNatId.Left := lSireCode.Left+24;
+                         gbAddSireNatId.Top := cbAddSireNatId.Top;
+                         gbAddSireNatId.Left := cbAddSireNatId.Left;
+                         lSireCode.Caption := 'Code : ';
+                         lSireCode.Enabled := True;
+                         teSireCode.Enabled := True;
+                         teSireCode.Width := cmboBreed.Width;
+                         gbAddSireNatId.Top := 120;
+                         Caption := 'Other Sires';
+                      end;
+   end;
+
    if lName.Visible then
       begin
          if ( FCountry = Ireland ) then
@@ -148,19 +159,26 @@ begin
             Height := 284;
       end
    else
-      if ( FCountry = Ireland ) then
-         Height := cDefFormHeight
-      else
-         begin
-            if ( FSireType = stAISire ) then
-               Height := 236
-            else
-               Height := cDefFormHeight;
-         end;
+      begin
+         if ( FCountry = Ireland ) then
+            begin
+               if ( FSireType = stAISire ) then
+                  Height := 200
+               else
+                  Height := 240;
+            end
+         else
+            begin
+               if ( FSireType = stAISire ) then
+                  Height := 236
+               else
+                  Height := 240;
+            end;
+      end;
 
    if ( FSireType = stAISire ) then
       begin
-         if FCountry = Ireland then
+         if ( FCountry = Ireland ) then
             begin
                if ( lName.Visible ) then
                   Width := 348
@@ -168,10 +186,15 @@ begin
                   Width := 328;
             end
          else
-            Width := 399;
+            Width := 400;
       end
    else
-      Width := 254;
+      begin
+         if ( gbAddSireNatId.Visible ) then
+            Width := 400
+         else
+            Width := 260;
+      end;
 
 end;
 
@@ -179,6 +202,8 @@ procedure TfmAddSire.btnSaveClick(Sender: TObject);
 var
    AnimalID : Integer;
    AISire : TAnimalRecord;
+   FormattedNatID : String;
+   aCurrentAnimal : TAnimal;
 
    function AnimalInUse(const AAICode : String): Integer;
    begin
@@ -230,21 +255,64 @@ begin
          MessageDlg('You must enter an AI Code.',mtError,[mbOK],0);
          Abort;
       end;
+
    if ( FSireType = stAISire ) then
       if ( FCountry = Ireland ) then
          if ( not(HerdLookup.IsValidAICode(teSireCode.Text)) ) then
             begin
                MessageDlg('Invalid AI Code Entered',mtError,[mbOK],0);
-               Exit;
+               Abort;
             end;
+
+   AnimalID := AnimalInUse(teSireCode.Text);
+   if ( AnimalID > 0 ) then
+      begin
+         MessageDlg(Format('Sire "%s" already exists.',[teSireCode.Text]),mtError,[mbOK],0);
+         Abort;
+      end;
+
    cmboBreed.PostEditValue;
    if ( Length(cmboBreed.Text) = 0 ) then
       begin
          MessageDlg('You must enter a breed.',mtError,[mbOK],0);
          Abort;
       end;
+
    teName.PostEditValue;
-   AnimalID := AnimalInUse(teSireCode.Text);
+
+   teNatIDNum.PostEditValue;
+   if ( cbAddSireNatId.Checked ) then
+      begin
+         if  ( Length(teNatIDNum.Text) = 0 ) then
+            begin
+               MessageDlg('Add Sire Nat. ID selected but Nat. ID Num is not entered.',mtError,[mbOK],0);
+               Abort;
+            end
+         else
+            begin
+               if ( not(CheckNatID(teNatIDNum.Text, FormattedNatID, True)) ) then
+                  begin
+                     MessageDlg(Format('Invalid National ID',[FormattedNatID]),mtError,[mbOK],0);
+                     Abort;
+                  end
+               else if ( IsNINatID(teNatIDNum.Text)) and ( not(CheckNINatID(teNatIDNum.Text, FormattedNatID)) ) then
+                  begin
+                     MessageDlg(Format('Invalid National ID',[FormattedNatID]),mtError,[mbOK],0);
+                     Abort;
+                  end;
+            end;
+         aCurrentAnimal := GetAnimal(FormattedNatID);
+         if ( aCurrentAnimal <> nil ) then
+            begin
+               MessageDlg(Format('National ID "%s" already in use',[FormattedNatID]),mtError,[mbOK],0);
+               Abort;
+            end;
+         if ( IsIETag(FormattedNatID) ) then
+            FormattedNatID := 'IE '+FormattedNatID
+         else if ( Is372Tag(FormattedNatID) ) then
+            FormattedNatID := '372 '+FormattedNatID;
+         teNatIDNum.Text := FormattedNatID;
+      end;
    if ( AnimalID <= 0 ) then
       begin
          // Add animal to database
@@ -258,6 +326,13 @@ begin
                AISire.AnimalNo := teSireCode.Text
             else
                AISire.AnimalNo := teShortName.Text;
+
+            if ( (cbAddSireNatId.Checked) and (Length(teNatIDNum.Text) > 0) ) then
+               begin
+                  AISire.ValidateIdTags := True;
+                  AISire.NatIDNum := teNatIDNum.Text;
+               end;
+
             AISire.Sex := cSex_Bull;
             AISire.Name := teName.Text;
             AISire.LactNo := 0;
@@ -293,8 +368,6 @@ begin
             FreeAndNil(AISire);
          end;
       end
-   else
-      MessageDlg(Format('Sire "%s" already exists.',[teSireCode.Text]),mtInformation,[mbOK],0);
 end;
 
 procedure TfmAddSire.btnCancelClick(Sender: TObject);
@@ -335,6 +408,35 @@ end;
 procedure TfmAddSire.FormDestroy(Sender: TObject);
 begin
    HerdLookup.mdPureBredBreeds.Close;
+end;
+
+procedure TfmAddSire.cbAddSireNatIdPropertiesChange(Sender: TObject);
+begin
+   gbAddSireNatId.Visible := cbAddSireNatId.Checked;
+   gbAddSireNatId.Width := 342;
+   Height := 240;
+   Width := 260;
+   if ( cbAddSireNatId.Checked ) then
+      begin
+         if ( lSireNatIdInfoText.Visible ) then
+            begin
+               lNatIDNum.Top := 60;
+               teNatIDNum.Top := 62;
+               gbAddSireNatId.Height := 110;
+               gbAddSireNatId.Width := 344;
+               Width := 428;
+               Height := 330;
+            end
+         else
+            begin
+               lNatIDNum.Top := 28;
+               teNatIDNum.Top := 30;
+               gbAddSireNatId.Height := 74;
+               gbAddSireNatId.Width := 296;
+               Width := 382;
+               Height := 296;
+            end;
+      end;
 end;
 
 end.

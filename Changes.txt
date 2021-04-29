@@ -1,3 +1,25 @@
+Version V6.0 R0.3
+
+29/04/21 /MK Change - uHerdLookup - CreateMDPureBredBreedData - Changed this table to include all pure bred breeds regardless if they are in use or not - GL/Alan McCormick.
+
+Version V6.0 R0.2
+
+21/04/21 [V6.0 R0.2] /MK Bug Fix - LoadBirthsToBeRegistered - Removed validation of tag number as we don't have a validation for UK tags only Eire and NI tags - Angela Hughes.
+
+Version V6.0 R0.1
+
+31/03/21 /MK Change - MenuUnit - Changed Modify Grid to Change Grid - GL request.
+                               - Changed "Sire Breed Only" to "Other Sires" - GL request.
+                    - uModifyGridCols - Changed Caption to "Change Grid Columns" - GL request.
+01/04/21 MK Change - MenuUnit - Add Sub Menu to Stock Sires.
+                              - Add menu items to new sub menu for List Stock Sires and Purchase Stock Bull.
+                   - uAddSire - Added NatIDNum box for NonHerdSire SireType so tag number can be added.
+                              - Added validation for new NatIDNum box.
+                              - Added CheckBox to show/hide new NatIDnum box.
+                              - Only show explanatory text regarding ICBF for Irish herds.
+06/04/21 /MK Bug Fix - uCreateEvents - ProcessHealth - Added new bRecordEvent variable to store whether to record the event or not to fix issue where
+                                                       if event already exists, the focused record was moving to the next event but it wasn't being checked.
+
 Version V5.9 R9.7
 
 21/04/21 /MK Bug Fix - uCTSBirthReg - LoadBirthsToBeRegistered - Removed validation of tag number as we don't have a validation for UK tags only Eire and NI tags - Angela Hughes.

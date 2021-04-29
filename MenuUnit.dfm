@@ -226,6 +226,7 @@ object MenuForm: TMenuForm
           Width = 99
           Height = 19
           Action = actModifyGrid
+          Caption = 'Change Grid'
           Flat = True
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
@@ -12137,7 +12138,7 @@ object MenuForm: TMenuForm
       PrinterPage.PageSize.Y = 297000
       PrinterPage._dxMeasurementUnits_ = 0
       PrinterPage._dxLastMU_ = 2
-      ReportDocument.CreationDate = 44259.7136619792
+      ReportDocument.CreationDate = 44287.718255463
       OptionsOnEveryPage.Footers = False
       OptionsOnEveryPage.FilterBar = False
       OptionsPreview.Visible = False
@@ -13175,10 +13176,17 @@ object MenuForm: TMenuForm
     end
     object pmiStockSires: TMenuItem
       Caption = 'Stock Sires'
-      OnClick = pmiStockSiresClick
+      object pmiListStockBulls: TMenuItem
+        Caption = 'List Stock Bulls'
+        OnClick = pmiListStockBullsClick
+      end
+      object pmiPurchaseStockBull: TMenuItem
+        Caption = 'Purchase Stock Bull'
+        OnClick = pmiPurchaseStockBullClick
+      end
     end
     object pmNonHerdStockBull: TMenuItem
-      Caption = 'Sire Breed Only'
+      Caption = 'Other Sires'
       OnClick = pmNonHerdStockBullClick
     end
     object pmiNonHerdDam: TMenuItem

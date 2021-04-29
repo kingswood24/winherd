@@ -533,13 +533,13 @@ begin
 
         Application.HelpFile := 'HerdHelp.chm';
         Application.CreateForm(TWinData, WinData);
-  Application.CreateForm(THerdLookup, HerdLookup);
-  Application.CreateForm(TMenuForm, MenuForm);
-  Application.CreateForm(TfSetUpAnimals, fSetUpAnimals);
-  Application.CreateForm(TfSearchDlg, fSearchDlg);
-  Application.CreateForm(TfRemarks, fRemarks);
-  Application.CreateForm(TfFilters, fFilters);
-  MenuForm.Update;
+        Application.CreateForm(THerdLookup, HerdLookup);
+        Application.CreateForm(TMenuForm, MenuForm);
+        Application.CreateForm(TfSetUpAnimals, fSetUpAnimals);
+        Application.CreateForm(TfSearchDlg, fSearchDlg);
+        Application.CreateForm(TfRemarks, fRemarks);
+        Application.CreateForm(TfFilters, fFilters);
+        MenuForm.Update;
         MenuForm.Show;
         Application.Run;
      end;
