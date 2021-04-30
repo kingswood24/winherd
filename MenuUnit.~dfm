@@ -226,6 +226,7 @@ object MenuForm: TMenuForm
           Width = 99
           Height = 19
           Action = actModifyGrid
+          Caption = 'Change Grid'
           Flat = True
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
@@ -1988,6 +1989,7 @@ object MenuForm: TMenuForm
             HeaderAlignmentVert = vaCenter
             Options.Editing = False
             Options.Filtering = False
+            Options.FilteringMRUItemsList = False
             Width = 70
           end
           object cxAnimalGridViewQANoMovements: TcxGridDBColumn
@@ -2002,6 +2004,10 @@ object MenuForm: TMenuForm
             DataBinding.FieldName = 'A1A2Result'
             HeaderAlignmentVert = vaCenter
             Options.Editing = False
+            Options.Filtering = False
+            Options.FilteringMRUItemsList = False
+            Options.Focusing = False
+            Options.Grouping = False
             Width = 60
           end
           object cxAnimalGridViewPurchCommission: TcxGridDBColumn
@@ -2010,6 +2016,7 @@ object MenuForm: TMenuForm
             HeaderAlignmentVert = vaCenter
             Options.Editing = False
             Options.Filtering = False
+            Options.Focusing = False
             Options.Grouping = False
             Width = 94
           end
@@ -2019,6 +2026,7 @@ object MenuForm: TMenuForm
             HeaderAlignmentVert = vaCenter
             Options.Editing = False
             Options.Filtering = False
+            Options.Focusing = False
             Options.Grouping = False
             Width = 82
           end
@@ -2028,6 +2036,7 @@ object MenuForm: TMenuForm
             HeaderAlignmentVert = vaCenter
             Options.Editing = False
             Options.Filtering = False
+            Options.Focusing = False
             Options.Grouping = False
             Width = 70
           end
@@ -2037,8 +2046,20 @@ object MenuForm: TMenuForm
             HeaderAlignmentVert = vaCenter
             Options.Editing = False
             Options.Filtering = False
+            Options.Focusing = False
             Options.Grouping = False
             Width = 70
+          end
+          object cxAnimalGridViewPricePerKg: TcxGridDBColumn
+            Caption = 'Price Per Kg'
+            DataBinding.FieldName = 'PricePerKg'
+            PropertiesClassName = 'TcxCurrencyEditProperties'
+            Properties.DisplayFormat = '0.00'
+            HeaderAlignmentVert = vaCenter
+            Options.Editing = False
+            Options.Filtering = False
+            Options.Focusing = False
+            Width = 72
           end
         end
         object cxAnimalGridLevel: TcxGridLevel
@@ -12134,7 +12155,7 @@ object MenuForm: TMenuForm
       PrinterPage.PageSize.Y = 297000
       PrinterPage._dxMeasurementUnits_ = 0
       PrinterPage._dxLastMU_ = 2
-      ReportDocument.CreationDate = 44246.5959318634
+      ReportDocument.CreationDate = 44316.734709294
       OptionsOnEveryPage.Footers = False
       OptionsOnEveryPage.FilterBar = False
       OptionsPreview.Visible = False
@@ -13170,8 +13191,19 @@ object MenuForm: TMenuForm
         OnClick = psmManualAIClick
       end
     end
+    object pmiStockSires: TMenuItem
+      Caption = 'Stock Sires'
+      object pmiListStockBulls: TMenuItem
+        Caption = 'List Stock Bulls'
+        OnClick = pmiListStockBullsClick
+      end
+      object pmiPurchaseStockBull: TMenuItem
+        Caption = 'Purchase Stock Bull'
+        OnClick = pmiPurchaseStockBullClick
+      end
+    end
     object pmNonHerdStockBull: TMenuItem
-      Caption = 'Non-Herd Stock Sire'
+      Caption = 'Other Sires'
       OnClick = pmNonHerdStockBullClick
     end
     object pmiNonHerdDam: TMenuItem
@@ -13184,6 +13216,22 @@ object MenuForm: TMenuForm
     Top = 89
     object pmiSuckCalvingHelp: TMenuItem
       Action = actCalvingHelp
+    end
+  end
+  object pmNatIdSort: TPopupMenu
+    Left = 895
+    Top = 59
+    object pmiNatIdSort: TMenuItem
+      Caption = 'National Id.'
+      OnClick = pmiNatIdSortClick
+    end
+    object pmiNatIdCheckDigit: TMenuItem
+      Caption = 'National Id. (Check Digit)'
+      OnClick = pmiNatIdCheckDigitClick
+    end
+    object pmiNatIdLast4Digits: TMenuItem
+      Caption = 'National Id. (Last 4 Digits)'
+      OnClick = pmiNatIdLast4DigitsClick
     end
   end
 end

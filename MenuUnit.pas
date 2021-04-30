@@ -1004,6 +1004,8 @@ unit MenuUnit;
 
  01/04/21 [V5.9 R9.7] /MK Change - Add Sub Menu to Stock Sires.
                                  - Add menu items to new sub menu for List Stock Sires and Purchase Stock Bull.
+
+ 30/04/21 [V6.0 R1.0] /MK Additional Feature - Added the PricePerKg column.                                 
 }
 
 interface
@@ -2006,6 +2008,7 @@ type
     pmiStockSires: TMenuItem;
     pmiListStockBulls: TMenuItem;
     pmiPurchaseStockBull: TMenuItem;
+    cxAnimalGridViewPricePerKg: TcxGridDBColumn;
    //--------------------------------------//
 
     procedure ExitButtonClick(Sender: TObject);

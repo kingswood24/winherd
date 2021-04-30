@@ -2006,6 +2006,8 @@ object MenuForm: TMenuForm
             Options.Editing = False
             Options.Filtering = False
             Options.FilteringMRUItemsList = False
+            Options.Focusing = False
+            Options.Grouping = False
             Width = 60
           end
           object cxAnimalGridViewPurchCommission: TcxGridDBColumn
@@ -2014,6 +2016,7 @@ object MenuForm: TMenuForm
             HeaderAlignmentVert = vaCenter
             Options.Editing = False
             Options.Filtering = False
+            Options.Focusing = False
             Options.Grouping = False
             Width = 94
           end
@@ -2023,6 +2026,7 @@ object MenuForm: TMenuForm
             HeaderAlignmentVert = vaCenter
             Options.Editing = False
             Options.Filtering = False
+            Options.Focusing = False
             Options.Grouping = False
             Width = 82
           end
@@ -2032,6 +2036,7 @@ object MenuForm: TMenuForm
             HeaderAlignmentVert = vaCenter
             Options.Editing = False
             Options.Filtering = False
+            Options.Focusing = False
             Options.Grouping = False
             Width = 70
           end
@@ -2041,8 +2046,20 @@ object MenuForm: TMenuForm
             HeaderAlignmentVert = vaCenter
             Options.Editing = False
             Options.Filtering = False
+            Options.Focusing = False
             Options.Grouping = False
             Width = 70
+          end
+          object cxAnimalGridViewPricePerKg: TcxGridDBColumn
+            Caption = 'Price Per Kg'
+            DataBinding.FieldName = 'PricePerKg'
+            PropertiesClassName = 'TcxCurrencyEditProperties'
+            Properties.DisplayFormat = '0.00'
+            HeaderAlignmentVert = vaCenter
+            Options.Editing = False
+            Options.Filtering = False
+            Options.Focusing = False
+            Width = 72
           end
         end
         object cxAnimalGridLevel: TcxGridLevel
@@ -12138,7 +12155,7 @@ object MenuForm: TMenuForm
       PrinterPage.PageSize.Y = 297000
       PrinterPage._dxMeasurementUnits_ = 0
       PrinterPage._dxLastMU_ = 2
-      ReportDocument.CreationDate = 44287.718255463
+      ReportDocument.CreationDate = 44316.7381646065
       OptionsOnEveryPage.Footers = False
       OptionsOnEveryPage.FilterBar = False
       OptionsPreview.Visible = False
