@@ -1380,6 +1380,7 @@ object MenuForm: TMenuForm
           DataController.Summary.FooterSummaryItems = <
             item
               Kind = skCount
+              OnGetText = cxAnimalGridViewPrintTotalAmountCount
               Column = cxAnimalGridViewSortAnimalNo
             end
             item
@@ -1391,6 +1392,36 @@ object MenuForm: TMenuForm
             item
               Kind = skAverage
               Column = cxAnimalGridViewDaysInMilk
+            end
+            item
+              Format = '0.00'
+              Kind = skAverage
+              OnGetText = cxAnimalGridViewPrintSummaryText
+              Column = cxAnimalGridViewDaysOnFarm
+            end
+            item
+              Format = '0.00'
+              Kind = skAverage
+              OnGetText = cxAnimalGridViewPrintAvgPricePerKg
+              Column = cxAnimalGridViewPricePerKg
+            end
+            item
+              Format = '0.00'
+              Kind = skAverage
+              OnGetText = cxAnimalGridViewPrintSummaryText
+              Column = cxAnimalGridViewPurchPrice
+            end
+            item
+              Format = '0.00'
+              Kind = skAverage
+              OnGetText = cxAnimalGridViewPrintAvgSalePrice
+              Column = cxAnimalGridViewSalePrice
+            end
+            item
+              Format = '0.00'
+              Kind = skAverage
+              OnGetText = cxAnimalGridViewPrintSummaryText
+              Column = cxAnimalGridViewPurchWeight
             end>
           DataController.Summary.SummaryGroups = <>
           Filtering.MRUItemsList = False
@@ -1410,6 +1441,7 @@ object MenuForm: TMenuForm
           OptionsView.FocusRect = False
           OptionsView.NavigatorOffset = 0
           OptionsView.DataRowHeight = 21
+          OptionsView.FooterAutoHeight = True
           OptionsView.GridLines = glHorizontal
           OptionsView.GroupByBox = False
           OptionsView.HeaderHeight = 32
@@ -2033,11 +2065,10 @@ object MenuForm: TMenuForm
           object cxAnimalGridViewSalePrice: TcxGridDBColumn
             Caption = 'Sale Price'
             DataBinding.FieldName = 'SalePrice'
+            PropertiesClassName = 'TcxCurrencyEditProperties'
             HeaderAlignmentVert = vaCenter
             Options.Editing = False
             Options.Filtering = False
-            Options.Focusing = False
-            Options.Grouping = False
             Width = 70
           end
           object cxAnimalGridViewSaleCosts: TcxGridDBColumn
@@ -12155,7 +12186,7 @@ object MenuForm: TMenuForm
       PrinterPage.PageSize.Y = 297000
       PrinterPage._dxMeasurementUnits_ = 0
       PrinterPage._dxLastMU_ = 2
-      ReportDocument.CreationDate = 44316.734709294
+      ReportDocument.CreationDate = 44320.7306971528
       OptionsOnEveryPage.Footers = False
       OptionsOnEveryPage.FilterBar = False
       OptionsPreview.Visible = False

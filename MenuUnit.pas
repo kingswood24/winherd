@@ -7,7 +7,7 @@ unit MenuUnit;
  // ***********************************************************************************************
 
  // TO DO : Grid Columns Damanimalno, DamNatID, SireAnimalNo must create sort click!!!!!!!!!!!!!!!
-
+             
  // ***********************************************************************************************
 
  ------------------------------------------------------------------------------
@@ -2621,6 +2621,18 @@ type
     procedure pmiNatIdLast4DigitsClick(Sender: TObject);
     procedure pmiListStockBullsClick(Sender: TObject);
     procedure pmiPurchaseStockBullClick(Sender: TObject);
+    procedure cxAnimalGridViewPrintTotalAmountCount(
+      Sender: TcxDataSummaryItem; const AValue: Variant;
+      AIsFooter: Boolean; var AText: String);
+    procedure cxAnimalGridViewPrintAvgPricePerKg(
+      Sender: TcxDataSummaryItem; const AValue: Variant;
+      AIsFooter: Boolean; var AText: String);
+    procedure cxAnimalGridViewPrintSummaryText(
+      Sender: TcxDataSummaryItem; const AValue: Variant;
+      AIsFooter: Boolean; var AText: String);
+    procedure cxAnimalGridViewPrintAvgSalePrice(
+      Sender: TcxDataSummaryItem; const AValue: Variant;
+      AIsFooter: Boolean; var AText: String);
   private
     { Private declarations }
     Reg : TRegistry;
@@ -2866,7 +2878,6 @@ type
 
     procedure RefreshAnimalGrid;
     procedure StockBullsInUseFilter;
-
    public
     { Public declarations }
     pbBar : TProgressbar;
@@ -16601,6 +16612,99 @@ end;
 procedure TMenuForm.pmiPurchaseStockBullClick(Sender: TObject);
 begin
    actPurchase.Execute;
+end;
+
+procedure TMenuForm.cxAnimalGridViewPrintTotalAmountCount(
+  Sender: TcxDataSummaryItem; const AValue: Variant; AIsFooter: Boolean;
+  var AText: String);
+begin
+   if ( WinData.AnimalFileByID <> nil ) and ( WinData.AnimalFileByID.Active ) and ( WinData.AnimalFileByID.RecordCount > 0 ) then
+      AText := IntToStr(WinData.AnimalFileByID.RecordCount);
+end;
+
+procedure TMenuForm.cxAnimalGridViewPrintAvgPricePerKg(
+  Sender: TcxDataSummaryItem; const AValue: Variant; AIsFooter: Boolean;
+  var AText: String);
+var
+   iAnimalCount : Integer;
+   fTotalWeight, fTotalPrice : Double;
+begin
+   AText := '';
+   if ( WinData.AnimalFileByID <> nil ) and ( WinData.AnimalFileByID.Active ) and ( WinData.AnimalFileByID.RecordCount > 0 ) then
+      with TQuery.Create(nil) do
+         try
+            DatabaseName := AliasName;
+            SQL.Clear;
+            SQL.Add('SELECT A.AId, S.Price, S.ColdDeadWt');
+            SQL.Add('FROM AFilters A');
+            SQL.Add('LEFT JOIN Events E ON ((E.AnimalId = A.AId) AND (E.EventType = 11))');
+            SQL.Add('INNER JOIN SalesDeaths S ON (S.EventId = E.Id)');
+            try
+               Open;
+               if ( RecordCount > 0 ) then
+                  begin
+                     First;
+                     iAnimalCount := 0;
+                     fTotalWeight := 0;
+                     fTotalPrice := 0;
+                     while ( not(Eof) ) do
+                        begin
+                           if ( FieldByName('Price').AsFloat > 0 ) and ( FieldByName('ColdDeadWt').AsFloat > 0 ) then
+                              begin
+                                 Inc(iAnimalCount);
+                                 fTotalWeight := fTotalWeight + FieldByName('ColdDeadWt').AsFloat;
+                                 fTotalPrice := fTotalPrice + FieldByName('Price').AsFloat;
+                              end;
+                           Next;
+                        end;
+                     if ( iAnimalCount > 0 ) and ( fTotalPrice > 0 ) and ( fTotalWeight > 0 ) then
+                        AText := FormatFloat('#.00',fTotalPrice/fTotalWeight);
+                  end;
+            except
+               on e : Exception do
+                  ShowDebugMessage(e.Message);
+            end;
+         finally
+            Free;
+         end;
+end;
+
+procedure TMenuForm.cxAnimalGridViewPrintSummaryText(
+  Sender: TcxDataSummaryItem; const AValue: Variant; AIsFooter: Boolean;
+  var AText: String);
+begin
+   if ( AText = '0.00' ) then
+      AText := '';
+end;
+
+procedure TMenuForm.cxAnimalGridViewPrintAvgSalePrice(
+  Sender: TcxDataSummaryItem; const AValue: Variant; AIsFooter: Boolean;
+  var AText: String);
+begin
+   AText := '';
+   if ( WinData.AnimalFileByID <> nil ) and ( WinData.AnimalFileByID.Active ) and ( WinData.AnimalFileByID.RecordCount > 0 ) then
+      with TQuery.Create(nil) do
+         try
+            DatabaseName := AliasName;
+            SQL.Clear;
+            SQL.Add('SELECT AVG(S.Price)');
+            SQL.Add('FROM SalesDeaths S');
+            SQL.Add('WHERE S.Price > 0');
+            SQL.Add('AND S.EventId IN (SELECT ID');
+            SQL.Add('                  FROM Events');
+            SQL.Add('                  WHERE EventType = 11');
+            SQL.Add('                  AND AnimalID IN (SELECT AID FROM AFilters))');
+            try
+               Open;
+               if ( RecordCount > 0 ) and ( Fields[0].AsFloat > 0 ) then
+                  AText := FormatFloat('0.00',Fields[0].AsFloat);
+            except
+               on e : Exception do
+                  ShowDebugMessage(e.Message);
+            end;
+         finally
+            Free;
+         end;
 end;
 
 initialization
