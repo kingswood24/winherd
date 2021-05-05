@@ -2640,6 +2640,15 @@ type
       AIsFooter: Boolean; var AText: String);
     procedure cxAnimalGridViewPrintColdDeadWt(Sender: TcxDataSummaryItem;
       const AValue: Variant; AIsFooter: Boolean; var AText: String);
+    procedure cxAnimalGridViewPrintAvgPurchWeight(
+      Sender: TcxDataSummaryItem; const AValue: Variant;
+      AIsFooter: Boolean; var AText: String);
+    procedure cxAnimalGridViewPrintAvgPurchPrice(
+      Sender: TcxDataSummaryItem; const AValue: Variant;
+      AIsFooter: Boolean; var AText: String);
+    procedure cxAnimalGridViewPrintAvgDaysOnFarm(
+      Sender: TcxDataSummaryItem; const AValue: Variant;
+      AIsFooter: Boolean; var AText: String);
   private
     { Private declarations }
     Reg : TRegistry;
@@ -5570,8 +5579,11 @@ begin
          cxAnimalGridView.DataController.EndFullUpdate;
          Windata.AnimalFileByID.EnableControls;
       except
-         ResetAnimalGridColumns;
-         RestoreAnimalGridView;
+         on e : Exception do
+            begin
+               //ResetAnimalGridColumns;
+               //RestoreAnimalGridView;
+            end;
       end;
 
       FocusAnimalOnMainGrid(CurrAnimal);
@@ -16555,6 +16567,7 @@ begin
       for j := 0 to cxAnimalGridView.ColumnCount-1 do
          if ( cxAnimalGridView.Columns[j].Name = CurrGridView.Columns[i].Name ) then
             cxAnimalGridView.Columns[j].Visible := CurrGridView.Columns[i].Visible;
+   StoreAnimalGridView;         
 end;
 
 procedure TMenuForm.actCalvingHelpExecute(Sender: TObject);
@@ -16735,6 +16748,125 @@ begin
                Open;
                if ( RecordCount > 0 ) and ( Fields[0].AsFloat > 0 ) then
                   AText := FormatFloat('0.00',Fields[0].AsFloat);
+            except
+               on e : Exception do
+                  ShowDebugMessage(e.Message);
+            end;
+         finally
+            Free;
+         end;
+end;
+
+procedure TMenuForm.cxAnimalGridViewPrintAvgPurchWeight(
+  Sender: TcxDataSummaryItem; const AValue: Variant; AIsFooter: Boolean;
+  var AText: String);
+begin
+   AText := '';
+   if ( WinData.AnimalFileByID <> nil ) and ( WinData.AnimalFileByID.Active ) and ( WinData.AnimalFileByID.RecordCount > 0 ) then
+      with TQuery.Create(nil) do
+         try
+            DatabaseName := AliasName;
+            SQL.Clear;
+            SQL.Add('SELECT AVG(P.Weight)');
+            SQL.Add('FROM Purchases P');
+            SQL.Add('WHERE P.Weight > 0');
+            SQL.Add('AND P.EventId IN (SELECT ID');
+            SQL.Add('                  FROM Events');
+            SQL.Add('                  WHERE EventType = 12');
+            SQL.Add('                  AND AnimalID IN (SELECT AID FROM AFilters))');
+            try
+               Open;
+               if ( RecordCount > 0 ) and ( Fields[0].AsFloat > 0 ) then
+                  AText := FormatFloat('0.00',Fields[0].AsFloat);
+            except
+               on e : Exception do
+                  ShowDebugMessage(e.Message);
+            end;
+         finally
+            Free;
+         end;
+end;
+
+procedure TMenuForm.cxAnimalGridViewPrintAvgPurchPrice(
+  Sender: TcxDataSummaryItem; const AValue: Variant; AIsFooter: Boolean;
+  var AText: String);
+begin
+   AText := '';
+   if ( WinData.AnimalFileByID <> nil ) and ( WinData.AnimalFileByID.Active ) and ( WinData.AnimalFileByID.RecordCount > 0 ) then
+      with TQuery.Create(nil) do
+         try
+            DatabaseName := AliasName;
+            SQL.Clear;
+            SQL.Add('SELECT AVG(P.Price)');
+            SQL.Add('FROM Purchases P');
+            SQL.Add('WHERE P.Price > 0');
+            SQL.Add('AND P.EventId IN (SELECT ID');
+            SQL.Add('                  FROM Events');
+            SQL.Add('                  WHERE EventType = 12');
+            SQL.Add('                  AND AnimalID IN (SELECT AID FROM AFilters))');
+            try
+               Open;
+               if ( RecordCount > 0 ) and ( Fields[0].AsFloat > 0 ) then
+                  AText := FormatFloat('0.00',Fields[0].AsFloat);
+            except
+               on e : Exception do
+                  ShowDebugMessage(e.Message);
+            end;
+         finally
+            Free;
+         end;
+end;
+
+procedure TMenuForm.cxAnimalGridViewPrintAvgDaysOnFarm(
+  Sender: TcxDataSummaryItem; const AValue: Variant; AIsFooter: Boolean;
+  var AText: String);
+var
+   dEntryDate,
+   dDateOfBirth,
+   dPurchDate,
+   dSaleDate : TDateTime;
+   iAnimalCount,
+   iTotDaysOnFarm,
+   iDaysBetween : Integer;
+begin
+   AText := '';
+   if ( WinData.AnimalFileByID <> nil ) and ( WinData.AnimalFileByID.Active ) and ( WinData.AnimalFileByID.RecordCount > 0 ) then
+      with TQuery.Create(nil) do
+         try
+            DatabaseName := AliasName;
+            SQL.Clear;
+            SQL.Add('SELECT AF.AId, A.DateOfBirth ,PE.EventDate PurchDate, SE.EventDate SaleDate');
+            SQL.Add('FROM AFilters AF');
+            SQL.Add('LEFT JOIN Events PE ON ((PE.AnimalId = AF.AId) AND (PE.EventType = 12))');
+            SQL.Add('LEFT JOIN Events SE ON ((SE.AnimalId = AF.AId) AND (SE.EventType = 11))');
+            SQL.Add('INNER JOIN Animals A ON (A.Id = AF.AId)');
+            try
+               Open;
+               First;
+               iAnimalCount := 0;
+               iTotDaysOnFarm := 0;
+               while ( not(Eof) ) do
+                  begin
+                     dEntryDate := 0;
+                     dDateOfBirth := 0;
+                     dPurchDate := 0;
+                     dSaleDate := 0;
+                     dDateOfBirth := FieldByName('DateOfBirth').AsDateTime;
+                     dPurchDate := FieldByName('PurchDate').AsDateTime;
+                     dSaleDate := FieldByName('SaleDate').AsDateTime;
+                     if ( dPurchDate > 0 ) then
+                        dEntryDate := dPurchDate
+                     else
+                        dEntryDate := dDateOfBirth;
+                     if ( dSaleDate > 0 ) and ( dSaleDate > dEntryDate ) then
+                        iTotDaysOnFarm := iTotDaysOnFarm + Trunc(dSaleDate - dEntryDate)
+                     else if ( dSaleDate = 0 ) and ( Date > dEntryDate ) then
+                        iTotDaysOnFarm := iTotDaysOnFarm + Trunc(Date - dEntryDate);
+                     Inc(iAnimalCount);
+                     Next;
+                  end;
+               if ( iTotDaysOnFarm > 0 ) and ( iAnimalCount > 0 ) then
+                  AText := FormatFloat('0',(iTotDaysOnFarm/iAnimalCount));
             except
                on e : Exception do
                   ShowDebugMessage(e.Message);

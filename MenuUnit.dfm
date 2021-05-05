@@ -1396,7 +1396,7 @@ object MenuForm: TMenuForm
             item
               Format = '0.00'
               Kind = skAverage
-              OnGetText = cxAnimalGridViewPrintSummaryText
+              OnGetText = cxAnimalGridViewPrintAvgDaysOnFarm
               Column = cxAnimalGridViewDaysOnFarm
             end
             item
@@ -1408,7 +1408,7 @@ object MenuForm: TMenuForm
             item
               Format = '0.00'
               Kind = skAverage
-              OnGetText = cxAnimalGridViewPrintSummaryText
+              OnGetText = cxAnimalGridViewPrintAvgPurchPrice
               Column = cxAnimalGridViewPurchPrice
             end
             item
@@ -1420,7 +1420,7 @@ object MenuForm: TMenuForm
             item
               Format = '0.00'
               Kind = skAverage
-              OnGetText = cxAnimalGridViewPrintSummaryText
+              OnGetText = cxAnimalGridViewPrintAvgPurchWeight
               Column = cxAnimalGridViewPurchWeight
             end
             item
@@ -12209,7 +12209,7 @@ object MenuForm: TMenuForm
       PrinterPage.PageSize.Y = 297000
       PrinterPage._dxMeasurementUnits_ = 0
       PrinterPage._dxLastMU_ = 2
-      ReportDocument.CreationDate = 44321.4962054977
+      ReportDocument.CreationDate = 44321.7017033681
       OptionsOnEveryPage.Footers = False
       OptionsOnEveryPage.FilterBar = False
       OptionsPreview.Visible = False
