@@ -1,3 +1,12 @@
+Version V6.0 R1.0
+
+30/04/21 /MK Bug Fix - DairyData - GroupsBeforeDelete - Noticed with Ben Charmley that a zero GroupId was added to the DeletedGrps table.
+             Additional Feature - DairyData - GetEventLookupData/AnimalFileByIDBeforeOpen - Added PricePerKg to MDGridSaleData so it will appear on main grid.
+05/05/21 /MK Additional Feature - DairyData - GetEventLookupData/AnimalFileByIDBeforeOpen - Added ColdDeadWt to MDGridSaleData so it will appear on main grid.
+                                - MenuUnit - Added the Sale Dead Weight column.
+                                           - Added summary for new Sale Price, Sale Dead Weight, Purchase Weight, Purchase Price,
+                                             Days on Farm and Price Per Kg.
+
 Version V6.0 R0.3
 
 29/04/21 /MK Change - uHerdLookup - CreateMDPureBredBreedData - Changed this table to include all pure bred breeds regardless if they are in use or not - GL/Alan McCormick.

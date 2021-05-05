@@ -1422,6 +1422,13 @@ object MenuForm: TMenuForm
               Kind = skAverage
               OnGetText = cxAnimalGridViewPrintSummaryText
               Column = cxAnimalGridViewPurchWeight
+            end
+            item
+              Format = '0.00'
+              Kind = skAverage
+              OnGetText = cxAnimalGridViewPrintColdDeadWt
+              FieldName = 'ColdDeadWt'
+              Column = cxAnimalGridViewColdDeadWt
             end>
           DataController.Summary.SummaryGroups = <>
           Filtering.MRUItemsList = False
@@ -1794,6 +1801,8 @@ object MenuForm: TMenuForm
           object cxAnimalGridViewPurchWeight: TcxGridDBColumn
             Caption = 'Purchase Weight'
             DataBinding.FieldName = 'PurchWeight'
+            PropertiesClassName = 'TcxCurrencyEditProperties'
+            Properties.DisplayFormat = '0.00'
             Visible = False
             HeaderAlignmentVert = vaCenter
             Options.Editing = False
@@ -2045,6 +2054,7 @@ object MenuForm: TMenuForm
           object cxAnimalGridViewPurchCommission: TcxGridDBColumn
             Caption = 'Purchase Commission'
             DataBinding.FieldName = 'SupplierComm'
+            PropertiesClassName = 'TcxCurrencyEditProperties'
             HeaderAlignmentVert = vaCenter
             Options.Editing = False
             Options.Filtering = False
@@ -2055,6 +2065,7 @@ object MenuForm: TMenuForm
           object cxAnimalGridViewPurchTransport: TcxGridDBColumn
             Caption = 'Purchase Transport'
             DataBinding.FieldName = 'SupplierHaul'
+            PropertiesClassName = 'TcxCurrencyEditProperties'
             HeaderAlignmentVert = vaCenter
             Options.Editing = False
             Options.Filtering = False
@@ -2074,6 +2085,8 @@ object MenuForm: TMenuForm
           object cxAnimalGridViewSaleCosts: TcxGridDBColumn
             Caption = 'Sale Costs'
             DataBinding.FieldName = 'SaleCosts'
+            PropertiesClassName = 'TcxCurrencyEditProperties'
+            Properties.DisplayFormat = '#.##'
             HeaderAlignmentVert = vaCenter
             Options.Editing = False
             Options.Filtering = False
@@ -2091,6 +2104,16 @@ object MenuForm: TMenuForm
             Options.Filtering = False
             Options.Focusing = False
             Width = 72
+          end
+          object cxAnimalGridViewColdDeadWt: TcxGridDBColumn
+            Caption = 'Sale Dead Weight'
+            DataBinding.FieldName = 'ColdDeadWt'
+            PropertiesClassName = 'TcxCurrencyEditProperties'
+            Properties.DisplayFormat = '0.00'
+            Options.Editing = False
+            Options.Filtering = False
+            Options.FilteringMRUItemsList = False
+            Width = 80
           end
         end
         object cxAnimalGridLevel: TcxGridLevel
@@ -12186,7 +12209,7 @@ object MenuForm: TMenuForm
       PrinterPage.PageSize.Y = 297000
       PrinterPage._dxMeasurementUnits_ = 0
       PrinterPage._dxLastMU_ = 2
-      ReportDocument.CreationDate = 44320.7306971528
+      ReportDocument.CreationDate = 44321.4962054977
       OptionsOnEveryPage.Footers = False
       OptionsOnEveryPage.FilterBar = False
       OptionsPreview.Visible = False

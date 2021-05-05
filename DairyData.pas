@@ -1015,7 +1015,9 @@ unit DairyData;
  09/02/21 [V5.9 R8.3] /MK Change - CheckFiles - Set all vaccination events that have a report in days of a week or more as modified so they up to the server again with the report in days - SP request.
 
  30/04/21 [V6.0 R1.0] /MK Bug Fix - GroupsBeforeDelete - Noticed with Ben Charmley that a zero GroupId was added to the DeletedGrps table.
-                          Additional Feature - Added PricePerKg to MDGridSaleData so it will appear on main grid.
+                          Additional Feature - GetEventLookupData/AnimalFileByIDBeforeOpen - Added PricePerKg to MDGridSaleData so it will appear on main grid.
+
+ 05/05/21 [V6.0 R1.0] /MK Additional Feature - GetEventLookupData/AnimalFileByIDBeforeOpen - Added ColdDeadWt to MDGridSaleData so it will appear on main grid.
 }
 
 interface
@@ -24331,6 +24333,7 @@ begin
                      CreateMemDataFieldDef(MDGridSaleData, 'SalePrice', ftFloat);
                      CreateMemDataFieldDef(MDGridSaleData, 'SaleCosts', ftFloat);
                      CreateMemDataFieldDef(MDGridSaleData, 'PricePerKg', ftFloat);
+                     CreateMemDataFieldDef(MDGridSaleData, 'ColdDeadWt', ftFloat);
                      MDGridSaleData.Active := True;
                      QGridSaleData.First;
                      while ( not(QGridSaleData.Eof) ) do
@@ -24345,6 +24348,7 @@ begin
                               MDGridSaleData.FieldByName('PricePerKg').AsFloat := ( QGridSaleData.FieldByName('SalePrice').AsFloat / QGridSaleData.FieldByName('ColdDeadWt').AsFloat )
                            else if ( QGridSaleData.FieldByName('SalePrice').AsFloat > 0 ) and ( QGridSaleData.FieldByName('Weight').AsFloat > 0 ) then
                               MDGridSaleData.FieldByName('PricePerKg').AsFloat := ( QGridSaleData.FieldByName('SalePrice').AsFloat / QGridSaleData.FieldByName('Weight').AsFloat );
+                           MDGridSaleData.FieldByName('ColdDeadWt').AsFloat := QGridSaleData.FieldByName('ColdDeadWt').AsFloat;
                            MDGridSaleData.Post;
 
                            QGridSaleData.Next;
@@ -25198,6 +25202,21 @@ begin
             end;
 
          sFieldName := 'PricePerKg';
+         if AnimalFileByID.FindField(sFieldName) = nil then
+            begin
+               with TStringField.Create(nil) do
+                  begin
+                     FieldName := sFieldName;
+                     FieldKind := fkLookup;
+                     LookupDataSet := MDGridSaleData;
+                     KeyFields := sKeyField;
+                     LookupKeyFields := sLookupKeyField;
+                     LookupResultField := sFieldName;
+                     Dataset := AnimalFileByID;
+                  end;
+            end;
+
+         sFieldName := 'ColdDeadWt';
          if AnimalFileByID.FindField(sFieldName) = nil then
             begin
                with TStringField.Create(nil) do
