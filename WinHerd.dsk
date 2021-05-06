@@ -1,5 +1,5 @@
 [Closed Files]
-File_0=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\MenuUnit.pas',0,1,4773,1,4794,0,0
+File_0=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\MenuUnit.pas',0,1,4773,1,4787,0,0
 File_1=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\GenTypesConst.pas',0,1,31,21,66,0,0
 File_2=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Changes.txt',0,1,1,1,1,0,0
 File_3=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uCTSBirthReg.pas',0,1,1,1,37,1,0
@@ -59,8 +59,8 @@ BottomPanelData=0000040000000000BD06000000000000028C000000000000000100000000BD06
 
 [View0]
 Module=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.dpr
-CursorX=1
-CursorY=1
+CursorX=17
+CursorY=16
 TopLine=1
 LeftCol=1
 
@@ -153,7 +153,7 @@ Dockable=1
 SplitPos=85
 ArrangeBy=Name
 SelectedItem=Name
-ExpandedItems=DataBinding,Font.Style,LookAndFeel,OptionsView,Properties.ValueChecked,Properties.ValueGrayed,Properties.ValueUnchecked
+ExpandedItems=DataBinding,Font.Style,LookAndFeel,OptionsView,Properties,Properties.ValueChecked,Properties.ValueGrayed,Properties.ValueUnchecked
 HiddenCategories=Legacy
 ShowStatusBar=1
 
@@ -302,7 +302,7 @@ Dockable=1
 
 [MessageView@EditWindow0]
 Create=1
-Visible=0
+Visible=1
 State=0
 Left=0
 Top=0
@@ -336,7 +336,7 @@ TBDockHeight=140
 LRDockWidth=1027
 Dockable=1
 TabPosition=0
-ActiveTab=Call Stack
+ActiveTab=Messages
 TabDockClients=BreakpointWindow,WatchWindow,DebugLogView,LocalVarsWindow,ModuleWindow,CallStackWindow,MessageView@EditWindow0
 
 [DockSite1]
