@@ -1013,6 +1013,13 @@ unit DairyData;
  22/01/21 [V5.9 R8.0] /MK Bug Fix - qHerdVaccineReminders & qHerdDosageReminders - Changed SQL to exclude events that don't have a ReportInDays.
 
  09/02/21 [V5.9 R8.3] /MK Change - CheckFiles - Set all vaccination events that have a report in days of a week or more as modified so they up to the server again with the report in days - SP request.
+
+ 30/04/21 [V6.0 R1.0] /MK Bug Fix - GroupsBeforeDelete - Noticed with Ben Charmley that a zero GroupId was added to the DeletedGrps table.
+                          Additional Feature - GetEventLookupData/AnimalFileByIDBeforeOpen - Added PricePerKg to MDGridSaleData so it will appear on main grid.
+
+ 05/05/21 [V6.0 R1.0] /MK Additional Feature - GetEventLookupData/AnimalFileByIDBeforeOpen - Added ColdDeadWt to MDGridSaleData so it will appear on main grid.
+
+ 06/05/21 [V6.0 R1.0] /MK Additional Feature - GetEventLookupData/AnimalFileByIDBeforeOpen - Added Grade to MDGridSaleData so it will appear on main grid.
 }
 
 interface
@@ -14731,20 +14738,24 @@ begin
 
    //   10/10/17 [V5.7 R3.8] /MK Change - If a group is deleted we need to store it so that it can be deleted from the server.
    //   05/11/18 [V5.8 R4.5] /MK Change - Insert date deleted and IsSynchronized values to newly added fields in DeletedGrps table.
-   GenQuery.SQL.Clear;
-   GenQuery.SQL.Add('INSERT INTO '+DeletedGrps.TableName+' (GroupID, DateDeleted, IsSynchronized)');
-   GenQuery.SQL.Add('VALUES (:GroupID, :DateDeleted, False)');
-   GenQuery.Params[0].AsInteger := DataSet.FieldByName('ID').AsInteger;
-   GenQuery.Params[1].AsDateTime := Date;
-   try
-      GenQuery.ExecSQL;
-   except
-      on e : Exception do
-         begin
-            ApplicationLog.LogException(e);
-            ApplicationLog.LogError(Format('Error deleting GroupID %d',[DataSet.FieldByName('ID').AsInteger]));
+   //   30/04/21 [V6.0 R1.0] /MK Bug Fix - Noticed with Ben Charmley that a zero GroupId was added to the DeletedGrps table.
+   if ( DataSet.FieldByName('ID').AsInteger > 0 ) then
+      begin
+         GenQuery.SQL.Clear;
+         GenQuery.SQL.Add('INSERT INTO '+DeletedGrps.TableName+' (GroupID, DateDeleted, IsSynchronized)');
+         GenQuery.SQL.Add('VALUES (:GroupID, :DateDeleted, False)');
+         GenQuery.Params[0].AsInteger := DataSet.FieldByName('ID').AsInteger;
+         GenQuery.Params[1].AsDateTime := Date;
+         try
+            GenQuery.ExecSQL;
+         except
+            on e : Exception do
+               begin
+                  ApplicationLog.LogException(e);
+                  ApplicationLog.LogError(Format('Error deleting GroupID %d',[DataSet.FieldByName('ID').AsInteger]));
+               end;
          end;
-   end;
+      end;
 end;
 
 procedure TWinData.GroupsNewRecord(DataSet: TDataSet);
@@ -22760,7 +22771,7 @@ begin
                if ( AnimalFileByID.FindField('PurchDate') = nil ) then Exit;
                if ( AnimalFileByID.FieldByName('PurchDate').AsDateTime > 0 ) and ( AnimalFileByID.FieldByName('SaleDate').AsDateTime = 0 ) then
                   begin
-                     PurchDate   := AnimalFileByID.FieldByName('PurchDate').AsDateTime;
+                     PurchDate := AnimalFileByID.FieldByName('PurchDate').AsDateTime;
                      {
                      PurchNoDays := AnimalFileByID.FieldByName('PurchFQASDays').AsInteger;
 
@@ -24310,7 +24321,8 @@ begin
                   try
                      DatabaseName := AliasName;
                      SQL.Clear;
-                     SQL.Add(' SELECT SE.AnimalID AnimalID, SE.EventDate SaleDate, C.Name CustomerName, S.Price SalePrice, S.CustomerCosts, S.TotalDeductions');
+                     SQL.Add(' SELECT SE.AnimalID AnimalID, SE.EventDate SaleDate, C.Name CustomerName, S.Price SalePrice,');
+                     SQL.Add('        S.CustomerCosts, S.TotalDeductions, S.ColdDeadWt, S.Grade');
                      SQL.Add(' FROM Events SE');
                      SQL.Add(' Left Join SalesDeaths S ON (S.EventID = SE.ID)');
                      SQL.Add(' Left Join Customers C On (C.ID = S.Customer)');
@@ -24322,6 +24334,9 @@ begin
                      CreateMemDataFieldDef(MDGridSaleData, 'CustomerName', ftString, 50);
                      CreateMemDataFieldDef(MDGridSaleData, 'SalePrice', ftFloat);
                      CreateMemDataFieldDef(MDGridSaleData, 'SaleCosts', ftFloat);
+                     CreateMemDataFieldDef(MDGridSaleData, 'PricePerKg', ftFloat);
+                     CreateMemDataFieldDef(MDGridSaleData, 'ColdDeadWt', ftFloat);
+                     CreateMemDataFieldDef(MDGridSaleData, 'Grade', ftString, 15);
                      MDGridSaleData.Active := True;
                      QGridSaleData.First;
                      while ( not(QGridSaleData.Eof) ) do
@@ -24331,7 +24346,11 @@ begin
                            MDGridSaleData.FieldByName('SaleDate').AsDateTime := QGridSaleData.FieldByName('SaleDate').AsDateTime;
                            MDGridSaleData.FieldByName('CustomerName').AsString := QGridSaleData.FieldByName('CustomerName').AsString;
                            MDGridSaleData.FieldByName('SalePrice').AsFloat := QGridSaleData.FieldByName('SalePrice').AsFloat;
-                           MDGridSaleData.FieldByName('SaleCosts').AsFloat := QGridSaleData.FieldByName('CustomerCosts').AsFloat + QGridSaleData.FieldByName('TotalDeductions').AsFloat;
+                           MDGridSaleData.FieldByName('SaleCosts').AsFloat := ( QGridSaleData.FieldByName('CustomerCosts').AsFloat + QGridSaleData.FieldByName('TotalDeductions').AsFloat );
+                           MDGridSaleData.FieldByName('ColdDeadWt').AsFloat := QGridSaleData.FieldByName('ColdDeadWt').AsFloat;
+                           MDGridSaleData.FieldByName('Grade').AsString := QGridSaleData.FieldByName('Grade').AsString;
+                           if ( QGridSaleData.FieldByName('SalePrice').AsFloat > 0 ) and ( QGridSaleData.FieldByName('ColdDeadWt').AsFloat > 0 ) then
+                              MDGridSaleData.FieldByName('PricePerKg').AsFloat := ( QGridSaleData.FieldByName('SalePrice').AsFloat / QGridSaleData.FieldByName('ColdDeadWt').AsFloat );
                            MDGridSaleData.Post;
 
                            QGridSaleData.Next;
@@ -25170,6 +25189,51 @@ begin
             end;
 
          sFieldName := 'SaleCosts';
+         if AnimalFileByID.FindField(sFieldName) = nil then
+            begin
+               with TStringField.Create(nil) do
+                  begin
+                     FieldName := sFieldName;
+                     FieldKind := fkLookup;
+                     LookupDataSet := MDGridSaleData;
+                     KeyFields := sKeyField;
+                     LookupKeyFields := sLookupKeyField;
+                     LookupResultField := sFieldName;
+                     Dataset := AnimalFileByID;
+                  end;
+            end;
+
+         sFieldName := 'PricePerKg';
+         if AnimalFileByID.FindField(sFieldName) = nil then
+            begin
+               with TStringField.Create(nil) do
+                  begin
+                     FieldName := sFieldName;
+                     FieldKind := fkLookup;
+                     LookupDataSet := MDGridSaleData;
+                     KeyFields := sKeyField;
+                     LookupKeyFields := sLookupKeyField;
+                     LookupResultField := sFieldName;
+                     Dataset := AnimalFileByID;
+                  end;
+            end;
+
+         sFieldName := 'ColdDeadWt';
+         if AnimalFileByID.FindField(sFieldName) = nil then
+            begin
+               with TStringField.Create(nil) do
+                  begin
+                     FieldName := sFieldName;
+                     FieldKind := fkLookup;
+                     LookupDataSet := MDGridSaleData;
+                     KeyFields := sKeyField;
+                     LookupKeyFields := sLookupKeyField;
+                     LookupResultField := sFieldName;
+                     Dataset := AnimalFileByID;
+                  end;
+            end;
+
+         sFieldName := 'Grade';
          if AnimalFileByID.FindField(sFieldName) = nil then
             begin
                with TStringField.Create(nil) do

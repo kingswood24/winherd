@@ -1380,6 +1380,7 @@ object MenuForm: TMenuForm
           DataController.Summary.FooterSummaryItems = <
             item
               Kind = skCount
+              OnGetText = cxAnimalGridViewPrintTotalAmountCount
               Column = cxAnimalGridViewSortAnimalNo
             end
             item
@@ -1391,6 +1392,30 @@ object MenuForm: TMenuForm
             item
               Kind = skAverage
               Column = cxAnimalGridViewDaysInMilk
+            end
+            item
+              OnGetText = cxAnimalGridViewPrintColdDeadWt
+              Column = cxAnimalGridViewColdDeadWt
+            end
+            item
+              OnGetText = cxAnimalGridViewPrintAvgPricePerKg
+              Column = cxAnimalGridViewPricePerKg
+            end
+            item
+              OnGetText = cxAnimalGridViewPrintAvgSalePrice
+              Column = cxAnimalGridViewSalePrice
+            end
+            item
+              OnGetText = cxAnimalGridViewPrintAvgDaysOnFarm
+              Column = cxAnimalGridViewDaysOnFarm
+            end
+            item
+              OnGetText = cxAnimalGridViewPrintAvgPurchPrice
+              Column = cxAnimalGridViewPurchPrice
+            end
+            item
+              OnGetText = cxAnimalGridViewPrintAvgPurchWeight
+              Column = cxAnimalGridViewPurchWeight
             end>
           DataController.Summary.SummaryGroups = <>
           Filtering.MRUItemsList = False
@@ -2006,6 +2031,8 @@ object MenuForm: TMenuForm
             Options.Editing = False
             Options.Filtering = False
             Options.FilteringMRUItemsList = False
+            Options.Focusing = False
+            Options.Grouping = False
             Width = 60
           end
           object cxAnimalGridViewPurchCommission: TcxGridDBColumn
@@ -2014,6 +2041,7 @@ object MenuForm: TMenuForm
             HeaderAlignmentVert = vaCenter
             Options.Editing = False
             Options.Filtering = False
+            Options.Focusing = False
             Options.Grouping = False
             Width = 94
           end
@@ -2023,6 +2051,7 @@ object MenuForm: TMenuForm
             HeaderAlignmentVert = vaCenter
             Options.Editing = False
             Options.Filtering = False
+            Options.Focusing = False
             Options.Grouping = False
             Width = 82
           end
@@ -2032,6 +2061,7 @@ object MenuForm: TMenuForm
             HeaderAlignmentVert = vaCenter
             Options.Editing = False
             Options.Filtering = False
+            Options.Focusing = False
             Options.Grouping = False
             Width = 70
           end
@@ -2041,7 +2071,35 @@ object MenuForm: TMenuForm
             HeaderAlignmentVert = vaCenter
             Options.Editing = False
             Options.Filtering = False
+            Options.Focusing = False
             Options.Grouping = False
+            Width = 70
+          end
+          object cxAnimalGridViewPricePerKg: TcxGridDBColumn
+            Caption = 'Price Per Kg'
+            DataBinding.FieldName = 'PricePerKg'
+            PropertiesClassName = 'TcxCurrencyEditProperties'
+            Properties.DisplayFormat = '0.00'
+            HeaderAlignmentVert = vaCenter
+            Options.Editing = False
+            Options.Filtering = False
+            Options.Focusing = False
+            Width = 72
+          end
+          object cxAnimalGridViewColdDeadWt: TcxGridDBColumn
+            Caption = 'Sale Dead Weight'
+            DataBinding.FieldName = 'ColdDeadWt'
+            Options.Editing = False
+            Options.Filtering = False
+            Options.Focusing = False
+            Width = 80
+          end
+          object cxAnimalGridViewSalesGrade: TcxGridDBColumn
+            Caption = 'Sales Grade'
+            DataBinding.FieldName = 'Grade'
+            Options.Editing = False
+            Options.Filtering = False
+            Options.Focusing = False
             Width = 70
           end
         end
@@ -12138,7 +12196,7 @@ object MenuForm: TMenuForm
       PrinterPage.PageSize.Y = 297000
       PrinterPage._dxMeasurementUnits_ = 0
       PrinterPage._dxLastMU_ = 2
-      ReportDocument.CreationDate = 44287.718255463
+      ReportDocument.CreationDate = 44322.7139243056
       OptionsOnEveryPage.Footers = False
       OptionsOnEveryPage.FilterBar = False
       OptionsPreview.Visible = False
