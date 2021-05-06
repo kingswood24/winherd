@@ -16645,9 +16645,6 @@ end;
 procedure TMenuForm.cxAnimalGridViewPrintAvgPricePerKg(
   Sender: TcxDataSummaryItem; const AValue: Variant; AIsFooter: Boolean;
   var AText: String);
-var
-   iAnimalCount : Integer;
-   fTotalWeight, fTotalPrice : Double;
 begin
    AText := '';
    if ( WinData.AnimalFileByID <> nil ) and ( WinData.AnimalFileByID.Active ) and ( WinData.AnimalFileByID.RecordCount > 0 ) then
@@ -16655,30 +16652,19 @@ begin
          try
             DatabaseName := AliasName;
             SQL.Clear;
-            SQL.Add('SELECT A.AId, S.Price, S.ColdDeadWt');
-            SQL.Add('FROM AFilters A');
-            SQL.Add('LEFT JOIN Events E ON ((E.AnimalId = A.AId) AND (E.EventType = 11))');
-            SQL.Add('INNER JOIN SalesDeaths S ON (S.EventId = E.Id)');
+            SQL.Add('SELECT AVG(S.Price), AVG(S.ColdDeadWt)');
+            SQL.Add('FROM SalesDeaths S');
+            SQL.Add('WHERE ((S.Price > 0) AND (S.ColdDeadWt > 0))');
+            SQL.Add('AND S.EventId IN (SELECT ID');
+            SQL.Add('                  FROM Events');
+            SQL.Add('                  WHERE EventType = 11');
+            SQL.Add('                  AND AnimalID IN (SELECT AID FROM AFilters))');
             try
                Open;
                if ( RecordCount > 0 ) then
                   begin
-                     First;
-                     iAnimalCount := 0;
-                     fTotalWeight := 0;
-                     fTotalPrice := 0;
-                     while ( not(Eof) ) do
-                        begin
-                           if ( FieldByName('Price').AsFloat > 0 ) and ( FieldByName('ColdDeadWt').AsFloat > 0 ) then
-                              begin
-                                 Inc(iAnimalCount);
-                                 fTotalWeight := fTotalWeight + FieldByName('ColdDeadWt').AsFloat;
-                                 fTotalPrice := fTotalPrice + FieldByName('Price').AsFloat;
-                              end;
-                           Next;
-                        end;
-                     if ( iAnimalCount > 0 ) and ( fTotalPrice > 0 ) and ( fTotalWeight > 0 ) then
-                        AText := FormatFloat('#.00',fTotalPrice/fTotalWeight);
+                     if ( Fields[0].AsFloat > 0 ) and ( Fields[1].AsFloat > 0 ) then
+                        AText := FormatFloat('#.00',Fields[0].AsFloat/Fields[1].AsFloat);
                   end;
             except
                on e : Exception do
