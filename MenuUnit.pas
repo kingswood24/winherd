@@ -4784,6 +4784,15 @@ begin
          btnAIMMovementEnq.Kind := cxbkStandard;
       end;
 
+   cxAnimalGridViewPricePerKg.Hidden := True;
+   cxAnimalGridViewPricePerKg.Visible := False;
+
+   cxAnimalGridViewColdDeadWt.Hidden := True;
+   cxAnimalGridViewColdDeadWt.Visible := False;
+
+   cxAnimalGridViewSalesGrade.Hidden := True;
+   cxAnimalGridViewSalesGrade.Visible := False;
+
    if ( WinData.GlobalSettings.DisplayMovementFeedColsInGridView ) and ( FSelectedHerdType = htBeef ) then
       begin
          GetRegValue(Reg_DefaultPath + 'Misc\' + DataDir + '\' + 'ResetBeefGridCols', 'Reset', ResetBeefCols );
