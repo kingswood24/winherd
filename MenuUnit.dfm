@@ -1807,7 +1807,6 @@ object MenuForm: TMenuForm
             Visible = False
             HeaderAlignmentVert = vaCenter
             Options.Editing = False
-            Options.Filtering = False
             Width = 110
           end
           object cxAnimalGridViewLotNumber: TcxGridDBColumn
@@ -1816,7 +1815,6 @@ object MenuForm: TMenuForm
             Visible = False
             HeaderAlignmentVert = vaCenter
             Options.Editing = False
-            Options.Filtering = False
             Width = 90
           end
           object cxAnimalGridViewPurchFQAS: TcxGridDBColumn
@@ -1853,7 +1851,6 @@ object MenuForm: TMenuForm
             Visible = False
             HeaderAlignmentVert = vaCenter
             Options.Editing = False
-            Options.Filtering = False
             Width = 110
           end
           object cxAnimalGridViewFeedGrpDesc: TcxGridDBColumn
@@ -12196,7 +12193,7 @@ object MenuForm: TMenuForm
       PrinterPage.PageSize.Y = 297000
       PrinterPage._dxMeasurementUnits_ = 0
       PrinterPage._dxLastMU_ = 2
-      ReportDocument.CreationDate = 44322.7616539931
+      ReportDocument.CreationDate = 44323.5144339699
       OptionsOnEveryPage.Footers = False
       OptionsOnEveryPage.FilterBar = False
       OptionsPreview.Visible = False
