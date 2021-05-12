@@ -28,10 +28,6 @@ FormOnTop=0
 FormState=0
 FormOnTop=0
 
-[C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uImageStore.pas]
-FormState=0
-FormOnTop=0
-
 [EditWindow0]
 ViewCount=1
 CurrentView=0
@@ -54,8 +50,8 @@ LeftPanelClients=CodeExplorer@EditWindow0
 LeftPanelData=00000400010000000C000000436F64654578706C6F7265720000000000000000000000000000000000FFFFFFFF
 RightPanelSize=0
 BottomPanelSize=140
-BottomPanelClients=DockSite1
-BottomPanelData=0000040000000000BD06000000000000028C000000000000000100000000BD06000009000000446F636B5369746531FFFFFFFF
+BottomPanelClients=DockSite0
+BottomPanelData=0000040000000000BD06000000000000028C000000000000000100000000BD06000009000000446F636B5369746530FFFFFFFF
 
 [View0]
 Module=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.dpr
@@ -152,7 +148,7 @@ LRDockWidth=219
 Dockable=1
 SplitPos=85
 ArrangeBy=Name
-SelectedItem=Caption
+SelectedItem=
 ExpandedItems=DataBinding,Font.Style,LookAndFeel,OptionsView,Properties,Properties.ValueChecked,Properties.ValueGrayed,Properties.ValueUnchecked
 HiddenCategories=Legacy
 ShowStatusBar=1
@@ -306,13 +302,13 @@ Visible=0
 State=0
 Left=0
 Top=0
-Width=1705
+Width=1689
 Height=111
 MaxLeft=-1
 MaxTop=-1
-ClientWidth=1705
+ClientWidth=1689
 ClientHeight=111
-TBDockHeight=111
+TBDockHeight=140
 LRDockWidth=443
 Dockable=1
 
@@ -320,26 +316,6 @@ Dockable=1
 DockHostCount=2
 
 [DockSite0]
-DockSiteType=1
-Create=1
-Visible=1
-State=0
-Left=0
-Top=107
-Width=193
-Height=944
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=185
-ClientHeight=913
-TBDockHeight=926
-LRDockWidth=219
-Dockable=1
-TabPosition=0
-ActiveTab=Project Manager
-TabDockClients=PropertyInspector,ProjectManager
-
-[DockSite1]
 DockSiteType=1
 Create=1
 Visible=1
@@ -358,4 +334,24 @@ Dockable=1
 TabPosition=0
 ActiveTab=Call Stack
 TabDockClients=BreakpointWindow,WatchWindow,DebugLogView,LocalVarsWindow,ModuleWindow,CallStackWindow,MessageView@EditWindow0
+
+[DockSite1]
+DockSiteType=1
+Create=1
+Visible=1
+State=0
+Left=0
+Top=107
+Width=193
+Height=944
+MaxLeft=-1
+MaxTop=-1
+ClientWidth=185
+ClientHeight=913
+TBDockHeight=926
+LRDockWidth=219
+Dockable=1
+TabPosition=0
+ActiveTab=Project Manager
+TabDockClients=PropertyInspector,ProjectManager
 

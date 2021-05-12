@@ -3147,7 +3147,8 @@ type
     MDGridCalvingDateData, MDGridServiceDateData, MDGridDryOffDateData,
     MDGridPregDiagDateData, MDGridBatchGroupData,
     MDGridJohnesResultData, MDGridStatusData,
-    MDGridCurrLactMilkData, MDGridA1A2ResultData : TdxMemData;
+    MDGridCurrLactMilkData, MDGridA1A2ResultData,
+    MDGridGrossMarginData : TdxMemData;
 
     FEventDataHelper : TEventDataHelper;
     FBreedingDataHelper : TBreedingDataHelper;
@@ -24239,6 +24240,11 @@ begin
                else
                   MDGridSaleData.Close;
 
+               if MDGridGrossMarginData = nil then
+                  MDGridGrossMarginData := TdxMemData.Create(nil)
+               else
+                  MDGridGrossMarginData.Close;
+
                QGridPurchData := TQuery.Create(nil);
                QGridPurchData.DatabaseName := AliasName;
                with QGridPurchData do
@@ -24357,6 +24363,11 @@ begin
                      Close;
                      Free;
                   end;
+
+               ClearMemDataFieldDefs(MDGridGrossMarginData);
+               CreateMemDataFieldDef(MDGridGrossMarginData,'AnimalId',ftInteger);
+               CreateMemDataFieldDef(MDGridGrossMarginData,'GrossMargin',ftFloat);
+               MDGridGrossMarginData.Active := True;
             end
          else
             begin
@@ -24369,6 +24380,11 @@ begin
                   begin
                      MDGridSaleData.Close;
                      FreeAndNil(MDGridSaleData);
+                  end;
+               if ( MDGridGrossMarginData <> nil ) then
+                  begin
+                     MDGridGrossMarginData.Close;
+                     FreeAndNil(MDGridGrossMarginData);
                   end;
             end;
       end;
@@ -25224,6 +25240,21 @@ begin
                      FieldName := sFieldName;
                      FieldKind := fkLookup;
                      LookupDataSet := MDGridSaleData;
+                     KeyFields := sKeyField;
+                     LookupKeyFields := sLookupKeyField;
+                     LookupResultField := sFieldName;
+                     Dataset := AnimalFileByID;
+                  end;
+            end;
+
+         sFieldName := 'GrossMargin';
+         if AnimalFileByID.FindField(sFieldName) = nil then
+            begin
+               with TStringField.Create(nil) do
+                  begin
+                     FieldName := sFieldName;
+                     FieldKind := fkLookup;
+                     LookupDataSet := MDGridGrossMarginData;
                      KeyFields := sKeyField;
                      LookupKeyFields := sLookupKeyField;
                      LookupResultField := sFieldName;

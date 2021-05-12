@@ -1,3 +1,7 @@
+Version V6.0 R1.1
+
+12/05/21 /MK Change - MenuUnit - SetUpForm - Moved btnRefreshAnimals button above the grid of animals - no need to disable it as all herds will use it eventually.
+
 Version V6.0 R1.0
 
 30/04/21 /MK Bug Fix - DairyData - GroupsBeforeDelete - Noticed with Ben Charmley that a zero GroupId was added to the DeletedGrps table.

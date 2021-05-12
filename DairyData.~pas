@@ -1015,7 +1015,9 @@ unit DairyData;
  09/02/21 [V5.9 R8.3] /MK Change - CheckFiles - Set all vaccination events that have a report in days of a week or more as modified so they up to the server again with the report in days - SP request.
 
  30/04/21 [V6.0 R1.0] /MK Bug Fix - GroupsBeforeDelete - Noticed with Ben Charmley that a zero GroupId was added to the DeletedGrps table.
-                          Additional Feature - Added PricePerKg to MDGridSaleData so it will appear on main grid.
+                          Additional Feature - GetEventLookupData/AnimalFileByIDBeforeOpen - Added PricePerKg to MDGridSaleData so it will appear on main grid.
+
+ 05/05/21 [V6.0 R1.0] /MK Additional Feature - GetEventLookupData/AnimalFileByIDBeforeOpen - Added ColdDeadWt to MDGridSaleData so it will appear on main grid.
 }
 
 interface
@@ -3145,7 +3147,8 @@ type
     MDGridCalvingDateData, MDGridServiceDateData, MDGridDryOffDateData,
     MDGridPregDiagDateData, MDGridBatchGroupData,
     MDGridJohnesResultData, MDGridStatusData,
-    MDGridCurrLactMilkData, MDGridA1A2ResultData : TdxMemData;
+    MDGridCurrLactMilkData, MDGridA1A2ResultData,
+    MDGridGrossMarginData : TdxMemData;
 
     FEventDataHelper : TEventDataHelper;
     FBreedingDataHelper : TBreedingDataHelper;
@@ -24237,6 +24240,11 @@ begin
                else
                   MDGridSaleData.Close;
 
+               if MDGridGrossMarginData = nil then
+                  MDGridGrossMarginData := TdxMemData.Create(nil)
+               else
+                  MDGridGrossMarginData.Close;
+
                QGridPurchData := TQuery.Create(nil);
                QGridPurchData.DatabaseName := AliasName;
                with QGridPurchData do
@@ -24355,6 +24363,10 @@ begin
                      Close;
                      Free;
                   end;
+
+               ClearMemDataFieldDefs(MDGridGrossMarginData);
+               CreateMemDataFieldDef(MDGridGrossMarginData,'AnimalId',ftInteger);
+               CreateMemDataFieldDef(MDGridGrossMarginData,'GrossMargin',ftFloat);
             end
          else
             begin
@@ -24367,6 +24379,11 @@ begin
                   begin
                      MDGridSaleData.Close;
                      FreeAndNil(MDGridSaleData);
+                  end;
+               if ( MDGridGrossMarginData <> nil ) then
+                  begin
+                     MDGridGrossMarginData.Close;
+                     FreeAndNil(MDGridGrossMarginData);
                   end;
             end;
       end;
@@ -25222,6 +25239,21 @@ begin
                      FieldName := sFieldName;
                      FieldKind := fkLookup;
                      LookupDataSet := MDGridSaleData;
+                     KeyFields := sKeyField;
+                     LookupKeyFields := sLookupKeyField;
+                     LookupResultField := sFieldName;
+                     Dataset := AnimalFileByID;
+                  end;
+            end;
+
+         sFieldName := 'GrossMargin';
+         if AnimalFileByID.FindField(sFieldName) = nil then
+            begin
+               with TStringField.Create(nil) do
+                  begin
+                     FieldName := sFieldName;
+                     FieldKind := fkLookup;
+                     LookupDataSet := MDGridGrossMarginData;
                      KeyFields := sKeyField;
                      LookupKeyFields := sLookupKeyField;
                      LookupResultField := sFieldName;
