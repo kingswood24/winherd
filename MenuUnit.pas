@@ -2652,6 +2652,9 @@ type
     procedure cxAnimalGridViewPrintAvgDaysOnFarm(
       Sender: TcxDataSummaryItem; const AValue: Variant;
       AIsFooter: Boolean; var AText: String);
+    procedure cxAnimalGridViewPrintAvgGrossMargin(
+      Sender: TcxDataSummaryItem; const AValue: Variant;
+      AIsFooter: Boolean; var AText: String);
   private
     { Private declarations }
     Reg : TRegistry;
@@ -11432,22 +11435,22 @@ begin
   try
       Update;
       begin
-       cxAnimalGridView.DataController.BeginFullUpdate;
-       WinData.AnimalFileByID.DisableControls;
-          try
-             WinData.AnimalFileByID.Active := False;
-             WinData.AnimalFileByID.SQL.Clear;
-             WinData.AnimalFileByID.SQL.Add('SELECT DISTINCT (A.ID), A.* FROM Animals A');
-             WinData.AnimalFileByID.SQL.Add('WHERE A.ID IN (SELECT E.AnimalID FROM Events E WHERE E.EventType = '+IntToStr(CSaleDeathEvent)+ ')');
-             WinData.AnimalFileByID.SQL.Add('AND (A.HerdID = ' + IntToStr(WinData.UserDefaultHerdID) + ')');
-             WinData.AnimalFileByID.SQL.Add('AND (A.AnimalDeleted=FALSE)');
-             ApplySortToAnimalFileByIdAndOpenQuery();
-             // Add query to fFilters.LeftHerdSQL so Filter can be applied on top of Animal Select filter.
-             fFilters.LeftHerdSQL := WinData.AnimalFileByID.SQL.Text;
-          finally
-             WinData.AnimalFileByID.EnableControls;
-             cxAnimalGridView.DataController.EndFullUpdate;
-          end;
+         cxAnimalGridView.DataController.BeginFullUpdate;
+         WinData.AnimalFileByID.DisableControls;
+         try
+            WinData.AnimalFileByID.Active := False;
+            WinData.AnimalFileByID.SQL.Clear;
+            WinData.AnimalFileByID.SQL.Add('SELECT DISTINCT (A.ID), A.* FROM Animals A');
+            WinData.AnimalFileByID.SQL.Add('WHERE A.ID IN (SELECT E.AnimalID FROM Events E WHERE E.EventType = '+IntToStr(CSaleDeathEvent)+ ')');
+            WinData.AnimalFileByID.SQL.Add('AND (A.HerdID = ' + IntToStr(WinData.UserDefaultHerdID) + ')');
+            WinData.AnimalFileByID.SQL.Add('AND (A.AnimalDeleted=FALSE)');
+            ApplySortToAnimalFileByIdAndOpenQuery();
+            // Add query to fFilters.LeftHerdSQL so Filter can be applied on top of Animal Select filter.
+            fFilters.LeftHerdSQL := WinData.AnimalFileByID.SQL.Text;
+         finally
+            WinData.AnimalFileByID.EnableControls;
+            cxAnimalGridView.DataController.EndFullUpdate;
+         end;
       end;
    finally
       Screen.Cursor := crDefault;
@@ -15921,21 +15924,30 @@ begin
 
       if ( FSelectedHerdType = htBeef ) and ( WinData.GlobalSettings.DisplayMovementFeedColsInGridView ) and
          ( cxAnimalGridViewGrossMargin.Visible ) then
-         begin
+         try
+            cxAnimalGridView.DataController.BeginFullUpdate;
+            WinData.AnimalFileByID.DisableControls;
+
             WinData.MDGridGrossMarginData.Close;
             WinData.MDGridGrossMarginData.Open;
 
             if ( not(WinData.MDGridPurchData.Active) ) or ( (WinData.MDGridPurchData.Active) and (WinData.MDGridPurchData.RecordCount = 0) ) then Exit;
+
+            ShowProgressIndicator('Processing Gross Margin Data',0,WinData.MDGridPurchData.RecordCount,1);
+            ProgressIndicator.Max := WinData.MDGridPurchData.RecordCount;
+            Application.ProcessMessages;
+            Update;
+
             WinData.MDGridPurchData.First;
             while ( not(WinData.MDGridPurchData.Eof) ) do
                begin
                   if ( WinData.MDGridSaleData.Locate('AnimalId',WinData.MDGridPurchData.FieldByName('AnimalId').AsInteger,[]) ) then
-                     if ( WinData.MDGridPurchData.FieldByName('Price').AsFloat > 0 ) and ( WinData.MDGridSaleData.FieldByName('Price').AsFloat > 0 ) then
+                     if ( WinData.MDGridPurchData.FieldByName('PurchPrice').AsFloat > 0 ) and ( WinData.MDGridSaleData.FieldByName('SalePrice').AsFloat > 0 ) then
                         try
                            WinData.MDGridGrossMarginData.Append;
                            WinData.MDGridGrossMarginData.FieldByName('AnimalId').AsInteger := WinData.MDGridPurchData.FieldByName('AnimalId').AsInteger;
-                           WinData.MDGridGrossMarginData.FieldByName('GrossMargin').AsFloat := ( WinData.MDGridSaleData.FieldByName('Price').AsFloat -
-                                                                                                 WinData.MDGridPurchData.FieldByName('Price').AsFloat );
+                           WinData.MDGridGrossMarginData.FieldByName('GrossMargin').AsFloat := ( WinData.MDGridSaleData.FieldByName('SalePrice').AsFloat -
+                                                                                                 WinData.MDGridPurchData.FieldByName('PurchPrice').AsFloat );
                            WinData.MDGridGrossMarginData.Post;
                         except
                            on e : Exception do
@@ -15946,15 +15958,20 @@ begin
                                                                 [WinData.MDGridPurchData.FieldByName('AnimalId').AsInteger]));
                               end;
                         end;
+                  ProgressIndicator.Position := ProgressIndicator.Position + 1;
                   WinData.MDGridPurchData.Next;
                end;
+            WinData.MDGridGrossMarginData.Open;
+            ProgressIndicator.Close;
+            Application.ProcessMessages;
+            Update;
+         finally
+            try
+               cxAnimalGridView.DataController.EndFullUpdate;
+               Windata.AnimalFileByID.EnableControls;
+            except
+            end;
          end;
-
-      try
-         WinData.AnimalFileByID.Close;
-         WinData.AnimalFileByID.Open;
-      except
-      end;
 
    finally
       Screen.Cursor := crDefault;
@@ -16417,10 +16434,10 @@ end;
 
 procedure TMenuForm.miTestFacilityClick(Sender: TObject);
 begin
-   //ProcessAimMovements;
-   //ProcessAIMHerdReconcile();
-   //TfmAIMHeifTempTransfers.SaveTempTransfers;
-   TfmRemittanceConvert.ShowConverter;
+   if ( WinData.MDGridGrossMarginData.Locate('AnimalId',WinData.AnimalFileByIDID.AsInteger,[]) ) then
+      ShowMessage(WinData.AnimalFileByIDNatIDNum.AsString + ' Gross Margin = '+FloatToStr(WinData.MDGridGrossMarginData.FieldByName('GrossMargin').AsFloat))
+   else
+      ShowMessage('Animal No Found in mdGridGrossMarginData');
 end;
 
 procedure TMenuForm.actAddA1A2ResultExecute(Sender: TObject);
@@ -16895,6 +16912,53 @@ begin
                   end;
                if ( iTotDaysOnFarm > 0 ) and ( iAnimalCount > 0 ) then
                   AText := FormatFloat('0',(iTotDaysOnFarm/iAnimalCount));
+            except
+               on e : Exception do
+                  ShowDebugMessage(e.Message);
+            end;
+         finally
+            Free;
+         end;
+end;
+
+procedure TMenuForm.cxAnimalGridViewPrintAvgGrossMargin(
+  Sender: TcxDataSummaryItem; const AValue: Variant; AIsFooter: Boolean;
+  var AText: String);
+var
+   fAvgPurchPrice,
+   fAvgSalePrice : Double;
+begin
+   AText := '';
+   if ( WinData.AnimalFileByID <> nil ) and ( WinData.AnimalFileByID.Active ) and ( WinData.AnimalFileByID.RecordCount > 0 ) then
+      with TQuery.Create(nil) do
+         try
+            DatabaseName := AliasName;
+            SQL.Clear;
+            SQL.Add('SELECT AVG(S.Price)');
+            SQL.Add('FROM SalesDeaths S');
+            SQL.Add('WHERE S.Price > 0');
+            SQL.Add('AND S.EventId IN (SELECT ID');
+            SQL.Add('                  FROM Events');
+            SQL.Add('                  WHERE EventType = 11');
+            SQL.Add('                  AND AnimalID IN (SELECT AID FROM AFilters))');
+            try
+               Open;
+               if ( RecordCount > 0 ) and ( Fields[0].AsFloat > 0 ) then
+                  fAvgSalePrice := Fields[0].AsFloat;
+               Close;
+               SQL.Clear;
+               SQL.Add('SELECT AVG(P.Price)');
+               SQL.Add('FROM Purchases P');
+               SQL.Add('WHERE P.Price > 0');
+               SQL.Add('AND P.EventId IN (SELECT ID');
+               SQL.Add('                  FROM Events');
+               SQL.Add('                  WHERE EventType = 12');
+               SQL.Add('                  AND AnimalID IN (SELECT AID FROM AFilters))');
+               Open;
+               if ( RecordCount > 0 ) and ( Fields[0].AsFloat > 0 ) then
+                  fAvgPurchPrice := Fields[0].AsFloat;
+               if ( fAvgSalePrice > 0 ) and ( fAvgPurchPrice > 0 ) then
+                  AText := FormatFloat('0.00',(fAvgSalePrice - fAvgPurchPrice));
             except
                on e : Exception do
                   ShowDebugMessage(e.Message);

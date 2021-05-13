@@ -2170,7 +2170,12 @@ object MenuForm: TMenuForm
           object cxAnimalGridViewGrossMargin: TcxGridDBColumn
             Caption = 'Gross Margin'
             DataBinding.FieldName = 'GrossMargin'
+            PropertiesClassName = 'TcxCurrencyEditProperties'
             HeaderAlignmentVert = vaCenter
+            Options.Editing = False
+            Options.Filtering = False
+            Options.FilteringMRUItemsList = False
+            Width = 80
           end
         end
         object cxAnimalGridLevel: TcxGridLevel
@@ -12218,7 +12223,7 @@ object MenuForm: TMenuForm
       PrinterPage.PageSize.Y = 297000
       PrinterPage._dxMeasurementUnits_ = 0
       PrinterPage._dxLastMU_ = 2
-      ReportDocument.CreationDate = 44328.670399213
+      ReportDocument.CreationDate = 44329.5925082986
       OptionsOnEveryPage.Footers = False
       OptionsOnEveryPage.FilterBar = False
       OptionsPreview.Visible = False
