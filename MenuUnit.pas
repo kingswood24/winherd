@@ -77,7 +77,7 @@ unit MenuUnit;
 
 
  06/01/09 [V3.9 R5.6] /SP Additional Feature - Default cmboSearchColumns.ItemIndex to WinData.SearchField Value.
-                                             eg. WinData.SearchField = 'AnimalNo' ... cmboSearchColumns.Text = 'Animal No.'
+                                               eg. WinData.SearchField = 'AnimalNo' ... cmboSearchColumns.Text = 'Animal No.'
 
  08/01/2009 [V3.9 R5.7] /SP Additional Feature - Introduction of New Reports Screen Layout
 
@@ -15969,19 +15969,20 @@ begin
 
             if ( not(WinData.MDGridPurchData.Active) ) or ( (WinData.MDGridPurchData.Active) and (WinData.MDGridPurchData.RecordCount = 0) ) then Exit;
 
-            ShowProgressIndicator('Processing Gross Margin Data',0,WinData.MDGridPurchData.RecordCount,1);
-            ProgressIndicator.Max := WinData.MDGridPurchData.RecordCount;
+            ShowProgressIndicator('Processing Gross Margin Data',0,QueryAnimals.RecordCount,1);
+            ProgressIndicator.Max := QueryAnimals.RecordCount;
             Application.ProcessMessages;
             Update;
 
-            WinData.MDGridPurchData.First;
-            while ( not(WinData.MDGridPurchData.Eof) ) do
+            QueryAnimals.First;
+            while ( not(QueryAnimals.Eof) ) do
                begin
-                  if ( WinData.MDGridSaleData.Locate('AnimalId',WinData.MDGridPurchData.FieldByName('AnimalId').AsInteger,[]) ) then
+                  if ( WinData.MDGridPurchData.Locate('AnimalId',QueryAnimals.FieldByName('AId').AsInteger,[]) ) and
+                     ( WinData.MDGridSaleData.Locate('AnimalId',QueryAnimals.FieldByName('AId').AsInteger,[]) ) then
                      if ( WinData.MDGridPurchData.FieldByName('PurchPrice').AsFloat > 0 ) and ( WinData.MDGridSaleData.FieldByName('SalePrice').AsFloat > 0 ) then
                         try
                            WinData.MDGridGrossMarginData.Append;
-                           WinData.MDGridGrossMarginData.FieldByName('AnimalId').AsInteger := WinData.MDGridPurchData.FieldByName('AnimalId').AsInteger;
+                           WinData.MDGridGrossMarginData.FieldByName('AnimalId').AsInteger := QueryAnimals.FieldByName('AId').AsInteger;
                            WinData.MDGridGrossMarginData.FieldByName('GrossMargin').AsFloat := ( WinData.MDGridSaleData.FieldByName('SalePrice').AsFloat -
                                                                                                  WinData.MDGridPurchData.FieldByName('PurchPrice').AsFloat );
                            WinData.MDGridGrossMarginData.Post;
@@ -15991,16 +15992,16 @@ begin
                                  ShowDebugMessage(e.Message);
                                  ApplicationLog.LogException(e);
                                  ApplicationLog.LogError(Format('WinData.MDGridGrossMarginData : Error posting for AnimalId :d.',
-                                                                [WinData.MDGridPurchData.FieldByName('AnimalId').AsInteger]));
+                                                                [QueryAnimals.FieldByName('AId').AsInteger]));
                               end;
                         end;
                   ProgressIndicator.Position := ProgressIndicator.Position + 1;
-                  WinData.MDGridPurchData.Next;
+                  QueryAnimals.Next;
                end;
-            WinData.MDGridGrossMarginData.Open;
             ProgressIndicator.Close;
             Application.ProcessMessages;
             Update;
+            WinData.MDGridGrossMarginData.Open;
          finally
             try
                cxAnimalGridView.DataController.EndFullUpdate;

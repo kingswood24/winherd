@@ -4,7 +4,7 @@ object MenuForm: TMenuForm
   HorzScrollBar.Visible = False
   AutoScroll = False
   Caption = 'Kingswood Herd Management'
-  ClientHeight = 1000
+  ClientHeight = 999
   ClientWidth = 1912
   Color = clBtnFace
   DefaultMonitor = dmDesktop
@@ -48,7 +48,7 @@ object MenuForm: TMenuForm
     Left = 0
     Top = 264
     Width = 1912
-    Height = 678
+    Height = 677
     Align = alClient
     BevelOuter = bvNone
     Caption = 'THIS IS THE PGRID'
@@ -65,7 +65,7 @@ object MenuForm: TMenuForm
       Left = 0
       Top = 0
       Width = 1912
-      Height = 678
+      Height = 677
       Align = alClient
       BevelOuter = bvNone
       Caption = 'THIS IS THE ANIMAL GRID'
@@ -74,7 +74,7 @@ object MenuForm: TMenuForm
         Left = 1504
         Top = 86
         Width = 8
-        Height = 592
+        Height = 591
         HotZoneClassName = 'TcxSimpleStyle'
         AlignSplitter = salRight
         AutoPosition = False
@@ -1381,7 +1381,7 @@ object MenuForm: TMenuForm
         Left = 0
         Top = 86
         Width = 1504
-        Height = 592
+        Height = 591
         Align = alClient
         Font.Charset = ANSI_CHARSET
         Font.Color = clWindowText
@@ -2199,7 +2199,7 @@ object MenuForm: TMenuForm
         Left = 1512
         Top = 86
         Width = 400
-        Height = 592
+        Height = 591
         Align = alRight
         BevelInner = bvLowered
         BevelOuter = bvNone
@@ -2209,7 +2209,7 @@ object MenuForm: TMenuForm
           Left = 1
           Top = 21
           Width = 398
-          Height = 430
+          Height = 429
           Align = alClient
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
@@ -2479,7 +2479,7 @@ object MenuForm: TMenuForm
         end
         object gbAnimalComments: TcxGroupBox
           Left = 1
-          Top = 459
+          Top = 458
           Align = alBottom
           Caption = 'Animal Comments'
           ParentFont = False
@@ -2560,7 +2560,7 @@ object MenuForm: TMenuForm
         end
         object AnimalCommentsSplitter: TcxSplitter
           Left = 1
-          Top = 451
+          Top = 450
           Width = 398
           Height = 8
           HotZoneClassName = 'TcxSimpleStyle'
@@ -2996,7 +2996,7 @@ object MenuForm: TMenuForm
   end
   object StatusBar: TStatusBar
     Left = 0
-    Top = 980
+    Top = 979
     Width = 1912
     Height = 20
     Panels = <
@@ -3023,7 +3023,7 @@ object MenuForm: TMenuForm
   end
   object pFilter: TPanel
     Left = 0
-    Top = 942
+    Top = 941
     Width = 1912
     Height = 38
     Align = alBottom
@@ -12236,7 +12236,7 @@ object MenuForm: TMenuForm
       PrinterPage.PageSize.Y = 297000
       PrinterPage._dxMeasurementUnits_ = 0
       PrinterPage._dxLastMU_ = 2
-      ReportDocument.CreationDate = 44330.3865400463
+      ReportDocument.CreationDate = 44330.4669942245
       OptionsOnEveryPage.Footers = False
       OptionsOnEveryPage.FilterBar = False
       OptionsPreview.Visible = False
