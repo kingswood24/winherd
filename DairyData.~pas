@@ -24326,7 +24326,7 @@ begin
                      DatabaseName := AliasName;
                      SQL.Clear;
                      SQL.Add(' SELECT SE.AnimalID AnimalID, SE.EventDate SaleDate, C.Name CustomerName, S.Price SalePrice,');
-                     SQL.Add('        S.CustomerCosts, S.TotalDeductions, S.ColdDeadWt, S.Weight');
+                     SQL.Add('        S.CustomerCosts, S.TotalDeductions, S.ColdDeadWt, S.Weight, S.Grade');
                      SQL.Add(' FROM Events SE');
                      SQL.Add(' Left Join SalesDeaths S ON (S.EventID = SE.ID)');
                      SQL.Add(' Left Join Customers C On (C.ID = S.Customer)');
@@ -24340,6 +24340,7 @@ begin
                      CreateMemDataFieldDef(MDGridSaleData, 'SaleCosts', ftFloat);
                      CreateMemDataFieldDef(MDGridSaleData, 'PricePerKg', ftFloat);
                      CreateMemDataFieldDef(MDGridSaleData, 'ColdDeadWt', ftFloat);
+                     CreateMemDataFieldDef(MDGridSaleData, 'SalesGrade', ftString , 15);
                      MDGridSaleData.Active := True;
                      QGridSaleData.First;
                      while ( not(QGridSaleData.Eof) ) do
@@ -24355,6 +24356,7 @@ begin
                            else if ( QGridSaleData.FieldByName('SalePrice').AsFloat > 0 ) and ( QGridSaleData.FieldByName('Weight').AsFloat > 0 ) then
                               MDGridSaleData.FieldByName('PricePerKg').AsFloat := ( QGridSaleData.FieldByName('SalePrice').AsFloat / QGridSaleData.FieldByName('Weight').AsFloat );
                            MDGridSaleData.FieldByName('ColdDeadWt').AsFloat := QGridSaleData.FieldByName('ColdDeadWt').AsFloat;
+                           MDGridSaleData.FieldByName('SalesGrade').AsString := QGridSaleData.FieldByName('Grade').AsString;
                            MDGridSaleData.Post;
 
                            QGridSaleData.Next;
@@ -24367,6 +24369,7 @@ begin
                ClearMemDataFieldDefs(MDGridGrossMarginData);
                CreateMemDataFieldDef(MDGridGrossMarginData,'AnimalId',ftInteger);
                CreateMemDataFieldDef(MDGridGrossMarginData,'GrossMargin',ftFloat);
+               MDGridGrossMarginData.Active := True;
             end
          else
             begin
@@ -25232,6 +25235,36 @@ begin
             end;
 
          sFieldName := 'ColdDeadWt';
+         if AnimalFileByID.FindField(sFieldName) = nil then
+            begin
+               with TStringField.Create(nil) do
+                  begin
+                     FieldName := sFieldName;
+                     FieldKind := fkLookup;
+                     LookupDataSet := MDGridSaleData;
+                     KeyFields := sKeyField;
+                     LookupKeyFields := sLookupKeyField;
+                     LookupResultField := sFieldName;
+                     Dataset := AnimalFileByID;
+                  end;
+            end;
+
+         sFieldName := 'ColdDeadWt';
+         if AnimalFileByID.FindField(sFieldName) = nil then
+            begin
+               with TStringField.Create(nil) do
+                  begin
+                     FieldName := sFieldName;
+                     FieldKind := fkLookup;
+                     LookupDataSet := MDGridSaleData;
+                     KeyFields := sKeyField;
+                     LookupKeyFields := sLookupKeyField;
+                     LookupResultField := sFieldName;
+                     Dataset := AnimalFileByID;
+                  end;
+            end;
+
+         sFieldName := 'SalesGrade';
          if AnimalFileByID.FindField(sFieldName) = nil then
             begin
                with TStringField.Create(nil) do

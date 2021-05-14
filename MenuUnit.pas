@@ -1012,6 +1012,8 @@ unit MenuUnit;
                                                Days on Farm and Price Per Kg.
 
  12/05/21 [V6.0 R1.1] /MK Change - SetUpForm - Moved btnRefreshAnimals button above the grid of animals - no need to disable it as all herds will use it eventually.
+
+ 14/05/21 [V6.0 R1.1] /MK Additional Feature - actRefreshAnimals - Added calculation of Gross Margin from WinData.MDGridPurchData and WinData.MDGridSaleData.
 }
 
 interface
@@ -2017,6 +2019,7 @@ type
     cxAnimalGridViewColdDeadWt: TcxGridDBColumn;
     btnRefreshAnimals: TRxSpeedButton;
     cxAnimalGridViewGrossMargin: TcxGridDBColumn;
+    cxAnimalGridViewSalesGrade: TcxGridDBColumn;
    //--------------------------------------//
 
     procedure ExitButtonClick(Sender: TObject);
@@ -4853,6 +4856,18 @@ begin
 
                cxAnimalGridViewPurchTransport.Hidden := False;
                cxAnimalGridViewPurchTransport.Visible := True;
+
+               cxAnimalGridViewPricePerKg.Hidden := False;
+               cxAnimalGridViewPricePerKg.Visible := True;
+
+               cxAnimalGridViewColdDeadWt.Hidden := False;
+               cxAnimalGridViewColdDeadWt.Visible := True;
+
+               cxAnimalGridViewSalesGrade.Hidden := False;
+               cxAnimalGridViewSalesGrade.Visible := True;
+
+               cxAnimalGridViewGrossMargin.Hidden := False;
+               cxAnimalGridViewGrossMargin.Visible := True;
             end;
       end
    else
@@ -4904,6 +4919,18 @@ begin
 
          cxAnimalGridViewPurchTransport.Hidden := True;
          cxAnimalGridViewPurchTransport.Visible := False;
+
+         cxAnimalGridViewPricePerKg.Hidden := True;
+         cxAnimalGridViewPricePerKg.Visible := False;
+
+         cxAnimalGridViewColdDeadWt.Hidden := True;
+         cxAnimalGridViewColdDeadWt.Visible := False;
+
+         cxAnimalGridViewSalesGrade.Hidden := True;
+         cxAnimalGridViewSalesGrade.Visible := False;
+
+         cxAnimalGridViewGrossMargin.Hidden := True;
+         cxAnimalGridViewGrossMargin.Visible := False;
       end;
 
    //   03/10/11 [V5.0 R1.0] /MK Change - Check If ConditionScore In Grid Cols Is Visible
@@ -15784,9 +15811,13 @@ var
    WeighedAnimals : TTable;
    QueryAnimals : TQuery;
    fOverallGain : Double;
+   bHasSoldAnimals : Boolean;
 begin
+   QueryAnimals := TQuery.Create(nil);
    try
       Screen.Cursor := crHourGlass;
+
+      QueryAnimals.DatabaseName := AliasName;
 
       WinData.RefreshOverGainPerDay := False;
 
@@ -15803,8 +15834,6 @@ begin
                   Exit;
                end;
 
-            QueryAnimals := TQuery.Create(nil);
-            QueryAnimals.DatabaseName := AliasName;
             QueryAnimals.SQL.Clear;
             QueryAnimals.SQL.Add('UPDATE Animals');
             QueryAnimals.SQL.Add('SET OverallWeightGain = 0');
@@ -15914,16 +15943,23 @@ begin
                   WeighedAnimals.DeleteTable;
                   FreeAndNil(WeighedAnimals);
                end;
-
-            if ( QueryAnimals <> nil ) then
-               begin
-                  QueryAnimals.Close;
-                  FreeAndNil(QueryAnimals);
-               end;
          end;
 
+      //   14/05/21 [V6.0 R1.1] /MK Additional Feature - Added calculation of Gross Margin from WinData.MDGridPurchData and WinData.MDGridSaleData.
+      // Get the count of animals on the main grid that are sold. If none then no point running through procedure.
+      bHasSoldAnimals := False;
+      QueryAnimals.Close;
+      QueryAnimals.SQL.Clear;
+      QueryAnimals.SQL.Add('SELECT AF.AId');
+      QueryAnimals.SQL.Add('FROM AFilters AF');
+      QueryAnimals.SQL.Add('INNER JOIN Animals A ON (AF.AId = A.Id)');
+      QueryAnimals.SQL.Add('WHERE (A.InHerd = False)');
+      QueryAnimals.SQL.Add('AND   (A.AnimalDeleted = False)');
+      QueryAnimals.SQL.Add('AND   (A.HerdId In (SELECT DefaultHerdID FROM Defaults))');
+      QueryAnimals.Open;
+      bHasSoldAnimals := ( QueryAnimals.RecordCount > 0 );
       if ( FSelectedHerdType = htBeef ) and ( WinData.GlobalSettings.DisplayMovementFeedColsInGridView ) and
-         ( cxAnimalGridViewGrossMargin.Visible ) then
+         ( cxAnimalGridViewGrossMargin.Visible ) and ( bHasSoldAnimals ) then
          try
             cxAnimalGridView.DataController.BeginFullUpdate;
             WinData.AnimalFileByID.DisableControls;
@@ -15974,6 +16010,12 @@ begin
          end;
 
    finally
+      if ( QueryAnimals <> nil ) then
+         begin
+            QueryAnimals.Close;
+            FreeAndNil(QueryAnimals);
+         end;
+
       Screen.Cursor := crDefault;
       Application.ProcessMessages;
       Update;

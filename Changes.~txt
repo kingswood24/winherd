@@ -1,6 +1,7 @@
 Version V6.0 R1.1
 
-12/05/21 /MK Change - SetUpForm - Moved btnRefreshAnimals button above the grid of animals - no need to disable it as all herds will use it eventually.
+12/05/21 /MK Change - MenuUnit - SetUpForm - Moved btnRefreshAnimals button above the grid of animals - no need to disable it as all herds will use it eventually.
+14/05/21 /MK Additional Feature - MenuUnit - actRefreshAnimals - Added calculation of Gross Margin from WinData.MDGridPurchData and WinData.MDGridSaleData.
 
 Version V6.0 R1.0
 

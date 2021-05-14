@@ -1018,6 +1018,8 @@ unit DairyData;
                           Additional Feature - GetEventLookupData/AnimalFileByIDBeforeOpen - Added PricePerKg to MDGridSaleData so it will appear on main grid.
 
  05/05/21 [V6.0 R1.0] /MK Additional Feature - GetEventLookupData/AnimalFileByIDBeforeOpen - Added ColdDeadWt to MDGridSaleData so it will appear on main grid.
+
+ 14/05/21 [V6.0 R1.1] /MK Additional Feature - GetEventLookupData/AnimalFileByIDBeforeOpen - Added SalesGrade and GrossMargin so it will appear on the main grid.
 }
 
 interface
@@ -24326,7 +24328,7 @@ begin
                      DatabaseName := AliasName;
                      SQL.Clear;
                      SQL.Add(' SELECT SE.AnimalID AnimalID, SE.EventDate SaleDate, C.Name CustomerName, S.Price SalePrice,');
-                     SQL.Add('        S.CustomerCosts, S.TotalDeductions, S.ColdDeadWt, S.Weight');
+                     SQL.Add('        S.CustomerCosts, S.TotalDeductions, S.ColdDeadWt, S.Weight, S.Grade');
                      SQL.Add(' FROM Events SE');
                      SQL.Add(' Left Join SalesDeaths S ON (S.EventID = SE.ID)');
                      SQL.Add(' Left Join Customers C On (C.ID = S.Customer)');
@@ -24340,6 +24342,7 @@ begin
                      CreateMemDataFieldDef(MDGridSaleData, 'SaleCosts', ftFloat);
                      CreateMemDataFieldDef(MDGridSaleData, 'PricePerKg', ftFloat);
                      CreateMemDataFieldDef(MDGridSaleData, 'ColdDeadWt', ftFloat);
+                     CreateMemDataFieldDef(MDGridSaleData, 'SalesGrade', ftString , 15);
                      MDGridSaleData.Active := True;
                      QGridSaleData.First;
                      while ( not(QGridSaleData.Eof) ) do
@@ -24355,6 +24358,7 @@ begin
                            else if ( QGridSaleData.FieldByName('SalePrice').AsFloat > 0 ) and ( QGridSaleData.FieldByName('Weight').AsFloat > 0 ) then
                               MDGridSaleData.FieldByName('PricePerKg').AsFloat := ( QGridSaleData.FieldByName('SalePrice').AsFloat / QGridSaleData.FieldByName('Weight').AsFloat );
                            MDGridSaleData.FieldByName('ColdDeadWt').AsFloat := QGridSaleData.FieldByName('ColdDeadWt').AsFloat;
+                           MDGridSaleData.FieldByName('SalesGrade').AsString := QGridSaleData.FieldByName('Grade').AsString;
                            MDGridSaleData.Post;
 
                            QGridSaleData.Next;
@@ -25233,6 +25237,36 @@ begin
             end;
 
          sFieldName := 'ColdDeadWt';
+         if AnimalFileByID.FindField(sFieldName) = nil then
+            begin
+               with TStringField.Create(nil) do
+                  begin
+                     FieldName := sFieldName;
+                     FieldKind := fkLookup;
+                     LookupDataSet := MDGridSaleData;
+                     KeyFields := sKeyField;
+                     LookupKeyFields := sLookupKeyField;
+                     LookupResultField := sFieldName;
+                     Dataset := AnimalFileByID;
+                  end;
+            end;
+
+         sFieldName := 'ColdDeadWt';
+         if AnimalFileByID.FindField(sFieldName) = nil then
+            begin
+               with TStringField.Create(nil) do
+                  begin
+                     FieldName := sFieldName;
+                     FieldKind := fkLookup;
+                     LookupDataSet := MDGridSaleData;
+                     KeyFields := sKeyField;
+                     LookupKeyFields := sLookupKeyField;
+                     LookupResultField := sFieldName;
+                     Dataset := AnimalFileByID;
+                  end;
+            end;
+
+         sFieldName := 'SalesGrade';
          if AnimalFileByID.FindField(sFieldName) = nil then
             begin
                with TStringField.Create(nil) do

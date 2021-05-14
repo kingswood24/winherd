@@ -1480,6 +1480,10 @@ object MenuForm: TMenuForm
               OnGetText = cxAnimalGridViewPrintColdDeadWt
               FieldName = 'ColdDeadWt'
               Column = cxAnimalGridViewColdDeadWt
+            end
+            item
+              OnGetText = cxAnimalGridViewPrintAvgGrossMargin
+              Column = cxAnimalGridViewGrossMargin
             end>
           DataController.Summary.SummaryGroups = <>
           Filtering.MRUItemsList = False
@@ -2167,6 +2171,15 @@ object MenuForm: TMenuForm
             Options.FilteringMRUItemsList = False
             Width = 80
           end
+          object cxAnimalGridViewSalesGrade: TcxGridDBColumn
+            Caption = 'Sales Grade'
+            DataBinding.FieldName = 'SalesGrade'
+            HeaderAlignmentVert = vaCenter
+            Options.Editing = False
+            Options.Filtering = False
+            Options.FilteringMRUItemsList = False
+            Width = 60
+          end
           object cxAnimalGridViewGrossMargin: TcxGridDBColumn
             Caption = 'Gross Margin'
             DataBinding.FieldName = 'GrossMargin'
@@ -2175,7 +2188,7 @@ object MenuForm: TMenuForm
             Options.Editing = False
             Options.Filtering = False
             Options.FilteringMRUItemsList = False
-            Width = 80
+            Width = 76
           end
         end
         object cxAnimalGridLevel: TcxGridLevel
@@ -12223,7 +12236,7 @@ object MenuForm: TMenuForm
       PrinterPage.PageSize.Y = 297000
       PrinterPage._dxMeasurementUnits_ = 0
       PrinterPage._dxLastMU_ = 2
-      ReportDocument.CreationDate = 44329.5925082986
+      ReportDocument.CreationDate = 44330.3865400463
       OptionsOnEveryPage.Footers = False
       OptionsOnEveryPage.FilterBar = False
       OptionsPreview.Visible = False
