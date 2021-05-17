@@ -479,7 +479,7 @@ uses
   BDEConfig in '..\..\..\..\..\Common\BDEConfig.pas',
   uBDE in '..\..\..\..\..\Common\uBDE.pas',
   uPopupAnimalEdit in 'uPopupAnimalEdit.pas' {fmPopupAnimalEdit},
-  uModifyGridCols in 'uModifyGridCols.pas' {fmModifyGridCols},
+  uCalculateGridColSelect in 'uCalculateGridColSelect.pas' {fmCalculateGridColSelect},
   uGeneralMemo in 'uGeneralMemo.pas' {fmGeneralMemo};
 
 {$R *.RES}
@@ -533,13 +533,13 @@ begin
 
         Application.HelpFile := 'HerdHelp.chm';
         Application.CreateForm(TWinData, WinData);
-        Application.CreateForm(THerdLookup, HerdLookup);
-        Application.CreateForm(TMenuForm, MenuForm);
-        Application.CreateForm(TfSetUpAnimals, fSetUpAnimals);
-        Application.CreateForm(TfSearchDlg, fSearchDlg);
-        Application.CreateForm(TfRemarks, fRemarks);
-        Application.CreateForm(TfFilters, fFilters);
-        MenuForm.Update;
+  Application.CreateForm(THerdLookup, HerdLookup);
+  Application.CreateForm(TMenuForm, MenuForm);
+  Application.CreateForm(TfSetUpAnimals, fSetUpAnimals);
+  Application.CreateForm(TfSearchDlg, fSearchDlg);
+  Application.CreateForm(TfRemarks, fRemarks);
+  Application.CreateForm(TfFilters, fFilters);
+  MenuForm.Update;
         MenuForm.Show;
         Application.Run;
      end;

@@ -142,7 +142,7 @@ object MenuForm: TMenuForm
           Shape = bsTopLine
         end
         object RxSpeedButton5: TRxSpeedButton
-          Left = 439
+          Left = 453
           Top = 1
           Width = 99
           Height = 19
@@ -221,12 +221,11 @@ object MenuForm: TMenuForm
           Shape = bsLeftLine
         end
         object btnModifyGrid: TRxSpeedButton
-          Left = 232
+          Left = 336
           Top = 1
-          Width = 99
+          Width = 113
           Height = 19
           Action = actModifyGrid
-          Caption = 'Change Grid'
           Flat = True
           Font.Charset = ANSI_CHARSET
           Font.Color = clWindowText
@@ -265,7 +264,7 @@ object MenuForm: TMenuForm
           Spacing = 5
         end
         object btnRefreshAnimals: TRxSpeedButton
-          Left = 336
+          Left = 232
           Top = 1
           Width = 99
           Height = 19
@@ -316,7 +315,7 @@ object MenuForm: TMenuForm
           Spacing = 5
         end
         object cbAllAnimals: TDBCheckBoxEh
-          Left = 562
+          Left = 602
           Top = 3
           Width = 115
           Height = 15
@@ -11975,7 +11974,7 @@ object MenuForm: TMenuForm
     Left = 1163
     Top = 183
     object actPrintGrid: TAction
-      Caption = 'Print Grid'
+      Caption = 'Grid Print'
       ImageIndex = 19
       OnExecute = actPrintGridExecute
     end
@@ -12160,7 +12159,7 @@ object MenuForm: TMenuForm
       OnExecute = actGroupSetupFromFilterExecute
     end
     object actRefreshAnimals: TAction
-      Caption = 'Calc Grid'
+      Caption = 'Grid Calcs'
       ImageIndex = 42
       OnExecute = actRefreshAnimalsExecute
     end
@@ -12202,7 +12201,7 @@ object MenuForm: TMenuForm
       OnExecute = actAddA1A2ResultExecute
     end
     object actModifyGrid: TAction
-      Caption = 'Modify Grid'
+      Caption = 'Grid Columns'
       ImageIndex = 41
       OnExecute = actModifyGridExecute
     end
@@ -12236,7 +12235,7 @@ object MenuForm: TMenuForm
       PrinterPage.PageSize.Y = 297000
       PrinterPage._dxMeasurementUnits_ = 0
       PrinterPage._dxLastMU_ = 2
-      ReportDocument.CreationDate = 44330.4669942245
+      ReportDocument.CreationDate = 44333.3940220255
       OptionsOnEveryPage.Footers = False
       OptionsOnEveryPage.FilterBar = False
       OptionsPreview.Visible = False
