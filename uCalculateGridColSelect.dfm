@@ -172,15 +172,5 @@ object fmCalculateGridColSelect: TfmCalculateGridColSelect
       ImageIndex = 21
       OnExecute = actCancelExecute
     end
-    object actDeSelectAll: TAction
-      Caption = 'DeSelect All'
-      ImageIndex = 40
-      OnExecute = actDeSelectAllExecute
-    end
-    object actSelectAll: TAction
-      Caption = 'Select All'
-      ImageIndex = 39
-      OnExecute = actSelectAllExecute
-    end
   end
 end

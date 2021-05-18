@@ -3,6 +3,9 @@ Version V6.0 R1.1
 12/05/21 /MK Change - MenuUnit - SetUpForm - Moved btnRefreshAnimals button above the grid of animals - no need to disable it as all herds will use it eventually.
 14/05/21 /MK Additional Feature - MenuUnit - actRefreshAnimals - Added calculation of Gross Margin from WinData.MDGridPurchData and WinData.MDGridSaleData.
                                 - DairyData - GetEventLookupData/AnimalFileByIDBeforeOpen - Added SalesGrade and GrossMargin so it will appear on the main grid.
+18/05/21 /MK Change - DairyData - LoadPreferences - Gerry said to default the NatIdToAnimalNo to True.
+                                - QueryBandonRegistrations - Don't include animals from Animals and AIMAnimalReg table marked as Registered or Queried as per uAimAnimalRegistration
+                    - uCalfRegFlt - BuildTable - Remove animals that are in the Animals and AIMAnimalReg table as Registered or Queried as per uAimAnimalRegistration.
 
 Version V6.0 R1.0
 

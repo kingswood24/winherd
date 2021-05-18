@@ -1059,6 +1059,7 @@ const
    cHighestSCC = 200;
    // Highest SCC Per Milk Rec End
 
+   cDefaultMainGridCalcColumns : array [0..1] of String = ('Lifetime Gain/Day', 'Gross Margin');
 type
    ValidTimeDOBRange  = 7..21;
    ValidRetensionDays = 2..3;

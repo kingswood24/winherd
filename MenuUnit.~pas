@@ -1047,7 +1047,7 @@ uses
   uModuleDefUpdate, uHerdNewFeatures, uClearDiseaseTestDate, uGroupsNotUsed,
   uConditionScoreReport, uSPParser, uImportFileMemo, uAddSire, uAHDBImport,
   uTestGridWithDataSet, uTestForm, uPopupAnimalEdit, uAIMHeifTempTransfers,
-  uMessageScr, uModifyGridCols, KRoutines, uRemittanceConvert;
+  uMessageScr, uModifyGridCols, KRoutines, uRemittanceConvert, uCalculateGridColSelect;
 
 type
   TDraftGroupType = ( dgtAddToDraftGroup, dgtClearDraftGroup, dgtClearAddToDraftGroup );
@@ -2761,6 +2761,8 @@ type
     FHintStyleController : TcxHintStyleController;
 
     FSortedColumn : TcxGridColumn;
+
+    FSelectedCalcGridCols : PStringArray;
 
     procedure SetUpForm;
     procedure HideModules;
@@ -5076,6 +5078,23 @@ begin
       btnCalving.DropDownMenu := mGroup
    else
       btnCalving.DropDownMenu := pmSuckCalvingHelp;
+
+   actRefreshAnimals.Enabled := ( FSelectedHerdType <> htDairy );
+   if ( FSelectedHerdType <> htDairy ) then
+      if ( FSelectedHerdType = htBeef ) then
+         begin
+            SetLength(FSelectedCalcGridCols,2);
+            if ( InArray(cxAnimalGridViewOverallGainPerDay.Caption,cDefaultMainGridCalcColumns) ) then
+               FSelectedCalcGridCols[0] := cxAnimalGridViewOverallGainPerDay.Caption;
+            if ( InArray(cxAnimalGridViewGrossMargin.Caption,cDefaultMainGridCalcColumns) ) then
+               FSelectedCalcGridCols[1] := cxAnimalGridViewGrossMargin.Caption;
+         end
+      else if ( FSelectedHerdType = htSuckler ) then
+         begin
+            SetLength(FSelectedCalcGridCols,1);
+            if ( InArray(cxAnimalGridViewGrossMargin.Caption,cDefaultMainGridCalcColumns) ) then
+               FSelectedCalcGridCols[1] := cxAnimalGridViewGrossMargin.Caption;
+         end;
 end;
 
 procedure TMenuForm.SetThePanelWidths;
@@ -15813,15 +15832,20 @@ var
    fOverallGain : Double;
    bHasSoldAnimals : Boolean;
 begin
+   TfmCalculateGridColSelect.ShowTheForm(FSelectedCalcGridCols,FSelectedHerdType);
+   if ( Length(FSelectedCalcGridCols) = 0 ) then
+      begin
+         MessageDlg('No grid columns selected to calculate.',mtInformation,[mbOK],0);
+         Exit;
+      end;
+
    QueryAnimals := TQuery.Create(nil);
    try
       Screen.Cursor := crHourGlass;
 
       QueryAnimals.DatabaseName := AliasName;
 
-      WinData.RefreshOverGainPerDay := False;
-
-      if ( FSelectedHerdType <> htDairy ) and ( cxAnimalGridViewOverallGainPerDay.Visible ) then
+      if ( InArray(cxAnimalGridViewGrossMargin.Caption,FSelectedCalcGridCols) ) then
          begin
             //   14/05/21 [V6.0 R1.1] /MK Additional Feature - Added calculation of Gross Margin from WinData.MDGridPurchData and WinData.MDGridSaleData.
             // Get the count of animals on the main grid that are sold. If none then no point running through procedure.
@@ -15836,181 +15860,188 @@ begin
             QueryAnimals.SQL.Add('AND   (A.HerdId In (SELECT DefaultHerdID FROM Defaults))');
             QueryAnimals.Open;
             bHasSoldAnimals := ( QueryAnimals.RecordCount > 0 );
-            if ( FSelectedHerdType = htBeef ) and ( WinData.GlobalSettings.DisplayMovementFeedColsInGridView ) and
-               ( cxAnimalGridViewGrossMargin.Visible ) and ( bHasSoldAnimals ) then
-               try
-                  cxAnimalGridView.DataController.BeginFullUpdate;
-                  WinData.AnimalFileByID.DisableControls;
-
-                  WinData.MDGridGrossMarginData.Close;
-                  WinData.MDGridGrossMarginData.Open;
-
-                  if ( not(WinData.MDGridPurchData.Active) ) or ( (WinData.MDGridPurchData.Active) and (WinData.MDGridPurchData.RecordCount = 0) ) then Exit;
-
-                  ShowProgressIndicator('Processing Gross Margin Data',0,QueryAnimals.RecordCount,1);
-                  ProgressIndicator.Max := QueryAnimals.RecordCount;
-                  Application.ProcessMessages;
-                  Update;
-
-                  QueryAnimals.First;
-                  while ( not(QueryAnimals.Eof) ) do
-                     begin
-                        if ( WinData.MDGridPurchData.Locate('AnimalId',QueryAnimals.FieldByName('AId').AsInteger,[]) ) and
-                           ( WinData.MDGridSaleData.Locate('AnimalId',QueryAnimals.FieldByName('AId').AsInteger,[]) ) then
-                           if ( WinData.MDGridPurchData.FieldByName('PurchPrice').AsFloat > 0 ) and ( WinData.MDGridSaleData.FieldByName('SalePrice').AsFloat > 0 ) then
-                              try
-                                 WinData.MDGridGrossMarginData.Append;
-                                 WinData.MDGridGrossMarginData.FieldByName('AnimalId').AsInteger := QueryAnimals.FieldByName('AId').AsInteger;
-                                 WinData.MDGridGrossMarginData.FieldByName('GrossMargin').AsFloat := ( WinData.MDGridSaleData.FieldByName('SalePrice').AsFloat -
-                                                                                                       WinData.MDGridPurchData.FieldByName('PurchPrice').AsFloat );
-                                 WinData.MDGridGrossMarginData.Post;
-                              except
-                                 on e : Exception do
-                                    begin
-                                       ShowDebugMessage(e.Message);
-                                       ApplicationLog.LogException(e);
-                                       ApplicationLog.LogError(Format('WinData.MDGridGrossMarginData : Error posting for AnimalId :d.',
-                                                                      [QueryAnimals.FieldByName('AId').AsInteger]));
-                                    end;
-                              end;
-                        ProgressIndicator.Position := ProgressIndicator.Position + 1;
-                        QueryAnimals.Next;
-                     end;
-                  ProgressIndicator.Close;
-                  Application.ProcessMessages;
-                  Update;
-                  WinData.MDGridGrossMarginData.Open;
-               finally
-                  try
-                     cxAnimalGridView.DataController.EndFullUpdate;
-                     Windata.AnimalFileByID.EnableControls;
-                  except
-                  end;
+            if ( not(bHasSoldAnimals) ) then
+               begin
+                  MessageDlg('Unable to calculate Gross Margin as no sold animals found on animal grid.',mtInformation,[mbOK],0);
+                  Exit;
                end;
-         end;
+            try
+               cxAnimalGridView.DataController.BeginFullUpdate;
+               WinData.AnimalFileByID.DisableControls;
 
-      WeighedAnimals := TTable.Create(nil);
-      try
-         //   25/01/18 [V5.7 R7.5] /MK Change - Bring up prompt to run the check for all animals both in herd or after the selected year.
-         iCalcYear := TfmUpdateAnimalGainPerDayMsg.GetWeightGainCalcYear;
-         if ( iCalcYear = 0 ) then Exit;
+               WinData.MDGridGrossMarginData.Close;
+               WinData.MDGridGrossMarginData.Open;
 
-         if ( not(WinData.EventDataHelper.CanCalcOverallGainPerDay) ) then
-            begin
-               MessageDlg('To calculate lifetime weight gain/day, you need to have'+cCRLF+
-                          'entered at least two sets of weighings.',mtInformation,[mbOK],0);
-               Exit;
-            end;
+               if ( not(WinData.MDGridPurchData.Active) ) or ( (WinData.MDGridPurchData.Active) and (WinData.MDGridPurchData.RecordCount = 0) ) then Exit;
 
-         QueryAnimals.SQL.Clear;
-         QueryAnimals.SQL.Add('UPDATE Animals');
-         QueryAnimals.SQL.Add('SET OverallWeightGain = 0');
-         QueryAnimals.ExecSQL;
+               ShowProgressIndicator('Processing Gross Margin Data',0,QueryAnimals.RecordCount,1);
+               ProgressIndicator.Max := QueryAnimals.RecordCount;
+               Application.ProcessMessages;
+               Update;
 
-         WinData.AnimalFileByID.Close;
-         WinData.AnimalFileByID.Open;
-
-         WeighedAnimals.DatabaseName := AliasName;
-         WeighedAnimals.TableName := 'tWeighedAnimals';
-         WeighedAnimals.FieldDefs.Add('ID',ftAutoInc);
-         WeighedAnimals.FieldDefs.Add('AnimalID',ftInteger);
-         if WeighedAnimals.Exists then Exit;
-
-         WeighedAnimals.FieldDefs.Clear;
-         WeighedAnimals.IndexDefs.Clear;
-
-         WeighedAnimals.FieldDefs.Add('Id',ftAutoInc);
-         WeighedAnimals.FieldDefs.Add('AnimalID',ftInteger);
-
-         WeighedAnimals.IndexDefs.Add('iId','Id',[ixPrimary, ixUnique]);
-         WeighedAnimals.IndexDefs.Add('iAnimalID','AnimalID',[ixUnique, ixCaseInsensitive]);
-         WeighedAnimals.CreateTable;
-         WeighedAnimals.Open;
-
-         // Get all animals in the currently in the herd first.
-         QueryAnimals.SQL.Clear;
-         QueryAnimals.SQL.Add('INSERT INTO '+WeighedAnimals.TableName+' (AnimalID)');
-         QueryAnimals.SQL.Add('SELECT ID');
-         QueryAnimals.SQL.Add('FROM Animals');
-         QueryAnimals.SQL.Add('WHERE InHerd = True');
-         QueryAnimals.SQL.Add('AND   AnimalDeleted = False');
-         QueryAnimals.SQL.Add('AND   HerdID = '+IntToStr(WinData.UserDefaultHerdID)+'');
-         try
-            QueryAnimals.ExecSQL;
-         except
-            MessageDlg('Cannot get In Herd animals',mtError,[mbOK],0);
-            Exit;
-         end;
-
-         // Get all animals that were sold since the date period selected.
-         QueryAnimals.Close;
-         QueryAnimals.SQL.Clear;
-         QueryAnimals.SQL.Add('INSERT INTO '+WeighedAnimals.TableName+' (AnimalID)');
-         QueryAnimals.SQL.Add('SELECT A.ID');
-         QueryAnimals.SQL.Add('FROM Animals A');
-         QueryAnimals.SQL.Add('LEFT JOIN Events E ON (E.AnimalID = A.ID)');
-         QueryAnimals.SQL.Add('WHERE A.InHerd = False');
-         QueryAnimals.SQL.Add('AND   A.HerdID = '+IntToStr(WinData.UserDefaultHerdID)+'');
-         QueryAnimals.SQL.Add('AND   E.EventType = '+IntToStr(CSaleDeathEvent)+'');
-         QueryAnimals.SQL.Add('AND   E.EventDate >= "01/01/'+IntToStr(iCalcYear)+'"');
-         try
-            QueryAnimals.ExecSQL;
-         except
-            MessageDlg('Cannot get sold animals',mtError,[mbOK],0);
-            Exit;
-         end;
-
-         // Delete animals from WeighedAnimals table that have never been weighed to update of Animals table quicker.
-         QueryAnimals.Close;
-         QueryAnimals.SQL.Clear;
-         QueryAnimals.SQL.Add('DELETE FROM '+WeighedAnimals.TableName);
-         QueryAnimals.SQL.Add('WHERE AnimalID NOT IN (SELECT AnimalID');
-         QueryAnimals.SQL.Add('                       FROM Events');
-         QueryAnimals.SQL.Add('                       WHERE EventType = :CWeighingEvent)');
-         QueryAnimals.Params[0].AsInteger := CWeightEvent;
-         QueryAnimals.ExecSQL;
-
-         WeighedAnimals.Close;
-         WeighedAnimals.Open;
-
-         ShowProgressIndicator('Processing Lifetime Weight Gain/Day',0,WeighedAnimals.RecordCount,1);
-         ProgressIndicator.Max := WeighedAnimals.RecordCount;
-         Application.ProcessMessages;
-         Update;
-
-         //   27/06/18 [V5.8 R0.6] /MK Change - Update animals table of animals in WeighedAnimals table who have an OverAllGainPerDay value.
-         WeighedAnimals.First;
-         while ( not(WeighedAnimals.Eof) ) do
-            begin
-               fOverallGain := WinData.FEventDataHelper.GetAnimalOverallGainPerDay(WeighedAnimals.FieldByName('AnimalID').AsInteger);
-               if ( fOverallGain > 0 ) then
+               QueryAnimals.First;
+               while ( not(QueryAnimals.Eof) ) do
                   begin
-                     QueryAnimals.Close;
-                     QueryAnimals.SQL.Clear;
-                     QueryAnimals.SQL.Add('UPDATE Animals');
-                     QueryAnimals.SQL.Add('SET OverallWeightGain = :Gain');
-                     QueryAnimals.SQL.Add('WHERE ID = :AnimalID');
-                     QueryAnimals.Params[0].AsFloat := fOverallGain;
-                     QueryAnimals.Params[1].AsInteger := WeighedAnimals.FieldByName('AnimalID').AsInteger;
-                     QueryAnimals.ExecSQL;
+                     if ( WinData.MDGridPurchData.Locate('AnimalId',QueryAnimals.FieldByName('AId').AsInteger,[]) ) and
+                        ( WinData.MDGridSaleData.Locate('AnimalId',QueryAnimals.FieldByName('AId').AsInteger,[]) ) then
+                        if ( WinData.MDGridPurchData.FieldByName('PurchPrice').AsFloat > 0 ) and ( WinData.MDGridSaleData.FieldByName('SalePrice').AsFloat > 0 ) then
+                           try
+                              WinData.MDGridGrossMarginData.Append;
+                              WinData.MDGridGrossMarginData.FieldByName('AnimalId').AsInteger := QueryAnimals.FieldByName('AId').AsInteger;
+                              WinData.MDGridGrossMarginData.FieldByName('GrossMargin').AsFloat := ( WinData.MDGridSaleData.FieldByName('SalePrice').AsFloat -
+                                                                                                    WinData.MDGridPurchData.FieldByName('PurchPrice').AsFloat );
+                              WinData.MDGridGrossMarginData.Post;
+                           except
+                              on e : Exception do
+                                 begin
+                                    ShowDebugMessage(e.Message);
+                                    ApplicationLog.LogException(e);
+                                    ApplicationLog.LogError(Format('WinData.MDGridGrossMarginData : Error posting for AnimalId :d.',
+                                                                   [QueryAnimals.FieldByName('AId').AsInteger]));
+                                 end;
+                           end;
+                     ProgressIndicator.Position := ProgressIndicator.Position + 1;
+                     QueryAnimals.Next;
                   end;
-               ProgressIndicator.Position := ProgressIndicator.Position + 1;
-               WeighedAnimals.Next;
+               ProgressIndicator.Close;
+               Application.ProcessMessages;
+               Update;
+               WinData.MDGridGrossMarginData.Open;
+            finally
+               try
+                  cxAnimalGridView.DataController.EndFullUpdate;
+                  Windata.AnimalFileByID.EnableControls;
+               except
+               end;
             end;
-         ProgressIndicator.Close;
-         Application.ProcessMessages;
-         Update;
+         end;
 
-         WinData.RefreshOverGainPerDay := False;
+      if ( InArray(cxAnimalGridViewOverallGainPerDay.Caption,FSelectedCalcGridCols) ) then
+         begin
+            WinData.RefreshOverGainPerDay := False;
+            WeighedAnimals := TTable.Create(nil);
+            try
+               //   25/01/18 [V5.7 R7.5] /MK Change - Bring up prompt to run the check for all animals both in herd or after the selected year.
+               iCalcYear := TfmUpdateAnimalGainPerDayMsg.GetWeightGainCalcYear;
+               if ( iCalcYear = 0 ) then Exit;
 
-      finally
-         if ( WeighedAnimals <> nil ) then
-            begin
+               if ( not(WinData.EventDataHelper.CanCalcOverallGainPerDay) ) then
+                  begin
+                     MessageDlg('To calculate lifetime weight gain/day, you need to have'+cCRLF+
+                                'entered at least two sets of weighings.',mtInformation,[mbOK],0);
+                     Exit;
+                  end;
+
+               QueryAnimals.SQL.Clear;
+               QueryAnimals.SQL.Add('UPDATE Animals');
+               QueryAnimals.SQL.Add('SET OverallWeightGain = 0');
+               QueryAnimals.ExecSQL;
+
+               WinData.AnimalFileByID.Close;
+               WinData.AnimalFileByID.Open;
+
+               WeighedAnimals.DatabaseName := AliasName;
+               WeighedAnimals.TableName := 'tWeighedAnimals';
+               WeighedAnimals.FieldDefs.Add('ID',ftAutoInc);
+               WeighedAnimals.FieldDefs.Add('AnimalID',ftInteger);
+               if WeighedAnimals.Exists then Exit;
+
+               WeighedAnimals.FieldDefs.Clear;
+               WeighedAnimals.IndexDefs.Clear;
+
+               WeighedAnimals.FieldDefs.Add('Id',ftAutoInc);
+               WeighedAnimals.FieldDefs.Add('AnimalID',ftInteger);
+
+               WeighedAnimals.IndexDefs.Add('iId','Id',[ixPrimary, ixUnique]);
+               WeighedAnimals.IndexDefs.Add('iAnimalID','AnimalID',[ixUnique, ixCaseInsensitive]);
+               WeighedAnimals.CreateTable;
+               WeighedAnimals.Open;
+
+               // Get all animals in the currently in the herd first.
+               QueryAnimals.SQL.Clear;
+               QueryAnimals.SQL.Add('INSERT INTO '+WeighedAnimals.TableName+' (AnimalID)');
+               QueryAnimals.SQL.Add('SELECT ID');
+               QueryAnimals.SQL.Add('FROM Animals');
+               QueryAnimals.SQL.Add('WHERE InHerd = True');
+               QueryAnimals.SQL.Add('AND   AnimalDeleted = False');
+               QueryAnimals.SQL.Add('AND   HerdID = '+IntToStr(WinData.UserDefaultHerdID)+'');
+               try
+                  QueryAnimals.ExecSQL;
+               except
+                  MessageDlg('Cannot get In Herd animals',mtError,[mbOK],0);
+                  Exit;
+               end;
+
+               // Get all animals that were sold since the date period selected.
+               QueryAnimals.Close;
+               QueryAnimals.SQL.Clear;
+               QueryAnimals.SQL.Add('INSERT INTO '+WeighedAnimals.TableName+' (AnimalID)');
+               QueryAnimals.SQL.Add('SELECT A.ID');
+               QueryAnimals.SQL.Add('FROM Animals A');
+               QueryAnimals.SQL.Add('LEFT JOIN Events E ON (E.AnimalID = A.ID)');
+               QueryAnimals.SQL.Add('WHERE A.InHerd = False');
+               QueryAnimals.SQL.Add('AND   A.HerdID = '+IntToStr(WinData.UserDefaultHerdID)+'');
+               QueryAnimals.SQL.Add('AND   E.EventType = '+IntToStr(CSaleDeathEvent)+'');
+               QueryAnimals.SQL.Add('AND   E.EventDate >= "01/01/'+IntToStr(iCalcYear)+'"');
+               try
+                  QueryAnimals.ExecSQL;
+               except
+                  MessageDlg('Cannot get sold animals',mtError,[mbOK],0);
+                  Exit;
+               end;
+
+               // Delete animals from WeighedAnimals table that have never been weighed to update of Animals table quicker.
+               QueryAnimals.Close;
+               QueryAnimals.SQL.Clear;
+               QueryAnimals.SQL.Add('DELETE FROM '+WeighedAnimals.TableName);
+               QueryAnimals.SQL.Add('WHERE AnimalID NOT IN (SELECT AnimalID');
+               QueryAnimals.SQL.Add('                       FROM Events');
+               QueryAnimals.SQL.Add('                       WHERE EventType = :CWeighingEvent)');
+               QueryAnimals.Params[0].AsInteger := CWeightEvent;
+               QueryAnimals.ExecSQL;
+
                WeighedAnimals.Close;
-               WeighedAnimals.DeleteTable;
-               FreeAndNil(WeighedAnimals);
+               WeighedAnimals.Open;
+
+               ShowProgressIndicator('Processing Lifetime Weight Gain/Day',0,WeighedAnimals.RecordCount,1);
+               ProgressIndicator.Max := WeighedAnimals.RecordCount;
+               Application.ProcessMessages;
+               Update;
+
+               //   27/06/18 [V5.8 R0.6] /MK Change - Update animals table of animals in WeighedAnimals table who have an OverAllGainPerDay value.
+               WeighedAnimals.First;
+               while ( not(WeighedAnimals.Eof) ) do
+                  begin
+                     fOverallGain := WinData.FEventDataHelper.GetAnimalOverallGainPerDay(WeighedAnimals.FieldByName('AnimalID').AsInteger);
+                     if ( fOverallGain > 0 ) then
+                        begin
+                           QueryAnimals.Close;
+                           QueryAnimals.SQL.Clear;
+                           QueryAnimals.SQL.Add('UPDATE Animals');
+                           QueryAnimals.SQL.Add('SET OverallWeightGain = :Gain');
+                           QueryAnimals.SQL.Add('WHERE ID = :AnimalID');
+                           QueryAnimals.Params[0].AsFloat := fOverallGain;
+                           QueryAnimals.Params[1].AsInteger := WeighedAnimals.FieldByName('AnimalID').AsInteger;
+                           QueryAnimals.ExecSQL;
+                        end;
+                     ProgressIndicator.Position := ProgressIndicator.Position + 1;
+                     WeighedAnimals.Next;
+                  end;
+               ProgressIndicator.Close;
+               Application.ProcessMessages;
+               Update;
+
+               WinData.RefreshOverGainPerDay := False;
+
+            finally
+               if ( WeighedAnimals <> nil ) then
+                  begin
+                     WeighedAnimals.Close;
+                     WeighedAnimals.DeleteTable;
+                     FreeAndNil(WeighedAnimals);
+                  end;
             end;
-      end;
+         end;
 
    finally
       if ( QueryAnimals <> nil ) then

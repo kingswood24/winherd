@@ -1646,7 +1646,7 @@ object fmGlobalSettings: TfmGlobalSettings
         end
         object cbRemoveTransponderAfterSale: TcxCheckBox
           Left = 11
-          Top = 210
+          Top = 237
           Caption = 'Remove Transponder Number After Sale'
           Properties.ImmediatePost = True
           Style.LookAndFeel.NativeStyle = True
@@ -1655,6 +1655,18 @@ object fmGlobalSettings: TfmGlobalSettings
           StyleHot.LookAndFeel.NativeStyle = True
           TabOrder = 9
           Width = 231
+        end
+        object cbUsePurchaseWeightAsLiveWeight: TcxCheckBox
+          Left = 11
+          Top = 212
+          Caption = 'Use purchase weight as live weight for Kill Out %'
+          Properties.ImmediatePost = True
+          Style.LookAndFeel.NativeStyle = True
+          StyleDisabled.LookAndFeel.NativeStyle = True
+          StyleFocused.LookAndFeel.NativeStyle = True
+          StyleHot.LookAndFeel.NativeStyle = True
+          TabOrder = 10
+          Width = 283
         end
       end
       object tsWeighings: TcxTabSheet

@@ -1098,7 +1098,7 @@ object fmGlobalSettings: TfmGlobalSettings
       Top = 15
       Width = 396
       Height = 338
-      ActivePage = tsSaleDeaths
+      ActivePage = tsCalving
       Align = alClient
       Font.Charset = ANSI_CHARSET
       Font.Color = clBlack

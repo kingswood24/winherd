@@ -1,14 +1,14 @@
 [Closed Files]
-File_0=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\MenuUnit.pas',0,1,16651,30,16666,0,0
-File_1=SourceModule,'C:\Program Files\Developer Express.VCL\ExpressQuantumGrid 5\Sources\cxGridTableView.pas',0,1,2501,21,2642,0,0
-File_2=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uCalculateGridColSelect.pas',0,1,39,39,42,1,0
-File_3=SourceModule,'C:\Program Files\Developer Express.VCL\ExpressQuantumGrid 5\Sources\cxGridDBTableView.pas',0,1,1,23,35,0,0
-File_4=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uHerdSync.pas',0,1,3594,47,3610,0,0
-File_5=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Changes.txt',0,1,1,44,5,0,0
-File_6=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\DairyData.pas',0,1,1001,1,1023,1,0
-File_7=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uHerdLookup.pas',0,1,3648,34,3668,1,0
-File_8=SourceModule,'C:\Kingswood\Delphi Development\Common\KRoutines.pas',0,1,4797,29,4817,0,0
-File_9=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\GenTypesConst.pas',0,1,28,21,66,0,0
+File_0=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\MenuUnit.pas',0,1,15906,26,15934,0,0
+File_1=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uHerdLookup.pas',0,1,546,25,558,0,0
+File_2=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Changes.txt',0,1,1,1,9,0,0
+File_3=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\GenTypesConst.pas',0,1,1042,94,1062,0,0
+File_4=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uCalculateGridColSelect.pas',0,1,52,1,57,1,0
+File_5=SourceModule,'c:\program files (x86)\borland\delphi5\Source\Vcl\classes.pas',0,1,8058,1,8078,0,0
+File_6=SourceModule,'C:\Kingswood\Delphi Development\Common\KRoutines.pas',0,1,1,1,1,0,0
+File_7=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\DairyData.pas',0,1,1006,2,1027,1,0
+File_8=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uCalfRegFlt.pas',0,1,1,17,1,1,0
+File_9=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uAimAnimalRegistration.pas',0,1,1,28,5,0,0
 
 [Modules]
 Module0=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.dpr
@@ -41,8 +41,8 @@ MessageView=MessageView@EditWindow0
 Create=1
 Visible=1
 State=0
-Left=187
-Top=106
+Left=192
+Top=107
 Width=1733
 Height=944
 MaxLeft=-1
@@ -54,8 +54,8 @@ LeftPanelClients=CodeExplorer@EditWindow0
 LeftPanelData=00000400010000000C000000436F64654578706C6F7265720000000000000000000000000000000000FFFFFFFF
 RightPanelSize=0
 BottomPanelSize=140
-BottomPanelClients=DockSite1
-BottomPanelData=0000040000000000BD06000000000000028C000000000000000100000000BD06000009000000446F636B5369746531FFFFFFFF
+BottomPanelClients=DockSite0
+BottomPanelData=0000040000000000BD06000000000000028C000000000000000100000000BD06000009000000446F636B5369746530FFFFFFFF
 
 [View0]
 Module=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.dpr
@@ -69,8 +69,7 @@ Count=1
 Watch0='iDaysBetween',256,0,18,1,0
 
 [Breakpoints]
-Count=1
-Breakpoint0='C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\MenuUnit.pas',15896,'',0,1,'',1,0,0,'',1,'','',''
+Count=0
 
 [AddressBreakpoints]
 Count=0
@@ -153,8 +152,8 @@ LRDockWidth=219
 Dockable=1
 SplitPos=85
 ArrangeBy=Name
-SelectedItem=ClientHeight
-ExpandedItems=DataBinding,Font.Style,LookAndFeel,OptionsView,Properties,Properties.ValueChecked,Properties.ValueGrayed,Properties.ValueUnchecked
+SelectedItem=Caption
+ExpandedItems=DataBinding,Font.Style,LookAndFeel,OptionsView,Properties.ValueChecked,Properties.ValueGrayed,Properties.ValueUnchecked
 HiddenCategories=Legacy
 ShowStatusBar=1
 
@@ -325,26 +324,6 @@ DockSiteType=1
 Create=1
 Visible=1
 State=0
-Left=0
-Top=107
-Width=193
-Height=944
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=185
-ClientHeight=913
-TBDockHeight=926
-LRDockWidth=219
-Dockable=1
-TabPosition=0
-ActiveTab=Object Inspector
-TabDockClients=PropertyInspector,ProjectManager
-
-[DockSite1]
-DockSiteType=1
-Create=1
-Visible=1
-State=0
 Left=12
 Top=0
 Width=1713
@@ -359,4 +338,24 @@ Dockable=1
 TabPosition=0
 ActiveTab=Call Stack
 TabDockClients=BreakpointWindow,WatchWindow,DebugLogView,LocalVarsWindow,ModuleWindow,CallStackWindow,MessageView@EditWindow0
+
+[DockSite1]
+DockSiteType=1
+Create=1
+Visible=1
+State=0
+Left=0
+Top=107
+Width=193
+Height=944
+MaxLeft=-1
+MaxTop=-1
+ClientWidth=185
+ClientHeight=913
+TBDockHeight=926
+LRDockWidth=219
+Dockable=1
+TabPosition=0
+ActiveTab=Object Inspector
+TabDockClients=PropertyInspector,ProjectManager
 

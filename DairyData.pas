@@ -1020,6 +1020,10 @@ unit DairyData;
  05/05/21 [V6.0 R1.0] /MK Additional Feature - GetEventLookupData/AnimalFileByIDBeforeOpen - Added ColdDeadWt to MDGridSaleData so it will appear on main grid.
 
  14/05/21 [V6.0 R1.1] /MK Additional Feature - GetEventLookupData/AnimalFileByIDBeforeOpen - Added SalesGrade and GrossMargin so it will appear on the main grid.
+
+ 18/05/21 [V6.0 R1.1] /MK Change - LoadPreferences - Gerry said to default the NatIdToAnimalNo to True.
+
+ 18/05/21 [V6.0 R1.1] /MK Change - QueryBandonRegistrations - Don't include animals from Animals and AIMAnimalReg table marked as Registered or Queried as per uAimAnimalRegistration
 }
 
 interface
@@ -20005,10 +20009,11 @@ begin
 
             Reg.ReadBinaryData(cGSHerdProtection, GlobalSettings.HerdPassword, SizeOf(THerdPassword));
 
+            //   18/05/21 [V6.0 R1.1] /MK Change - Gerry said to default the NatIdToAnimalNo to True.
             if Reg.ValueExists(cGSNatIDToAnimalNo) then
                GlobalSettings.NatIDToAnimalNo := Reg.ReadBool(cGSNatIDToAnimalNo)
             else
-               GlobalSettings.NatIDToAnimalNo := False;
+               GlobalSettings.NatIDToAnimalNo := True;
 
             if Reg.ValueExists(cGSBladeRegistered) then
                GlobalSettings.BladeRegistered := Reg.ReadBool(cGSBladeRegistered)
@@ -20401,7 +20406,8 @@ begin
                   Reg.WriteBool(cGSBackupSpanDisks, FALSE);
                   Reg.WriteBool(cGSBackupArchiveFile, TRUE);
                   Reg.WriteBinaryData(cGSHerdProtection, GlobalSettings.HerdPassword, SizeOf(THerdPassword));
-                  Reg.WriteBool(cGSNatIDToAnimalNo, FALSE);
+                  //   18/05/21 [V6.0 R1.1] /MK Change - Gerry said to default the NatIdToAnimalNo to True.
+                  Reg.WriteBool(cGSNatIDToAnimalNo, True);
                   Reg.WriteBool(cGSBladeRegistered, FALSE);
                   Reg.WriteBool(cGSRenumberAnimalNo, FALSE);
                   Reg.WriteBool(cGSMandatoryBreedingEvents, FALSE);
@@ -27728,27 +27734,33 @@ end;
 
 procedure TWinData.QueryBandonRegistrations(var AProgramCanClose : Boolean);
 const
+   //   18/05/21 [V6.0 R1.1] /MK Change - Don't include animals from Animals and AIMAnimalReg table marked as Registered or Queried as per uAimAnimalRegistration
    QueryTxt = 'SELECT COUNT(ID) CID '+
               'FROM Animals '+
-              'WHERE (DateOfBirth >= :ADate ) '+
-              'AND (ID IN ( SELECT ID%d FROM Calvings WHERE ID%dNotified=FALSE))';
+              'WHERE (DateOfBirth >= :StartDate ) '+
+              'AND   (AIMRegStatus NOT IN (3,4)) '+
+              'AND   (ID IN (SELECT ID%d FROM Calvings '+
+              '              WHERE ID%dNotified = FALSE '+
+              '              AND (ID%d > 0) '+
+              '              AND NOT ID%d IN (SELECT AnimalID FROM AimAnimalReg WHERE Status IN (3,4))))';
 var
    i, CalfCount : Integer;
    AimAnimalRegistration : TAimAnimalRegistration;
+   qCalvesToRegister : TQuery;
 begin
    AProgramCanClose := True;
 
    if ( not(SystemRegisteredCountry = Ireland) or (Menuform = nil)) then Exit;
 
    CalfCount := 0;
-   with TQuery.create(nil) do
+   qCalvesToRegister := TQuery.Create(nil);
+   with qCalvesToRegister do
       try
          DatabaseName := AliasName;
-
          for i := 1 to cMaxCalves do
             begin
                SQL.Clear;
-               SQL.Add(Format(QueryTxt,[i,i]));
+               SQL.Add(Format(QueryTxt,[i,i,i,i]));
                Params[0].AsDateTime := IncMonth(Date, -3);
                Open;
                try

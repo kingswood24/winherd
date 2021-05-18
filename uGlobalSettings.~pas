@@ -63,8 +63,9 @@
                                                                                    - If country is Ireland then autoset NextNatID to the NextNatID without user having to think of it.
                                                                                      For NI users do as we have always done because NextNatID for NI check is more intricate.
 
-  09/10/19 [V5.9 R0.8] /MK Change - cbUpdateMartWeightWithCrushWeight - Changed caption to Update Mart Weight And Price With Crush Weight as the procedure that takes the
-                                                                        Crush Weight then calculates a new price based on the TotalMartPrice, Individual Crush Weight and TotalCrushWeight.
+  14/10/19 [V5.9 R0.9] /MK Additional Feature - Created a new preference under Events/Sales/Deaths for Remove Transponder Number After Sale only for Parlour users - John Wynne.
+
+  21/08/20 [V5.9 R5.5] /MK Additional Feature - Added new preference "Use purchase weight as live weight for Kill out".
 }
 
 unit uGlobalSettings;
@@ -210,6 +211,7 @@ type
     cbDealer: TcxCheckBox;
     cbUpdateMartWeightWithCrushWeight: TcxCheckBox;
     cbRemoveTransponderAfterSale: TcxCheckBox;
+    cbUsePurchaseWeightAsLiveWeight: TcxCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure o(Sender: TObject; var Action: TCloseAction);
     procedure ListBox1Click(Sender: TObject);
@@ -408,6 +410,8 @@ begin
 
          cbUseLastWeighingAsLiveWeight.Checked := Preferences.ValueAsBoolean[cGSUseLastRecordWeightAsLiveWeightForKillOut];
 
+         cbUsePurchaseWeightAsLiveWeight.Checked := Preferences.ValueAsBoolean[cGSUsePurchaseWeightAsLiveWeightForKillOut];
+
          cbDealer.Checked := DisplayDealerMainScr;
 
          cbUpdateMartWeightWithCrushWeight.Checked := UpdateMartWeightWithCrushWeight;
@@ -556,6 +560,7 @@ begin
          DefaultCalfSexType := cmboDefaultCalfSex.Text;
 
          UseLastRecordWeightAsLiveWeightForKillOut := cbUseLastWeighingAsLiveWeight.Checked;
+         UsePurchaseWeightAsLiveWeightForKillOut := cbUsePurchaseWeightAsLiveWeight.Checked;
 
          //   05/09/11 [V5.0 R0.5] /MK Additional Feature - Default New Report Screen Layout For Everybody.
          Preferences.ValueAsString[cGSReportLayoutStyle] := 'NEWLAYOUT';
@@ -590,6 +595,7 @@ begin
          Preferences.ValueAsString[cGSDefaultCalfSexType] := cmboDefaultCalfSex.Text;
 
          Preferences.ValueAsBoolean[cGSUseLastRecordWeightAsLiveWeightForKillOut] := cbUseLastWeighingAsLiveWeight.Checked;
+         Preferences.ValueAsBoolean[cGSUsePurchaseWeightAsLiveWeightForKillOut] := cbUsePurchaseWeightAsLiveWeight.Checked;
 
          DisplayDealerMainScr := cbDealer.Checked;
 
