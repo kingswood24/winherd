@@ -15897,7 +15897,7 @@ begin
                            try
                               WinData.MDGridGrossMarginData.Append;
                               WinData.MDGridGrossMarginData.FieldByName('AnimalId').AsInteger := QueryAnimals.FieldByName('AId').AsInteger;
-                              WinData.MDGridGrossMarginData.FieldByName('GrossMargin').AsString := (WinData.MDGridSaleData.FieldByName('SalePrice').AsFloat -
+                              WinData.MDGridGrossMarginData.FieldByName('GrossMargin').AsFloat := (WinData.MDGridSaleData.FieldByName('SalePrice').AsFloat -
                                                                                                     WinData.MDGridPurchData.FieldByName('PurchPrice').AsFloat);
                               WinData.MDGridGrossMarginData.Post;
                            except

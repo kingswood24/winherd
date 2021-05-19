@@ -24376,7 +24376,7 @@ begin
 
                ClearMemDataFieldDefs(MDGridGrossMarginData);
                CreateMemDataFieldDef(MDGridGrossMarginData,'AnimalId',ftInteger);
-               CreateMemDataFieldDef(MDGridGrossMarginData,'GrossMargin',ftString,100);
+               CreateMemDataFieldDef(MDGridGrossMarginData,'GrossMargin',ftFloat);
                MDGridGrossMarginData.Active := True;
             end
          else
@@ -25200,7 +25200,7 @@ begin
          sFieldName := 'SalePrice';
          if AnimalFileByID.FindField(sFieldName) = nil then
             begin
-               with TStringField.Create(nil) do
+               with TFloatField.Create(nil) do
                   begin
                      FieldName := sFieldName;
                      FieldKind := fkLookup;
@@ -25215,7 +25215,7 @@ begin
          sFieldName := 'SaleCosts';
          if AnimalFileByID.FindField(sFieldName) = nil then
             begin
-               with TStringField.Create(nil) do
+               with TFloatField.Create(nil) do
                   begin
                      FieldName := sFieldName;
                      FieldKind := fkLookup;
@@ -25230,7 +25230,7 @@ begin
          sFieldName := 'PricePerKg';
          if AnimalFileByID.FindField(sFieldName) = nil then
             begin
-               with TStringField.Create(nil) do
+               with TFloatField.Create(nil) do
                   begin
                      FieldName := sFieldName;
                      FieldKind := fkLookup;
@@ -25245,22 +25245,7 @@ begin
          sFieldName := 'ColdDeadWt';
          if AnimalFileByID.FindField(sFieldName) = nil then
             begin
-               with TStringField.Create(nil) do
-                  begin
-                     FieldName := sFieldName;
-                     FieldKind := fkLookup;
-                     LookupDataSet := MDGridSaleData;
-                     KeyFields := sKeyField;
-                     LookupKeyFields := sLookupKeyField;
-                     LookupResultField := sFieldName;
-                     Dataset := AnimalFileByID;
-                  end;
-            end;
-
-         sFieldName := 'ColdDeadWt';
-         if AnimalFileByID.FindField(sFieldName) = nil then
-            begin
-               with TStringField.Create(nil) do
+               with TFloatField.Create(nil) do
                   begin
                      FieldName := sFieldName;
                      FieldKind := fkLookup;
@@ -25290,7 +25275,7 @@ begin
          sFieldName := 'GrossMargin';
          if AnimalFileByID.FindField(sFieldName) = nil then
             begin
-               with TStringField.Create(nil) do
+               with TFloatField.Create(nil) do
                   begin
                      FieldName := sFieldName;
                      FieldKind := fkLookup;

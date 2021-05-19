@@ -2183,6 +2183,7 @@ object MenuForm: TMenuForm
             Caption = 'Gross Margin'
             DataBinding.FieldName = 'GrossMargin'
             PropertiesClassName = 'TcxCurrencyEditProperties'
+            Properties.UseThousandSeparator = True
             HeaderAlignmentVert = vaCenter
             Options.Editing = False
             Options.Filtering = False
@@ -12235,7 +12236,7 @@ object MenuForm: TMenuForm
       PrinterPage.PageSize.Y = 297000
       PrinterPage._dxMeasurementUnits_ = 0
       PrinterPage._dxLastMU_ = 2
-      ReportDocument.CreationDate = 44335.5298216551
+      ReportDocument.CreationDate = 44335.6899548843
       OptionsOnEveryPage.Footers = False
       OptionsOnEveryPage.FilterBar = False
       OptionsPreview.Visible = False

@@ -2187,6 +2187,7 @@ object MenuForm: TMenuForm
             Options.Editing = False
             Options.Filtering = False
             Options.FilteringMRUItemsList = False
+            Options.SortByDisplayText = isbtOff
             Width = 76
           end
         end
@@ -12235,7 +12236,7 @@ object MenuForm: TMenuForm
       PrinterPage.PageSize.Y = 297000
       PrinterPage._dxMeasurementUnits_ = 0
       PrinterPage._dxLastMU_ = 2
-      ReportDocument.CreationDate = 44335.5298216551
+      ReportDocument.CreationDate = 44335.6899548843
       OptionsOnEveryPage.Footers = False
       OptionsOnEveryPage.FilterBar = False
       OptionsPreview.Visible = False
