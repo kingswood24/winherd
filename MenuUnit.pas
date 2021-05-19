@@ -5092,8 +5092,8 @@ begin
       else if ( FSelectedHerdType = htSuckler ) then
          begin
             SetLength(FSelectedCalcGridCols,1);
-            if ( InArray(cxAnimalGridViewGrossMargin.Caption,cDefaultMainGridCalcColumns) ) then
-               FSelectedCalcGridCols[1] := cxAnimalGridViewGrossMargin.Caption;
+            if ( InArray(cxAnimalGridViewOverallGainPerDay.Caption,cDefaultMainGridCalcColumns) ) then
+               FSelectedCalcGridCols[0] := cxAnimalGridViewOverallGainPerDay.Caption;
          end;
 end;
 
@@ -5634,11 +5634,13 @@ begin
          cxAnimalGridView.DataController.EndFullUpdate;
          Windata.AnimalFileByID.EnableControls;
       except
+         {
          on e : Exception do
             begin
-               //ResetAnimalGridColumns;
-               //RestoreAnimalGridView;
+               ResetAnimalGridColumns;
+               RestoreAnimalGridView;
             end;
+         }
       end;
 
       FocusAnimalOnMainGrid(CurrAnimal);
@@ -7568,8 +7570,11 @@ begin
       WinData.ActiveFilter := bSaleDeaths;
       btnClearSelect.Visible := bSaleDeaths;
    finally
-      WinData.AnimalFileByID.EnableControls;
-      cxAnimalGridView.DataController.EndFullUpdate;
+      try
+         WinData.AnimalFileByID.EnableControls;
+         cxAnimalGridView.DataController.EndFullUpdate;
+      except
+      end;
    end;
 end;
 
@@ -15830,9 +15835,12 @@ var
    WeighedAnimals : TTable;
    QueryAnimals : TQuery;
    fOverallGain : Double;
-   bHasSoldAnimals : Boolean;
+   bHasSoldAnimals,
+   bCalcCancelled : Boolean;
 begin
-   TfmCalculateGridColSelect.ShowTheForm(FSelectedCalcGridCols,FSelectedHerdType);
+   bCalcCancelled := False;
+   TfmCalculateGridColSelect.ShowTheForm(FSelectedCalcGridCols,FSelectedHerdType,bCalcCancelled);
+   if ( bCalcCancelled ) then Exit;
    if ( Length(FSelectedCalcGridCols) = 0 ) then
       begin
          MessageDlg('No grid columns selected to calculate.',mtInformation,[mbOK],0);
@@ -15862,7 +15870,8 @@ begin
             bHasSoldAnimals := ( QueryAnimals.RecordCount > 0 );
             if ( not(bHasSoldAnimals) ) then
                begin
-                  MessageDlg('Unable to calculate Gross Margin as no sold animals found on animal grid.',mtInformation,[mbOK],0);
+                  MessageDlg('Unable to calculate Gross Margin, no sold animals found on animal grid.'+cCRLF+
+                             'Apply a Sales Filter or tick Show All Animals.',mtInformation,[mbOK],0);
                   Exit;
                end;
             try
@@ -15888,8 +15897,8 @@ begin
                            try
                               WinData.MDGridGrossMarginData.Append;
                               WinData.MDGridGrossMarginData.FieldByName('AnimalId').AsInteger := QueryAnimals.FieldByName('AId').AsInteger;
-                              WinData.MDGridGrossMarginData.FieldByName('GrossMargin').AsFloat := ( WinData.MDGridSaleData.FieldByName('SalePrice').AsFloat -
-                                                                                                    WinData.MDGridPurchData.FieldByName('PurchPrice').AsFloat );
+                              WinData.MDGridGrossMarginData.FieldByName('GrossMargin').AsFloat := (WinData.MDGridSaleData.FieldByName('SalePrice').AsFloat -
+                                                                                                    WinData.MDGridPurchData.FieldByName('PurchPrice').AsFloat);
                               WinData.MDGridGrossMarginData.Post;
                            except
                               on e : Exception do
@@ -15936,9 +15945,6 @@ begin
                QueryAnimals.SQL.Add('UPDATE Animals');
                QueryAnimals.SQL.Add('SET OverallWeightGain = 0');
                QueryAnimals.ExecSQL;
-
-               WinData.AnimalFileByID.Close;
-               WinData.AnimalFileByID.Open;
 
                WeighedAnimals.DatabaseName := AliasName;
                WeighedAnimals.TableName := 'tWeighedAnimals';
@@ -16032,6 +16038,19 @@ begin
                Update;
 
                WinData.RefreshOverGainPerDay := False;
+
+               cxAnimalGridView.DataController.BeginFullUpdate;
+               WinData.AnimalFileByID.DisableControls;
+               try
+                  WinData.AnimalFileByID.Close;
+                  WinData.AnimalFileByID.Open;
+               finally
+                  try
+                     cxAnimalGridView.DataController.EndFullUpdate;
+                     Windata.AnimalFileByID.EnableControls;
+                  except
+                  end;
+               end;
 
             finally
                if ( WeighedAnimals <> nil ) then

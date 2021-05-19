@@ -36,9 +36,11 @@ type
     FGridView : TcxGridTableView;
     FColsToCalc : PStringArray;
     FDefaultColsToCalc : PStringArray;
+    FCalcCancelled : Boolean;
   public
     { Public declarations }
-    class procedure ShowTheForm ( var AGridColNames : PStringArray; AHerdType : THerdType );
+    class procedure ShowTheForm ( var AGridColNames : PStringArray; AHerdType : THerdType; var ACalcCancelled : Boolean );
+    procedure WMSysCommand(var MSG: TWMSysCommand); message WM_SYSCOMMAND;
   end;
 
 var
@@ -48,12 +50,13 @@ implementation
 
 {$R *.DFM}
 
-class procedure TfmCalculateGridColSelect.ShowTheForm ( var AGridColNames : PStringArray; AHerdType : THerdType );
+class procedure TfmCalculateGridColSelect.ShowTheForm ( var AGridColNames : PStringArray; AHerdType : THerdType; var ACalcCancelled : Boolean );
 var
    i, j, Index : Integer;
 begin
    with TfmCalculateGridColSelect.Create(nil) do
       try
+         FCalcCancelled := ACalcCancelled;
          if ( AHerdType = htBeef ) then
             begin
                SetLength(FDefaultColsToCalc,2);
@@ -83,6 +86,7 @@ begin
             end;
          ShowModal;
          AGridColNames := FColsToCalc;
+         ACalcCancelled := FCalcCancelled;
       finally
          Free;
       end;
@@ -100,13 +104,22 @@ begin
             FColsToCalc[Length(FColsToCalc)-1] := GridColsGridTableView.DataController.Values[i, 1];
          end;
    ModalResult := mrOK;
+   FCalcCancelled := False;
    Close;
 end;
 
 procedure TfmCalculateGridColSelect.actCancelExecute(Sender: TObject);
 begin
    ModalResult := mrCancel;
+   FCalcCancelled := True;
    Close;
+end;
+
+procedure TfmCalculateGridColSelect.WMSysCommand(var MSG: TWMSysCommand);
+begin
+   if ( MSG.CmdType = SC_CLOSE ) then
+      actCancel.Execute;
+   inherited;
 end;
 
 end.

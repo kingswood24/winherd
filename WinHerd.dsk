@@ -1,14 +1,14 @@
 [Closed Files]
-File_0=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\MenuUnit.pas',0,1,15906,26,15934,0,0
-File_1=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uHerdLookup.pas',0,1,546,25,558,0,0
-File_2=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Changes.txt',0,1,1,1,9,0,0
-File_3=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\GenTypesConst.pas',0,1,1042,94,1062,0,0
-File_4=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uCalculateGridColSelect.pas',0,1,52,1,57,1,0
-File_5=SourceModule,'c:\program files (x86)\borland\delphi5\Source\Vcl\classes.pas',0,1,8058,1,8078,0,0
-File_6=SourceModule,'C:\Kingswood\Delphi Development\Common\KRoutines.pas',0,1,1,1,1,0,0
-File_7=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\DairyData.pas',0,1,1006,2,1027,1,0
-File_8=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uCalfRegFlt.pas',0,1,1,17,1,1,0
-File_9=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uAimAnimalRegistration.pas',0,1,1,28,5,0,0
+File_0=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\MenuUnit.pas',0,1,15876,95,15901,0,0
+File_1=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\DairyData.pas',0,1,24348,82,24379,1,0
+File_2=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\GenTypesConst.pas',0,1,40,29,65,0,0
+File_3=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uCalculateGridColSelect.pas',0,1,91,34,120,1,0
+File_4=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uHerdLookup.pas',0,1,3272,1,3298,0,0
+File_5=SourceModule,'c:\program files (x86)\borland\delphi5\Source\Vcl\forms.pas',0,1,6253,1,6273,0,0
+File_6=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Changes.txt',0,1,1,1,9,0,0
+File_7=SourceModule,'c:\program files (x86)\borland\delphi5\Source\Vcl\classes.pas',0,1,8058,1,8078,0,0
+File_8=SourceModule,'C:\Kingswood\Delphi Development\Common\KRoutines.pas',0,1,1,1,1,0,0
+File_9=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uCalfRegFlt.pas',0,1,1,17,1,1,0
 
 [Modules]
 Module0=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.dpr
@@ -302,7 +302,7 @@ Dockable=1
 
 [MessageView@EditWindow0]
 Create=1
-Visible=0
+Visible=1
 State=0
 Left=0
 Top=0
@@ -336,7 +336,7 @@ TBDockHeight=140
 LRDockWidth=1027
 Dockable=1
 TabPosition=0
-ActiveTab=Call Stack
+ActiveTab=Messages
 TabDockClients=BreakpointWindow,WatchWindow,DebugLogView,LocalVarsWindow,ModuleWindow,CallStackWindow,MessageView@EditWindow0
 
 [DockSite1]
@@ -356,6 +356,6 @@ TBDockHeight=926
 LRDockWidth=219
 Dockable=1
 TabPosition=0
-ActiveTab=Object Inspector
+ActiveTab=Project Manager
 TabDockClients=PropertyInspector,ProjectManager
 

@@ -1022,6 +1022,8 @@ unit DairyData;
  14/05/21 [V6.0 R1.1] /MK Additional Feature - GetEventLookupData/AnimalFileByIDBeforeOpen - Added SalesGrade and GrossMargin so it will appear on the main grid.
 
  18/05/21 [V6.0 R1.1] /MK Change - LoadPreferences - Gerry said to default the NatIdToAnimalNo to True.
+
+ 18/05/21 [V6.0 R1.1] /MK Change - QueryBandonRegistrations - Don't include animals from Animals and AIMAnimalReg table marked as Registered or Queried as per uAimAnimalRegistration
 }
 
 interface
@@ -24374,7 +24376,7 @@ begin
 
                ClearMemDataFieldDefs(MDGridGrossMarginData);
                CreateMemDataFieldDef(MDGridGrossMarginData,'AnimalId',ftInteger);
-               CreateMemDataFieldDef(MDGridGrossMarginData,'GrossMargin',ftFloat);
+               CreateMemDataFieldDef(MDGridGrossMarginData,'GrossMargin',ftString,100);
                MDGridGrossMarginData.Active := True;
             end
          else
@@ -27732,6 +27734,7 @@ end;
 
 procedure TWinData.QueryBandonRegistrations(var AProgramCanClose : Boolean);
 const
+   //   18/05/21 [V6.0 R1.1] /MK Change - Don't include animals from Animals and AIMAnimalReg table marked as Registered or Queried as per uAimAnimalRegistration
    QueryTxt = 'SELECT COUNT(ID) CID '+
               'FROM Animals '+
               'WHERE (DateOfBirth >= :StartDate ) '+
