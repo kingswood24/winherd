@@ -1,14 +1,14 @@
 [Closed Files]
-File_0=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\MenuUnit.pas',0,1,17017,10,17083,0,0
-File_1=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\DairyData.pas',0,1,25009,32,25278,1,0
-File_2=SourceModule,'C:\Kingswood\Delphi Development\Common\cxUtils.pas',0,1,94,1,114,0,0
-File_3=SourceModule,'C:\Program Files\Developer Express.VCL\ExpressMemData\Sources\dxmdaset.pas',0,1,1,14,36,0,0
-File_4=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\GenTypesConst.pas',0,1,40,29,65,0,0
-File_5=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uCalculateGridColSelect.pas',0,1,91,34,120,1,0
-File_6=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uHerdLookup.pas',0,1,3272,1,3298,0,0
-File_7=SourceModule,'c:\program files (x86)\borland\delphi5\Source\Vcl\forms.pas',0,1,6253,1,6273,0,0
-File_8=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Changes.txt',0,1,1,1,9,0,0
-File_9=SourceModule,'c:\program files (x86)\borland\delphi5\Source\Vcl\classes.pas',0,1,8058,1,8078,0,0
+File_0=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uDataBackup.pas',0,1,1099,112,1106,1,0
+File_1=SourceModule,'C:\Kingswood\Delphi Development\Common\UserMsgConst.pas',0,1,1,18,7,0,0
+File_2=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Changes.txt',0,1,1,1,8,0,0
+File_3=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\MenuUnit.pas',0,1,985,1,1017,0,0
+File_4=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\DairyData.pas',0,1,25009,32,25278,1,0
+File_5=SourceModule,'C:\Kingswood\Delphi Development\Common\cxUtils.pas',0,1,94,1,114,0,0
+File_6=SourceModule,'C:\Program Files\Developer Express.VCL\ExpressMemData\Sources\dxmdaset.pas',0,1,1,14,36,0,0
+File_7=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\GenTypesConst.pas',0,1,40,29,65,0,0
+File_8=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uCalculateGridColSelect.pas',0,1,91,34,120,1,0
+File_9=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uHerdLookup.pas',0,1,3272,1,3298,0,0
 
 [Modules]
 Module0=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.dpr
@@ -25,10 +25,6 @@ FormState=0
 FormOnTop=0
 
 [C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.todo]
-FormState=0
-FormOnTop=0
-
-[C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uImageStore.pas]
 FormState=0
 FormOnTop=0
 
@@ -54,8 +50,8 @@ LeftPanelClients=CodeExplorer@EditWindow0
 LeftPanelData=00000400010000000C000000436F64654578706C6F7265720000000000000000000000000000000000FFFFFFFF
 RightPanelSize=0
 BottomPanelSize=140
-BottomPanelClients=DockSite1
-BottomPanelData=0000040000000000BD06000000000000028C000000000000000100000000BD06000009000000446F636B5369746531FFFFFFFF
+BottomPanelClients=DockSite0
+BottomPanelData=0000040000000000BD06000000000000028C000000000000000100000000BD06000009000000446F636B5369746530FFFFFFFF
 
 [View0]
 Module=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.dpr
@@ -69,7 +65,9 @@ Count=1
 Watch0='iDaysBetween',256,0,18,1,0
 
 [Breakpoints]
-Count=0
+Count=2
+Breakpoint0='C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uDataBackup.pas',1118,'',0,1,'',1,0,0,'',1,'','',''
+Breakpoint1='C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uDataBackup.pas',1004,'',0,1,'',1,0,0,'',1,'','',''
 
 [AddressBreakpoints]
 Count=0
@@ -82,8 +80,8 @@ Left=0
 Top=0
 Width=1920
 Height=115
-MaxLeft=-1
-MaxTop=-1
+MaxLeft=-4
+MaxTop=-4
 MaxWidth=1928
 MaxHeight=115
 ClientWidth=1920
@@ -150,10 +148,10 @@ ClientHeight=882
 TBDockHeight=926
 LRDockWidth=219
 Dockable=1
-SplitPos=82
+SplitPos=85
 ArrangeBy=Name
-SelectedItem=Caption
-ExpandedItems=DataBinding,DataController,DataController.DataModeController,DataController.Filter,DataController.Summary,DataController.Summary.DefaultGroupSummaryItems,DataController.Summary.FooterSummaryItems,Font.Style,LookAndFeel,Options,OptionsView,Properties,Properties.ValueChecked,Properties.ValueGrayed,Properties.ValueUnchecked
+SelectedItem=
+ExpandedItems=DataBinding,Font.Style,LookAndFeel,OptionsView,Properties,Properties.ValueChecked,Properties.ValueGrayed,Properties.ValueUnchecked
 HiddenCategories=Legacy
 ShowStatusBar=1
 
@@ -306,13 +304,13 @@ Visible=0
 State=0
 Left=0
 Top=0
-Width=1705
+Width=1689
 Height=111
 MaxLeft=-1
 MaxTop=-1
-ClientWidth=1705
+ClientWidth=1689
 ClientHeight=111
-TBDockHeight=111
+TBDockHeight=140
 LRDockWidth=443
 Dockable=1
 
@@ -320,26 +318,6 @@ Dockable=1
 DockHostCount=2
 
 [DockSite0]
-DockSiteType=1
-Create=1
-Visible=1
-State=0
-Left=0
-Top=107
-Width=193
-Height=944
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=185
-ClientHeight=913
-TBDockHeight=926
-LRDockWidth=219
-Dockable=1
-TabPosition=0
-ActiveTab=Object Inspector
-TabDockClients=PropertyInspector,ProjectManager
-
-[DockSite1]
 DockSiteType=1
 Create=1
 Visible=1
@@ -358,4 +336,24 @@ Dockable=1
 TabPosition=0
 ActiveTab=Call Stack
 TabDockClients=BreakpointWindow,WatchWindow,DebugLogView,LocalVarsWindow,ModuleWindow,CallStackWindow,MessageView@EditWindow0
+
+[DockSite1]
+DockSiteType=1
+Create=1
+Visible=1
+State=0
+Left=0
+Top=107
+Width=193
+Height=944
+MaxLeft=-1
+MaxTop=-1
+ClientWidth=185
+ClientHeight=913
+TBDockHeight=926
+LRDockWidth=219
+Dockable=1
+TabPosition=0
+ActiveTab=Project Manager
+TabDockClients=PropertyInspector,ProjectManager
 
