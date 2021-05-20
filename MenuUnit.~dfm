@@ -2183,11 +2183,11 @@ object MenuForm: TMenuForm
             Caption = 'Gross Margin'
             DataBinding.FieldName = 'GrossMargin'
             PropertiesClassName = 'TcxCurrencyEditProperties'
+            Properties.UseThousandSeparator = True
             HeaderAlignmentVert = vaCenter
             Options.Editing = False
             Options.Filtering = False
             Options.FilteringMRUItemsList = False
-            Options.SortByDisplayText = isbtOff
             Width = 76
           end
         end
