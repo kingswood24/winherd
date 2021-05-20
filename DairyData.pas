@@ -24233,7 +24233,6 @@ var
 
    i : Integer;
 begin
-
    if GlobalSettings.DisplayMovementFeedColsInGridView then
       begin
          if AOpen then
@@ -24253,6 +24252,8 @@ begin
                else
                   MDGridGrossMarginData.Close;
 
+               MovementDataHelper.CreateTempMovementEventTables;
+
                QGridPurchData := TQuery.Create(nil);
                QGridPurchData.DatabaseName := AliasName;
                with QGridPurchData do
@@ -24260,13 +24261,12 @@ begin
                      DatabaseName := AliasName;
                      SQL.Clear;
                      SQL.Add(' SELECT PE.AnimalID AnimalID, PE.EventDate PurchDate, P.Price PurchPrice,');
-                     SQL.Add(' S.Name SupplierName, P.LotNumber PurchLotNumber, P.FQASDays PurchFQASDays, PE.EventDesc PurchComment, ');
-                     SQL.Add(' P.Weight PurchWeight, P.SupplierCosts, P.BuyerCosts, P.Haulage, P.Commission,');
-                     SQL.Add(' S.Commission SupCommission, S.Transport SupTransport ');
-                     SQL.Add(' FROM Events PE');
+                     SQL.Add('        S.Name SupplierName, P.LotNumber PurchLotNumber, P.FQASDays PurchFQASDays, PE.EventDesc PurchComment, ');
+                     SQL.Add('        P.Weight PurchWeight, P.SupplierCosts, P.BuyerCosts, P.Haulage, P.Commission,');
+                     SQL.Add('        S.Commission SupCommission, S.Transport SupTransport ');
+                     SQL.Add(' FROM '+MovementDataHelper.TempPurchEvents.TableName+' PE');
                      SQL.Add(' LEFT JOIN Purchases P ON (P.EventID=PE.ID)');
                      SQL.Add(' LEFT JOIN SuppliersBreeders S ON (S.ID=P.Supplier)');
-                     SQL.Add(' WHERE (PE.EventType=12)');
                      Open;
                      ClearMemDataFieldDefs(MDGridPurchData);
                      CreateMemDataFieldDef(MDGridPurchData, 'AnimalId', ftInteger);
@@ -24335,10 +24335,9 @@ begin
                      SQL.Clear;
                      SQL.Add(' SELECT SE.AnimalID AnimalID, SE.EventDate SaleDate, C.Name CustomerName, S.Price SalePrice,');
                      SQL.Add('        S.CustomerCosts, S.TotalDeductions, S.ColdDeadWt, S.Weight, S.Grade');
-                     SQL.Add(' FROM Events SE');
+                     SQL.Add(' FROM '+MovementDataHelper.TempSaleEvents.TableName+' SE');
                      SQL.Add(' Left Join SalesDeaths S ON (S.EventID = SE.ID)');
                      SQL.Add(' Left Join Customers C On (C.ID = S.Customer)');
-                     SQL.Add(' WHERE (SE.EventType=11)');
                      Open;
                      ClearMemDataFieldDefs(MDGridSaleData);
                      CreateMemDataFieldDef(MDGridSaleData, 'AnimalId', ftInteger);
@@ -25289,339 +25288,338 @@ begin
 
       end;
 
-      GetEventLookupData(True);
+  GetEventLookupData(True);
 
-      sKeyField := 'ID';
-      sLookupKeyField := 'AnimalID';
+  sKeyField := 'ID';
+  sLookupKeyField := 'AnimalID';
 
-      //   05/01/11 [V4.0 R7.3] /MK Additional Feature - Add Condition Score Field.
-      sFieldName := 'CScore';
-      if AnimalFileByID.FindField(sFieldName) = nil then
-         begin
-            with TFloatField.Create(AnimalFileByID) do
-               begin
-                  FieldName := sFieldName;
-                  FieldKind := fkLookup;
-                  LookupDataSet := MDGridConditionScoreData;
-                  KeyFields := sKeyField;
-                  LookupKeyFields := sLookupKeyField;
-                  LookupResultField := sFieldName;
-                  Dataset := AnimalFileByID;
-               end;
-         end;
+  //   05/01/11 [V4.0 R7.3] /MK Additional Feature - Add Condition Score Field.
+  sFieldName := 'CScore';
+  if AnimalFileByID.FindField(sFieldName) = nil then
+     begin
+        with TFloatField.Create(AnimalFileByID) do
+           begin
+              FieldName := sFieldName;
+              FieldKind := fkLookup;
+              LookupDataSet := MDGridConditionScoreData;
+              KeyFields := sKeyField;
+              LookupKeyFields := sLookupKeyField;
+              LookupResultField := sFieldName;
+              Dataset := AnimalFileByID;
+           end;
+     end;
 
-      //   12/03/11 [V4.0 R8.7] /MK Additional Feature - Add Calving Date Field.
-      sFieldName := 'ThisLactCalvingDate';
-      if AnimalFileByID.FindField(sFieldName) = nil then
-         begin
-            with TDateField.Create(AnimalFileByID) do
-               begin
-                  FieldName := sFieldName;
-                  FieldKind := fkLookup;
-                  LookupDataSet := MDGridCalvingDateData;
-                  KeyFields := sKeyField;
-                  LookupKeyFields := sLookupKeyField;
-                  LookupResultField := sFieldName;
-                  Dataset := AnimalFileByID;
-               end;
-         end;
+  //   12/03/11 [V4.0 R8.7] /MK Additional Feature - Add Calving Date Field.
+  sFieldName := 'ThisLactCalvingDate';
+  if AnimalFileByID.FindField(sFieldName) = nil then
+     begin
+        with TDateField.Create(AnimalFileByID) do
+           begin
+              FieldName := sFieldName;
+              FieldKind := fkLookup;
+              LookupDataSet := MDGridCalvingDateData;
+              KeyFields := sKeyField;
+              LookupKeyFields := sLookupKeyField;
+              LookupResultField := sFieldName;
+              Dataset := AnimalFileByID;
+           end;
+     end;
 
-      sFieldName := 'LastLactCalvingDate';
-      if AnimalFileByID.FindField(sFieldName) = nil then
-         begin
-            with TDateField.Create(AnimalFileByID) do
-               begin
-                  FieldName := sFieldName;
-                  FieldKind := fkLookup;
-                  LookupDataSet := MDGridCalvingDateData;
-                  KeyFields := sKeyField;
-                  LookupKeyFields := sLookupKeyField;
-                  LookupResultField := sFieldName;
-                  Dataset := AnimalFileByID;
-               end;
-         end;
+  sFieldName := 'LastLactCalvingDate';
+  if AnimalFileByID.FindField(sFieldName) = nil then
+     begin
+        with TDateField.Create(AnimalFileByID) do
+           begin
+              FieldName := sFieldName;
+              FieldKind := fkLookup;
+              LookupDataSet := MDGridCalvingDateData;
+              KeyFields := sKeyField;
+              LookupKeyFields := sLookupKeyField;
+              LookupResultField := sFieldName;
+              Dataset := AnimalFileByID;
+           end;
+     end;
 
-      //   12/03/11 [V4.0 R8.7] /MK Additional Feature - Add Service Date Field.
-      //   31/07/12 [V5.0 R8.3] /MK Change - Created new ServiceDateLastLact Field.
-      sFieldName := 'ServiceDateThisLact';
-      if AnimalFileByID.FindField(sFieldName) = nil then
-         begin
-            with TDateField.Create(AnimalFileByID) do
-               begin
-                  FieldName := sFieldName;
-                  FieldKind := fkLookup;
-                  LookupDataSet := MDGridServiceDateData;
-                  KeyFields := sKeyField;
-                  LookupKeyFields := sLookupKeyField;
-                  LookupResultField := sFieldName;
-                  Dataset := AnimalFileByID;
-               end;
-         end;
+  //   12/03/11 [V4.0 R8.7] /MK Additional Feature - Add Service Date Field.
+  //   31/07/12 [V5.0 R8.3] /MK Change - Created new ServiceDateLastLact Field.
+  sFieldName := 'ServiceDateThisLact';
+  if AnimalFileByID.FindField(sFieldName) = nil then
+     begin
+        with TDateField.Create(AnimalFileByID) do
+           begin
+              FieldName := sFieldName;
+              FieldKind := fkLookup;
+              LookupDataSet := MDGridServiceDateData;
+              KeyFields := sKeyField;
+              LookupKeyFields := sLookupKeyField;
+              LookupResultField := sFieldName;
+              Dataset := AnimalFileByID;
+           end;
+     end;
 
-      //   31/07/12 [V5.0 R8.3] /MK Change - Created new ServiceDateLastLact Field.
-      sFieldName := 'ServiceDateLastLact';
-      if AnimalFileByID.FindField(sFieldName) = nil then
-         begin
-            with TDateField.Create(AnimalFileByID) do
-               begin
-                  FieldName := sFieldName;
-                  FieldKind := fkLookup;
-                  LookupDataSet := MDGridServiceDateData;
-                  KeyFields := sKeyField;
-                  LookupKeyFields := sLookupKeyField;
-                  LookupResultField := sFieldName;
-                  Dataset := AnimalFileByID;
-               end;
-         end;
+  //   31/07/12 [V5.0 R8.3] /MK Change - Created new ServiceDateLastLact Field.
+  sFieldName := 'ServiceDateLastLact';
+  if AnimalFileByID.FindField(sFieldName) = nil then
+     begin
+        with TDateField.Create(AnimalFileByID) do
+           begin
+              FieldName := sFieldName;
+              FieldKind := fkLookup;
+              LookupDataSet := MDGridServiceDateData;
+              KeyFields := sKeyField;
+              LookupKeyFields := sLookupKeyField;
+              LookupResultField := sFieldName;
+              Dataset := AnimalFileByID;
+           end;
+     end;
 
-      sFieldName := 'DryOffDate';
-      if AnimalFileByID.FindField(sFieldName) = nil then
-         begin
-            with TDateField.Create(AnimalFileByID) do
-               begin
-                  FieldName := sFieldName;
-                  FieldKind := fkLookup;
-                  LookupDataSet := MDGridDryOffDateData;
-                  KeyFields := sKeyField;
-                  LookupKeyFields := sLookupKeyField;
-                  LookupResultField := sFieldName;
-                  DataSet := AnimalFileByID;
-               end;
-         end;
+  sFieldName := 'DryOffDate';
+  if AnimalFileByID.FindField(sFieldName) = nil then
+     begin
+        with TDateField.Create(AnimalFileByID) do
+           begin
+              FieldName := sFieldName;
+              FieldKind := fkLookup;
+              LookupDataSet := MDGridDryOffDateData;
+              KeyFields := sKeyField;
+              LookupKeyFields := sLookupKeyField;
+              LookupResultField := sFieldName;
+              DataSet := AnimalFileByID;
+           end;
+     end;
 
-      sFieldName := 'PregDiagDate';
-      if AnimalFileByID.FindField(sFieldName) = nil then
-         begin
-            with TDateField.Create(AnimalFileByID) do
-               begin
-                  FieldName := sFieldName;
-                  FieldKind := fkLookup;
-                  LookupDataSet := MDGridPregDiagDateData;
-                  KeyFields := sKeyField;
-                  LookupKeyFields := sLookupKeyField;
-                  LookupResultField := sFieldName;
-                  DataSet := AnimalFileByID;
-               end;
-         end;
+  sFieldName := 'PregDiagDate';
+  if AnimalFileByID.FindField(sFieldName) = nil then
+     begin
+        with TDateField.Create(AnimalFileByID) do
+           begin
+              FieldName := sFieldName;
+              FieldKind := fkLookup;
+              LookupDataSet := MDGridPregDiagDateData;
+              KeyFields := sKeyField;
+              LookupKeyFields := sLookupKeyField;
+              LookupResultField := sFieldName;
+              DataSet := AnimalFileByID;
+           end;
+     end;
 
-      sFieldName := 'PDStatus';
-      if AnimalFileByID.FindField(sFieldName) = nil then
-         begin
-            with TBooleanField.Create(AnimalFileByID) do
-               begin
-                  FieldName := sFieldName;
-                  FieldKind := fkLookup;
-                  LookupDataSet := MDGridPregDiagDateData;
-                  KeyFields := sKeyField;
-                  LookupKeyFields := sLookupKeyField;
-                  LookupResultField := sFieldName;
-                  DataSet := AnimalFileByID;
-               end;
-         end;
+  sFieldName := 'PDStatus';
+  if AnimalFileByID.FindField(sFieldName) = nil then
+     begin
+        with TBooleanField.Create(AnimalFileByID) do
+           begin
+              FieldName := sFieldName;
+              FieldKind := fkLookup;
+              LookupDataSet := MDGridPregDiagDateData;
+              KeyFields := sKeyField;
+              LookupKeyFields := sLookupKeyField;
+              LookupResultField := sFieldName;
+              DataSet := AnimalFileByID;
+           end;
+     end;
 
-      sFieldName := 'DaysToFQAS';
-      if AnimalFileByID.FindField(sFieldName) = nil then
-         begin
-            with TIntegerField.Create(AnimalFileByID) do
-               begin
-                  FieldName := sFieldName;
-                  FieldKind := fkCalculated;
-                  Dataset := AnimalFileByID;
-               end;
-         end;
+  sFieldName := 'DaysToFQAS';
+  if AnimalFileByID.FindField(sFieldName) = nil then
+     begin
+        with TIntegerField.Create(AnimalFileByID) do
+           begin
+              FieldName := sFieldName;
+              FieldKind := fkCalculated;
+              Dataset := AnimalFileByID;
+           end;
+     end;
 
-      sFieldName := 'PurchFQAS';
-      if AnimalFileByID.FindField(sFieldName) = nil then
-         begin
-            with TBooleanField.Create(nil) do
-               begin
-                  FieldName := sFieldName;
-                  FieldKind := fkCalculated;
-                  Dataset := AnimalFileByID;
-                  OnGetText := AnimalFileByIDPurchFQASGetText;
-               end;
-         end;
+  sFieldName := 'PurchFQAS';
+  if AnimalFileByID.FindField(sFieldName) = nil then
+     begin
+        with TBooleanField.Create(nil) do
+           begin
+              FieldName := sFieldName;
+              FieldKind := fkCalculated;
+              Dataset := AnimalFileByID;
+              OnGetText := AnimalFileByIDPurchFQASGetText;
+           end;
+     end;
 
-      sFieldName := 'FeedGrpDesc';
-      if AnimalFileByID.FindField(sFieldName) = nil then
-         begin
-            with TStringField.Create(AnimalFileByID) do
-               begin
-                  FieldName := sFieldName;
-                  FieldKind := fkLookup;
-                  LookupDataSet := MDGridFeedData;
-                  KeyFields := sKeyField;
-                  LookupKeyFields := sLookupKeyField;
-                  LookupResultField := sFieldName;
-                  Dataset := AnimalFileByID;
-               end;
-         end;
+  sFieldName := 'FeedGrpDesc';
+  if AnimalFileByID.FindField(sFieldName) = nil then
+     begin
+        with TStringField.Create(AnimalFileByID) do
+           begin
+              FieldName := sFieldName;
+              FieldKind := fkLookup;
+              LookupDataSet := MDGridFeedData;
+              KeyFields := sKeyField;
+              LookupKeyFields := sLookupKeyField;
+              LookupResultField := sFieldName;
+              Dataset := AnimalFileByID;
+           end;
+     end;
 
-      sFieldName := 'BatchGrpDesc';
-      if AnimalFileByID.FindField(sFieldName) = nil then
-         begin
-            with TStringField.Create(AnimalFileByID) do
-               begin
-                  FieldName := sFieldName;
-                  FieldKind := fkLookup;
-                  LookupDataSet := MDGridBatchGroupData;
-                  KeyFields := sKeyField;
-                  LookupKeyFields := sLookupKeyField;
-                  LookupResultField := sFieldName;
-                  Dataset := AnimalFileByID;
-               end;
-         end;
+  sFieldName := 'BatchGrpDesc';
+  if AnimalFileByID.FindField(sFieldName) = nil then
+     begin
+        with TStringField.Create(AnimalFileByID) do
+           begin
+              FieldName := sFieldName;
+              FieldKind := fkLookup;
+              LookupDataSet := MDGridBatchGroupData;
+              KeyFields := sKeyField;
+              LookupKeyFields := sLookupKeyField;
+              LookupResultField := sFieldName;
+              Dataset := AnimalFileByID;
+           end;
+     end;
 
-      sFieldName := 'JohnesResult';
-      if AnimalFileByID.FindField(sFieldName) = nil then
-         begin
-            with TIntegerField.Create(AnimalFileByID) do
-               begin
-                  FieldName := sFieldName;
-                  FieldKind := fkLookup;
-                  LookupDataSet := MDGridJohnesResultData;
-                  KeyFields := sKeyField;
-                  LookupKeyFields := sLookupKeyField;
-                  LookupResultField := sFieldName;
-                  Dataset := AnimalFileByID;
-               end;
-         end;
+  sFieldName := 'JohnesResult';
+  if AnimalFileByID.FindField(sFieldName) = nil then
+     begin
+        with TIntegerField.Create(AnimalFileByID) do
+           begin
+              FieldName := sFieldName;
+              FieldKind := fkLookup;
+              LookupDataSet := MDGridJohnesResultData;
+              KeyFields := sKeyField;
+              LookupKeyFields := sLookupKeyField;
+              LookupResultField := sFieldName;
+              Dataset := AnimalFileByID;
+           end;
+     end;
 
-      sFieldName := 'Status';
-      if AnimalFileByID.FindField(sFieldName) = nil then
-         begin
-            with TStringField.Create(AnimalFileByID) do
-               begin
-                  FieldName := sFieldName;
-                  FieldKind := fkLookup;
-                  LookupDataSet := MDGridStatusData;
-                  KeyFields := sKeyField;
-                  LookupKeyFields := sLookupKeyField;
-                  LookupResultField := sFieldName;
-                  Dataset := AnimalFileByID;
-               end;
-         end;
+  sFieldName := 'Status';
+  if AnimalFileByID.FindField(sFieldName) = nil then
+     begin
+        with TStringField.Create(AnimalFileByID) do
+           begin
+              FieldName := sFieldName;
+              FieldKind := fkLookup;
+              LookupDataSet := MDGridStatusData;
+              KeyFields := sKeyField;
+              LookupKeyFields := sLookupKeyField;
+              LookupResultField := sFieldName;
+              Dataset := AnimalFileByID;
+           end;
+     end;
 
-      sFieldName := 'SCC';
-      if AnimalFileByID.FindField(sFieldName) = nil then
-         begin
-            with TFloatField.Create(AnimalFileByID) do
-               begin
-                  FieldName := sFieldName;
-                  FieldKind := fkLookup;
-                  LookupDataSet := MDGridCurrLactMilkData;
-                  KeyFields := sKeyField;
-                  LookupKeyFields := sLookupKeyField;
-                  LookupResultField := sFieldName;
-                  Dataset := AnimalFileByID;
-               end;
-         end;
+  sFieldName := 'SCC';
+  if AnimalFileByID.FindField(sFieldName) = nil then
+     begin
+        with TFloatField.Create(AnimalFileByID) do
+           begin
+              FieldName := sFieldName;
+              FieldKind := fkLookup;
+              LookupDataSet := MDGridCurrLactMilkData;
+              KeyFields := sKeyField;
+              LookupKeyFields := sLookupKeyField;
+              LookupResultField := sFieldName;
+              Dataset := AnimalFileByID;
+           end;
+     end;
 
-      sFieldName := 'LactYield';
-      if AnimalFileByID.FindField(sFieldName) = nil then
-         begin
-            with TFloatField.Create(AnimalFileByID) do
-               begin
-                  FieldName := sFieldName;
-                  FieldKind := fkLookup;
-                  LookupDataSet := MDGridCurrLactMilkData;
-                  KeyFields := sKeyField;
-                  LookupKeyFields := sLookupKeyField;
-                  LookupResultField := sFieldName;
-                  Dataset := AnimalFileByID;
-               end;
-         end;
+  sFieldName := 'LactYield';
+  if AnimalFileByID.FindField(sFieldName) = nil then
+     begin
+        with TFloatField.Create(AnimalFileByID) do
+           begin
+              FieldName := sFieldName;
+              FieldKind := fkLookup;
+              LookupDataSet := MDGridCurrLactMilkData;
+              KeyFields := sKeyField;
+              LookupKeyFields := sLookupKeyField;
+              LookupResultField := sFieldName;
+              Dataset := AnimalFileByID;
+           end;
+     end;
 
-      sFieldName := 'Solids';
-      if AnimalFileByID.FindField(sFieldName) = nil then
-         begin
-            with TFloatField.Create(AnimalFileByID) do
-               begin
-                  FieldName := sFieldName;
-                  FieldKind := fkLookup;
-                  LookupDataSet := MDGridCurrLactMilkData;
-                  KeyFields := sKeyField;
-                  LookupKeyFields := sLookupKeyField;
-                  LookupResultField := sFieldName;
-                  Dataset := AnimalFileByID;
-               end;
-         end;
+  sFieldName := 'Solids';
+  if AnimalFileByID.FindField(sFieldName) = nil then
+     begin
+        with TFloatField.Create(AnimalFileByID) do
+           begin
+              FieldName := sFieldName;
+              FieldKind := fkLookup;
+              LookupDataSet := MDGridCurrLactMilkData;
+              KeyFields := sKeyField;
+              LookupKeyFields := sLookupKeyField;
+              LookupResultField := sFieldName;
+              Dataset := AnimalFileByID;
+           end;
+     end;
 
-      sFieldName := 'DailyYield';
-      if AnimalFileByID.FindField(sFieldName) = nil then
-         begin
-            with TFloatField.Create(AnimalFileByID) do
-               begin
-                  FieldName := sFieldName;
-                  FieldKind := fkLookup;
-                  LookupDataSet := MDGridCurrLactMilkData;
-                  KeyFields := sKeyField;
-                  LookupKeyFields := sLookupKeyField;
-                  LookupResultField := sFieldName;
-                  Dataset := AnimalFileByID;
-               end;
-         end;
+  sFieldName := 'DailyYield';
+  if AnimalFileByID.FindField(sFieldName) = nil then
+     begin
+        with TFloatField.Create(AnimalFileByID) do
+           begin
+              FieldName := sFieldName;
+              FieldKind := fkLookup;
+              LookupDataSet := MDGridCurrLactMilkData;
+              KeyFields := sKeyField;
+              LookupKeyFields := sLookupKeyField;
+              LookupResultField := sFieldName;
+              Dataset := AnimalFileByID;
+           end;
+     end;
 
-      sFieldName := 'LatestSolids';
-      if AnimalFileByID.FindField(sFieldName) = nil then
-         begin
-            with TFloatField.Create(AnimalFileByID) do
-               begin
-                  FieldName := sFieldName;
-                  FieldKind := fkLookup;
-                  LookupDataSet := MDGridCurrLactMilkData;
-                  KeyFields := sKeyField;
-                  LookupKeyFields := sLookupKeyField;
-                  LookupResultField := sFieldName;
-                  Dataset := AnimalFileByID;
-               end;
-         end;
+  sFieldName := 'LatestSolids';
+  if AnimalFileByID.FindField(sFieldName) = nil then
+     begin
+        with TFloatField.Create(AnimalFileByID) do
+           begin
+              FieldName := sFieldName;
+              FieldKind := fkLookup;
+              LookupDataSet := MDGridCurrLactMilkData;
+              KeyFields := sKeyField;
+              LookupKeyFields := sLookupKeyField;
+              LookupResultField := sFieldName;
+              Dataset := AnimalFileByID;
+           end;
+     end;
 
-      sFieldName := 'BfatWeight';
-      if AnimalFileByID.FindField(sFieldName) = nil then
-         begin
-            with TFloatField.Create(AnimalFileByID) do
-               begin
-                  FieldName := sFieldName;
-                  FieldKind := fkLookup;
-                  LookupDataSet := MDGridCurrLactMilkData;
-                  KeyFields := sKeyField;
-                  LookupKeyFields := sLookupKeyField;
-                  LookupResultField := sFieldName;
-                  Dataset := AnimalFileByID;
-               end;
-         end;
+  sFieldName := 'BfatWeight';
+  if AnimalFileByID.FindField(sFieldName) = nil then
+     begin
+        with TFloatField.Create(AnimalFileByID) do
+           begin
+              FieldName := sFieldName;
+              FieldKind := fkLookup;
+              LookupDataSet := MDGridCurrLactMilkData;
+              KeyFields := sKeyField;
+              LookupKeyFields := sLookupKeyField;
+              LookupResultField := sFieldName;
+              Dataset := AnimalFileByID;
+           end;
+     end;
 
-      sFieldName := 'ProtWeight';
-      if AnimalFileByID.FindField(sFieldName) = nil then
-         begin
-            with TFloatField.Create(AnimalFileByID) do
-               begin
-                  FieldName := sFieldName;
-                  FieldKind := fkLookup;
-                  LookupDataSet := MDGridCurrLactMilkData;
-                  KeyFields := sKeyField;
-                  LookupKeyFields := sLookupKeyField;
-                  LookupResultField := sFieldName;
-                  Dataset := AnimalFileByID;
-               end;
-         end;
+  sFieldName := 'ProtWeight';
+  if AnimalFileByID.FindField(sFieldName) = nil then
+     begin
+        with TFloatField.Create(AnimalFileByID) do
+           begin
+              FieldName := sFieldName;
+              FieldKind := fkLookup;
+              LookupDataSet := MDGridCurrLactMilkData;
+              KeyFields := sKeyField;
+              LookupKeyFields := sLookupKeyField;
+              LookupResultField := sFieldName;
+              Dataset := AnimalFileByID;
+           end;
+     end;
 
-      sFieldName := 'A1A2Result';
-      if AnimalFileByID.FindField(sFieldName) = nil then
-         begin
-            with TStringField.Create(AnimalFileByID) do
-               begin
-                  FieldName := sFieldName;
-                  FieldKind := fkLookup;
-                  LookupDataSet := MDGridA1A2ResultData;
-                  KeyFields := sKeyField;
-                  LookupKeyFields := sLookupKeyField;
-                  LookupResultField := sFieldName;
-                  DataSet := AnimalFileByID;
-               end;
-         end;
-
+  sFieldName := 'A1A2Result';
+  if AnimalFileByID.FindField(sFieldName) = nil then
+     begin
+        with TStringField.Create(AnimalFileByID) do
+           begin
+              FieldName := sFieldName;
+              FieldKind := fkLookup;
+              LookupDataSet := MDGridA1A2ResultData;
+              KeyFields := sKeyField;
+              LookupKeyFields := sLookupKeyField;
+              LookupResultField := sFieldName;
+              DataSet := AnimalFileByID;
+           end;
+     end;
 end;
 
 procedure TWinData.AddToEventLookupData(AAnimalID, AEventType: Integer);

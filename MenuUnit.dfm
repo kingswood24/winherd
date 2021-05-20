@@ -142,7 +142,7 @@ object MenuForm: TMenuForm
           Shape = bsTopLine
         end
         object RxSpeedButton5: TRxSpeedButton
-          Left = 453
+          Left = 546
           Top = 1
           Width = 99
           Height = 19
@@ -221,7 +221,7 @@ object MenuForm: TMenuForm
           Shape = bsLeftLine
         end
         object btnModifyGrid: TRxSpeedButton
-          Left = 336
+          Left = 408
           Top = 1
           Width = 113
           Height = 19
@@ -264,7 +264,7 @@ object MenuForm: TMenuForm
           Spacing = 5
         end
         object btnRefreshAnimals: TRxSpeedButton
-          Left = 232
+          Left = 285
           Top = 1
           Width = 99
           Height = 19
@@ -315,7 +315,7 @@ object MenuForm: TMenuForm
           Spacing = 5
         end
         object cbAllAnimals: TDBCheckBoxEh
-          Left = 602
+          Left = 710
           Top = 3
           Width = 115
           Height = 15
@@ -339,7 +339,7 @@ object MenuForm: TMenuForm
           OnClick = cbAllAnimalsClick
         end
         object cbSearch: TDBCheckBoxEh
-          Left = 760
+          Left = 881
           Top = 3
           Width = 115
           Height = 15
@@ -1429,59 +1429,34 @@ object MenuForm: TMenuForm
             end>
           DataController.Summary.FooterSummaryItems = <
             item
-              Kind = skCount
               OnGetText = cxAnimalGridViewPrintTotalAmountCount
               Column = cxAnimalGridViewSortAnimalNo
             end
             item
-              Format = '0.00'
-              Kind = skAverage
-              OnGetText = cxAnimalGridViewTcxGridDBDataControllerTcxDataSummaryFooterSummaryItems1GetText
               Column = cxAnimalGridViewOverallGainPerDay
             end
             item
-              Kind = skAverage
               Column = cxAnimalGridViewDaysInMilk
             end
             item
-              Format = '0.00'
-              Kind = skAverage
-              OnGetText = cxAnimalGridViewPrintAvgDaysOnFarm
               Column = cxAnimalGridViewDaysOnFarm
             end
             item
-              Format = '0.00'
-              Kind = skAverage
-              OnGetText = cxAnimalGridViewPrintAvgPricePerKg
               Column = cxAnimalGridViewPricePerKg
             end
             item
-              Format = '0.00'
-              Kind = skAverage
-              OnGetText = cxAnimalGridViewPrintAvgPurchPrice
               Column = cxAnimalGridViewPurchPrice
             end
             item
-              Format = '0.00'
-              Kind = skAverage
-              OnGetText = cxAnimalGridViewPrintAvgSalePrice
               Column = cxAnimalGridViewSalePrice
             end
             item
-              Format = '0.00'
-              Kind = skAverage
-              OnGetText = cxAnimalGridViewPrintAvgPurchWeight
               Column = cxAnimalGridViewPurchWeight
             end
             item
-              Format = '0.00'
-              Kind = skAverage
-              OnGetText = cxAnimalGridViewPrintColdDeadWt
-              FieldName = 'ColdDeadWt'
               Column = cxAnimalGridViewColdDeadWt
             end
             item
-              OnGetText = cxAnimalGridViewPrintAvgGrossMargin
               Column = cxAnimalGridViewGrossMargin
             end>
           DataController.Summary.SummaryGroups = <>
@@ -12218,6 +12193,8 @@ object MenuForm: TMenuForm
     PreviewOptions.VisibleOptions = [pvoPrint]
     PrintTitle = 'Main Grid'
     Version = 0
+    OnAfterPreview = ComponentPrinterAfterPreview
+    OnBeforePreview = ComponentPrinterBeforePreview
     Left = 1072
     Top = 121
     object AnimalGridPrinterLink: TdxGridReportLink
@@ -12236,7 +12213,7 @@ object MenuForm: TMenuForm
       PrinterPage.PageSize.Y = 297000
       PrinterPage._dxMeasurementUnits_ = 0
       PrinterPage._dxLastMU_ = 2
-      ReportDocument.CreationDate = 44335.6899548843
+      ReportDocument.CreationDate = 44336.7613866782
       OptionsOnEveryPage.Footers = False
       OptionsOnEveryPage.FilterBar = False
       OptionsPreview.Visible = False
