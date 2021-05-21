@@ -1,3 +1,9 @@
+Version V6.0 R1.2
+
+21/05/21 /MK Bug Fix - MenuUnit - I found that moving across the grid was very slow with Simon McDermots data which has 11,000 animals and 27,000 events.
+                                  I created a new private variable FPrintGrid that is set to False on FormCreate, its set to True on PrintGrid and then False after PrintGrid.
+                                  This will stop the new DBTableSummaryItem.GetText from running until the user clicks print which is the only time the footer is showing.
+
 Version V6.0 R1.1
 
 12/05/21 /MK Change - MenuUnit - SetUpForm - Moved btnRefreshAnimals button above the grid of animals - no need to disable it as all herds will use it eventually.

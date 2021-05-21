@@ -24252,8 +24252,6 @@ begin
                else
                   MDGridGrossMarginData.Close;
 
-               MovementDataHelper.CreateTempMovementEventTables;
-
                QGridPurchData := TQuery.Create(nil);
                QGridPurchData.DatabaseName := AliasName;
                with QGridPurchData do
@@ -24264,9 +24262,10 @@ begin
                      SQL.Add('        S.Name SupplierName, P.LotNumber PurchLotNumber, P.FQASDays PurchFQASDays, PE.EventDesc PurchComment, ');
                      SQL.Add('        P.Weight PurchWeight, P.SupplierCosts, P.BuyerCosts, P.Haulage, P.Commission,');
                      SQL.Add('        S.Commission SupCommission, S.Transport SupTransport ');
-                     SQL.Add(' FROM '+MovementDataHelper.TempPurchEvents.TableName+' PE');
+                     SQL.Add(' FROM Events PE');
                      SQL.Add(' LEFT JOIN Purchases P ON (P.EventID=PE.ID)');
                      SQL.Add(' LEFT JOIN SuppliersBreeders S ON (S.ID=P.Supplier)');
+                     SQL.Add(' WHERE PE.EventType = 12');
                      Open;
                      ClearMemDataFieldDefs(MDGridPurchData);
                      CreateMemDataFieldDef(MDGridPurchData, 'AnimalId', ftInteger);
@@ -24335,9 +24334,10 @@ begin
                      SQL.Clear;
                      SQL.Add(' SELECT SE.AnimalID AnimalID, SE.EventDate SaleDate, C.Name CustomerName, S.Price SalePrice,');
                      SQL.Add('        S.CustomerCosts, S.TotalDeductions, S.ColdDeadWt, S.Weight, S.Grade');
-                     SQL.Add(' FROM '+MovementDataHelper.TempSaleEvents.TableName+' SE');
-                     SQL.Add(' Left Join SalesDeaths S ON (S.EventID = SE.ID)');
-                     SQL.Add(' Left Join Customers C On (C.ID = S.Customer)');
+                     SQL.Add(' FROM Events SE');
+                     SQL.Add(' LEFT JOIN SalesDeaths S ON (S.EventID = SE.ID)');
+                     SQL.Add(' LEFT JOIN Customers C On (C.ID = S.Customer)');
+                     SQL.Add(' WHERE SE.EventType = 11');
                      Open;
                      ClearMemDataFieldDefs(MDGridSaleData);
                      CreateMemDataFieldDef(MDGridSaleData, 'AnimalId', ftInteger);
@@ -25010,12 +25010,13 @@ var
    sLookupKeyField : string;
    sFieldName : string;
 begin
+   GetEventLookupData(True);
+
+  sKeyField := 'ID';
+  sLookupKeyField := 'AnimalID';
+
    if GlobalSettings.DisplayMovementFeedColsInGridView then
       begin
-         GetEventLookupData(True);
-
-         sKeyField := 'ID';
-         sLookupKeyField := 'AnimalID';
          sFieldName      := 'PurchDate';
          if AnimalFileByID.FindField(sFieldName) = nil then
             begin
@@ -25287,11 +25288,6 @@ begin
             end;
 
       end;
-
-  GetEventLookupData(True);
-
-  sKeyField := 'ID';
-  sLookupKeyField := 'AnimalID';
 
   //   05/01/11 [V4.0 R7.3] /MK Additional Feature - Add Condition Score Field.
   sFieldName := 'CScore';

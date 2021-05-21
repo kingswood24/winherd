@@ -1,38 +1,21 @@
 [Closed Files]
-File_0=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uGroupUpdate.pas',0,1,250,50,289,0,0
-File_1=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Reports\uSalesReport.pas',0,1,1160,21,1180,0,0
-File_2=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uMovementDataHelper.pas',0,1,64,1,99,0,0
-File_3=SourceModule,'C:\Program Files\Developer Express.VCL\ExpressDataController\Sources\cxDBData.pas',0,1,1249,1,1279,0,0
-File_4=SourceModule,'C:\Program Files\Developer Express.VCL\ExpressQuantumGrid 5\Sources\cxGridCustomTableView.pas',0,1,3511,1,3531,0,0
-File_5=SourceModule,'C:\Program Files\Developer Express.VCL\ExpressQuantumGrid 5\Sources\cxGrid.pas',0,1,2092,1,2112,0,0
-File_6=SourceModule,'C:\Program Files\Developer Express.VCL\ExpressQuantumGrid 5\Sources\cxGridCustomView.pas',0,1,7599,1,7619,0,0
-File_7=SourceModule,'C:\Program Files\Developer Express.VCL\ExpressQuantumGrid 5\Sources\cxGridDBDataDefinitions.pas',0,1,408,1,428,0,0
-File_8=SourceModule,'c:\program files (x86)\borland\delphi5\Source\Vcl\dbtables.pas',0,1,5884,1,5904,0,0
+File_0=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\DairyData.pas',0,1,25337,3,25340,1,0
+File_1=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\MenuUnit.pas',0,1,16766,58,16768,0,0
+File_2=SourceModule,'C:\Program Files\Developer Express.VCL\ExpressDataController\Sources\cxCustomData.pas',0,1,1267,1,1287,0,0
+File_3=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uGroupUpdate.pas',0,1,250,50,289,0,0
+File_4=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Reports\uSalesReport.pas',0,1,1160,21,1180,0,0
+File_5=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uMovementDataHelper.pas',0,1,64,1,99,0,0
+File_6=SourceModule,'C:\Program Files\Developer Express.VCL\ExpressDataController\Sources\cxDBData.pas',0,1,1249,1,1279,0,0
+File_7=SourceModule,'C:\Program Files\Developer Express.VCL\ExpressQuantumGrid 5\Sources\cxGridCustomTableView.pas',0,1,3511,1,3531,0,0
+File_8=SourceModule,'C:\Program Files\Developer Express.VCL\ExpressQuantumGrid 5\Sources\cxGrid.pas',0,1,2092,1,2112,0,0
+File_9=SourceModule,'C:\Program Files\Developer Express.VCL\ExpressQuantumGrid 5\Sources\cxGridCustomView.pas',0,1,7599,1,7619,0,0
 
 [Modules]
-Module0=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\DairyData.pas
-Module1=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\MenuUnit.pas
-Module2=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.dpr
-Module3=C:\Program Files\Developer Express.VCL\ExpressDataController\Sources\cxCustomData.pas
-Count=4
+Module0=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.dpr
+Count=1
 EditWindowCount=1
 
-[C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\DairyData.pas]
-ModuleType=SourceModule
-FormState=1
-FormOnTop=0
-
-[C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\MenuUnit.pas]
-ModuleType=SourceModule
-FormState=1
-FormOnTop=1
-
 [C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.dpr]
-ModuleType=SourceModule
-FormState=0
-FormOnTop=0
-
-[C:\Program Files\Developer Express.VCL\ExpressDataController\Sources\cxCustomData.pas]
 ModuleType=SourceModule
 FormState=0
 FormOnTop=0
@@ -50,12 +33,9 @@ FormState=0
 FormOnTop=0
 
 [EditWindow0]
-ViewCount=4
-CurrentView=1
+ViewCount=1
+CurrentView=0
 View0=0
-View1=1
-View2=2
-View3=3
 CodeExplorer=CodeExplorer@EditWindow0
 MessageView=MessageView@EditWindow0
 Create=1
@@ -84,35 +64,12 @@ CursorY=1
 TopLine=1
 LeftCol=1
 
-[View1]
-Module=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\DairyData.pas
-CursorX=3
-CursorY=25340
-TopLine=25337
-LeftCol=1
-
-[View2]
-Module=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\MenuUnit.pas
-CursorX=117
-CursorY=17086
-TopLine=16997
-LeftCol=1
-
-[View3]
-Module=C:\Program Files\Developer Express.VCL\ExpressDataController\Sources\cxCustomData.pas
-CursorX=1
-CursorY=1287
-TopLine=1267
-LeftCol=1
-
 [Watches]
 Count=1
 Watch0='iDaysBetween',256,0,18,1,0
 
 [Breakpoints]
-Count=2
-Breakpoint0='C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\MenuUnit.pas',17086,'',0,1,'',1,0,0,'',1,'','',''
-Breakpoint1='C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\MenuUnit.pas',16770,'',0,1,'',1,0,0,'',1,'','',''
+Count=0
 
 [AddressBreakpoints]
 Count=0
@@ -125,8 +82,8 @@ Left=0
 Top=0
 Width=1920
 Height=115
-MaxLeft=-4
-MaxTop=-4
+MaxLeft=-1
+MaxTop=-1
 MaxWidth=1928
 MaxHeight=115
 ClientWidth=1920
@@ -195,7 +152,7 @@ LRDockWidth=219
 Dockable=1
 SplitPos=85
 ArrangeBy=Name
-SelectedItem=Name
+SelectedItem=Caption
 ExpandedItems=DataBinding,Font.Style,LookAndFeel,OptionsView,Properties,Properties.ValueChecked,Properties.ValueGrayed,Properties.ValueUnchecked
 HiddenCategories=Legacy
 ShowStatusBar=1
@@ -345,15 +302,15 @@ Dockable=1
 
 [MessageView@EditWindow0]
 Create=1
-Visible=0
+Visible=1
 State=0
 Left=0
 Top=0
-Width=1689
+Width=1705
 Height=111
 MaxLeft=-1
 MaxTop=-1
-ClientWidth=1689
+ClientWidth=1705
 ClientHeight=111
 TBDockHeight=140
 LRDockWidth=443
@@ -379,7 +336,7 @@ TBDockHeight=140
 LRDockWidth=1027
 Dockable=1
 TabPosition=0
-ActiveTab=Call Stack
+ActiveTab=Messages
 TabDockClients=BreakpointWindow,WatchWindow,DebugLogView,LocalVarsWindow,ModuleWindow,CallStackWindow,MessageView@EditWindow0
 
 [DockSite1]
@@ -399,6 +356,6 @@ TBDockHeight=926
 LRDockWidth=219
 Dockable=1
 TabPosition=0
-ActiveTab=Project Manager
+ActiveTab=Object Inspector
 TabDockClients=PropertyInspector,ProjectManager
 

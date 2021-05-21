@@ -1014,6 +1014,10 @@ unit MenuUnit;
  12/05/21 [V6.0 R1.1] /MK Change - SetUpForm - Moved btnRefreshAnimals button above the grid of animals - no need to disable it as all herds will use it eventually.
 
  14/05/21 [V6.0 R1.1] /MK Additional Feature - actRefreshAnimals - Added calculation of Gross Margin from WinData.MDGridPurchData and WinData.MDGridSaleData.
+
+ 21/05/21 [V6.0 R1.2] /MK Bug Fix - I found that moving across the grid was very slow with Simon McDermots data which has 11,000 animals and 27,000 events.
+                                    I created a new private variable FPrintGrid that is set to False on FormCreate, its set to True on PrintGrid and then False after PrintGrid.
+                                    This will stop the new DBTableSummaryItem.GetText from running until the user clicks print which is the only time the footer is showing.
 }
 
 interface
@@ -2658,10 +2662,6 @@ type
     procedure cxAnimalGridViewPrintAvgOverallGainPerDay(
       Sender: TcxDataSummaryItem; const AValue: Variant;
       AIsFooter: Boolean; var AText: String);
-    procedure ComponentPrinterBeforePreview(Sender: TObject;
-      AReportLink: TBasedxReportLink);
-    procedure ComponentPrinterAfterPreview(Sender: TObject;
-      AReportLink: TBasedxReportLink);
   private
     { Private declarations }
     Reg : TRegistry;
@@ -8791,10 +8791,12 @@ end;
 
 procedure TMenuForm.actPrintGridExecute(Sender: TObject);
 begin
+   FPrintGrid := True;
    if Length(ComponentPrinter.PrintTitle) = 0 then
       ComponentPrinter.PrintTitle := 'Kingswood Grid Print';
    if not AnimalGridPrinterLink.PreviewExists then
       AnimalGridPrinterLink.Preview;
+   FPrintGrid := False;
 end;
 
 procedure TMenuForm.actEventHistoryExecute(Sender: TObject);
@@ -16780,7 +16782,8 @@ procedure TMenuForm.cxAnimalGridViewPrintAvgPricePerKg(
 begin
    AText := '';
    if ( FFormShowing ) and ( FPrintGrid ) then
-      if ( WinData.AnimalFileByID <> nil ) and ( WinData.AnimalFileByID.Active ) and ( WinData.AnimalFileByID.RecordCount > 0 ) then
+      if ( WinData.AnimalFileByID <> nil ) and ( WinData.AnimalFileByID.Active ) and
+         ( WinData.AnimalFileByID.RecordCount > 0 ) and ( cxAnimalGridViewPricePerKg.Visible ) then
          with TQuery.Create(nil) do
             try
                DatabaseName := AliasName;
@@ -16822,7 +16825,8 @@ procedure TMenuForm.cxAnimalGridViewPrintAvgSalePrice(
 begin
    AText := '';
    if ( FFormShowing ) and ( FPrintGrid ) then
-      if ( WinData.AnimalFileByID <> nil ) and ( WinData.AnimalFileByID.Active ) and ( WinData.AnimalFileByID.RecordCount > 0 ) then
+      if ( WinData.AnimalFileByID <> nil ) and ( WinData.AnimalFileByID.Active ) and
+         ( WinData.AnimalFileByID.RecordCount > 0 ) and ( cxAnimalGridViewSalePrice.Visible ) then
          with TQuery.Create(nil) do
             try
                DatabaseName := AliasName;
@@ -16853,7 +16857,8 @@ procedure TMenuForm.cxAnimalGridViewPrintAvgColdDeadWt(
 begin
    AText := '';
    if ( FFormShowing ) and ( FPrintGrid ) then
-      if ( WinData.AnimalFileByID <> nil ) and ( WinData.AnimalFileByID.Active ) and ( WinData.AnimalFileByID.RecordCount > 0 ) then
+      if ( WinData.AnimalFileByID <> nil ) and ( WinData.AnimalFileByID.Active ) and
+         ( WinData.AnimalFileByID.RecordCount > 0 ) and ( cxAnimalGridViewColdDeadWt.Visible ) then
          with TQuery.Create(nil) do
             try
                DatabaseName := AliasName;
@@ -16884,7 +16889,8 @@ procedure TMenuForm.cxAnimalGridViewPrintAvgPurchWeight(
 begin
    AText := '';
    if ( FFormShowing ) and ( FPrintGrid ) then
-      if ( WinData.AnimalFileByID <> nil ) and ( WinData.AnimalFileByID.Active ) and ( WinData.AnimalFileByID.RecordCount > 0 ) then
+      if ( WinData.AnimalFileByID <> nil ) and ( WinData.AnimalFileByID.Active ) and
+         ( WinData.AnimalFileByID.RecordCount > 0 ) and ( cxAnimalGridViewPurchWeight.Visible ) then
          with TQuery.Create(nil) do
             try
                DatabaseName := AliasName;
@@ -16915,7 +16921,8 @@ procedure TMenuForm.cxAnimalGridViewPrintAvgPurchPrice(
 begin
    AText := '';
    if ( FFormShowing ) and ( FPrintGrid ) then
-      if ( WinData.AnimalFileByID <> nil ) and ( WinData.AnimalFileByID.Active ) and ( WinData.AnimalFileByID.RecordCount > 0 ) then
+      if ( WinData.AnimalFileByID <> nil ) and ( WinData.AnimalFileByID.Active ) and
+         ( WinData.AnimalFileByID.RecordCount > 0 ) and ( cxAnimalGridViewPurchPrice.Visible ) then
          with TQuery.Create(nil) do
             try
                DatabaseName := AliasName;
@@ -16954,7 +16961,8 @@ var
 begin
    AText := '';
    if ( FFormShowing ) and ( FPrintGrid ) then
-      if ( WinData.AnimalFileByID <> nil ) and ( WinData.AnimalFileByID.Active ) and ( WinData.AnimalFileByID.RecordCount > 0 ) then
+      if ( WinData.AnimalFileByID <> nil ) and ( WinData.AnimalFileByID.Active ) and
+         ( WinData.AnimalFileByID.RecordCount > 0 ) and ( cxAnimalGridViewDaysOnFarm.Visible ) then
          with TQuery.Create(nil) do
             try
                DatabaseName := AliasName;
@@ -17009,7 +17017,8 @@ var
 begin
    AText := '';
    if ( FFormShowing ) and ( FPrintGrid ) then
-      if ( WinData.AnimalFileByID <> nil ) and ( WinData.AnimalFileByID.Active ) and ( WinData.AnimalFileByID.RecordCount > 0 ) then
+      if ( WinData.AnimalFileByID <> nil ) and ( WinData.AnimalFileByID.Active ) and
+         ( WinData.AnimalFileByID.RecordCount > 0 ) and ( cxAnimalGridViewGrossMargin.Visible ) then
          with TQuery.Create(nil) do
             try
                DatabaseName := AliasName;
@@ -17055,7 +17064,8 @@ begin
    //   12/01/18 [V5.7 R7.4] /MK Additional Feature - AvgOverallGainPerDay should be based on animals with a gain NOT animals with zero gain per day - GL.
    AText := '';
    if ( FFormShowing ) and ( FPrintGrid ) then
-      if  ( WinData.AnimalFileByID <> nil ) and ( WinData.AnimalFileByID.Active ) and ( WinData.AnimalFileByID.RecordCount > 0 ) then
+      if  ( WinData.AnimalFileByID <> nil ) and ( WinData.AnimalFileByID.Active ) and
+          ( WinData.AnimalFileByID.RecordCount > 0 ) and ( cxAnimalGridViewOverallGainPerDay.Visible ) then
          with TQuery.Create(nil) do
             try
                DatabaseName := AliasName;
@@ -17075,16 +17085,6 @@ begin
             finally
                Free;
             end;
-end;
-
-procedure TMenuForm.ComponentPrinterBeforePreview(Sender: TObject; AReportLink: TBasedxReportLink);
-begin
-   FPrintGrid := True;
-end;
-
-procedure TMenuForm.ComponentPrinterAfterPreview(Sender: TObject; AReportLink: TBasedxReportLink);
-begin
-   FPrintGrid := False;
 end;
 
 initialization

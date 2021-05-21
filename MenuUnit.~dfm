@@ -1429,33 +1429,42 @@ object MenuForm: TMenuForm
             end>
           DataController.Summary.FooterSummaryItems = <
             item
+              OnGetText = cxAnimalGridViewPrintTotalAmountCount
               Column = cxAnimalGridViewSortAnimalNo
             end
             item
+              OnGetText = cxAnimalGridViewPrintAvgOverallGainPerDay
               Column = cxAnimalGridViewOverallGainPerDay
             end
             item
               Column = cxAnimalGridViewDaysInMilk
             end
             item
+              OnGetText = cxAnimalGridViewPrintAvgDaysOnFarm
               Column = cxAnimalGridViewDaysOnFarm
             end
             item
+              OnGetText = cxAnimalGridViewPrintAvgPricePerKg
               Column = cxAnimalGridViewPricePerKg
             end
             item
+              OnGetText = cxAnimalGridViewPrintAvgPurchPrice
               Column = cxAnimalGridViewPurchPrice
             end
             item
+              OnGetText = cxAnimalGridViewPrintAvgSalePrice
               Column = cxAnimalGridViewSalePrice
             end
             item
+              OnGetText = cxAnimalGridViewPrintAvgPurchWeight
               Column = cxAnimalGridViewPurchWeight
             end
             item
+              OnGetText = cxAnimalGridViewPrintAvgColdDeadWt
               Column = cxAnimalGridViewColdDeadWt
             end
             item
+              OnGetText = cxAnimalGridViewPrintAvgGrossMargin
               Column = cxAnimalGridViewGrossMargin
             end>
           DataController.Summary.SummaryGroups = <>
@@ -12192,8 +12201,6 @@ object MenuForm: TMenuForm
     PreviewOptions.VisibleOptions = [pvoPrint]
     PrintTitle = 'Main Grid'
     Version = 0
-    OnAfterPreview = ComponentPrinterAfterPreview
-    OnBeforePreview = ComponentPrinterBeforePreview
     Left = 1072
     Top = 121
     object AnimalGridPrinterLink: TdxGridReportLink
@@ -12212,7 +12219,7 @@ object MenuForm: TMenuForm
       PrinterPage.PageSize.Y = 297000
       PrinterPage._dxMeasurementUnits_ = 0
       PrinterPage._dxLastMU_ = 2
-      ReportDocument.CreationDate = 44336.7613866782
+      ReportDocument.CreationDate = 44337.3902679051
       OptionsOnEveryPage.Footers = False
       OptionsOnEveryPage.FilterBar = False
       OptionsPreview.Visible = False
