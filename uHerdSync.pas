@@ -834,6 +834,12 @@ begin
                                     end;
                               end;
 
+                           if ( Length(AnimalNo) > 10 ) then
+                              begin
+                                 CreateLogEntry(Format('Unable to create Animal. Animal No. %s exceeds field length of 10.',[AnimalNo]));
+                                 Continue;
+                              end;
+
                            if (InHerd) then // more likely a purchased animal
                               begin
                                  AddAnimalToDb := true;
@@ -866,7 +872,6 @@ begin
                               AnimalRecord.ValidateColour := False;
                               AnimalRecord.ValidateDOB := False;
                               try
-
                                  if InHerd then
                                     begin
                                        AnimalRecord.Add;
