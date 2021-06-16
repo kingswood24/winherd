@@ -279,10 +279,15 @@ begin
 
       SireGridDBBandedTableView.OnFocusedRecordChanged := nil;
 
-      FQuery.Close;
-      FQuery.SQL.Text := 'INSERT INTO '+FCalfTable.TableName+' (CalfID, DateOfBirth, InHerd) '+
-                         FQuery.SQL.Text;
-      FQuery.ExecSQL;
+      try
+         FQuery.Close;
+         FQuery.SQL.Text := 'INSERT INTO '+FCalfTable.TableName+' (CalfID, DateOfBirth, InHerd) '+
+                            FQuery.SQL.Text;
+         FQuery.ExecSQL;
+      except
+         on e : Exception do
+            ShowMessage(e.Message);
+      end;
 
       FCalfTable.Close;
       FCalfTable.Open;
@@ -350,7 +355,7 @@ begin
          begin
             FCalfTable.RecNo := i;
 
-            // If the calf in FCalfTable does not have any birth or recent weighings then ignore this calf. 
+            // If the calf in FCalfTable does not have any birth or recent weighings then ignore this calf.
             if ( qBirthWeighInfo.Locate('CalfID',FCalfTable.FieldByName('CalfID').AsInteger,[]) ) or
                ( qWeighInfo.Locate('CalfID',FCalfTable.FieldByName('CalfID').AsInteger,[]) ) then
                try
@@ -398,6 +403,8 @@ begin
                         qWeighInfo.FindLast;
                         FCalfTable.FieldByName('FirstWeighDate').AsDateTime := qWeighInfo.FieldByName('WeighDate').AsFloat;
                         FCalfTable.FieldByName('FirstWeight').AsFloat := qWeighInfo.FieldByName('Weight').AsFloat;
+                        qWeighInfo.Filter := '';
+                        qWeighInfo.Filtered := False;
                      end;
 
                   // If the calf is in herd then locate its last weighing event and assign this as the last weight.
@@ -408,9 +415,10 @@ begin
                         qWeighInfo.Filter := 'CalfID = '+IntToStr(FCalfTable.FieldByName('CalfID').AsInteger);
                         qWeighInfo.Filtered := True;
                         qWeighInfo.FindFirst;
-
                         FCalfTable.FieldByName('LastWeighDate').AsDateTime := qWeighInfo.FieldByName('WeighDate').AsFloat;
                         FCalfTable.FieldByName('LastWeight').AsFloat := qWeighInfo.FieldByName('Weight').AsFloat;
+                        qWeighInfo.Filter := '';
+                        qWeighInfo.Filtered := False;
                      end
                   // If the calf is NOT in herd then assign its last weight as the sale weight.
                   else

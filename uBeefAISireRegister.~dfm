@@ -267,8 +267,8 @@ inherited fmBeefAISireRegister: TfmBeefAISireRegister
   end
   object GetAllBulls: TLMDWebHTTPGet
     URL = 
-      'http://www.icbf.com/services/evaluations/files/Beef_AI_Bulls_SBV' +
-      '_Stars.xls'
+      'http://www.kingswood.ie/download/winherd/Beef_AI_Bulls_SBV_Stars' +
+      '.xls'
     DownloadDir = 'C:\Kingswood Herd Management\'
     DestinationName = 'Beef_AI_Bulls_SBV_Stars.xls'
     DownloadParams.LoadImages = True
