@@ -11,9 +11,15 @@ File_8=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winher
 File_9=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Reports\uSalesReport.pas',0,1,1160,21,1180,0,0
 
 [Modules]
-Module0=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.dpr
-Count=1
+Module0=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uSireAnalysis.pas
+Module1=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.dpr
+Count=2
 EditWindowCount=1
+
+[C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uSireAnalysis.pas]
+ModuleType=SourceModule
+FormState=1
+FormOnTop=0
 
 [C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.dpr]
 ModuleType=SourceModule
@@ -28,18 +34,19 @@ FormOnTop=0
 FormState=0
 FormOnTop=0
 
+[C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uBaseForm.pas]
+FormState=0
+FormOnTop=0
+
 [C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uImageStore.pas]
 FormState=0
 FormOnTop=0
 
-[C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uHerdLookup.pas]
-FormState=0
-FormOnTop=0
-
 [EditWindow0]
-ViewCount=1
-CurrentView=0
+ViewCount=2
+CurrentView=1
 View0=0
+View1=1
 CodeExplorer=CodeExplorer@EditWindow0
 MessageView=MessageView@EditWindow0
 Create=1
@@ -68,12 +75,21 @@ CursorY=1
 TopLine=1
 LeftCol=1
 
+[View1]
+Module=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uSireAnalysis.pas
+CursorX=1
+CursorY=461
+TopLine=437
+LeftCol=1
+
 [Watches]
 Count=1
 Watch0='iDaysBetween',256,0,18,1,0
 
 [Breakpoints]
-Count=0
+Count=2
+Breakpoint0='C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uSireAnalysis.pas',283,'',0,1,'',1,0,0,'',1,'','',''
+Breakpoint1='C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uSireAnalysis.pas',289,'',0,1,'',1,0,0,'',1,'','',''
 
 [AddressBreakpoints]
 Count=0
@@ -156,8 +172,8 @@ LRDockWidth=219
 Dockable=1
 SplitPos=85
 ArrangeBy=Name
-SelectedItem=OnCreate
-ExpandedItems=DataBinding,Font.Style,LookAndFeel,OptionsView,Properties,Properties.ValueChecked,Properties.ValueGrayed,Properties.ValueUnchecked
+SelectedItem=Name
+ExpandedItems=DataBinding,DataController,Font.Style,LookAndFeel,Properties,Properties.ValueChecked,Properties.ValueGrayed,Properties.ValueUnchecked
 HiddenCategories=Legacy
 ShowStatusBar=1
 
@@ -306,15 +322,15 @@ Dockable=1
 
 [MessageView@EditWindow0]
 Create=1
-Visible=0
+Visible=1
 State=0
 Left=0
 Top=0
-Width=1689
+Width=1705
 Height=111
 MaxLeft=-1
 MaxTop=-1
-ClientWidth=1689
+ClientWidth=1705
 ClientHeight=111
 TBDockHeight=140
 LRDockWidth=443
@@ -340,7 +356,7 @@ TBDockHeight=140
 LRDockWidth=1027
 Dockable=1
 TabPosition=0
-ActiveTab=Call Stack
+ActiveTab=Messages
 TabDockClients=BreakpointWindow,WatchWindow,DebugLogView,LocalVarsWindow,ModuleWindow,CallStackWindow,MessageView@EditWindow0
 
 [DockSite1]
