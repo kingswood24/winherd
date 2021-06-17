@@ -1018,6 +1018,8 @@ unit MenuUnit;
  21/05/21 [V6.0 R1.2] /MK Bug Fix - I found that moving across the grid was very slow with Simon McDermots data which has 11,000 animals and 27,000 events.
                                     I created a new private variable FPrintGrid that is set to False on FormCreate, its set to True on PrintGrid and then False after PrintGrid.
                                     This will stop the new DBTableSummaryItem.GetText from running until the user clicks print which is the only time the footer is showing.
+
+ 17/06/21 [V6.0 R1.4] /MK Change - cxAnimalGridViewOverallGainPerDayGetDisplayText - If the OverAllGainPerDay is 0.00 then display text should be blank - GL request.
 }
 
 interface
@@ -2662,6 +2664,9 @@ type
     procedure cxAnimalGridViewPrintAvgOverallGainPerDay(
       Sender: TcxDataSummaryItem; const AValue: Variant;
       AIsFooter: Boolean; var AText: String);
+    procedure cxAnimalGridViewOverallGainPerDayGetDisplayText(
+      Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
+      var AText: String);
   private
     { Private declarations }
     Reg : TRegistry;
@@ -17085,6 +17090,14 @@ begin
             finally
                Free;
             end;
+end;
+
+procedure TMenuForm.cxAnimalGridViewOverallGainPerDayGetDisplayText(
+  Sender: TcxCustomGridTableItem; ARecord: TcxCustomGridRecord;
+  var AText: String);
+begin
+   if ( AText = '0.00' ) then
+      AText := '';
 end;
 
 initialization

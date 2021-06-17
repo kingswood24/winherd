@@ -415,9 +415,10 @@ begin
                         qWeighInfo.Filter := 'CalfID = '+IntToStr(FCalfTable.FieldByName('CalfID').AsInteger);
                         qWeighInfo.Filtered := True;
                         qWeighInfo.FindFirst;
-
                         FCalfTable.FieldByName('LastWeighDate').AsDateTime := qWeighInfo.FieldByName('WeighDate').AsFloat;
                         FCalfTable.FieldByName('LastWeight').AsFloat := qWeighInfo.FieldByName('Weight').AsFloat;
+                        qWeighInfo.Filter := '';
+                        qWeighInfo.Filtered := False;
                      end
                   // If the calf is NOT in herd then assign its last weight as the sale weight.
                   else

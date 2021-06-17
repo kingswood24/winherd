@@ -2053,6 +2053,7 @@ object MenuForm: TMenuForm
             DataBinding.FieldName = 'OverallWeightGain'
             PropertiesClassName = 'TcxCurrencyEditProperties'
             Properties.DisplayFormat = '0.00'
+            OnGetDisplayText = cxAnimalGridViewOverallGainPerDayGetDisplayText
             HeaderAlignmentVert = vaCenter
             Options.Editing = False
             Width = 83
@@ -12219,7 +12220,7 @@ object MenuForm: TMenuForm
       PrinterPage.PageSize.Y = 297000
       PrinterPage._dxMeasurementUnits_ = 0
       PrinterPage._dxLastMU_ = 2
-      ReportDocument.CreationDate = 44337.3902679051
+      ReportDocument.CreationDate = 44364.4428363079
       OptionsOnEveryPage.Footers = False
       OptionsOnEveryPage.FilterBar = False
       OptionsPreview.Visible = False

@@ -140,6 +140,8 @@
    23/02/21 [V5.9 R8.5] /MK Change - CreateExistingClientIdElement - Changed format of eventDate node to 4 digit year to match server format
                                                                    - Changed format of dateofBirth node to 4 digit year to match server format
                                                                    - OpenCalvingQuery - Change LEFT JOIN to INNER JOIN to make the query quicker.
+
+   17/06/21 [V6.0 R1.4] /MK Change - ReadHerdSyncData - When bring in an animal number with a length > 10 then move on but log problem.
 }
 
 unit uHerdSync;
@@ -422,7 +424,6 @@ type
      procedure AddOfficialHealthCode(AHealthCode :THealthCodeObject);
      procedure AddFarmHealthCode(AHealthCode :THealthCodeObject);
      procedure SetDrugAsInUse(const ADrugId : Integer; const AInUse : Boolean);
-
 
      function EnforceOfficialBreedCode(ABreedCode: string): string;
 
@@ -835,6 +836,13 @@ begin
                                     end;
                               end;
 
+                           //   17/06/21 [V6.0 R1.4] /MK Change - When bring in an animal number with a length > 10 then move on but log problem.
+                           if ( Length(AnimalNo) > 10 ) then
+                              begin
+                                 CreateLogEntry(Format('Unable to create Animal. Animal No. %s exceeds field length of 10.',[AnimalNo]));
+                                 Continue;
+                              end;
+
                            if (InHerd) then // more likely a purchased animal
                               begin
                                  AddAnimalToDb := true;
@@ -867,7 +875,6 @@ begin
                               AnimalRecord.ValidateColour := False;
                               AnimalRecord.ValidateDOB := False;
                               try
-
                                  if InHerd then
                                     begin
                                        AnimalRecord.Add;
