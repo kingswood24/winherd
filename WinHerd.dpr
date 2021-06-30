@@ -448,7 +448,6 @@ uses
   uAnimal in '..\..\..\..\Common\uAnimal.pas',
   uSemenStockControl in '..\..\..\..\Common\uSemenStockControl.pas',
   uFarmSyncSettings in '..\..\..\..\Common\uFarmSyncSettings.pas',
-  uApplicationLog in '..\..\..\..\Common\uApplicationLog.pas',
   Drawing in '..\..\..\..\Common\Drawing.pas',
   uPreferences in '..\..\..\..\Common\uPreferences.pas',
   uSQLFilters in '..\..\..\..\Common\uSQLFilters.pas',
@@ -480,7 +479,8 @@ uses
   uBDE in '..\..\..\..\..\Common\uBDE.pas',
   uPopupAnimalEdit in 'uPopupAnimalEdit.pas' {fmPopupAnimalEdit},
   uCalculateGridColSelect in 'uCalculateGridColSelect.pas' {fmCalculateGridColSelect},
-  uGeneralMemo in 'uGeneralMemo.pas' {fmGeneralMemo};
+  uGeneralMemo in 'uGeneralMemo.pas' {fmGeneralMemo},
+  uApplicationLog in 'uApplicationLog.pas';
 
 {$R *.RES}
 { 08/03/12 [V5.0 R4.1] - Program has dependancy on qrpdflib.dll. }
@@ -533,13 +533,13 @@ begin
 
         Application.HelpFile := 'HerdHelp.chm';
         Application.CreateForm(TWinData, WinData);
-        Application.CreateForm(THerdLookup, HerdLookup);
-        Application.CreateForm(TMenuForm, MenuForm);
-        Application.CreateForm(TfSetUpAnimals, fSetUpAnimals);
-        Application.CreateForm(TfSearchDlg, fSearchDlg);
-        Application.CreateForm(TfRemarks, fRemarks);
-        Application.CreateForm(TfFilters, fFilters);
-        MenuForm.Update;
+  Application.CreateForm(THerdLookup, HerdLookup);
+  Application.CreateForm(TMenuForm, MenuForm);
+  Application.CreateForm(TfSetUpAnimals, fSetUpAnimals);
+  Application.CreateForm(TfSearchDlg, fSearchDlg);
+  Application.CreateForm(TfRemarks, fRemarks);
+  Application.CreateForm(TfFilters, fFilters);
+  MenuForm.Update;
         MenuForm.Show;
         Application.Run;
      end;

@@ -1,14 +1,14 @@
 [Closed Files]
-File_0=SourceModule,'C:\Kingswood\Delphi Development\Common\uProgressIndicator.pas',0,1,32,47,52,1,0
-File_1=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Feeds.pas',0,1,1,1,1,0,0
-File_2=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\MenuUnit.pas',0,1,6955,15,6975,0,0
-File_3=SourceModule,'c:\program files (x86)\borland\delphi5\Source\Rtl\Sys\sysutils.pas',0,1,2691,1,2711,0,0
-File_4=SourceModule,'c:\program files (x86)\borland\delphi5\Source\Vcl\comctrls.pas',0,1,8968,52,8978,0,0
-File_5=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\GenTypesConst.pas',0,1,108,27,145,0,0
-File_6=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uUpdateTables.pas',0,1,1,1,1,0,0
-File_7=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\DairyData.pas',0,1,10305,19,10315,0,0
-File_8=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uVaccineDueOn.pas',0,1,1,1,1,1,0
-File_9=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Changes.txt',0,1,1,35,3,0,0
+File_0=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Changes.txt',0,1,1788,85,1808,0,0
+File_1=SourceModule,'C:\Kingswood\Delphi Development\Common\uProgressIndicator.pas',0,1,84,5,124,1,0
+File_2=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uGroupSetUp.pas',0,1,1583,64,1610,0,0
+File_3=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Feeds.pas',0,1,1,1,1,0,0
+File_4=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\MenuUnit.pas',0,1,6955,15,6975,0,0
+File_5=SourceModule,'c:\program files (x86)\borland\delphi5\Source\Rtl\Sys\sysutils.pas',0,1,2691,1,2711,0,0
+File_6=SourceModule,'c:\program files (x86)\borland\delphi5\Source\Vcl\comctrls.pas',0,1,8968,52,8978,0,0
+File_7=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\GenTypesConst.pas',0,1,108,27,145,0,0
+File_8=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uUpdateTables.pas',0,1,1,1,1,0,0
+File_9=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uVaccineDueOn.pas',0,1,1,1,1,1,0
 
 [Modules]
 Module0=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.dpr
@@ -28,7 +28,7 @@ FormOnTop=0
 FormState=0
 FormOnTop=0
 
-[C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uImageStore.pas]
+[C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\DairyData.pas]
 FormState=0
 FormOnTop=0
 
@@ -59,8 +59,8 @@ BottomPanelData=0000040000000000BD06000000000000028C000000000000000100000000BD06
 
 [View0]
 Module=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.dpr
-CursorX=7
-CursorY=9
+CursorX=22
+CursorY=8
 TopLine=1
 LeftCol=1
 
@@ -152,7 +152,7 @@ LRDockWidth=219
 Dockable=1
 SplitPos=85
 ArrangeBy=Name
-SelectedItem=Caption
+SelectedItem=Name
 ExpandedItems=DataBinding,Font.Style,LookAndFeel,OptionsView,Properties,Properties.ValueChecked,Properties.ValueGrayed,Properties.ValueUnchecked
 HiddenCategories=Legacy
 ShowStatusBar=1
@@ -312,7 +312,7 @@ MaxLeft=-1
 MaxTop=-1
 ClientWidth=1705
 ClientHeight=111
-TBDockHeight=140
+TBDockHeight=111
 LRDockWidth=443
 Dockable=1
 
@@ -356,6 +356,6 @@ TBDockHeight=926
 LRDockWidth=219
 Dockable=1
 TabPosition=0
-ActiveTab=Project Manager
+ActiveTab=Object Inspector
 TabDockClients=PropertyInspector,ProjectManager
 

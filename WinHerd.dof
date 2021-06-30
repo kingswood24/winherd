@@ -68,19 +68,19 @@ CodePage=1252
 [Version Info Keys]
 CompanyName=Kingswood Computing Ltd
 FileDescription=Kingswood Herd Management
-FileVersion=6.0.1.4
+FileVersion=6.0.1.5
 InternalName=Winherd
 LegalCopyright=Kingswood Computing Ltd.
 LegalTrademarks=
 OriginalFilename=Winherd
 ProductName=Winherd.exe
-ProductVersion=V6.0 R1.4
+ProductVersion=V6.0 R1.5
 Comments=Kingswood Computing Ltd.
 [Excluded Packages]
-$(DELPHI)\Projects\Bpl\Ean5.bpl=Ean components
 C:\PDBDataManager3\D5\PDBDataManD5.bpl=PDBDataManager v3.0
 C:\Program Files (x86)\EXTRAFIL\DELPHI5\LIB\xtrafil.bpl=Extra Filters for QuickReport
 C:\Program Files\Developer Express.VCL\Library\Delphi5\dcldxDBOrd5.bpl=ExpressDBOrgChart by Developer Express Inc.
+$(DELPHI)\Projects\Bpl\Ean5.bpl=Ean components
 $(DELPHI)\Projects\Bpl\KpeedButton.bpl=(untitled)
 $(DELPHI)\Projects\Bpl\dclIndy50.bpl=Internet Direct (Indy) for D5 Property and Component Editors
 $(DELPHI)\Projects\Bpl\Adom_5_1Delphi5.bpl=Open XML Alternative Document Object Model (ADOM 5.1)
