@@ -199,7 +199,7 @@
   10/02/16 [V5.5 R2.7] /MK Bug Fix - CreateAnimalCart - AnimalCart table defintion was the same as the SyncWarnings table definitions.
 
   09/03/16 [V5.5 R5.4] /MK Additional Feature - Added IgnoreEBIUpdate fields to CowExt and BullExt to be used with ICBF Import and WinData.CreateYoungStockEBIValues
-                                                to stop the program from updating the EBI values of young stock that were already updated by the ICBF Import.                                                 
+                                                to stop the program from updating the EBI values of young stock that were already updated by the ICBF Import.
 
   10/02/16 [V5.5 R2.7] /MK Bug Fix - CreateAnimalCart - AnimalCart table defintion was the same as the SyncWarnings table definitions.
 
@@ -304,8 +304,7 @@ interface
 
 uses
    Classes, db, dbTables, GenTypesConst, SysUtils, Def,
-   Dialogs, Password, Forms, kRoutines, FileCtrl,
-   uApplicationLog;
+   Dialogs, Password, Forms, kRoutines, FileCtrl, uApplicationLog;
 
    procedure Initialize; {}
    procedure Finalize;   {}
@@ -1605,6 +1604,16 @@ begin
 
             SQL.Clear;
             SQL.Add('ALTER TABLE "'+UpdateTable.TableName+'" Add SCCFilter Boolean');
+            ExecSQL;
+         except
+            Result := False;
+         end;
+
+   if ( not(FieldExists('A1A2Result')) ) then
+      with UpdateQuery do
+         try
+            SQL.Clear;
+            SQL.Add('ALTER TABLE "'+UpdateTable.TableName+'" ADD A1A2Result CHAR(5)');
             ExecSQL;
          except
             Result := False;
@@ -3912,6 +3921,9 @@ begin
          AddListType('-90M', 'Sexed 90% Male', LSexedSemen, False, True);
          AddListType('-75M', 'Sexed 75% Male', LSexedSemen, False, True);
 
+         //   02/12/20 [V5.9 R7.7] /MK Bug Fix - Changed Foot to Hoof and fixed spelling misate of Paring - GL request.
+         UpdateGenLookupItemDesc('TU1', 'Foot Pairing', 'Hoof Paring', LTreatmentUsed);
+
          //   31/01/19 [V5.8 R6.5] /MK Additional Feature - Added in new genlook items for the Treatment Used.
          AddListType('TU1', 'Hoof Paring', LTreatmentUsed, False, True);
          AddListType('TU2', 'Pare and Antibiotics', LTreatmentUsed, False, True);
@@ -3922,9 +3934,6 @@ begin
          AddListType('MD2', 'Spilled', LMediDiposalReasons, False, True);
          AddListType('MD3', 'Stolen', LMediDiposalReasons, False, True);
          AddListType('MD4', 'Unknown', LMediDiposalReasons, False, True);
-
-         //   02/12/20 [V5.9 R7.7] /MK Bug Fix - Changed Foot to Hoof and fixed spelling misate of Paring - GL request.
-         UpdateGenLookupItemDesc('TU1', 'Foot Pairing', 'Hoof Paring', LTreatmentUsed);
 
       except
          on e : Exception do
@@ -5783,6 +5792,62 @@ begin
 end;
 
 function UpdateAnimals : Boolean;
+
+   function UpdatePenNameFromFeedGroup : Boolean;
+   var
+      qGetGroups,
+      qUpdateAnimals : TQuery;
+   begin
+      Result := False;
+      
+      qGetGroups := TQuery.Create(nil);
+      qUpdateAnimals := TQuery.Create(nil);
+      try
+         try
+            qUpdateAnimals.DatabaseName := UpdateQuery.DatabaseName;
+            qUpdateAnimals.Close;
+            qUpdateAnimals.SQL.Clear;
+            qUpdateAnimals.SQL.Add('UPDATE Animals');
+            qUpdateAnimals.SQL.Add('SET PenName = :FeedGroup');
+            qUpdateAnimals.SQL.Add('WHERE ID = :AId');
+
+            qGetGroups.DatabaseName := UpdateQuery.DatabaseName;
+            qGetGroups.SQL.Clear;
+            qGetGroups.SQL.Add('SELECT A.Id, G.Description');
+            qGetGroups.SQL.Add('FROM Grps G');
+            qGetGroups.SQL.Add('LEFT JOIN GrpLinks GL ON (GL.GroupId = G.Id)');
+            qGetGroups.SQL.Add('LEFT JOIN Animals A ON (A.Id = GL.AnimalId)');
+            qGetGroups.SQL.Add('WHERE (A.InHerd = True)');
+            qGetGroups.SQL.Add('AND   (A.AnimalDeleted = False)');
+            qGetGroups.SQL.Add('AND   (A.HerdId IN (SELECT DefaultHerdId FROM Defaults))');
+            qGetGroups.SQL.Add('AND   (Upper(G.GroupType) = "FEED")');
+            qGetGroups.Open;
+            qGetGroups.First;
+            while ( not(qGetGroups.Eof) ) do
+               begin
+                  qUpdateAnimals.Close;
+                  qUpdateAnimals.Params[0].AsString := Fields[1].AsString;
+                  qUpdateAnimals.Params[1].AsInteger := Fields[0].AsInteger;
+                  qUpdateAnimals.ExecSQL;
+                  qGetGroups.Next;
+               end;
+         except
+            on e : Exception do
+               begin
+                  ShowDebugMessage(e.Message);
+                  ApplicationLog.LogException(e);
+                  ApplicationLog.LogError(e.Message);
+                  Result := False;
+               end;
+         end;
+      finally
+         if ( qGetGroups <> nil ) then
+            FreeAndNil(qGetGroups);
+         if ( qUpdateAnimals <> nil ) then
+            FreeAndNil(qUpdateAnimals);
+      end;
+   end;
+
 begin
    Result := True;
    UpdateTable.TableName := 'Animals';
@@ -5922,6 +5987,16 @@ begin
          try
             SQL.Text := 'ALTER TABLE Animals ADD QANoMovements CHAR(10)';
             ExecSQL;
+         except
+            Result := False;
+         end;
+
+   if not FieldExists('PenName') then
+      with UpdateQuery do
+         try
+            SQL.Text := 'ALTER TABLE Animals ADD PenName CHAR(30)';
+            ExecSQL;
+            UpdatePenNameFromFeedGroup;
          except
             Result := False;
          end;

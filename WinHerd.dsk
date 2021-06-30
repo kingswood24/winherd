@@ -1,19 +1,25 @@
 [Closed Files]
-File_0=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uApplicationLog.pas',0,1,1,54,16,0,0
-File_1=SourceModule,'C:\Kingswood\Delphi Development\Common\uApplicationLog.pas',0,1,1,44,30,0,0
-File_2=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Changes.txt',0,1,1788,85,1808,0,0
-File_3=SourceModule,'C:\Kingswood\Delphi Development\Common\uProgressIndicator.pas',0,1,84,5,124,1,0
-File_4=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uGroupSetUp.pas',0,1,1583,64,1610,0,0
-File_5=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Feeds.pas',0,1,1,1,1,0,0
-File_6=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\MenuUnit.pas',0,1,6955,15,6975,0,0
-File_7=SourceModule,'c:\program files (x86)\borland\delphi5\Source\Rtl\Sys\sysutils.pas',0,1,2691,1,2711,0,0
-File_8=SourceModule,'c:\program files (x86)\borland\delphi5\Source\Vcl\comctrls.pas',0,1,8968,52,8978,0,0
-File_9=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\GenTypesConst.pas',0,1,108,27,145,0,0
+File_0=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\GenTypesConst.pas',0,1,41,21,66,0,0
+File_1=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uApplicationLog.pas',0,1,1,54,16,0,0
+File_2=SourceModule,'C:\Kingswood\Delphi Development\Common\uApplicationLog.pas',0,1,1,44,30,0,0
+File_3=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Changes.txt',0,1,1788,85,1808,0,0
+File_4=SourceModule,'C:\Kingswood\Delphi Development\Common\uProgressIndicator.pas',0,1,84,5,124,1,0
+File_5=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uGroupSetUp.pas',0,1,1583,64,1610,0,0
+File_6=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Feeds.pas',0,1,1,1,1,0,0
+File_7=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\MenuUnit.pas',0,1,6955,15,6975,0,0
+File_8=SourceModule,'c:\program files (x86)\borland\delphi5\Source\Rtl\Sys\sysutils.pas',0,1,2691,1,2711,0,0
+File_9=SourceModule,'c:\program files (x86)\borland\delphi5\Source\Vcl\comctrls.pas',0,1,8968,52,8978,0,0
 
 [Modules]
-Module0=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.dpr
-Count=1
+Module0=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uUpdateTables.pas
+Module1=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.dpr
+Count=2
 EditWindowCount=1
+
+[C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uUpdateTables.pas]
+ModuleType=SourceModule
+FormState=0
+FormOnTop=0
 
 [C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.dpr]
 ModuleType=SourceModule
@@ -29,9 +35,10 @@ FormState=0
 FormOnTop=0
 
 [EditWindow0]
-ViewCount=1
-CurrentView=0
+ViewCount=2
+CurrentView=1
 View0=0
+View1=1
 CodeExplorer=CodeExplorer@EditWindow0
 MessageView=MessageView@EditWindow0
 Create=1
@@ -55,9 +62,16 @@ BottomPanelData=0000040000000000BD06000000000000028C000000000000000100000000BD06
 
 [View0]
 Module=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.dpr
-CursorX=22
-CursorY=17
+CursorX=1
+CursorY=1
 TopLine=1
+LeftCol=1
+
+[View1]
+Module=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uUpdateTables.pas
+CursorX=62
+CursorY=5817
+TopLine=5797
 LeftCol=1
 
 [Watches]
@@ -65,7 +79,8 @@ Count=1
 Watch0='iDaysBetween',256,0,18,1,0
 
 [Breakpoints]
-Count=0
+Count=1
+Breakpoint0='C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uUpdateTables.pas',5803,'',0,1,'',1,0,0,'',1,'','',''
 
 [AddressBreakpoints]
 Count=0
@@ -78,8 +93,8 @@ Left=0
 Top=0
 Width=1920
 Height=115
-MaxLeft=-4
-MaxTop=-4
+MaxLeft=-1
+MaxTop=-1
 MaxWidth=1928
 MaxHeight=115
 ClientWidth=1920
