@@ -2026,6 +2026,7 @@ type
     btnRefreshAnimals: TRxSpeedButton;
     cxAnimalGridViewGrossMargin: TcxGridDBColumn;
     cxAnimalGridViewSalesGrade: TcxGridDBColumn;
+    cxAnimalGridViewPenName: TcxGridDBColumn;
    //--------------------------------------//
 
     procedure ExitButtonClick(Sender: TObject);
@@ -4880,6 +4881,9 @@ begin
 
                cxAnimalGridViewGrossMargin.Hidden := False;
                cxAnimalGridViewGrossMargin.Visible := True;
+
+               cxAnimalGridViewPenName.Hidden := False;
+               cxAnimalGridViewPenName.Visible := True;
             end;
       end
    else
@@ -4943,6 +4947,9 @@ begin
 
          cxAnimalGridViewGrossMargin.Hidden := True;
          cxAnimalGridViewGrossMargin.Visible := False;
+
+         cxAnimalGridViewPenName.Hidden := True;
+         cxAnimalGridViewPenName.Visible := False;
       end;
 
    //   03/10/11 [V5.0 R1.0] /MK Change - Check If ConditionScore In Grid Cols Is Visible

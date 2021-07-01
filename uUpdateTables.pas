@@ -296,6 +296,10 @@
   23/11/20 [V5.9 R7.5] /MK Additional Feature - UpdateGenLook - Add Sexed Semen service type if it can't be found already.
 
   02/12/20 [V5.9 R7.7] /MK Bug Fix - UpdateGenLook - Changed Foot to Hoof and fixed spelling misate of Paring - GL request.
+
+  01/07/21 [V6.0 R1.5] /MK Additional Feature - UpdateAnimals - Added PenName field to store the Feed Group name even after the animal is sold - Kepak.
+                                                              - Added sub procedure that will add the Feed Group name to the PenName for animals in the herd
+                                                                after the field PenName is added to the table.
 }
 
 unit uUpdateTables;
@@ -5799,7 +5803,6 @@ function UpdateAnimals : Boolean;
       qUpdateAnimals : TQuery;
    begin
       Result := False;
-      
       qGetGroups := TQuery.Create(nil);
       qUpdateAnimals := TQuery.Create(nil);
       try
@@ -5822,6 +5825,8 @@ function UpdateAnimals : Boolean;
             qGetGroups.SQL.Add('AND   (A.HerdId IN (SELECT DefaultHerdId FROM Defaults))');
             qGetGroups.SQL.Add('AND   (Upper(G.GroupType) = "FEED")');
             qGetGroups.Open;
+            if ( qGetGroups.RecordCount = 0 ) then Exit;
+
             qGetGroups.First;
             while ( not(qGetGroups.Eof) ) do
                begin

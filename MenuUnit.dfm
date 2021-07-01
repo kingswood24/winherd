@@ -2174,6 +2174,15 @@ object MenuForm: TMenuForm
             Options.FilteringMRUItemsList = False
             Width = 76
           end
+          object cxAnimalGridViewPenName: TcxGridDBColumn
+            Caption = 'Pen Name'
+            DataBinding.FieldName = 'PenName'
+            HeaderAlignmentVert = vaCenter
+            Options.Editing = False
+            Options.FilteringMRUItemsList = False
+            Options.Grouping = False
+            Width = 110
+          end
         end
         object cxAnimalGridLevel: TcxGridLevel
           GridView = cxAnimalGridView
@@ -12220,7 +12229,7 @@ object MenuForm: TMenuForm
       PrinterPage.PageSize.Y = 297000
       PrinterPage._dxMeasurementUnits_ = 0
       PrinterPage._dxLastMU_ = 2
-      ReportDocument.CreationDate = 44364.4428363079
+      ReportDocument.CreationDate = 44378.7188518981
       OptionsOnEveryPage.Footers = False
       OptionsOnEveryPage.FilterBar = False
       OptionsPreview.Visible = False

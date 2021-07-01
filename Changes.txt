@@ -1,3 +1,9 @@
+Version V6.0 R1.5
+
+01/07/21 /MK Additional Feature - uUpdateTables - UpdateAnimals - Added PenName field to store the Feed Group name even after the animal is sold - Kepak.
+                                                                - Added sub procedure that will add the Feed Group name to the PenName for animals in the herd
+                                                                  after the field PenName is added to the table.
+
 Version V6.0 R1.4
 
 09/06/21 /MK Change - uHerdSync - ReadHerdSyncData - When bring in an animal number with a length > 10 then move on but log problem.

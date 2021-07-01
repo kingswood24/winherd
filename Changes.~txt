@@ -1,5 +1,6 @@
 Version V6.0 R1.4
 
+09/06/21 /MK Change - uHerdSync - ReadHerdSyncData - When bring in an animal number with a length > 10 then move on but log problem.
 17/06/21 /MK Bug Fix - uSireAnalysis - ProcessCalfTable - When filtering the qWeighInfo query clear the filter after using the data.
              Change - MenuUnit - cxAnimalGridViewOverallGainPerDayGetDisplayText - If the OverAllGainPerDay is 0.00 then display text should be blank - GL request.
 
