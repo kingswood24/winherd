@@ -4881,9 +4881,6 @@ begin
 
                cxAnimalGridViewGrossMargin.Hidden := False;
                cxAnimalGridViewGrossMargin.Visible := True;
-
-               cxAnimalGridViewPenName.Hidden := False;
-               cxAnimalGridViewPenName.Visible := True;
             end;
       end
    else

@@ -1,14 +1,14 @@
 [Closed Files]
-File_0=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uUpdateTables.pas',0,1,5797,62,5817,0,0
-File_1=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\GenTypesConst.pas',0,1,41,21,66,0,0
-File_2=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uApplicationLog.pas',0,1,1,54,16,0,0
-File_3=SourceModule,'C:\Kingswood\Delphi Development\Common\uApplicationLog.pas',0,1,1,44,30,0,0
-File_4=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Changes.txt',0,1,1788,85,1808,0,0
-File_5=SourceModule,'C:\Kingswood\Delphi Development\Common\uProgressIndicator.pas',0,1,84,5,124,1,0
-File_6=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uGroupSetUp.pas',0,1,1583,64,1610,0,0
-File_7=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Feeds.pas',0,1,1,1,1,0,0
-File_8=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\MenuUnit.pas',0,1,6955,15,6975,0,0
-File_9=SourceModule,'c:\program files (x86)\borland\delphi5\Source\Rtl\Sys\sysutils.pas',0,1,2691,1,2711,0,0
+File_0=SourceModule,'c:\program files (x86)\borland\delphi5\Source\Vcl\Classes.pas',0,1,8344,1,8364,0,0
+File_1=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\MenuUnit.pas',0,1,1,1,1,0,0
+File_2=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Changes.txt',0,1,1,1,5,0,0
+File_3=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uUpdateTables.pas',0,1,281,1,303,0,0
+File_4=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\GenTypesConst.pas',0,1,31,30,65,0,0
+File_5=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uApplicationLog.pas',0,1,1,54,16,0,0
+File_6=SourceModule,'C:\Kingswood\Delphi Development\Common\uApplicationLog.pas',0,1,1,44,30,0,0
+File_7=SourceModule,'C:\Kingswood\Delphi Development\Common\uProgressIndicator.pas',0,1,84,5,124,1,0
+File_8=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uGroupSetUp.pas',0,1,1583,64,1610,0,0
+File_9=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Feeds.pas',0,1,1,1,1,0,0
 
 [Modules]
 Module0=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.dpr
@@ -25,6 +25,10 @@ FormState=0
 FormOnTop=0
 
 [C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.todo]
+FormState=0
+FormOnTop=0
+
+[C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uImageStore.pas]
 FormState=0
 FormOnTop=0
 
@@ -65,8 +69,7 @@ Count=1
 Watch0='iDaysBetween',256,0,18,1,0
 
 [Breakpoints]
-Count=1
-Breakpoint0='C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uUpdateTables.pas',5803,'',0,1,'',1,0,0,'',1,'','',''
+Count=0
 
 [AddressBreakpoints]
 Count=0
@@ -79,8 +82,8 @@ Left=0
 Top=0
 Width=1920
 Height=115
-MaxLeft=-4
-MaxTop=-4
+MaxLeft=-1
+MaxTop=-1
 MaxWidth=1928
 MaxHeight=115
 ClientWidth=1920
@@ -149,8 +152,8 @@ LRDockWidth=219
 Dockable=1
 SplitPos=85
 ArrangeBy=Name
-SelectedItem=
-ExpandedItems=DataBinding,Font.Style,LookAndFeel,OptionsView,Properties,Properties.ValueChecked,Properties.ValueGrayed,Properties.ValueUnchecked
+SelectedItem=Name
+ExpandedItems=DataBinding,Font.Style,LookAndFeel,Options,OptionsView,Properties.ValueChecked,Properties.ValueGrayed,Properties.ValueUnchecked
 HiddenCategories=Legacy
 ShowStatusBar=1
 
@@ -299,15 +302,15 @@ Dockable=1
 
 [MessageView@EditWindow0]
 Create=1
-Visible=0
+Visible=1
 State=0
 Left=0
 Top=0
-Width=1689
+Width=1705
 Height=111
 MaxLeft=-1
 MaxTop=-1
-ClientWidth=1689
+ClientWidth=1705
 ClientHeight=111
 TBDockHeight=140
 LRDockWidth=443
@@ -333,7 +336,7 @@ TBDockHeight=140
 LRDockWidth=1027
 Dockable=1
 TabPosition=0
-ActiveTab=Call Stack
+ActiveTab=Messages
 TabDockClients=BreakpointWindow,WatchWindow,DebugLogView,LocalVarsWindow,ModuleWindow,CallStackWindow,MessageView@EditWindow0
 
 [DockSite1]
@@ -353,6 +356,6 @@ TBDockHeight=926
 LRDockWidth=219
 Dockable=1
 TabPosition=0
-ActiveTab=Project Manager
+ActiveTab=Object Inspector
 TabDockClients=PropertyInspector,ProjectManager
 

@@ -1020,6 +1020,8 @@ unit MenuUnit;
                                     This will stop the new DBTableSummaryItem.GetText from running until the user clicks print which is the only time the footer is showing.
 
  17/06/21 [V6.0 R1.4] /MK Change - cxAnimalGridViewOverallGainPerDayGetDisplayText - If the OverAllGainPerDay is 0.00 then display text should be blank - GL request.
+
+ 02/07/21 [V6.0 R1.5] /MK Change - Added Pen Name column to grid from animals table - Kepak. 
 }
 
 interface
@@ -4881,9 +4883,6 @@ begin
 
                cxAnimalGridViewGrossMargin.Hidden := False;
                cxAnimalGridViewGrossMargin.Visible := True;
-
-               cxAnimalGridViewPenName.Hidden := False;
-               cxAnimalGridViewPenName.Visible := True;
             end;
       end
    else
@@ -4947,9 +4946,6 @@ begin
 
          cxAnimalGridViewGrossMargin.Hidden := True;
          cxAnimalGridViewGrossMargin.Visible := False;
-
-         cxAnimalGridViewPenName.Hidden := True;
-         cxAnimalGridViewPenName.Visible := False;
       end;
 
    //   03/10/11 [V5.0 R1.0] /MK Change - Check If ConditionScore In Grid Cols Is Visible

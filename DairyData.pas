@@ -2419,7 +2419,7 @@ type
     qDrugBatchNoQtyRemaining: TFloatField;
     MediPurchIsSynchronized: TBooleanField;
     FdStkEventsIsSynchronized: TBooleanField;
-	AnimalFileByIDQANoMovements: TStringField;
+    AnimalFileByIDQANoMovements: TStringField;
     GroupsAdditionalData: TBooleanField;
     GroupsClientId: TStringField;
     GroupsSource: TIntegerField;
@@ -2433,6 +2433,7 @@ type
     EventsExtIsDeleted: TBooleanField;
     EventsExtIsSynchronized: TBooleanField;
     QuerySuppliersBTEHerdNo: TStringField;
+    AnimalFileByIDPenName: TStringField;
     procedure HerdBeforePost(DataSet: TDataSet);
     procedure EventsNewRecord(DataSet: TDataSet);
     procedure WinDataDestroy(Sender: TObject);

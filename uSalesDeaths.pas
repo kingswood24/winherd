@@ -426,7 +426,7 @@ begin
                            else
                               WinData.FeedManager.EndFeedEventsForAnimal(WinData.AnimalFileByIDID.AsVariant,StrToDateTime(DateOfSaleDeath.EditText));
                         //   06/11/18 [V5.8 R3.5] /MK Bug Fix - Only remove animal from group if its in a feed group. 
-                        WinData.GroupManager.RemoveAnimalFromGrp(WinData.AnimalFileByIDID.AsVariant,iaAnimalExistGroupIDs[i]);
+                        WinData.GroupManager.RemoveAnimalFromGrp(WinData.AnimalFileByIDID.AsVariant,iaAnimalExistGroupIDs[i],True);
                      end;
                end;
 

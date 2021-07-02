@@ -768,11 +768,6 @@ begin
       Height := 437;
       //end;
 
-   if ( WinData.DefCountry(WinData.AnimalFileByIDHerdID.AsInteger) = Ireland ) then
-      Supplier.LookupDisplay := 'Name;BTEHerdNo'
-   else
-      Supplier.LookupDisplay := 'Name';
-
    EnableChangeOfCosts(False);
 
 end;

@@ -51,6 +51,9 @@
   17/10/18 [V5.8 R4.0] /MK Bug Fix - CustomersChange - Only set the comment to the customer name if (adding or (editing and customer name has changed)).
 
   06/11/18 [V5.8 R3.5] /MK Bug Fix - SaleDeathNavBeforeAction - Only remove animal from group if its in a feed group.
+
+  26/03/19 [V5.8 R8.3] /MK Additional Feature - If editing a sale/death event then open then change Customers.LookupSource to new WinData.dsQueryAllCustomers and
+                                                also close/open new WinData.QueryAllCustomers when user clicks the Add button in the Customers drop-down-list - Una Carter.
 }
 
 unit uSalesDeaths;

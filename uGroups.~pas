@@ -811,7 +811,7 @@ begin
 
    GroupId := WinData.GroupsID.AsInteger;
 
-   if ( WinData.GroupManager.RemoveAnimalFromGrp(AnimalId,GroupId) ) then
+   if ( WinData.GroupManager.RemoveAnimalFromGrp(AnimalId,GroupId,False) ) then
       begin
          TargetData.DisableControls;
          try

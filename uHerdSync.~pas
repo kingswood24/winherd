@@ -141,7 +141,9 @@
                                                                    - Changed format of dateofBirth node to 4 digit year to match server format
                                                                    - OpenCalvingQuery - Change LEFT JOIN to INNER JOIN to make the query quicker.
 
-   17/06/21 [V6.0 R1.4] /MK Change - ReadHerdSyncData - When bring in an animal number with a length > 10 then move on but log problem.
+   09/06/21 [V6.0 R1.4] /MK Change - ReadHerdSyncData - When bringing in an animal number with a length > 10 then move on but log problem.
+
+   02/07/21 [V6.0 R1.5] /MK Change - CreateHerdSyncData - Use LEFT JOIN instead of INNER JOIN when calvings table wasn't updated with calf recorded - Create Calving Utility required to fix.
 }
 
 unit uHerdSync;
@@ -1654,7 +1656,8 @@ begin
                   FSyncDataQuery.SQL.Add('       E.EventDesc AS EventComment, G.LookupCode As CalvingSurvey');
                   FSyncDataQuery.SQL.Add('FROM Animals A');
                   FSyncDataQuery.SQL.Add('INNER JOIN Events E ON (E.AnimalId=A.Id)');
-                  FSyncDataQuery.SQL.Add('INNER JOIN Calvings C ON (C.EventId=E.Id)');
+                  //   02/07/21 [V6.0 R1.4] /MK Change - Use LEFT JOIN instead of INNER JOIN when calvings table wasn't updated with calf recorded - Create Calving Utility required to fix.
+                  FSyncDataQuery.SQL.Add('LEFT JOIN Calvings C ON (C.EventId=E.Id)');
                   //   06/11/14 [V5.3 R8.8] /MK Change - Use LEFT JOIN instead of INNER JOIN for GB customers that don't record Birth Type - SP/GL/TGM request.
                   FSyncDataQuery.SQL.Add('LEFT JOIN GenLook G ON (G.Id=C.BirthType)');
                   FSyncDataQuery.SQL.Add('WHERE (E.EventType=5)');

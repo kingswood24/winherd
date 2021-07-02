@@ -113,6 +113,8 @@
 
    28/11/18 [V5.8 R5.5] /MK Bug Fix - SelectAll - Passing in AllowDeletion as whatever length existing group array is as AllowDeletion will
                                                   delete animal from previous group selected group are being removed from that group - Michael Callan reported.
+
+   01/02/19 [V5.8 R6.5] /MK Change - FormCreate - If ParlourType Is Nedap Then Allow Drafting Group Type.
 }
 
 unit uGroupSetUp;
@@ -905,7 +907,7 @@ begin
                                     WinData.FeedManager.EndFeedEventsForAnimal(qAnimalsNotInGroup.FieldByName('ID').AsInteger,dEndAllocDate);
                                  end
                               else
-                                 //   29/01/18 [V5.7 R6.7] /MK Bug Fix - Passing in wrong group id. 
+                                 //   29/01/18 [V5.7 R6.7] /MK Bug Fix - Passing in wrong group id.
                                  WinData.GroupManager.RemoveAnimalFromGrp(qAnimalsNotInGroup.FieldByName('ID').AsInteger, WinData.Groups.FieldByName('ID').AsInteger);
                            end
                         else
@@ -1586,7 +1588,7 @@ begin
                               WinData.GroupManager.RemoveAnimalFromGrp(DBGAnimals.DataSource.DataSet.FieldByName('ID').AsInteger,iPreviousFeedGroup);
                         end
                      else
-                        WinData.GroupManager.RemoveAnimalFromGrp(DBGAnimals.DataSource.DataSet.FieldByName('ID').AsInteger,iPreviousFeedGroup);
+                        WinData.GroupManager.RemoveAnimalFromGrp(DBGAnimals.DataSource.DataSet.FieldByName('ID').AsInteger,iPreviousFeedGroup,False);
 
                   //   18/09/17 [V5.7 R3.0] /MK Change - If feed group and group has active feed regime then user must select an allocation date from uAllocateFeedToAnimal.
                   if ( GroupType = gtFeed ) and ( WinData.GroupManager.GroupHasActiveFeedRegime(WinData.Groups.FieldByName('ID').AsInteger) ) then

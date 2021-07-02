@@ -54,6 +54,11 @@
   04/05/18 [V5.8 R0.1] /MK Bug Fix - When saving the event check to see if the event exists already, this helps if event comes in twice from the parlour - Nick Kearney.   
 
   07/03/19 [V5.8 R8.0] /MK Change - CreateEvents - Removed this code as SQL for ElectronicID was not executing - no longer supporting PDA's anyway - SP.
+
+  07/05/19 [V5.8 R9.2] /MK Additional Feature - SaveEvents - Added a ProgressBar here to show activity to the user.
+
+  06/04/21 [V6.0 R0.1] /MK Bug Fix - ProcessHealth - Added new bRecordEvent variable to store whether to record the event or not to fix issue where
+                                                     if event already exists, the focused record was moving to the next event but it wasn't being checked.
 }
 
 unit uCreateEvents;
@@ -647,64 +652,56 @@ begin
            ProgressIndicator.Position := ProgressIndicator.Position+1;
            Application.ProcessMessages;
          end;
-      {
-      if EventSource = esParlourLink then
-         begin
-            if MessageDlg('Do you want to review Parlour events?',mtConfirmation,[mbYes, mbNo],0) = idYes then
-               ShowTheForm(TDBDataSet(EventTable), ErroneousItems, nil, LinkType )
-         end
-      else
-         begin
-      }
-            if ( PDAOtherEventsRecorded = True ) then
+
+      if ( PDAOtherEventsRecorded = True ) then
+          begin
+             if (( PDACalvingsRecorded = False ) and ( PDAMovementsRecorded = False )) then
                 begin
-                   if (( PDACalvingsRecorded = False ) and ( PDAMovementsRecorded = False )) then
+                   if ( EventSource <> esParlourLink ) then
                       begin
-                         if ( EventSource <> esParlourLink ) then
-                            begin
-                               if Application.MessageBox('All PDA events have been saved.'+cCRLF+cCRLF+
-                                                         'Do you want to review these events?','PDALink',
-                                                         MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2 ) = idYes then
-                                  ShowTheForm(TDBDataSet(EventTable), ErroneousItems, EventList, LinkType )
-                            end
-                         else
-                            begin
-                               if Application.MessageBox('All Parlour Link events have been saved.'+cCRLF+cCRLF+
-                                                         'Do you want to review these events?','ParlourLink',
-                                                         MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2 ) = idYes then
-                                  ShowTheForm(TDBDataSet(EventTable), ErroneousItems, EventList, LinkType )
-                            end
+                         if Application.MessageBox('All PDA events have been saved.'+cCRLF+cCRLF+
+                                                   'Do you want to review these events?','PDALink',
+                                                   MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2 ) = idYes then
+                            ShowTheForm(TDBDataSet(EventTable), ErroneousItems, EventList, LinkType )
                       end
                    else
                       begin
-                         if ( EventSource <> esParlourLink ) then
-                            begin
-                               Application.MessageBox('PDA Calving\Movement events must be completed.'+cCRLF+
-                                                      'All other PDA events have been saved.'+ cCRLF+ cCRLF+
-                                                      'Click OK to begin the completion of Calving\Movement events.', 'PDALink',MB_OK + MB_ICONWARNING);
-                               ShowTheForm(TDBDataSet(EventTable), ErroneousItems, EventList, LinkType );
-                            end
-                         else
-                            begin
-                               Application.MessageBox('ParlourLink Calving\Movement events must be completed.'+cCRLF+
-                                                      'All other ParlourLink events have been saved.'+ cCRLF+ cCRLF+
-                                                      'Click OK to begin the completion of Calving\Movement events.', 'ParlourLink',MB_OK + MB_ICONWARNING);
-                               ShowTheForm(TDBDataSet(EventTable), ErroneousItems, EventList, LinkType );
-                            end;
+                         if Application.MessageBox('All Parlour Link events have been saved.'+cCRLF+cCRLF+
+                                                   'Do you want to review these events?','ParlourLink',
+                                                   MB_YESNO + MB_ICONQUESTION + MB_DEFBUTTON2 ) = idYes then
+                            ShowTheForm(TDBDataSet(EventTable), ErroneousItems, EventList, LinkType )
                       end
                 end
-            else if (( PDACalvingsRecorded = True ) or ( PDAMovementsRecorded = True )) then
-               begin
+             else
+                begin
+                   if ( EventSource <> esParlourLink ) then
+                      begin
+                         Application.MessageBox('PDA Calving\Movement events must be completed.'+cCRLF+
+                                                'All other PDA events have been saved.'+ cCRLF+ cCRLF+
+                                                'Click OK to begin the completion of Calving\Movement events.', 'PDALink',MB_OK + MB_ICONWARNING);
+                         ShowTheForm(TDBDataSet(EventTable), ErroneousItems, EventList, LinkType );
+                      end
+                   else
+                      begin
+                         Application.MessageBox('ParlourLink Calving\Movement events must be completed.'+cCRLF+
+                                                'All other ParlourLink events have been saved.'+ cCRLF+ cCRLF+
+                                                'Click OK to begin the completion of Calving\Movement events.', 'ParlourLink',MB_OK + MB_ICONWARNING);
+                         ShowTheForm(TDBDataSet(EventTable), ErroneousItems, EventList, LinkType );
+                      end;
+                end
+          end
+      else if (( PDACalvingsRecorded = True ) or ( PDAMovementsRecorded = True )) then
+         begin
 
-                  if not (( FAutoSaveCalvings=True ) and (PDAMovementsRecorded=False)) then
-                     begin
-                        Application.MessageBox('PDA Calving\Movement events must be completed.'+cCRLF+cCRLF+
-                                               'Click OK to begin the completion of Calving\Movement events.', 'PDALink',MB_OK + MB_ICONWARNING);
-                        ShowTheForm(TDBDataSet(EventTable), ErroneousItems, EventList, LinkType );
-                     end;
+            if not (( FAutoSaveCalvings=True ) and (PDAMovementsRecorded=False)) then
+               begin
+                  Application.MessageBox('PDA Calving\Movement events must be completed.'+cCRLF+cCRLF+
+                                         'Click OK to begin the completion of Calving\Movement events.', 'PDALink',MB_OK + MB_ICONWARNING);
+                  ShowTheForm(TDBDataSet(EventTable), ErroneousItems, EventList, LinkType );
                end;
-      //   end;
+         end;
    finally
+      ProgressIndicator.Close;
    end;
 end;
 
@@ -713,6 +710,7 @@ var
    i : Integer;
    Medicine, GenLook, MediPurch, MedAdmin : TTable;
    WestfaliaHealthLineFound,
+   bRecordEvent,
    CancelDryOff : Boolean;
    ParlourInfo : TParlourDetails;
    HealthDryRecord : THealthDryRecord;
@@ -1081,15 +1079,26 @@ begin
             while not EventTable.eof do
                begin
                   CancelDryOff := False;
+                  bRecordEvent := True;
 
+                  //   06/04/21 [V6.0 R0.1] /MK Bug Fix - Added new bRecordEvent variable to store whether to record the event or not to fix issue where
+                  //                                      if event already exists, the focused record was moving to the next event but it wasn't being checked.
                   if ( EventTable.FieldByName('EventType').AsInteger = CHealthEvent ) then
-                     if ( WinData.CheckEventExists(EventTable.FieldByName('AnimalID').AsInteger,
-                                                   CHealthEvent,EventTable.FieldByName('EventDate').AsDateTime) ) then EventTable.Next;
+                     bRecordEvent := ( not(WinData.CheckEventExists(EventTable.FieldByName('AnimalID').AsInteger,
+                                                                    CHealthEvent,EventTable.FieldByName('EventDate').AsDateTime)) );
                   if ( EventTable.FieldByName('EventType').AsInteger = CDryOffEvent ) then
-                     if ( WinData.CheckEventExists(EventTable.FieldByName('AnimalID').AsInteger,
-                                                   CDryOffEvent,EventTable.FieldByName('EventDate').AsDateTime) ) then EventTable.Next;
+                     bRecordEvent := ( not(WinData.CheckEventExists(EventTable.FieldByName('AnimalID').AsInteger,
+                                                                    CDryOffEvent,EventTable.FieldByName('EventDate').AsDateTime)) );
 
-                  if EventTable.FieldByName('EventType').AsInteger in ([CHealthEvent, CDryOffEvent]) then
+                  if ( not(bRecordEvent) ) then
+                     begin
+                        AddToErrorList(EventTable.FieldByName('EventType').AsInteger, 'Unable to create Dry Off event: Animal '+EventTable.FieldByName('NatIDNum').AsString+' already has Dry Off event');
+                        EventTable.Edit;
+                        EventTable.FieldByName('Deleted').AsBoolean := True;
+                        EventTable.Post;
+                     end;
+
+                  if ( bRecordEvent ) and ( EventTable.FieldByName('EventType').AsInteger in ([CHealthEvent, CDryOffEvent]) ) then
                      begin
                         if not(ActiveMovement(EventTable.FieldByName('AnimalID').AsInteger, EventTable.FieldByName('HerdID').AsInteger)) then
                            begin
@@ -1126,7 +1135,7 @@ begin
                                          (UpperCase(ParlourInfo.ParlourType) = 'WESTFALIA') ) then
                                        EHealth.EventComment := 'Westfalia Milk Isolation';
 
-                                    EHealth.AnimalID     := EventTable.FieldByName('AnimalID').AsInteger;
+                                    EHealth.AnimalID := EventTable.FieldByName('AnimalID').AsInteger;
 
                                     //   25/10/17 [V5.7 R4.1] /MK Change - Allocate the drying off event to the right lactation number.
                                     iEventLactNo := EventTable.FieldByName('LactNo').AsInteger;

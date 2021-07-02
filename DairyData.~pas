@@ -2419,7 +2419,7 @@ type
     qDrugBatchNoQtyRemaining: TFloatField;
     MediPurchIsSynchronized: TBooleanField;
     FdStkEventsIsSynchronized: TBooleanField;
-	AnimalFileByIDQANoMovements: TStringField;
+    AnimalFileByIDQANoMovements: TStringField;
     GroupsAdditionalData: TBooleanField;
     GroupsClientId: TStringField;
     GroupsSource: TIntegerField;
@@ -25012,10 +25012,11 @@ var
 begin
    GetEventLookupData(True);
 
+  sKeyField := 'ID';
+  sLookupKeyField := 'AnimalID';
+
    if GlobalSettings.DisplayMovementFeedColsInGridView then
       begin
-         sKeyField := 'ID';
-         sLookupKeyField := 'AnimalID';
          sFieldName      := 'PurchDate';
          if AnimalFileByID.FindField(sFieldName) = nil then
             begin
@@ -25287,9 +25288,6 @@ begin
             end;
 
       end;
-
-  sKeyField := 'ID';
-  sLookupKeyField := 'AnimalID';
 
   //   05/01/11 [V4.0 R7.3] /MK Additional Feature - Add Condition Score Field.
   sFieldName := 'CScore';

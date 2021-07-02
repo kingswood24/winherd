@@ -72,7 +72,7 @@ type
       function AnimalInThisGroup(const AID, GrpID: Integer): Boolean;
       function GetGroupIDGroupType(const AGroupId : Integer ) : TGroupType;
       function GetGroupTypeFromGroupTypeStr(AGroupTypeStr : String) : TGroupType;
-      function RemoveAnimalFromGrp(const AAnimalID : Integer; const AGroupID : Integer) : Boolean;
+      function RemoveAnimalFromGrp(const AAnimalID : Integer; const AGroupID : Integer; const ASoldAnimal : Boolean = False) : Boolean;
       function AddToGroup(AID, GroupID: Integer; AllowDeletion: Boolean;
          const DateJoined: TDateTime; const ATagNo: String = '';
          const ShowConfirmMsg : Boolean = True;
@@ -83,7 +83,6 @@ type
       function CreateGroup (AGroupName : String; AGroupType : TGroupType) : Integer;
       function CreateNewGroupCode (AGroupType : TGroupType) : String;
       function GroupTypeStringFromType (AGroupType : TGroupType) : String;
-      function BatchGroupCount (AAnimalTable : String) : Integer;
    end;
 
 const
@@ -361,7 +360,7 @@ begin
       end;
 end;
 
-function TGroupManager.RemoveAnimalFromGrp(const AAnimalID: Integer; const AGroupID : Integer): Boolean;
+function TGroupManager.RemoveAnimalFromGrp(const AAnimalID : Integer; const AGroupID : Integer; const ASoldAnimal : Boolean = False) : Boolean;
 begin
    with TQuery.Create(nil) do
       try
@@ -374,6 +373,18 @@ begin
          Params[1].AsInteger := AAnimalID;
          try
             ExecSQL;
+
+            if ( GetGroupIDGroupType(AGroupId) = gtFeed ) and ( not(ASoldAnimal) ) then
+               begin
+                  Close;
+                  SQL.Clear;
+                  SQL.Add('UPDATE Animals');
+                  SQL.Add('SET PenName = ""');
+                  SQL.Add('WHERE ID = :AID');
+                  Params[0].AsInteger := AAnimalID;
+                  ExecSQL;
+               end;
+
             uHerdSync.ResetSyncFlagForGroup(AGroupID);
          except
             on e : Exception do
@@ -609,6 +620,18 @@ begin
                   Params[1].AsInteger := GroupID ;
                   Params[2].AsDateTime := DateJoined;
                   ExecSQL;
+
+                  if ( gtNewGroupType = gtFeed ) then
+                     begin
+                        Close;
+                        SQL.Clear;
+                        SQL.Add('UPDATE Animals');
+                        SQL.Add('SET PenName = :PenName');
+                        SQL.Add('WHERE ID = :AID');
+                        Params[0].AsString := sSelectedGroupName;
+                        Params[1].AsInteger := AID;
+                        ExecSQL;
+                     end;
 
                   Result := True;
 
@@ -980,31 +1003,6 @@ begin
       gtPurchase : Result := 'Purchase';
       gtDrafting : Result := 'Draft';
    end;
-end;
-
-function TGroupManager.BatchGroupCount(AAnimalTable: String): Integer;
-begin
-   with TQuery.Create(nil) do
-      try
-         SQL.Clear;
-         SQL.Add('SELECT Count(GL.AnimalID) CountAID, GL.AnimalID AnimalID');
-         SQL.Add('FROM grps G, grplinks GL');
-         SQL.Add('WHERE ((G.Id= GL.GroupID) AND (UPPER(G.GroupType)= ' + UPPERCASE(QuotedStr(GroupTypesArray[gtBatch])) + '))');
-         SQL.Add('AND   (GL.AnimalID IN (SELECT AnimalID FROM '+AAnimalTable+'))');
-         SQL.Add('GROUP BY GL.AnimalID');
-         SQL.Add('HAVING COUNT(GL.AnimalID) > 1');
-         try
-            Open;
-         except
-            on e : Exception do
-               begin
-                  ApplicationLog.LogException(e);
-                  ApplicationLog.LogError(e.Message);
-               end;
-         end;
-      finally
-         Free;
-      end;
 end;
 
 end.
