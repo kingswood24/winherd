@@ -1021,7 +1021,9 @@ unit MenuUnit;
 
  17/06/21 [V6.0 R1.4] /MK Change - cxAnimalGridViewOverallGainPerDayGetDisplayText - If the OverAllGainPerDay is 0.00 then display text should be blank - GL request.
 
- 02/07/21 [V6.0 R1.5] /MK Change - Added Pen Name column to grid from animals table - Kepak. 
+ 02/07/21 [V6.0 R1.5] /MK Change - Added Pen Name column to grid from animals table - Kepak.
+
+ 05/07/21 [V6.0 R1.5] /MK Change - Only show the Pen Name column for beef herds.
 }
 
 interface
@@ -4138,6 +4140,17 @@ begin
                      cxAnimalGridViewOverallGainPerDay.Hidden := True;
                   end;
 
+               if ( cxAnimalGridViewPenName.Visible ) then
+                  begin
+                     cxAnimalGridViewPenName.Visible := False;
+                     cxAnimalGridViewPenName.Hidden := True;
+                  end
+               else
+                  begin
+                     cxAnimalGridViewPenName.Visible := False;
+                     cxAnimalGridViewPenName.Hidden := True;
+                  end;
+
                actDryOff.Caption := 'Drying Off';
                pBreedingContainter.Visible := True;
                CheckMods;
@@ -4367,6 +4380,17 @@ begin
                      cxAnimalGridViewOverallGainPerDay.Hidden := False;
                   end;
 
+               if ( cxAnimalGridViewPenName.Visible ) then
+                  begin
+                     cxAnimalGridViewPenName.Visible := False;
+                     cxAnimalGridViewPenName.Hidden := True;
+                  end
+               else
+                  begin
+                     cxAnimalGridViewPenName.Visible := False;
+                     cxAnimalGridViewPenName.Hidden := True;
+                  end;
+
                actDryOff.Caption := 'Weaning';
 
                btnDryOff.Visible := True;
@@ -4571,6 +4595,17 @@ begin
                   begin
                      cxAnimalGridViewOverallGainPerDay.Visible := False;
                      cxAnimalGridViewOverallGainPerDay.Hidden := False;
+                  end;
+
+               if ( cxAnimalGridViewPenName.Visible ) then
+                  begin
+                     cxAnimalGridViewPenName.Visible := False;
+                     cxAnimalGridViewPenName.Hidden := True;
+                  end
+               else
+                  begin
+                     cxAnimalGridViewPenName.Visible := True;
+                     cxAnimalGridViewPenName.Hidden := False;
                   end;
 
                if (Def.Definition.dUseQuotaMan) then

@@ -6,6 +6,8 @@ Version V6.0 R1.5
 02/07/21 /MK Change - MenuUnit - Added Pen Name column to grid from animals table - Kepak.
                     - uHerdSync - CreateHerdSyncData - Use LEFT JOIN instead of INNER JOIN when calvings table wasn't updated with calf recorded - Create Calving Utility required to fix.
                     - Groups - AddToGroup/RemoveAnimalFromGrp - Update the Pen Name field in the animals table - only remove Pen Name if animal is removed from a group but not after sale.
+05/07/21 /MK Change - MenuUnit - Only show the Pen Name column for beef herds.
+                    - uMediPurch - CalcMediPurchQtyRemaining - Show the prompt to the user to only include batches marked in use - Alec (Fletchers).
 
 Version V6.0 R1.4
 
