@@ -2433,6 +2433,7 @@ type
     EventsExtIsDeleted: TBooleanField;
     EventsExtIsSynchronized: TBooleanField;
     QuerySuppliersBTEHerdNo: TStringField;
+    AnimalFileByIDPenName: TStringField;
     procedure HerdBeforePost(DataSet: TDataSet);
     procedure EventsNewRecord(DataSet: TDataSet);
     procedure WinDataDestroy(Sender: TObject);
@@ -29143,44 +29144,54 @@ end;
 procedure TWinData.UpdatePregDiagEvent(AAnimalID, AAnimalLactNo : Integer);
 var
    CurrPregDiagID : Integer;
-   qUpdateExistPregDiag : TQuery;
+   qUpdateExistPregDiag,
+   qUpdatePDEvents : TQuery;
 begin
    qUpdateExistPregDiag := TQuery.Create(nil);
-   with qUpdateExistPregDiag do
+   qUpdatePDEvents := TQuery.Create(nil);
+   try
+      qUpdateExistPregDiag.DatabaseName := AliasName;
+      qUpdatePDEvents.DatabaseName := AliasName;
       try
-         DatabaseName := AliasName;
-         SQL.Clear;
-         SQL.Add('SELECT E.ID');
-         SQL.Add('FROM Events E ');
-         SQL.Add('WHERE (E.AnimalID = '+IntToStr(AAnimalID)+')');
-         SQL.Add('AND   (E.AnimalLactNo = '+IntToStr(AAnimalLactNo)+')');
-         SQL.Add('AND   (E.EventType = '+IntToStr(CPregDiagEvent)+')');
-         Open;
-         try
-            First;
-            CurrPregDiagID := Fields[0].AsInteger;
-         finally
-            Close;
-         end;
-
-         //   30/10/15 [V5.4 R9.7] /MK Change - Set the EventType to a new event type to allow for another PD to go in on the same lactation.
-         if ( CurrPregDiagID > 0 ) then
-            try
-                SQL.Clear;
-                SQL.Add('UPDATE Events');
-                SQL.Add('SET EventType = EventType + 100');
-                SQL.Add('WHERE ID = :CurrPregDiagID');
-                Params[0].AsInteger := CurrPregDiagID;
-                ExecSQL;
-            except
-               on E : Exception do
+         qUpdateExistPregDiag.Close;
+         qUpdateExistPregDiag.SQL.Clear;
+         qUpdateExistPregDiag.SQL.Add('SELECT E.ID');
+         qUpdateExistPregDiag.SQL.Add('FROM Events E ');
+         qUpdateExistPregDiag.SQL.Add('WHERE (E.AnimalID = '+IntToStr(AAnimalID)+')');
+         qUpdateExistPregDiag.SQL.Add('AND   (E.AnimalLactNo = '+IntToStr(AAnimalLactNo)+')');
+         qUpdateExistPregDiag.SQL.Add('AND   (E.EventType = '+IntToStr(CPregDiagEvent)+')');
+         qUpdateExistPregDiag.Open;
+         //   05/07/21 [V6.0 R1.6] /MK Change - Found on some sets of data there were more than one PD event on the same lactation - Tom Craigs data.
+         qUpdateExistPregDiag.First;
+         while ( not(qUpdateExistPregDiag.Eof) ) do
+            begin
+               CurrPregDiagID := qUpdateExistPregDiag.Fields[0].AsInteger;
+               //   30/10/15 [V5.4 R9.7] /MK Change - Set the EventType to a new event type to allow for another PD to go in on the same lactation.
+               if ( CurrPregDiagID > 0 ) then
                   begin
-                     ShowMessage(e.Message);
+                     qUpdatePDEvents.SQL.Clear;
+                     qUpdatePDEvents.SQL.Add('UPDATE Events');
+                     qUpdatePDEvents.SQL.Add('SET EventType = EventType + 100');
+                     qUpdatePDEvents.SQL.Add('WHERE ID = :CurrPregDiagID');
+                     qUpdatePDEvents.Params[0].AsInteger := CurrPregDiagID;
+                     qUpdatePDEvents.ExecSQL;
                   end;
+               qUpdateExistPregDiag.Next;
             end;
-      finally
-         Free;
+      except
+         on e : Exception do
+            begin
+               ApplicationLog.LogException(e);
+               ApplicationLog.LogError(Format('Error updating PD Event for AnimalId %d.',[AAnimalId]));
+               Exit;
+            end;
       end;
+   finally
+      if ( qUpdateExistPregDiag <> nil ) then
+         FreeAndNil(qUpdateExistPregDiag);
+      if ( qUpdatePDEvents <> nil ) then
+         FreeAndNil(qUpdatePDEvents);
+   end;
 end;
 
 procedure TWinData.CheckForRelinkCalvesToDams(ARelinkDateLength : Integer);

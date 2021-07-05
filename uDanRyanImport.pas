@@ -30,6 +30,8 @@
                             Additional Feature - Added uProgressIndicator to show progress of reading the file and saving the events.
 
    16/12/20 [V5.9 R7.9] /MK Change - FilterGridTable - Default the ActivePageIndex to Pregnant as this event should always exist.
+
+   05/07/21 [V6.0 R1.6] /MK Change - Added a check for the recheck code, RCK, in the event code field - Tom Craig.   
 }
 
 unit uDanRyanImport;
@@ -90,6 +92,7 @@ type
     FTotalEventsSaved,
     FDaysInCalf : Integer;
     FCalfType : String;
+    FRecheck : Boolean;
     FFileName : String;
     FFileType : TFileType;
     procedure CreateTempTables;
@@ -635,6 +638,7 @@ var
                         else if ( FDaysInCalf <= 0 ) then
                            PregDiagEvent.EventComment := 'Not Pregnant';
                      end;
+                  PregDiagEvent.IsRecheck := FRecheck;
                end
             else
                begin
@@ -731,6 +735,7 @@ procedure TfmDanRyanImport.DecipherEventCode ( AEventCode : String );
 var
    EParser : TSPParser;
    PDDate : TDateTime;
+   i : Integer;
 
    function GetCalfSex ( ACalfSex : String ) : string;
    begin
@@ -782,6 +787,7 @@ begin
    try
       FDaysInCalf := 0;
       FCalfType := '';
+      FRecheck := False;
 
       EParser := TSPParser.Create(nil);
       EParser.Sepchar := ' ';
@@ -814,6 +820,13 @@ begin
             FCalfType := GetCalfSex(UpperCase(EParser.Fields[2]));
             if ( EParser.Count > 2 ) and ( GetCalfSex(UpperCase(EParser.Fields[3])) <> '' ) then
                FCalfType := FCalfType + '/' + GetCalfSex(UpperCase(EParser.Fields[3]));
+
+            for i := 1 to EParser.Count do
+               if ( EParser.Fields[i] = 'RCK' ) then
+                  begin
+                     FRecheck := True;
+                     Break;
+                  end;
          end;
 
    finally
