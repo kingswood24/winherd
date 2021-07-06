@@ -30,6 +30,8 @@
                             Additional Feature - Added uProgressIndicator to show progress of reading the file and saving the events.
 
    16/12/20 [V5.9 R7.9] /MK Change - FilterGridTable - Default the ActivePageIndex to Pregnant as this event should always exist.
+
+   05/07/21 [V6.0 R1.6] /MK Change - Added a check for the recheck code, RCK, in the event code field - Tom Craig.   
 }
 
 unit uDanRyanImport;
@@ -554,9 +556,6 @@ begin
    EventGridDBTableView.DataController.DataSource := nil;
    FEventTable.Filtered := False;
    FEventTable.Filter := '';
-
-   //   16/12/20 [V5.9 R7.9] /MK Change - Default the ActivePageIndex to Pregnant as this event should always exist.
-   pcEvents.ActivePageIndex := tsPregnant.PageIndex;
 
    if pcEvents.ActivePage <> nil then
       begin

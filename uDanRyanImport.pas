@@ -163,6 +163,8 @@ begin
    OnActivate := nil;
    ReadFile;
    FilterGridTable;
+   //   16/12/20 [V5.9 R7.9] /MK Change - Default the ActivePageIndex to Pregnant as this event should always exist.
+   pcEvents.ActivePageIndex := tsPregnant.PageIndex;
 end;
 
 procedure TfmDanRyanImport.CreateTempTables;
@@ -556,9 +558,6 @@ begin
    EventGridDBTableView.DataController.DataSource := nil;
    FEventTable.Filtered := False;
    FEventTable.Filter := '';
-
-   //   16/12/20 [V5.9 R7.9] /MK Change - Default the ActivePageIndex to Pregnant as this event should always exist.
-   pcEvents.ActivePageIndex := tsPregnant.PageIndex;
 
    if pcEvents.ActivePage <> nil then
       begin
