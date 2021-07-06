@@ -1,14 +1,14 @@
 [Closed Files]
-File_0=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uDanRyanImport.pas',0,1,145,52,160,0,0
-File_1=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Changes.txt',0,1,1,37,4,0,0
-File_2=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Reports\ActionReminderFilt.pas',0,1,825,61,846,1,0
-File_3=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\DairyData.pas',0,1,1008,1,1029,1,0
-File_4=SourceModule,'c:\program files (x86)\borland\delphi5\Source\Vcl\db.pas',0,1,8632,1,8652,0,0
-File_5=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uApplicationLog.pas',0,1,35,1,55,0,0
-File_6=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\GenTypesConst.pas',0,1,37,21,66,0,0
-File_7=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uMediPurch.pas',0,1,46,150,74,1,0
-File_8=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\MenuUnit.pas',0,1,997,1,1027,0,0
-File_9=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uCreateEvents.pas',0,1,3077,161,3097,0,0
+File_0=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Changes.txt',0,1,1,164,6,0,0
+File_1=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uSuppliers.pas',0,1,10,1,30,1,0
+File_2=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uCustomers.pas',0,1,10,1,30,1,0
+File_3=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uDanRyanImport.pas',0,1,145,52,160,0,0
+File_4=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Reports\ActionReminderFilt.pas',0,1,825,61,846,1,0
+File_5=SourceModule,'c:\program files (x86)\borland\delphi5\Source\Vcl\db.pas',0,1,8632,1,8652,0,0
+File_6=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uApplicationLog.pas',0,1,35,1,55,0,0
+File_7=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\GenTypesConst.pas',0,1,37,21,66,0,0
+File_8=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uMediPurch.pas',0,1,46,150,74,1,0
+File_9=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\MenuUnit.pas',0,1,997,1,1027,0,0
 
 [Modules]
 Module0=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.dpr
@@ -28,11 +28,7 @@ FormOnTop=0
 FormState=0
 FormOnTop=0
 
-[C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uBaseForm.pas]
-FormState=0
-FormOnTop=0
-
-[C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uImageStore.pas]
+[C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\DairyData.pas]
 FormState=0
 FormOnTop=0
 
@@ -45,8 +41,8 @@ MessageView=MessageView@EditWindow0
 Create=1
 Visible=1
 State=0
-Left=192
-Top=107
+Left=187
+Top=106
 Width=1733
 Height=944
 MaxLeft=-1
@@ -86,11 +82,11 @@ Left=0
 Top=0
 Width=1920
 Height=115
-MaxLeft=-4
-MaxTop=-4
-MaxWidth=1928
+MaxLeft=-1
+MaxTop=-1
+MaxWidth=1920
 MaxHeight=115
-ClientWidth=1920
+ClientWidth=1912
 ClientHeight=84
 
 [ProjectManager]
@@ -156,8 +152,8 @@ LRDockWidth=219
 Dockable=1
 SplitPos=85
 ArrangeBy=Name
-SelectedItem=Caption
-ExpandedItems=DataBinding,Font.Style,LookAndFeel,OptionsView,Properties,Properties.ValueChecked,Properties.ValueGrayed,Properties.ValueUnchecked
+SelectedItem=Name
+ExpandedItems=DataBinding,Font.Style,LookAndFeel,Properties.ValueChecked,Properties.ValueGrayed,Properties.ValueUnchecked
 HiddenCategories=Legacy
 ShowStatusBar=1
 
@@ -306,7 +302,7 @@ Dockable=1
 
 [MessageView@EditWindow0]
 Create=1
-Visible=0
+Visible=1
 State=0
 Left=0
 Top=0
@@ -340,7 +336,7 @@ TBDockHeight=926
 LRDockWidth=219
 Dockable=1
 TabPosition=0
-ActiveTab=Project Manager
+ActiveTab=Object Inspector
 TabDockClients=PropertyInspector,ProjectManager
 
 [DockSite1]
@@ -360,6 +356,6 @@ TBDockHeight=140
 LRDockWidth=1027
 Dockable=1
 TabPosition=0
-ActiveTab=Call Stack
+ActiveTab=Messages
 TabDockClients=BreakpointWindow,WatchWindow,DebugLogView,LocalVarsWindow,ModuleWindow,CallStackWindow,MessageView@EditWindow0
 

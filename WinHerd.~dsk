@@ -1,8 +1,8 @@
 [Closed Files]
-File_0=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uDanRyanImport.pas',0,1,1,1,35,1,0
-File_1=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Changes.txt',0,1,1,37,4,0,0
-File_2=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Reports\ActionReminderFilt.pas',0,1,825,61,846,1,0
-File_3=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\DairyData.pas',0,1,1008,1,1029,1,0
+File_0=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uSuppliers.pas',0,1,282,43,293,1,0
+File_1=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uDanRyanImport.pas',0,1,145,52,160,0,0
+File_2=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Changes.txt',0,1,1,37,4,0,0
+File_3=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Reports\ActionReminderFilt.pas',0,1,825,61,846,1,0
 File_4=SourceModule,'c:\program files (x86)\borland\delphi5\Source\Vcl\db.pas',0,1,8632,1,8652,0,0
 File_5=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uApplicationLog.pas',0,1,35,1,55,0,0
 File_6=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\GenTypesConst.pas',0,1,37,21,66,0,0
@@ -28,11 +28,7 @@ FormOnTop=0
 FormState=0
 FormOnTop=0
 
-[C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uBaseForm.pas]
-FormState=0
-FormOnTop=0
-
-[C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uImageStore.pas]
+[C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\DairyData.pas]
 FormState=0
 FormOnTop=0
 
@@ -58,8 +54,8 @@ LeftPanelClients=CodeExplorer@EditWindow0
 LeftPanelData=00000400010000000C000000436F64654578706C6F7265720000000000000000000000000000000000FFFFFFFF
 RightPanelSize=0
 BottomPanelSize=140
-BottomPanelClients=DockSite1
-BottomPanelData=0000040000000000BD06000000000000028C000000000000000100000000BD06000009000000446F636B5369746531FFFFFFFF
+BottomPanelClients=DockSite0
+BottomPanelData=0000040000000000BD06000000000000028C000000000000000100000000BD06000009000000446F636B5369746530FFFFFFFF
 
 [View0]
 Module=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.dpr
@@ -73,7 +69,8 @@ Count=1
 Watch0='iDaysBetween',256,0,18,1,0
 
 [Breakpoints]
-Count=0
+Count=1
+Breakpoint0='C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uSuppliers.pas',289,'',0,1,'',1,0,0,'',1,'','',''
 
 [AddressBreakpoints]
 Count=0
@@ -86,8 +83,8 @@ Left=0
 Top=0
 Width=1920
 Height=115
-MaxLeft=-4
-MaxTop=-4
+MaxLeft=-1
+MaxTop=-1
 MaxWidth=1928
 MaxHeight=115
 ClientWidth=1920
@@ -156,7 +153,7 @@ LRDockWidth=219
 Dockable=1
 SplitPos=85
 ArrangeBy=Name
-SelectedItem=Caption
+SelectedItem=Name
 ExpandedItems=DataBinding,Font.Style,LookAndFeel,OptionsView,Properties,Properties.ValueChecked,Properties.ValueGrayed,Properties.ValueUnchecked
 HiddenCategories=Legacy
 ShowStatusBar=1
@@ -306,7 +303,7 @@ Dockable=1
 
 [MessageView@EditWindow0]
 Create=1
-Visible=0
+Visible=1
 State=0
 Left=0
 Top=0
@@ -328,26 +325,6 @@ DockSiteType=1
 Create=1
 Visible=1
 State=0
-Left=0
-Top=107
-Width=193
-Height=944
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=185
-ClientHeight=913
-TBDockHeight=926
-LRDockWidth=219
-Dockable=1
-TabPosition=0
-ActiveTab=Project Manager
-TabDockClients=PropertyInspector,ProjectManager
-
-[DockSite1]
-DockSiteType=1
-Create=1
-Visible=1
-State=0
 Left=12
 Top=0
 Width=1713
@@ -360,6 +337,26 @@ TBDockHeight=140
 LRDockWidth=1027
 Dockable=1
 TabPosition=0
-ActiveTab=Call Stack
+ActiveTab=Messages
 TabDockClients=BreakpointWindow,WatchWindow,DebugLogView,LocalVarsWindow,ModuleWindow,CallStackWindow,MessageView@EditWindow0
+
+[DockSite1]
+DockSiteType=1
+Create=1
+Visible=1
+State=0
+Left=0
+Top=107
+Width=193
+Height=944
+MaxLeft=-1
+MaxTop=-1
+ClientWidth=185
+ClientHeight=913
+TBDockHeight=926
+LRDockWidth=219
+Dockable=1
+TabPosition=0
+ActiveTab=Object Inspector
+TabDockClients=PropertyInspector,ProjectManager
 

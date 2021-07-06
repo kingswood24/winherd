@@ -23,7 +23,7 @@
 
    27/03/19 [V5.8 R8.3] /MK Bug Fix - Tab Order was wrong.    
 
-   19/09/19 [V5.9 R0.5] /MK Bug Fix - ComponentPrinterLink had lost its Component so I have hard coded it, Print Customers not showing data - Adrain Walsh.
+   19/09/19 [V5.9 R0.5] /MK Bug Fix - ComponentPrinterLink had lost its Component so I have hard coded it, Print Customers not showing data - Adrian Walsh.
 }
 
 unit uCustomers;
@@ -38,7 +38,7 @@ uses
   KRoutines, cxGridCustomTableView, cxGridTableView, cxGridDBTableView,
   cxGridLevel, cxClasses, cxGridCustomView, cxGrid, cxButtons, dxPSCore,
   dxPScxCommon, dxPScxGridLnk, uHerdLookup, cxCheckBox, cxLabel, cxDBLabel,
-  Menus, uMartEmailRequest;
+  Menus, uMartEmailRequest, cxFilter;
 
 type
   TfCustomers = class(TForm)
@@ -257,6 +257,15 @@ procedure TfCustomers.eSearchChange(Sender: TObject);
 begin
    if ( eSearch.Text = '' ) then
       CustomerGridDBTableView.DataController.FocusedRecordIndex := 0;
+
+   CustomerGridDBTableView.DataController.Filter.Clear;
+   CustomerGridDBTableView.DataController.Filter.Active := False;
+   if ( Length(eSearch.Text) > 0 ) then
+      begin
+         CustomerGridDBTableView.DataController.Filter.Options := [fcoCaseInsensitive];
+         CustomerGridDBTableView.DataController.Filter.AddItem(nil, CustomerGridDBTableViewName, foLike, '%'+eSearch.Text+'%', '%'+eSearch.Text+'%');
+         CustomerGridDBTableView.DataController.Filter.Active := True;
+      end;
 end;
 
 procedure TfCustomers.eSearchKeyPress(Sender: TObject; var Key: Char);
@@ -269,6 +278,7 @@ var
 begin
    //   27/11/15 [V5.5 R1.4] /MK Change - Added partial search i.e. the program will search for text in whole of name not
    //                                     just the start of the name.
+   {
    if ( key in iCharSearchSet ) then
       with CustomerGridDBTableView do
          begin
@@ -307,6 +317,7 @@ begin
                Screen.Cursor := crDefault;
             end;
          end;
+   }
 end;
 
 procedure TfCustomers.FormCreate(Sender: TObject);

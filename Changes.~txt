@@ -1,6 +1,9 @@
 Version V6.0 R1.6
 
 05/07/21 /MK Change - DairyData - UpdatePregDiagEvent - Found on some sets of data there were more than one PD event on the same lactation - Tom Craigs data.
+                    - uDanRyanImport - Added a check for the recheck code, RCK, in the event code field - Tom Craig.   
+06/07/21 /MK Change - uSuppliers - Removed search from eSearch.OnKeyPress.
+                                 - Added search using GridView.DataController.Filter to eSearch.OnChange to allow for partial search - Geraldine Murray.
 
 Version V6.0 R1.5
 
