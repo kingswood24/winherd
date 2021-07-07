@@ -506,6 +506,9 @@ Changes to Add a New Mass Update Event
                                     - sbSaveClick - Set FDrugBatchQty_EmptyCheck before UpdateAnimals/CopyDetails so not to check quantity remaining for batch in MultiDrug - George (TGM).
 
    28/10/20 [V5.9 R6.5] /MK Bug Fix - FormCreate - Breeding Data Temp Tables were being created but not being filled. This was separated from BreedingData.Create.
+
+   07/07/21 [V6.0 R1.6] /MK Change - CreateTempTable - Moved the FWeighInfoQuery and FPurchInfoQuery GET to after the TempAnimals table is created.
+                            Additional Feature - CreateTempTable - If the animal doesn't have a previous weighing weight then use the purchase weight if any - Una Carter.
 }
 
 interface
@@ -3152,32 +3155,6 @@ begin
                  ceNoStraws.DataBinding.DataField := '';
                  cbSexedSemen.DataSource := nil;
 
-                 if ( WinData.EventType in [THealth, TDryOff, THerdVaccination, TWeight] ) then
-                    if ( not(FWeighInfoQuery.Active) ) then
-                       begin
-                          FWeighInfoQuery.Close;
-                          FWeighInfoQuery.SQL.Clear;
-                          FWeighInfoQuery.SQL.Add('SELECT T.AnimalID, T.DateOfBirth, E.EventDate WeighDate, W.Weight');
-                          FWeighInfoQuery.SQL.Add('FROM '+TempAnimals.TableName+' T');
-                          FWeighInfoQuery.SQL.Add('LEFT JOIN '+FWeighingEvents.TableName+' E ON (E.AnimalID = T.AnimalID)');
-                          FWeighInfoQuery.SQL.Add('LEFT JOIN Weights W On (W.EventID = E.EventID)');
-                          FWeighInfoQuery.SQL.Add('WHERE (E.EventDate >= T.DateOfBirth)');
-                          FWeighInfoQuery.SQL.Add('AND   ( W.Weight IS NOT NULL ) AND ( W.Weight > 0 )');
-                          FWeighInfoQuery.SQL.Add('ORDER BY T.AnimalID, E.EventDate DESC');
-                          FWeighInfoQuery.Open;
-                       end;
-
-                 if ( not(FPurchInfoQuery.Active) ) then
-                    begin
-                       FPurchInfoQuery.Close;
-                       FPurchInfoQuery.SQL.Clear;
-                       FPurchInfoQuery.SQL.Add('SELECT A.AnimalID, E.EventDate, P.Weight');
-                       FPurchInfoQuery.SQL.Add('FROM '+TempAnimals.TableName+' A');
-                       FPurchInfoQuery.SQL.Add('LEFT JOIN '+FPurchaseEvents.TableName+' E ON (E.AnimalID = A.AnimalID)');
-                       FPurchInfoQuery.SQL.Add('LEFT JOIN Purchases P ON (P.EventID = E.EventID)');
-                       FPurchInfoQuery.Open;
-                    end;
-
                  case WinData.EventType of
                     TService    : ServiceSetUp;
                     TPlannedBull,
@@ -3198,9 +3175,9 @@ begin
                  end;
 
                  Open;
+
                  sbMessage.Panels[0].Text := cLoadingAnimals;
 
-                 // MoveSelectedAnimals.Execute;
                  try
                     with GenQuery do
                        begin
@@ -3315,6 +3292,34 @@ begin
                              SQL.Add(Format('WHERE NOT AnimalId IN %s',[HerdLookup.GetAnimalSelectionToArrayWideString(FSelectionType)]));
                           ExecSQL;
 
+                          //   07/07/21 [V6.0 R1.6] /MK Change - Moved this FWeighInfoQuery GET to after the TempAnimals table is created.
+                          if ( WinData.EventType in [THealth, TDryOff, THerdVaccination, TWeight] ) then
+                             if ( not(FWeighInfoQuery.Active) ) then
+                                begin
+                                   FWeighInfoQuery.Close;
+                                   FWeighInfoQuery.SQL.Clear;
+                                   FWeighInfoQuery.SQL.Add('SELECT T.AnimalID, T.DateOfBirth, E.EventDate WeighDate, W.Weight');
+                                   FWeighInfoQuery.SQL.Add('FROM '+TempAnimals.TableName+' T');
+                                   FWeighInfoQuery.SQL.Add('LEFT JOIN '+FWeighingEvents.TableName+' E ON (E.AnimalID = T.AnimalID)');
+                                   FWeighInfoQuery.SQL.Add('LEFT JOIN Weights W On (W.EventID = E.EventID)');
+                                   FWeighInfoQuery.SQL.Add('WHERE (E.EventDate >= T.DateOfBirth)');
+                                   FWeighInfoQuery.SQL.Add('AND   ( W.Weight IS NOT NULL ) AND ( W.Weight > 0 )');
+                                   FWeighInfoQuery.SQL.Add('ORDER BY T.AnimalID, E.EventDate DESC');
+                                   FWeighInfoQuery.Open;
+                                end;
+
+                          //   07/07/21 [V6.0 R1.6] /MK Change - Moved this FPurchInfoQuery GET to after the TempAnimals table is created.
+                          if ( not(FPurchInfoQuery.Active) ) then
+                             begin
+                                FPurchInfoQuery.Close;
+                                FPurchInfoQuery.SQL.Clear;
+                                FPurchInfoQuery.SQL.Add('SELECT A.AnimalID, E.EventDate, P.Weight');
+                                FPurchInfoQuery.SQL.Add('FROM '+TempAnimals.TableName+' A');
+                                FPurchInfoQuery.SQL.Add('LEFT JOIN '+FPurchaseEvents.TableName+' E ON (E.AnimalID = A.AnimalID)');
+                                FPurchInfoQuery.SQL.Add('LEFT JOIN Purchases P ON (P.EventID = E.EventID)');
+                                FPurchInfoQuery.Open;
+                             end;
+
                           FPurchInfoQuery.First;
                           while ( not(FPurchInfoQuery.Eof) ) do
                              begin
@@ -3372,7 +3377,10 @@ begin
                                                begin
                                                   rgUseWeightAsApplicRate.ItemIndex := 0;
                                                   if ( FWeighInfoQuery.Locate('AnimalID',TempAnimals.FieldByName('AnimalID').AsInteger,[]) ) then
-                                                     TempAnimals.FieldByName('LastWeight').Value := FWeighInfoQuery.FieldByName('Weight').AsFloat;
+                                                     TempAnimals.FieldByName('LastWeight').Value := FWeighInfoQuery.FieldByName('Weight').AsFloat
+                                                  //   07/07/21 [V6.0 R1.6] /MK Additional Feature - If the animal doesn't have a previous weighing weight then use the purchase weight if any - Una Carter.
+                                                  else if ( TempAnimals.FieldByName('PWeight').AsFloat > 0 ) then
+                                                     TempAnimals.FieldByName('LastWeight').Value := TempAnimals.FieldByName('PWeight').AsFloat;
                                                end;
                                          end;
 

@@ -4,7 +4,8 @@ Version V6.0 R1.6
                     - uDanRyanImport - Added a check for the recheck code, RCK, in the event code field - Tom Craig.   
 06/07/21 /MK Change - uCustomers/uSuppliers - Removed search from eSearch.OnKeyPress.
                                             - Added search using GridView.DataController.Filter to eSearch.OnChange to allow for partial search - Geraldine Murray.
-             Additional Feature - ElectronicRemittanceConverter - Added Total Dead Weight to summary items before Remittance End - Una Carter request.   
+             Additional Feature - ElectronicRemittanceConverter - Added Total Dead Weight to summary items before Remittance End - Una Carter request.
+07/07/21 /MK Change - uCustomers/uSuppliers - Allow the user to search by either column on the grid by checking to see which column is sorted.
 
 Version V6.0 R1.5
 

@@ -499,6 +499,15 @@ Changes to Add a New Mass Update Event
                                                - Added functionality to auto search for part nat id when the user presses enter in the Part Nat Id. box.
                                                  If the user presses enter again this will tick/select the found record.
                                                - Added a help/information indicator after Part Nat Id search to tell users how to use the enter key in Part Nat Id.
+
+   25/08/20 [V5.9 R5.7] /MK Bug Fix - HealthEventRecCreated - Check if Multi Drug panel is not showing and rgUseWeightAsApplicRate.ItemIndex is 1 before using TotalApplicRate - James (Fletchers).
+
+   26/08/20 [V5.9 R5.8] /MK Bug Fix - Seperate the KeyDown of Animal Number and Part NatID - George (TGM).   
+                                    - sbSaveClick - Set FDrugBatchQty_EmptyCheck before UpdateAnimals/CopyDetails so not to check quantity remaining for batch in MultiDrug - George (TGM).
+
+   28/10/20 [V5.9 R6.5] /MK Bug Fix - FormCreate - Breeding Data Temp Tables were being created but not being filled. This was separated from BreedingData.Create.
+
+   07/07/21 [V6.0 R1.6] /MK Change - CreateTempTable - Moved the FWeighInfoQuery and FPurchInfoQuery GET to after the TempAnimals table is created.
 }
 
 interface
@@ -882,8 +891,6 @@ type
     procedure DrugBatchNoPropertiesCloseUp(Sender: TObject);
     procedure teAnimalNoPropertiesChange(Sender: TObject);
     procedure teNatIDNumPropertiesChange(Sender: TObject);
-    procedure teAnimalNoKeyDown(Sender: TObject; var Key: Word;
-      Shift: TShiftState);
     procedure btnSelectAllClick(Sender: TObject);
     procedure TempAnimalsBeforePost(DataSet: TDataSet);
     procedure btnSetupFertilityProgramsClick(Sender: TObject);
@@ -954,6 +961,8 @@ type
     procedure actSearchByParNatIdExecute(Sender: TObject);
     procedure imgSearchInfoClick(Sender: TObject);
     procedure HintTimerTimer(Sender: TObject);
+    procedure teAnimalNoKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure teNatIDNumKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
   private
     FBreedingDataHelper : TBreedingDataHelper;
     procedure ShowHideWeightColumn(AShow: Boolean);
@@ -971,6 +980,7 @@ type
     procedure ChangeTotalApplicRateAmtTitleCaption;
     procedure HideHintStyleController;
     procedure CreateHintStyleController;
+    procedure SelectDeSelectAnimal;
   private
     { Private declarations }
     ItemChanged,
@@ -3144,32 +3154,6 @@ begin
                  ceNoStraws.DataBinding.DataField := '';
                  cbSexedSemen.DataSource := nil;
 
-                 if ( WinData.EventType in [THealth, TDryOff, THerdVaccination, TWeight] ) then
-                    if ( not(FWeighInfoQuery.Active) ) then
-                       begin
-                          FWeighInfoQuery.Close;
-                          FWeighInfoQuery.SQL.Clear;
-                          FWeighInfoQuery.SQL.Add('SELECT T.AnimalID, T.DateOfBirth, E.EventDate WeighDate, W.Weight');
-                          FWeighInfoQuery.SQL.Add('FROM '+TempAnimals.TableName+' T');
-                          FWeighInfoQuery.SQL.Add('LEFT JOIN '+FWeighingEvents.TableName+' E ON (E.AnimalID = T.AnimalID)');
-                          FWeighInfoQuery.SQL.Add('LEFT JOIN Weights W On (W.EventID = E.EventID)');
-                          FWeighInfoQuery.SQL.Add('WHERE (E.EventDate >= T.DateOfBirth)');
-                          FWeighInfoQuery.SQL.Add('AND   ( W.Weight IS NOT NULL ) AND ( W.Weight > 0 )');
-                          FWeighInfoQuery.SQL.Add('ORDER BY T.AnimalID, E.EventDate DESC');
-                          FWeighInfoQuery.Open;
-                       end;
-
-                 if ( not(FPurchInfoQuery.Active) ) then
-                    begin
-                       FPurchInfoQuery.Close;
-                       FPurchInfoQuery.SQL.Clear;
-                       FPurchInfoQuery.SQL.Add('SELECT A.AnimalID, E.EventDate, P.Weight');
-                       FPurchInfoQuery.SQL.Add('FROM '+TempAnimals.TableName+' A');
-                       FPurchInfoQuery.SQL.Add('LEFT JOIN '+FPurchaseEvents.TableName+' E ON (E.AnimalID = A.AnimalID)');
-                       FPurchInfoQuery.SQL.Add('LEFT JOIN Purchases P ON (P.EventID = E.EventID)');
-                       FPurchInfoQuery.Open;
-                    end;
-
                  case WinData.EventType of
                     TService    : ServiceSetUp;
                     TPlannedBull,
@@ -3190,9 +3174,9 @@ begin
                  end;
 
                  Open;
+
                  sbMessage.Panels[0].Text := cLoadingAnimals;
 
-                 // MoveSelectedAnimals.Execute;
                  try
                     with GenQuery do
                        begin
@@ -3307,6 +3291,34 @@ begin
                              SQL.Add(Format('WHERE NOT AnimalId IN %s',[HerdLookup.GetAnimalSelectionToArrayWideString(FSelectionType)]));
                           ExecSQL;
 
+                          //   07/07/21 [V6.0 R1.6] /MK Change - Moved this FWeighInfoQuery GET to after the TempAnimals table is created.
+                          if ( WinData.EventType in [THealth, TDryOff, THerdVaccination, TWeight] ) then
+                             if ( not(FWeighInfoQuery.Active) ) then
+                                begin
+                                   FWeighInfoQuery.Close;
+                                   FWeighInfoQuery.SQL.Clear;
+                                   FWeighInfoQuery.SQL.Add('SELECT T.AnimalID, T.DateOfBirth, E.EventDate WeighDate, W.Weight');
+                                   FWeighInfoQuery.SQL.Add('FROM '+TempAnimals.TableName+' T');
+                                   FWeighInfoQuery.SQL.Add('LEFT JOIN '+FWeighingEvents.TableName+' E ON (E.AnimalID = T.AnimalID)');
+                                   FWeighInfoQuery.SQL.Add('LEFT JOIN Weights W On (W.EventID = E.EventID)');
+                                   FWeighInfoQuery.SQL.Add('WHERE (E.EventDate >= T.DateOfBirth)');
+                                   FWeighInfoQuery.SQL.Add('AND   ( W.Weight IS NOT NULL ) AND ( W.Weight > 0 )');
+                                   FWeighInfoQuery.SQL.Add('ORDER BY T.AnimalID, E.EventDate DESC');
+                                   FWeighInfoQuery.Open;
+                                end;
+
+                          //   07/07/21 [V6.0 R1.6] /MK Change - Moved this FPurchInfoQuery GET to after the TempAnimals table is created.
+                          if ( not(FPurchInfoQuery.Active) ) then
+                             begin
+                                FPurchInfoQuery.Close;
+                                FPurchInfoQuery.SQL.Clear;
+                                FPurchInfoQuery.SQL.Add('SELECT A.AnimalID, E.EventDate, P.Weight');
+                                FPurchInfoQuery.SQL.Add('FROM '+TempAnimals.TableName+' A');
+                                FPurchInfoQuery.SQL.Add('LEFT JOIN '+FPurchaseEvents.TableName+' E ON (E.AnimalID = A.AnimalID)');
+                                FPurchInfoQuery.SQL.Add('LEFT JOIN Purchases P ON (P.EventID = E.EventID)');
+                                FPurchInfoQuery.Open;
+                             end;
+
                           FPurchInfoQuery.First;
                           while ( not(FPurchInfoQuery.Eof) ) do
                              begin
@@ -3364,7 +3376,10 @@ begin
                                                begin
                                                   rgUseWeightAsApplicRate.ItemIndex := 0;
                                                   if ( FWeighInfoQuery.Locate('AnimalID',TempAnimals.FieldByName('AnimalID').AsInteger,[]) ) then
-                                                     TempAnimals.FieldByName('LastWeight').Value := FWeighInfoQuery.FieldByName('Weight').AsFloat;
+                                                     TempAnimals.FieldByName('LastWeight').Value := FWeighInfoQuery.FieldByName('Weight').AsFloat
+                                                  //   07/07/21 [V6.0 R1.6] /MK Additional Feature - If the animal doesn't have a previous weighing weight then use the purchase weight if any - Una Carter.
+                                                  else if ( TempAnimals.FieldByName('PWeight').AsFloat > 0 ) then
+                                                     TempAnimals.FieldByName('LastWeight').Value := TempAnimals.FieldByName('PWeight').AsFloat;
                                                end;
                                          end;
 
@@ -5287,6 +5302,8 @@ begin
 
       if OKToUpdate then
          try
+            //   26/08/20 [V5.9 R5.8] /MK Bug Fix - Set FDrugBatchQty_EmptyCheck before UpdateAnimals/CopyDetails so not to check quantity remaining for batch in MultiDrug - George (TGM).
+            FDrugBatchQty_EmptyCheck := True;
             SavingInfo := True;
             ItemChanged := True;
             UpdateAnimals(nil);
@@ -7368,6 +7385,8 @@ begin
    lRateOfApplic.Caption := '';
    FDataLoading := False;
    FBreedingDataHelper := TBreedingDataHelper.Create();
+   //   28/10/20 [V5.9 R6.5] /MK Bug Fix - Breeding Data Temp Tables were being created but not being filled. This was separated from BreedingData.Create.
+   FBreedingDataHelper.CreateTempBreedingDataTables;
    //dbcbDrugBatchNo.RepositoryItem := HerdLookup.erDrugBatchNoLookup;
    WinData.qDrugBatchNo.Active := False;
    dbcbDrugBatchNo.Enabled := False;
@@ -7839,6 +7858,7 @@ end;
 
 procedure TfEventsByGroup.teNatIDNumPropertiesChange(Sender: TObject);
 begin
+   FPartNatIdSearchFound := False;
    // Start to Search for this Animals National ID
    {
    if Length(teNatIDNum.Text) > 0 then
@@ -7850,35 +7870,6 @@ begin
             end
       end;
    }
-end;
-
-procedure TfEventsByGroup.teAnimalNoKeyDown(Sender: TObject; var Key: Word;
-  Shift: TShiftState);
-begin
-   if ( Key = VK_RETURN ) then
-      begin
-         if ( FPartNatIdSearchFound ) and ( FPartNatIdSearchSelectedRecNo <> TempAnimals.RecNo ) then
-            with AnimalGrid.DataSource.DataSet do
-               begin
-                  if not eof or bof then
-                     begin
-                        AnimalGrid.DataSource.DataSet.Edit;
-                        try
-                           AnimalGrid.DataSource.DataSet.FieldByName('Selected').AsBoolean := not AnimalGrid.DataSource.DataSet.FieldByName('Selected').AsBoolean;
-                           AnimalGrid.DataSource.DataSet.Post;
-                           if ( TempAnimals.FieldByName('Selected').AsBoolean ) then
-                              FPartNatIdSearchSelectedRecNo := TempAnimals.RecNo;
-                           CountSelectedRecords;
-                        except
-                           MessageDlg('Animal selection could not be made.',mtError,[mbOK],0);
-                        end;
-                     end;
-                  if Sender is TcxTextEdit then
-                     (Sender as TcxTextEdit).SelectAll;
-               end
-         else
-            actSearchByParNatId.Execute;
-      end;
 end;
 
 procedure TfEventsByGroup.btnSelectAllClick(Sender: TObject);
@@ -9898,12 +9889,13 @@ begin
                else if ( EventType = THealth ) then
                   if ( ADataSet.FieldByName('DrugUsed').AsInteger > 0 ) then
                      begin
-                        if ( rgUseWeightAsApplicRate.ItemIndex = 0 ) then
-                           EventComment := GetHealthCommentByName_Unit_ApplicRate(ADataSet.FieldByName('DrugUsed').AsInteger,
-                                                                                  ADataSet.FieldByName('RateOfApplic').AsFloat,AEventType)
-                        else
+                        //   25/08/20 [V5.9 R5.7] /MK Bug Fix - Check if Multi Drug panel is not showing and rgUseWeightAsApplicRate.ItemIndex is 1 before using TotalApplicRate. 
+                        if ( not(pMultiDrug.Visible) ) and ( rgUseWeightAsApplicRate.ItemIndex = 1 ) then
                            EventComment := GetHealthCommentByName_Unit_ApplicRate(ADataSet.FieldByName('DrugUsed').AsInteger,
                                                                                   ADataSet.FieldByName('TotalApplicRate').AsFloat,AEventType)
+                        else
+                           EventComment := GetHealthCommentByName_Unit_ApplicRate(ADataSet.FieldByName('DrugUsed').AsInteger,
+                                                                                  ADataSet.FieldByName('RateOfApplic').AsFloat,AEventType);
                      end;
             end;
 
@@ -10170,26 +10162,30 @@ begin
    IsPregnant := False;
    NoOfCalves := 0;
    DaysInCalf := 0;
-   //   20/03/18 [V5.7 R8.4] /MK Change - Use new BreedingDataHelper procedure to get preg diag info by SQL for speed purposes.
-   FBreedingDataHelper.GetPregDiagInfo(ADataSet.FieldByName('AnimalID').AsInteger,
-                                       ADataSet.FieldByName('LactNo').AsInteger,
-                                       IsPregnant,IsRecheck,PregDiagDate,NoOfCalves,DaysInCalf);
-   if ( PregDiagDate > 0 ) then
-      begin
-         if ( WinData.EventType = TPregDiag ) then
-            begin
-               TempAnimals.FieldByName('RepeatPregDiag').AsBoolean := not(IsPregnant) or IsRecheck;
-               Inc(FPregDiagRepeatCount);
-            end
-         else if ( WinData.EventType = TService ) then
-            begin
-               if ( bPrevPregDiagEvent <> nil ) then
-                  begin
-                     TempAnimals.FieldByName('PrevPregDiagEvent').AsBoolean := IsPregnant;
-                     Inc(FPregDiagEventCount);
-                  end;
-            end;
-      end;
+
+   try
+      //   20/03/18 [V5.7 R8.4] /MK Change - Use new BreedingDataHelper procedure to get preg diag info by SQL for speed purposes.
+      FBreedingDataHelper.GetPregDiagInfo(ADataSet.FieldByName('AnimalID').AsInteger,
+                                          ADataSet.FieldByName('LactNo').AsInteger,
+                                          IsPregnant,IsRecheck,PregDiagDate,NoOfCalves,DaysInCalf);
+      if ( PregDiagDate > 0 ) then
+         begin
+            if ( WinData.EventType = TPregDiag ) then
+               begin
+                  TempAnimals.FieldByName('RepeatPregDiag').AsBoolean := not(IsPregnant) or IsRecheck;
+                  Inc(FPregDiagRepeatCount);
+               end
+            else if ( WinData.EventType = TService ) then
+               begin
+                  if ( bPrevPregDiagEvent <> nil ) then
+                     begin
+                        TempAnimals.FieldByName('PrevPregDiagEvent').AsBoolean := IsPregnant;
+                        Inc(FPregDiagEventCount);
+                     end;
+               end;
+         end;
+   except
+   end;
 end;
 
 procedure TfEventsByGroup.UpdateTempAnimalsServiceInfo(ADataSet : TDataSet);
@@ -10581,6 +10577,7 @@ begin
          if ( sSearchTxt = sTableStr ) then
             begin
                FPartNatIdSearchFound := True;
+               FPartNatIdSearchSelectedRecNo := TempAnimals.RecNo;
                Break;
             end;
          TempAnimals.Next;
@@ -10646,6 +10643,49 @@ begin
    HintStyleController.HintStyle.Font.Color := clWindowText;
    HintStyleController.HintStyle.Rounded := True;
    HintStyleController.HintStyle.RoundRadius := 12;
+end;
+
+procedure TfEventsByGroup.teAnimalNoKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+   if ( Key = VK_RETURN ) then
+      begin
+         SelectDeSelectAnimal;
+         if Sender is TcxTextEdit then
+            (Sender as TcxTextEdit).SelectAll;
+      end;
+end;
+
+procedure TfEventsByGroup.teNatIDNumKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+   if ( Key = VK_RETURN ) then
+      begin
+         if ( FPartNatIdSearchFound ) and ( FPartNatIdSearchSelectedRecNo = TempAnimals.RecNo ) then
+            begin
+               SelectDeSelectAnimal;
+               if Sender is TcxTextEdit then
+                  (Sender as TcxTextEdit).SelectAll;
+            end
+         else
+            actSearchByParNatId.Execute;
+      end;
+end;
+
+procedure TfEventsByGroup.SelectDeSelectAnimal;
+begin
+   with AnimalGrid.DataSource.DataSet do
+      begin
+         if not eof or bof then
+            begin
+               AnimalGrid.DataSource.DataSet.Edit;
+               try
+                  AnimalGrid.DataSource.DataSet.FieldByName('Selected').AsBoolean := not AnimalGrid.DataSource.DataSet.FieldByName('Selected').AsBoolean;
+                  AnimalGrid.DataSource.DataSet.Post;
+                  CountSelectedRecords;
+               except
+                  MessageDlg('Animal selection could not be made.',mtError,[mbOK],0);
+               end;
+            end;
+      end;
 end;
 
 end.
