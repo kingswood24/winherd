@@ -17,6 +17,9 @@
                            Change - Modified the layout of the report to fit these new columns.
 
   12/11/19 [V5.9 R1.2] /MK Additional Feature - Instead of showing the word "Undefined" under Pregnant show it as blank as it is on the HerdApp.
+
+  04/11/20 [V5.9 R7.2] /MK Change - Changed Pregnancy to Preg Status - GL request.
+                                  - If the PD is Undefined then change it to ? similar to Due to Calve - GL request.
 }
 
 unit DueForDryingOff;
@@ -97,6 +100,7 @@ type
     QRDBText23: TQRDBText;
     QRDBText24: TQRDBText;
     QRDBText25: TQRDBText;
+    QRLabel10: TQRLabel;
     procedure DueForDryingOffScrBeforePrint(Sender: TCustomQuickRep;
       var PrintReport: Boolean);
     procedure MainHeader1BeforePrint(Sender: TQRCustomBand;

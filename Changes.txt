@@ -10,6 +10,7 @@ Version V6.0 R1.6
                                       - btnLookupBatchQtys - Changed the icon from a magnifying glass to binocular as GL though the magnifying glass didn't represent a lookup. 
              Additional Feature - uEventsByGroups -  CreateTempTable - If the animal doesn't have a previous weighing weight then use the purchase weight if any - Una Carter.
                                 - uHerdLookup - Added binoculars icon to the ImageList16x16.
+                                - DueForDryingOff - Added (>200 K) under the High SCC column, I had to move the column headings up to add this new text in.
 
 Version V6.0 R1.5
 
