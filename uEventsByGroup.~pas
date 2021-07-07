@@ -508,6 +508,7 @@ Changes to Add a New Mass Update Event
    28/10/20 [V5.9 R6.5] /MK Bug Fix - FormCreate - Breeding Data Temp Tables were being created but not being filled. This was separated from BreedingData.Create.
 
    07/07/21 [V6.0 R1.6] /MK Change - CreateTempTable - Moved the FWeighInfoQuery and FPurchInfoQuery GET to after the TempAnimals table is created.
+                            Additional Feature - CreateTempTable - If the animal doesn't have a previous weighing weight then use the purchase weight if any - Una Carter.
 }
 
 interface
