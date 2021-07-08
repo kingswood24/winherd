@@ -1024,6 +1024,8 @@ unit MenuUnit;
  02/07/21 [V6.0 R1.5] /MK Change - Added Pen Name column to grid from animals table - Kepak.
 
  05/07/21 [V6.0 R1.5] /MK Change - Only show the Pen Name column for beef herds.
+
+ 08/07/21 [V6.0 R1.6] /MK Change - Changed Average SCC back to Latest SCC from last individual recording - GL request.
 }
 
 interface

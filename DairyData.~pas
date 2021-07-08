@@ -1024,6 +1024,8 @@ unit DairyData;
  18/05/21 [V6.0 R1.1] /MK Change - LoadPreferences - Gerry said to default the NatIdToAnimalNo to True.
 
  18/05/21 [V6.0 R1.1] /MK Change - QueryBandonRegistrations - Don't include animals from Animals and AIMAnimalReg table marked as Registered or Queried as per uAimAnimalRegistration
+
+ 05/07/21 [V6.0 R1.6] /MK Change - UpdatePregDiagEvent - Found on some sets of data there were more than one PD event on the same lactation - Tom Craigs data.
 }
 
 interface
@@ -24863,7 +24865,6 @@ begin
             begin
                MDGridCurrLactMilkData.Append;
                MDGridCurrLactMilkData.FieldByName('AnimalID').AsInteger := HerdLookup.qMainGridMilkDisk.FieldByName('AnimalID').AsInteger;
-               MDGridCurrLactMilkData.FieldByName('SCC').AsFloat := HerdLookup.qMainGridMilkDisk.FieldByName('SCC').AsFloat;
 
                fCumButterFat := HerdLookup.qMainGridMilkDisk.FieldByName('CumBfatPerc').AsFloat;
                fCumProtein := HerdLookup.qMainGridMilkDisk.FieldByName('CumProtPerc').AsFloat;
@@ -24894,6 +24895,8 @@ begin
                      fDailyTotSolids := fDailyBfatWeight + fDailyProtWeight;
                      MDGridCurrLactMilkData.FieldByName('DailyYield').AsString := FormatFloat('0',fDailyYield);
                      MDGridCurrLactMilkData.FieldByName('LatestSolids').AsFloat := fDailyTotSolids;
+                     //   08/07/21 [V6.0 R1.6] /MK Change - Changed MDGridCurrLactMilkData.SCC to latest recorded SCC from Average SCC of MilkDisk table.
+                     MDGridCurrLactMilkData.FieldByName('SCC').AsFloat := HerdLookup.qMainGridMilkDiskTrans.FieldByName('SCC').AsFloat;
                   end;
 
                MDGridCurrLactMilkData.Post;

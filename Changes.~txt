@@ -11,6 +11,9 @@ Version V6.0 R1.6
              Additional Feature - uEventsByGroups -  CreateTempTable - If the animal doesn't have a previous weighing weight then use the purchase weight if any - Una Carter.
                                 - uHerdLookup - Added binoculars icon to the ImageList16x16.
                                 - DueForDryingOff - Added (>200 K) under the High SCC column, I had to move the column headings up to add this new text in.
+08/07/21 /MK Change - SetupAnimals - CreateFooter - Created a ftNone FooterType that allows the Footer.Text to be set to nothing.
+                                                  - Remove averaging SCC columns in individual recording section of Animal Record screen - GL request.
+                      - MenuUnit - Changed Average SCC back to Latest SCC from last individual recording - GL request.
 
 Version V6.0 R1.5
 

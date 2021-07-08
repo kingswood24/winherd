@@ -1021,7 +1021,9 @@ unit MenuUnit;
 
  17/06/21 [V6.0 R1.4] /MK Change - cxAnimalGridViewOverallGainPerDayGetDisplayText - If the OverAllGainPerDay is 0.00 then display text should be blank - GL request.
 
- 02/07/21 [V6.0 R1.5] /MK Change - Added Pen Name column to grid from animals table - Kepak. 
+ 02/07/21 [V6.0 R1.5] /MK Change - Added Pen Name column to grid from animals table - Kepak.
+
+ 05/07/21 [V6.0 R1.5] /MK Change - Only show the Pen Name column for beef herds.
 }
 
 interface
