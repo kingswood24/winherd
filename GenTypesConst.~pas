@@ -63,7 +63,7 @@ uses
 
 const
    HerdVerNo = 'KHM V6.0 R1.6';
-   iHerdVerNo = 6015;
+   iHerdVerNo = 6016;
 
    //*** All Herd Version Changes moved to Changes unit.***//
 
@@ -1340,6 +1340,10 @@ type
       ShowVetLinkFeature : Boolean;
 
       RemoveTransponderAfterSale : Boolean;
+
+      //   08/07/21 [V6.0 R1.6] /MK Additional Feature - Added GlobalSettings for ICBFRegReminder and AIMHerdRecReminder for Startup Reminders.
+      ICBFRegReminder : Boolean;
+      AIMHerdRecReminder : Boolean;
    end;
 
    TActionReminderReport = (arDueService, arDuePD, arDueDryOff, arDueCalve);

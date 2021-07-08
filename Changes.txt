@@ -18,6 +18,19 @@ Version V6.0 R1.6
                       - HealthFilterU - ViewBtnClick - I created a query like WinData.qDrugBatchNo that looks for all purchased drugs with batch numbers.
                                                      - Changed all references of WinData.qDrugBatchNo to new query.
                                                      - If the program can only find the BatchNumber in qDrugBatchNo then get the Supplier name from there also - Chris Throne.
+             Additional Feature - uPreferences - Added const for ICBFRegReminder for Startup Reminders.
+                                - GenTypesConst - Added GlobalSettings for ICBFRegReminder and AIMHerdRecReminder for Startup Reminders.
+                                - uGlobalSettings - Added new Startup Reminder check boxes for ICBFRegReminder and AIMHerdRecReminder.
+                                                  - FormCreate - Set new ICBFRegReminder and AIMHerdRecReminder checkboxes by their GlobalSetting variables.
+                                                               - New ICBFRegReminder and AIMHerdRecReminder checkboxes only visible for Irish customers.
+                                                  - o - Set new GlobalSetting ICBFRegReminder and AIMHerdRecReminder variables by their checkboxes.
+                                - DairyData - LoadPreferences - Read new ICBFRegReminder reg value and set GlobalSettings.ICBFRegReminder by this value.
+                                                              - Read new ICBFRegReminder reg value and set GlobalSettings.AIMHerdRecReminder by this value.
+                                                              - Default ICBFRegReminder reg value to true if it doesn't exist.
+                                                              - Default AIMHerdRecReminder reg value to true if it doesn't exist.
+                                            - SavePreferences - Assign GlobalSettings.ICBFRegReminder to new ICBFRegReminder reg entry.
+                                                              - Assign GlobalSettings.AIMHerdRecReminder to new AIMHerdRecReminder reg entry.
+                                - uStartupReminder - Allow ICBF Reg Reminder and AIM Herd Sync reminders to be removed - John Joe Murphy.
 
 Version V6.0 R1.5
 

@@ -1028,6 +1028,12 @@ unit DairyData;
  05/07/21 [V6.0 R1.6] /MK Change - UpdatePregDiagEvent - Found on some sets of data there were more than one PD event on the same lactation - Tom Craigs data.
 
  08/07/21 [V6.0 R1.6] /MK Change - GetEventLookupData - Changed MDGridCurrLactMilkData.SCC to latest recorded SCC from Average SCC of MilkDisk table.
+                          Additional Feature - LoadPreferences - Read new ICBFRegReminder reg value and set GlobalSettings.ICBFRegReminder by this value.
+                                                               - Read new ICBFRegReminder reg value and set GlobalSettings.AIMHerdRecReminder by this value.
+                                                               - Default ICBFRegReminder reg value to true if it doesn't exist.
+                                                               - Default AIMHerdRecReminder reg value to true if it doesn't exist.
+                                             - SavePreferences - Assign GlobalSettings.ICBFRegReminder to new ICBFRegReminder reg entry.
+                                                               - Assign GlobalSettings.AIMHerdRecReminder to new AIMHerdRecReminder reg entry.
 }
 
 interface
@@ -20396,6 +20402,18 @@ begin
                   GlobalSettings.RemoveTransponderAfterSale := Reg.ReadBool(cGSRemoveTransponderAfterSale)
                else
                   GlobalSettings.RemoveTransponderAfterSale := Def.Definition.dUseParlour;
+
+            //   08/07/21 [V6.0 R1.6] /MK Additional Feature - Read new ICBFRegReminder reg value and set GlobalSettings.ICBFRegReminder by this value.
+            if Reg.ValueExists(cGSICBFRegReminder) then
+               GlobalSettings.ICBFRegReminder := Reg.ReadBool(cGSICBFRegReminder)
+            else
+               GlobalSettings.ICBFRegReminder := True;
+
+            //   08/07/21 [V6.0 R1.6] /MK Additional Feature - Read new ICBFRegReminder reg value and set GlobalSettings.AIMHerdRecReminder by this value.
+            if Reg.ValueExists(cGSAIMHerdRecReminder) then
+               GlobalSettings.AIMHerdRecReminder := Reg.ReadBool(cGSAIMHerdRecReminder)
+            else
+               GlobalSettings.AIMHerdRecReminder := True;
          end
       //   10/04/18 [V5.7 R8.7] /MK Change - Stop loading from settings.def, just create the registry key entries with default values if registry key does not exist - SP.
       else
@@ -20500,6 +20518,12 @@ begin
                   Reg.WriteBool(cGSUseLastRecordWeightAsLiveWeightForKillOut, False);
 
                   Reg.WriteBool(cGSUsePurchaseWeightAsLiveWeightForKillOut, False);
+
+                  //   08/07/21 [V6.0 R1.6] /MK Additional Feature - Default ICBFRegReminder reg value to true if it doesn't exist.
+                  Reg.WriteBool(cGSICBFRegReminder, True);
+
+                  //   08/07/21 [V6.0 R1.6] /MK Additional Feature - Default AIMHerdRecReminder reg value to true if it doesn't exist.
+                  Reg.WriteBool(cGSAIMHerdRecReminder, True);
 
                   LoadPreferences;
                end;
@@ -20730,6 +20754,12 @@ begin
 
             //   14/10/19 [V5.9 R0.9] /MK Additional Feature - Enable RemoveTransponderAfterSale if not found and Parlour user.
             Reg.WriteBool(cGSRemoveTransponderAfterSale, GlobalSettings.RemoveTransponderAfterSale);
+
+            //   08/07/21 [V6.0 R1.6] /MK Additional Feature - Assign GlobalSettings.ICBFRegReminder to new ICBFRegReminder reg entry.
+            Reg.WriteBool(cGSICBFRegReminder, GlobalSettings.ICBFRegReminder);
+
+            //   08/07/21 [V6.0 R1.6] /MK Additional Feature - Assign GlobalSettings.AIMHerdRecReminder to new AIMHerdRecReminder reg entry.
+            Reg.WriteBool(cGSAIMHerdRecReminder, GlobalSettings.AIMHerdRecReminder);
          end;
    finally
       Reg.CloseKey;

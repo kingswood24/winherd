@@ -52,6 +52,8 @@
   04/11/20 [V5.9 R7.2] /MK Change - Added a const string array for KeyReports.
 
   15/12/20 [V5.9 R7.8] /MK Change - Changed cUnitedDairiesURL URL as requested by George (TGM).
+
+  08/07/21 [V6.0 R1.6] /MK Additional Feature - Added GlobalSettings for ICBFRegReminder and AIMHerdRecReminder for Startup Reminders.
 }
 
 unit GenTypesConst;
@@ -1340,6 +1342,10 @@ type
       ShowVetLinkFeature : Boolean;
 
       RemoveTransponderAfterSale : Boolean;
+
+      //   08/07/21 [V6.0 R1.6] /MK Additional Feature - Added GlobalSettings for ICBFRegReminder and AIMHerdRecReminder for Startup Reminders.
+      ICBFRegReminder : Boolean;
+      AIMHerdRecReminder : Boolean;
    end;
 
    TActionReminderReport = (arDueService, arDuePD, arDueDryOff, arDueCalve);
