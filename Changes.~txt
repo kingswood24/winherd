@@ -31,6 +31,9 @@ Version V6.0 R1.6
                                             - SavePreferences - Assign GlobalSettings.ICBFRegReminder to new ICBFRegReminder reg entry.
                                                               - Assign GlobalSettings.AIMHerdRecReminder to new AIMHerdRecReminder reg entry.
                                 - uStartupReminder - Allow ICBF Reg Reminder and AIM Herd Sync reminders to be removed - John Joe Murphy.
+09/07/21 /MK Change - uPurchases - Changed DateOfPurchase TDBDateEdit to dePurchaseDate TcxDBDateTime so that user can enter 4 date year - Geraldine Carroll.    
+                    - uSalesDeaths - bDeleteClick - When deleting the sale event check if there is already an animal in the herd
+                                                    with this tag number and don't allow the event to be deleted.
 
 Version V6.0 R1.5
 
