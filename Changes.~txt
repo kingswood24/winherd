@@ -30,6 +30,7 @@ Version V6.0 R1.6
                                                               - Default AIMHerdRecReminder reg value to true if it doesn't exist.
                                             - SavePreferences - Assign GlobalSettings.ICBFRegReminder to new ICBFRegReminder reg entry.
                                                               - Assign GlobalSettings.AIMHerdRecReminder to new AIMHerdRecReminder reg entry.
+                                - uStartupReminder - Allow ICBF Reg Reminder and AIM Herd Sync reminders to be removed - John Joe Murphy.
 
 Version V6.0 R1.5
 
