@@ -14,7 +14,7 @@ Version V6.0 R1.6
 08/07/21 /MK Change - SetupAnimals - CreateFooter - Created a ftNone FooterType that allows the Footer.Text to be set to nothing.
                                                   - Remove averaging SCC columns in individual recording section of Animal Record screen - GL request.
                       - DairyData - GetEventLookupData - Changed MDGridCurrLactMilkData.SCC to latest recorded SCC from Average SCC of MilkDisk table.
-                      - MenuUnit - Changed Average SCC back to Latest SCC from last individual recording - GL request.
+                      - MenuUnit - Changed Average SCC back to Latest SCC from last individual recording - GL/Tom Manning request.
                       - HealthFilterU - ViewBtnClick - I created a query like WinData.qDrugBatchNo that looks for all purchased drugs with batch numbers.
                                                      - Changed all references of WinData.qDrugBatchNo to new query.
                                                      - If the program can only find the BatchNumber in qDrugBatchNo then get the Supplier name from there also - Chris Throne.

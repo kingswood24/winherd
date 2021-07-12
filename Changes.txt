@@ -1,3 +1,7 @@
+Version V6.0 R1.7
+
+12/07/21 /MK Change - DairyData - LoadPreferences - Default ShowBlockTempMovements off - GL request.
+
 Version V6.0 R1.6
 
 05/07/21 /MK Change - DairyData - UpdatePregDiagEvent - Found on some sets of data there were more than one PD event on the same lactation - Tom Craigs data.
