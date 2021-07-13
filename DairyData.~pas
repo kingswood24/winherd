@@ -33136,6 +33136,7 @@ begin
                   begin
 
                   end;
+               ProgressIndicator.StepIt;
                qAnimalsToTreat.Next;
             end;
       except

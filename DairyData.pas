@@ -3658,8 +3658,6 @@ type
 
     function MartFileHasBlankBreeds : Boolean;
 
-    procedure RecreatePurchaseDefaultTreatments;
-
     property ReportInEuro : Boolean read GetReportInEuro write SetReportInEuro;
     property ICBFMMR : Boolean read GetICBFMMR write SetICBFMMR;
     // Store Dir which MilkRec files are stored.
@@ -33097,58 +33095,6 @@ begin
       finally
          Free;
       end;
-end;
-
-procedure TWinData.RecreatePurchaseDefaultTreatments;
-var
-   qAnimalsToTreat,
-   qPurchaseTreatments : TQuery;
-begin
-   qAnimalsToTreat := TQuery.Create(nil);
-   qPurchaseTreatments := TQuery.Create(nil);
-   try
-      qAnimalsToTreat.DatabaseName := AliasName;
-      qAnimalsToTreat.SQL.Clear;
-      qAnimalsToTreat.SQL.Add('SELECT A.Id AnimalId, A.LactNo, A.HerdId, E.EventDate PurchDate');
-      qAnimalsToTreat.SQL.Add('FROM Animals A');
-      qAnimalsToTreat.SQL.Add('INNER JOIN Events E ON ((E.AnimalId = A.Id) AND (E.EventType = 12) AND (E.AnimalLactNo = A.LactNo))');
-      qAnimalsToTreat.SQL.Add('WHERE (A.InHerd = True)');
-      qAnimalsToTreat.SQL.Add('AND   (A.AnimalDeleted = False)');
-      qAnimalsToTreat.SQL.Add('AND   (A.HerdId IN (SELECT DefaultHerdId FROM Defaults))');
-      try
-         qAnimalsToTreat.Open;
-         if ( qAnimalsToTreat.RecordCount = 0 ) then Exit;
-
-         ShowProgressIndicator('Creating Missing Purchase Treatments',1,qAnimalsToTreat.RecordCount,1);
-
-         qAnimalsToTreat.First;
-         while ( not(qAnimalsToTreat.Eof) ) do
-            begin
-               qPurchaseTreatments.Close;
-               qPurchaseTreatments.SQL.Clear;
-               qPurchaseTreatments.SQL.Add('SELECT *');
-               qPurchaseTreatments.SQL.Add('FROM Events');
-               qPurchaseTreatments.SQL.Add('WHERE EventDate = "'+FormatDateTime(CUSDateStyle,qAnimalsToTreat.FieldByName('PurchDate').AsDateTime)+'"');
-               qPurchaseTreatments.SQL.Add('AND AnimalId = '+IntToStr(qAnimalsToTreat.FieldByName('AnimalId').AsInteger));
-               qPurchaseTreatments.SQL.Add('AND EventType = '+IntToStr(CHealthEvent));
-               qPurchaseTreatments.Open;
-               if ( qPurchaseTreatments.RecordCount = 0 ) then
-                  begin
-
-                  end;
-               ProgressIndicator.StepIt;
-               qAnimalsToTreat.Next;
-            end;
-      except
-         on e : Exception do
-            ShowDebugMessage(e.Message);
-      end;
-   finally
-      if ( qAnimalsToTreat <> nil ) then
-         FreeAndNil(qAnimalsToTreat);
-      if ( qPurchaseTreatments <> nil ) then
-         FreeAndNil(qPurchaseTreatments);
-   end;
 end;
 
 end.

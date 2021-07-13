@@ -68,8 +68,8 @@ LeftCol=1
 
 [View1]
 Module=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\DairyData.pas
-CursorX=20
-CursorY=33113
+CursorX=22
+CursorY=33137
 TopLine=33102
 LeftCol=1
 
@@ -315,13 +315,13 @@ Visible=0
 State=0
 Left=0
 Top=0
-Width=1705
+Width=1689
 Height=111
 MaxLeft=-1
 MaxTop=-1
-ClientWidth=1705
+ClientWidth=1689
 ClientHeight=111
-TBDockHeight=111
+TBDockHeight=140
 LRDockWidth=443
 Dockable=1
 
