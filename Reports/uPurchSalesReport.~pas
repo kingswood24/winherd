@@ -2,7 +2,9 @@
    05/09/14 [V5.3 R5.9] /MK Bug Fix - Only get average and sum of PurchWeight, PurchPrice, SalesWeight and SalePrice
                                       where these fields have a value > 0.
 
-   13/07/18 [V5.8 R0.9] /MK Additional Feature - Added sub title to Report Title from Custom Title in uReportOptions.  
+   13/07/18 [V5.8 R0.9] /MK Additional Feature - Added sub title to Report Title from Custom Title in uReportOptions - Jackie (Quinn's).  
+
+   10/08/20 [V5.9 R5.3] /MK Change - Added the Herd Identity to the top of the report.   
 }
 
 unit uPurchSalesReport;
@@ -98,6 +100,8 @@ type
     QRExpr13: TQRExpr;
     qrdbBreedCode: TQRDBText;
     qrlCustomTitle: TQRLabel;
+    qrlHerdIdentityCap: TQRLabel;
+    qrlHerdIdentity: TQRLabel;
     procedure qrDBSDatePrint(sender: TObject; var Value: String);
     procedure QRExpr12Print(sender: TObject; var Value: String);
     procedure QRDBText2Print(sender: TObject; var Value: String);
@@ -106,9 +110,12 @@ type
     procedure QRExpr4Print(sender: TObject; var Value: String);
     procedure QRExpr14Print(sender: TObject; var Value: String);
     procedure qrDBWeightPrint(sender: TObject; var Value: String);
+    procedure QRExpr9Print(sender: TObject; var Value: String);
+    procedure QRExpr13Print(sender: TObject; var Value: String);
   private
     function GetAVGValueBySQL(AFieldName: String): String;
     function GetSUMValueBySQL(AFieldName: String): String;
+    function GetFieldType (AFieldName : String) : TFieldType;
     { Private declarations }
   public
     { Public declarations }
@@ -185,7 +192,9 @@ begin
          SQL.Clear;
          SQL.Add('SELECT AVG('+AFieldName+')');
          SQL.Add('FROM PurchSales');
-         SQL.Add('WHERE '+AFieldName+' IS NOT NULL');
+         SQL.Add('WHERE ('+AFieldName+' IS NOT NULL)');
+         if ( GetFieldType(AFieldName) = ftFloat ) then
+            SQL.Add('AND   ('+AFieldName+' > 0)');
          try
             Open;
             if ( Fields[0].AsFloat > 0 ) then
@@ -273,7 +282,9 @@ begin
          SQL.Clear;
          SQL.Add('SELECT SUM('+AFieldName+')');
          SQL.Add('FROM PurchSales');
-         SQL.Add('WHERE '+AFieldName+' IS NOT NULL');
+         SQL.Add('WHERE ('+AFieldName+' IS NOT NULL)');
+         if ( GetFieldType(AFieldName) = ftFloat ) then
+            SQL.Add('AND   ('+AFieldName+' > 0)');
          try
             Open;
             if ( Fields[0].AsFloat > 0 ) then
@@ -292,6 +303,78 @@ procedure TfmPurchSalesReport.qrDBWeightPrint(sender: TObject;
 begin
    if ( Value = '.00' ) then
       Value := '';
+end;
+
+function TfmPurchSalesReport.GetFieldType(AFieldName: String): TFieldType;
+var
+   i : Integer;
+   tPurchSales : TTable;
+begin
+   Result := ftUnknown;
+   tPurchSales := TTable.Create(nil);
+   try
+      tPurchSales.DatabaseName := AliasName;
+      tPurchSales.TableName := 'PurchSales';
+      if ( not(tPurchSales.Exists) ) then Exit;
+      tPurchSales.Open;
+      for i := 0 to tPurchSales.FieldDefs.Count-1 do
+         if ( UpperCase(tPurchSales.Fields[i].FieldName) = UpperCase(AFieldName) ) then
+            begin
+               Result := tPurchSales.Fields[i].DataType;
+               Break;
+            end;
+   finally
+      if ( tPurchSales <> nil ) then
+         FreeAndNil(tPurchSales);
+   end;
+end;
+
+procedure TfmPurchSalesReport.QRExpr9Print(sender: TObject;
+  var Value: String);
+begin
+   Value := '';
+   with GetQuery do
+      try
+         DatabaseName := AliasName;
+         SQL.Clear;
+         SQL.Add('SELECT AVG(PurchPrice), AVG(SalesPrice)');
+         SQL.Add('FROM PurchSales');
+         SQl.Add('WHERE ( PurchPrice > 0 AND SalesPrice > 0 )');
+         try
+            Open;
+            if ( Fields[0].AsFloat > 0 ) and ( Fields[1].AsFloat > 0 ) then
+               Value := FormatFloat('#.00',Fields[1].AsFloat-Fields[0].AsFloat);
+         except
+            on e : Exception do
+               ShowMessage(e.Message);
+         end;
+      finally
+         Free;
+      end;
+end;
+
+procedure TfmPurchSalesReport.QRExpr13Print(sender: TObject;
+  var Value: String);
+begin
+   Value := '';
+   with GetQuery do
+      try
+         DatabaseName := AliasName;
+         SQL.Clear;
+         SQL.Add('SELECT SUM(PurchPrice), SUM(SalesPrice)');
+         SQL.Add('FROM PurchSales');
+         SQl.Add('WHERE ( PurchPrice > 0 AND SalesPrice > 0 )');
+         try
+            Open;
+            if ( Fields[0].AsFloat > 0 ) and ( Fields[1].AsFloat > 0 ) then
+               Value := FormatFloat('#.00',Fields[1].AsFloat-Fields[0].AsFloat);
+         except
+            on e : Exception do
+               ShowMessage(e.Message);
+         end;
+      finally
+         Free;
+      end;
 end;
 
 end.

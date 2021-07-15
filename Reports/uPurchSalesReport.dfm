@@ -1416,6 +1416,7 @@ object fmPurchSalesReport: TfmPurchSalesReport
         Font.Style = []
         Color = clWhite
         Master = PurchSalesDetail
+        OnPrint = QRExpr9Print
         ParentFont = False
         ResetAfterPrint = False
         Transparent = False
@@ -1899,6 +1900,7 @@ object fmPurchSalesReport: TfmPurchSalesReport
         Font.Style = []
         Color = clWhite
         Master = PurchSalesDetail
+        OnPrint = QRExpr13Print
         ParentFont = False
         ResetAfterPrint = False
         Transparent = False

@@ -1228,6 +1228,68 @@ object fmPurchSalesReport: TfmPurchSalesReport
         WordWrap = True
         FontSize = 14
       end
+      object qrlHerdIdentityCap: TQRLabel
+        Left = 622
+        Top = 42
+        Width = 77
+        Height = 17
+        Frame.Color = clBlack
+        Frame.DrawTop = False
+        Frame.DrawBottom = False
+        Frame.DrawLeft = False
+        Frame.DrawRight = False
+        Size.Values = (
+          44.9791666666667
+          1645.70833333333
+          111.125
+          203.729166666667)
+        Alignment = taRightJustify
+        AlignToBand = False
+        AutoSize = True
+        AutoStretch = False
+        Caption = 'Herd Identity :'
+        Color = clWhite
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Arial'
+        Font.Style = [fsBold]
+        ParentFont = False
+        Transparent = False
+        WordWrap = True
+        FontSize = 8
+      end
+      object qrlHerdIdentity: TQRLabel
+        Left = 704
+        Top = 42
+        Width = 61
+        Height = 17
+        Frame.Color = clBlack
+        Frame.DrawTop = False
+        Frame.DrawBottom = False
+        Frame.DrawLeft = False
+        Frame.DrawRight = False
+        Size.Values = (
+          44.9791666666667
+          1862.66666666667
+          111.125
+          161.395833333333)
+        Alignment = taLeftJustify
+        AlignToBand = False
+        AutoSize = False
+        AutoStretch = False
+        Caption = 'qrlHerdIdentity'
+        Color = clWhite
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Arial'
+        Font.Style = []
+        ParentFont = False
+        Transparent = False
+        WordWrap = True
+        FontSize = 8
+      end
     end
     object PageFooterBand3: TQRBand
       Left = 38
@@ -1354,6 +1416,7 @@ object fmPurchSalesReport: TfmPurchSalesReport
         Font.Style = []
         Color = clWhite
         Master = PurchSalesDetail
+        OnPrint = QRExpr9Print
         ParentFont = False
         ResetAfterPrint = False
         Transparent = False
@@ -1837,6 +1900,7 @@ object fmPurchSalesReport: TfmPurchSalesReport
         Font.Style = []
         Color = clWhite
         Master = PurchSalesDetail
+        OnPrint = QRExpr13Print
         ParentFont = False
         ResetAfterPrint = False
         Transparent = False

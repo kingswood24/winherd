@@ -1,24 +1,19 @@
 [Closed Files]
-File_0=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Changes.txt',0,1,1,35,3,0,0
-File_1=SourceModule,'C:\Kingswood\Delphi Development\Common\KRoutines.pas',0,1,2365,1,2379,0,0
-File_2=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uVersionHistory.pas',0,1,1,1,1,1,0
-File_3=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uSalesDeaths.pas',0,1,41,1,60,1,0
-File_4=SourceModule,'c:\program files (x86)\borland\delphi5\Source\Vcl\controls.pas',0,1,4269,1,4289,0,0
-File_5=SourceModule,'c:\kingswood\components d5\kingswd\kwDBNavigator.pas',0,1,474,19,484,0,0
-File_6=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uSalePurchDelete.pas',0,1,48,1,100,1,0
-File_7=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uPurchases.pas',0,1,3,1,43,1,0
-File_8=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uGroupUpdate.pas',0,1,331,1,361,1,0
+File_0=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Reports\uPurchSalesReport.pas',0,1,1,1,1,1,0
+File_1=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Changes.txt',0,1,1,1,1,0,0
+File_2=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uMartImportByFile.pas',0,1,1703,74,1723,0,0
+File_3=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\DairyData.pas',0,1,22303,67,22340,1,0
+File_4=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uMartImportByFileReview.pas',0,1,448,36,472,0,0
+File_5=SourceModule,'C:\Kingswood\Delphi Development\Common\EventRecording.pas',0,1,2195,23,2230,0,0
+File_6=SourceModule,'C:\Kingswood\Delphi Development\Common\KRoutines.pas',0,1,2365,1,2379,0,0
+File_7=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uVersionHistory.pas',0,1,1,1,1,1,0
+File_8=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uSalesDeaths.pas',0,1,41,1,60,1,0
+File_9=SourceModule,'c:\program files (x86)\borland\delphi5\Source\Vcl\controls.pas',0,1,4269,1,4289,0,0
 
 [Modules]
-Module0=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\DairyData.pas
-Module1=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.dpr
-Count=2
+Module0=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.dpr
+Count=1
 EditWindowCount=1
-
-[C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\DairyData.pas]
-ModuleType=SourceModule
-FormState=1
-FormOnTop=0
 
 [C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.dpr]
 ModuleType=SourceModule
@@ -33,11 +28,14 @@ FormOnTop=0
 FormState=0
 FormOnTop=0
 
+[C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Reports\StockInHerdFilt.pas]
+FormState=0
+FormOnTop=0
+
 [EditWindow0]
-ViewCount=2
-CurrentView=1
+ViewCount=1
+CurrentView=0
 View0=0
-View1=1
 CodeExplorer=CodeExplorer@EditWindow0
 MessageView=MessageView@EditWindow0
 Create=1
@@ -61,16 +59,9 @@ BottomPanelData=0000040000000000BD06000000000000028C000000000000000100000000BD06
 
 [View0]
 Module=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.dpr
-CursorX=59
-CursorY=13
+CursorX=28
+CursorY=15
 TopLine=1
-LeftCol=1
-
-[View1]
-Module=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\DairyData.pas
-CursorX=22
-CursorY=33137
-TopLine=33102
 LeftCol=1
 
 [Watches]
@@ -91,8 +82,8 @@ Left=0
 Top=0
 Width=1920
 Height=115
-MaxLeft=-4
-MaxTop=-4
+MaxLeft=-1
+MaxTop=-1
 MaxWidth=1928
 MaxHeight=115
 ClientWidth=1920
@@ -161,7 +152,7 @@ LRDockWidth=219
 Dockable=1
 SplitPos=85
 ArrangeBy=Name
-SelectedItem=Name
+SelectedItem=OnActivate
 ExpandedItems=DataBinding,Font.Style,LookAndFeel,OptionsView,Properties,Properties.ValueChecked,Properties.ValueGrayed,Properties.ValueUnchecked
 HiddenCategories=Legacy
 ShowStatusBar=1
