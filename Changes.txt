@@ -5,6 +5,9 @@ Version V6.0 R1.7
                                        - QRExpr9Print - Only average fields where the value is > 0.
                                        - QRExpr13Print - Only sum fields where the value is > 0.
                                        - GetFieldType - Added function to find what the field type is for GetSUMValueBySQL & GetAVGValueBySQL to check for FloatField Value > 0.
+                    - uSalesReport - Seperated the Cattle Costings report into its own unit to speed up the report.
+                                   - Seperated the No Farm Costs report into its own unit to speed up the report.
+                                   - Seperated the No Feed Costs report into its own unit to speed up the report.
 
 Version V6.0 R1.6
 

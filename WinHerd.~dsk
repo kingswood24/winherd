@@ -1,14 +1,14 @@
 [Closed Files]
-File_0=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Reports\uPurchSalesReport.pas',0,1,1,1,8,1,0
-File_1=SourceModule,'c:\program files (x86)\borland\delphi5\Source\Vcl\Db.pas',0,1,35,23,56,0,0
-File_2=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Reports\uPurchSalesReport.dfm',0,1,1,1,1,0,0
-File_3=SourceModule,'c:\program files (x86)\borland\delphi5\Source\Vcl\Dbtables.pas',0,1,4550,1,4570,0,0
-File_4=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Changes.txt',0,1,1,1,1,0,0
-File_5=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uMartImportByFile.pas',0,1,1703,74,1723,0,0
-File_6=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\DairyData.pas',0,1,22303,67,22340,1,0
-File_7=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uMartImportByFileReview.pas',0,1,448,36,472,0,0
-File_8=SourceModule,'C:\Kingswood\Delphi Development\Common\EventRecording.pas',0,1,2195,23,2230,0,0
-File_9=SourceModule,'C:\Kingswood\Delphi Development\Common\KRoutines.pas',0,1,2365,1,2379,0,0
+File_0=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Reports\uSalesReport.pas',0,1,81,1,91,1,0
+File_1=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Changes.txt',0,1,1,1,10,0,0
+File_2=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uSalesRepNoFeedCosts.pas',0,1,1,27,1,1,0
+File_3=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uCattleCostingsRep.pas',0,1,1,17,14,1,0
+File_4=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uSalesRepNoFarmCosts.pas',0,1,1,24,7,1,0
+File_5=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Reports\StockInHerdFilt.pas',0,1,1293,54,1313,1,0
+File_6=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Reports\uPurchSalesReport.pas',0,1,1,22,24,1,0
+File_7=SourceModule,'c:\program files (x86)\borland\delphi5\Source\Vcl\Db.pas',0,1,35,23,56,0,0
+File_8=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Reports\uPurchSalesReport.dfm',0,1,1,1,1,0,0
+File_9=SourceModule,'c:\program files (x86)\borland\delphi5\Source\Vcl\Dbtables.pas',0,1,4550,1,4570,0,0
 
 [Modules]
 Module0=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.dpr
@@ -28,7 +28,7 @@ FormOnTop=0
 FormState=0
 FormOnTop=0
 
-[C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Reports\StockInHerdFilt.pas]
+[C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\DairyData.pas]
 FormState=0
 FormOnTop=0
 
@@ -54,8 +54,8 @@ LeftPanelClients=CodeExplorer@EditWindow0
 LeftPanelData=00000400010000000C000000436F64654578706C6F7265720000000000000000000000000000000000FFFFFFFF
 RightPanelSize=0
 BottomPanelSize=140
-BottomPanelClients=DockSite1
-BottomPanelData=0000040000000000BD06000000000000028C000000000000000100000000BD06000009000000446F636B5369746531FFFFFFFF
+BottomPanelClients=DockSite0
+BottomPanelData=0000040000000000BD06000000000000028C000000000000000100000000BD06000009000000446F636B5369746530FFFFFFFF
 
 [View0]
 Module=C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\WinHerd.dpr
@@ -65,8 +65,9 @@ TopLine=1
 LeftCol=1
 
 [Watches]
-Count=1
+Count=2
 Watch0='iDaysBetween',256,0,18,1,0
+Watch1='PurchSalesDetail.DataSet.RecNo',256,0,18,1,0
 
 [Breakpoints]
 Count=0
@@ -152,7 +153,7 @@ LRDockWidth=219
 Dockable=1
 SplitPos=85
 ArrangeBy=Name
-SelectedItem=OnActivate
+SelectedItem=Name
 ExpandedItems=DataBinding,Font.Style,LookAndFeel,OptionsView,Properties,Properties.ValueChecked,Properties.ValueGrayed,Properties.ValueUnchecked
 HiddenCategories=Legacy
 ShowStatusBar=1
@@ -324,26 +325,6 @@ DockSiteType=1
 Create=1
 Visible=1
 State=0
-Left=0
-Top=107
-Width=193
-Height=944
-MaxLeft=-1
-MaxTop=-1
-ClientWidth=185
-ClientHeight=913
-TBDockHeight=926
-LRDockWidth=219
-Dockable=1
-TabPosition=0
-ActiveTab=Object Inspector
-TabDockClients=PropertyInspector,ProjectManager
-
-[DockSite1]
-DockSiteType=1
-Create=1
-Visible=1
-State=0
 Left=12
 Top=0
 Width=1713
@@ -358,4 +339,24 @@ Dockable=1
 TabPosition=0
 ActiveTab=Call Stack
 TabDockClients=BreakpointWindow,WatchWindow,DebugLogView,LocalVarsWindow,ModuleWindow,CallStackWindow,MessageView@EditWindow0
+
+[DockSite1]
+DockSiteType=1
+Create=1
+Visible=1
+State=0
+Left=0
+Top=107
+Width=193
+Height=944
+MaxLeft=-1
+MaxTop=-1
+ClientWidth=185
+ClientHeight=913
+TBDockHeight=926
+LRDockWidth=219
+Dockable=1
+TabPosition=0
+ActiveTab=Project Manager
+TabDockClients=PropertyInspector,ProjectManager
 

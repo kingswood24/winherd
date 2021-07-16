@@ -84,6 +84,10 @@ unit uSalesReport;
  04/03/21 [V5.9 R9.3] /MK Additional Feature - Cattle Costs - Change Sale Date to Date Of Birth "easy 5 minute change" - GL/C&J Meats.                                             
 
  25/03/21 [V5.9 R9.6] /MK Change - LoadOtherData - Aoife (Bellingham) asked if the restriction of crush weights this could be increased to 28 days as the lads in the yard are behind with tagging.
+
+ 16/07/21 [V6.0 R1.7] /MK Change - Seperated the Cattle Costings report into its own unit to speed up the report.
+                                 - Seperated the No Farm Costs report into its own unit to speed up the report.
+                                 - Seperated the No Feed Costs report into its own unit to speed up the report.
 }
 
 interface
@@ -493,487 +497,12 @@ type
     NetMarginPerDay: TQRDBText;
     QRLabel17: TQRLabel;
     qrlHerdName: TQRLabel;
-    qrNoFarmCost: TQuickRep;
-    QRBand6: TQRBand;
-    NoFarmCostsTitleLabel: TQRLabel;
-    QRShape44: TQRShape;
-    NoFarmCostsSortLabel: TQRLabel;
-    NoFarmCostsOrderLabel: TQRLabel;
-    NoFarmCostsSortOptionsLabel: TQRLabel;
-    QRSysData3: TQRSysData;
-    QRSysData5: TQRSysData;
-    QRShape53: TQRShape;
-    QRShape54: TQRShape;
-    QRLabel25: TQRLabel;
-    NoFarmCostsSupplierLabel: TQRLabel;
-    NoFarmCostsBuyerLabel: TQRLabel;
-    QRLabel32: TQRLabel;
-    QRLabel33: TQRLabel;
-    NoFarmCostsCustomerLabel: TQRLabel;
-    QRLabel69: TQRLabel;
-    QRLabel72: TQRLabel;
-    QRLabel73: TQRLabel;
-    QRLabel74: TQRLabel;
-    lNoFarmCostsSaleFrom: TQRLabel;
-    lNoFarmCostsPurchFrom: TQRLabel;
-    lNoFarmCostsSaleTo: TQRLabel;
-    lNoFarmCostsPurchTo: TQRLabel;
-    QRLabel84: TQRLabel;
-    lNoFarmCostsSexType: TQRLabel;
-    QRShape55: TQRShape;
-    QRShape56: TQRShape;
-    QRShape57: TQRShape;
-    QRShape59: TQRShape;
-    QRShape60: TQRShape;
-    QRLabel86: TQRLabel;
-    QRLabel87: TQRLabel;
-    QRLabel88: TQRLabel;
-    QRLabel90: TQRLabel;
-    QRLabel92: TQRLabel;
-    QRLabel93: TQRLabel;
-    QRLabel94: TQRLabel;
-    QRLabel95: TQRLabel;
-    QRLabel96: TQRLabel;
-    QRLabel97: TQRLabel;
-    QRLabel98: TQRLabel;
-    QRLabel99: TQRLabel;
-    QRLabel100: TQRLabel;
-    QRLabel101: TQRLabel;
-    QRLabel102: TQRLabel;
-    QRLabel103: TQRLabel;
-    QRLabel104: TQRLabel;
-    QRLabel105: TQRLabel;
-    QRLabel106: TQRLabel;
-    QRLabel107: TQRLabel;
-    QRLabel108: TQRLabel;
-    QRLabel109: TQRLabel;
-    QRLabel110: TQRLabel;
-    QRLabel111: TQRLabel;
-    QRLabel112: TQRLabel;
-    QRLabel113: TQRLabel;
-    QRLabel114: TQRLabel;
-    QRLabel115: TQRLabel;
-    QRLabel117: TQRLabel;
-    qrlNoFarmCostsBuyerSupplier: TQRLabel;
-    QRShape61: TQRShape;
-    QRLabel120: TQRLabel;
-    lNoFarmCostsGradesTitle: TQRLabel;
-    lNoFarmCostsWeightsTitle: TQRLabel;
-    lNoFarmCostsGrades: TQRLabel;
-    lNoFarmCostsWeights: TQRLabel;
-    QRLabel125: TQRLabel;
-    QRLabel126: TQRLabel;
-    qrlNoFarmCostsHerdName: TQRLabel;
-    QRBand7: TQRBand;
-    QRLabel128: TQRLabel;
-    QRLabel129: TQRLabel;
-    QRShape62: TQRShape;
-    QRShape63: TQRShape;
-    QRShape65: TQRShape;
-    QRShape66: TQRShape;
-    QRShape67: TQRShape;
-    QRExpr79: TQRExpr;
-    QRExpr81: TQRExpr;
-    QRExpr82: TQRExpr;
-    QRExpr84: TQRExpr;
-    QRExpr85: TQRExpr;
-    QRExpr86: TQRExpr;
-    QRExpr87: TQRExpr;
-    QRExpr88: TQRExpr;
-    QRExpr89: TQRExpr;
-    QRExpr90: TQRExpr;
-    QRExpr91: TQRExpr;
-    QRExpr92: TQRExpr;
-    QRExpr93: TQRExpr;
-    QRExpr94: TQRExpr;
-    QRExpr95: TQRExpr;
-    QRExpr96: TQRExpr;
-    QRExpr99: TQRExpr;
-    QRExpr100: TQRExpr;
-    QRExpr101: TQRExpr;
-    QRExpr102: TQRExpr;
-    QRExpr103: TQRExpr;
-    QRExpr104: TQRExpr;
-    QRExpr105: TQRExpr;
-    QRExpr106: TQRExpr;
-    QRExpr107: TQRExpr;
-    QRExpr108: TQRExpr;
-    QRExpr109: TQRExpr;
-    QRExpr110: TQRExpr;
-    QRExpr111: TQRExpr;
-    QRExpr112: TQRExpr;
-    QRExpr113: TQRExpr;
-    QRExpr116: TQRExpr;
-    QRExpr117: TQRExpr;
-    QRShape68: TQRShape;
-    QRBand8: TQRBand;
-    QRLabel130: TQRLabel;
-    NoFarmCostsPremVerLabel: TQRLabel;
-    QRShape69: TQRShape;
-    NoFarmCostsDetailBand: TQRBand;
-    QRShape70: TQRShape;
-    QRShape71: TQRShape;
-    QRShape72: TQRShape;
-    QRShape74: TQRShape;
-    QRShape75: TQRShape;
-    QRShape76: TQRShape;
-    QRDBText6: TQRDBText;
-    QRDBText8: TQRDBText;
-    QRDBText9: TQRDBText;
-    QRDBText10: TQRDBText;
-    NoFarmCostsBuyer_Supplier: TQRDBText;
-    QRDBText13: TQRDBText;
-    QRDBText15: TQRDBText;
-    QRDBText16: TQRDBText;
-    QRDBText20: TQRDBText;
-    QRDBText21: TQRDBText;
-    QRDBText22: TQRDBText;
-    QRDBText23: TQRDBText;
-    QRDBText24: TQRDBText;
-    QRDBText25: TQRDBText;
-    QRDBText31: TQRDBText;
-    QRDBText32: TQRDBText;
-    QRDBText33: TQRDBText;
-    QRDBText34: TQRDBText;
-    QRDBText35: TQRDBText;
-    QRDBText36: TQRDBText;
-    QRDBText37: TQRDBText;
-    QRDBText38: TQRDBText;
-    QRDBText39: TQRDBText;
-    QRDBText40: TQRDBText;
-    QRDBText41: TQRDBText;
-    qrNoFeedCosts: TQuickRep;
-    QRBand3: TQRBand;
-    NoFeedCostsTitleLabel: TQRLabel;
-    QRShape58: TQRShape;
-    NoFeedCostsSortLabel: TQRLabel;
-    NoFeedCostsOrderLabel: TQRLabel;
-    NoFeedCostsSortOptionsLabel: TQRLabel;
-    QRSysData6: TQRSysData;
-    QRSysData7: TQRSysData;
-    QRShape64: TQRShape;
-    QRShape73: TQRShape;
-    QRLabel22: TQRLabel;
-    NoFeedCostsSupplierLabel: TQRLabel;
-    NoFeedCostsBuyerLabel: TQRLabel;
-    QRLabel36: TQRLabel;
-    QRLabel75: TQRLabel;
-    NoFeedCostsCustomerLabel: TQRLabel;
-    QRLabel81: TQRLabel;
-    QRLabel82: TQRLabel;
-    QRLabel83: TQRLabel;
-    QRLabel85: TQRLabel;
-    lNoFeedCostsSaleFrom: TQRLabel;
-    lNoFeedCostsPurchFrom: TQRLabel;
-    lNoFeedCostsSaleTo: TQRLabel;
-    lNoFeedCostsPurchTo: TQRLabel;
-    QRLabel119: TQRLabel;
-    lNoFeedCostsSexType: TQRLabel;
-    QRShape77: TQRShape;
-    QRShape78: TQRShape;
-    QRShape79: TQRShape;
-    QRShape80: TQRShape;
-    QRShape81: TQRShape;
-    QRShape82: TQRShape;
-    QRLabel122: TQRLabel;
-    QRLabel123: TQRLabel;
-    QRLabel124: TQRLabel;
-    QRLabel127: TQRLabel;
-    QRLabel131: TQRLabel;
-    QRLabel133: TQRLabel;
-    QRLabel134: TQRLabel;
-    QRLabel135: TQRLabel;
-    QRLabel136: TQRLabel;
-    QRLabel137: TQRLabel;
-    QRLabel138: TQRLabel;
-    QRLabel139: TQRLabel;
-    QRLabel140: TQRLabel;
-    QRLabel141: TQRLabel;
-    QRLabel142: TQRLabel;
-    QRLabel143: TQRLabel;
-    QRLabel144: TQRLabel;
-    QRLabel145: TQRLabel;
-    QRLabel146: TQRLabel;
-    QRLabel147: TQRLabel;
-    QRLabel148: TQRLabel;
-    QRLabel149: TQRLabel;
-    QRLabel150: TQRLabel;
-    QRLabel151: TQRLabel;
-    QRLabel152: TQRLabel;
-    QRLabel153: TQRLabel;
-    QRLabel154: TQRLabel;
-    QRLabel155: TQRLabel;
-    QRLabel156: TQRLabel;
-    QRLabel157: TQRLabel;
-    QRLabel158: TQRLabel;
-    qrlBuyerSupplierNoFeed: TQRLabel;
-    QRShape83: TQRShape;
-    QRLabel160: TQRLabel;
-    QRLabel161: TQRLabel;
-    lNoFeedCostsGradesTitle: TQRLabel;
-    lNoFeedCostsWeightsTitle: TQRLabel;
-    lNoFeedCostsGrades: TQRLabel;
-    lNoFeedCostsWeights: TQRLabel;
-    QRLabel166: TQRLabel;
-    QRLabel167: TQRLabel;
-    qrlNoFeedCostsHerdName: TQRLabel;
-    QRBand9: TQRBand;
-    QRLabel169: TQRLabel;
-    QRLabel170: TQRLabel;
-    QRShape84: TQRShape;
-    QRShape85: TQRShape;
-    QRShape86: TQRShape;
-    QRShape87: TQRShape;
-    QRShape88: TQRShape;
-    QRShape89: TQRShape;
-    QRExpr80: TQRExpr;
-    QRExpr97: TQRExpr;
-    QRExpr98: TQRExpr;
-    QRExpr114: TQRExpr;
-    QRExpr115: TQRExpr;
-    QRExpr118: TQRExpr;
-    QRExpr119: TQRExpr;
-    QRExpr120: TQRExpr;
-    QRExpr121: TQRExpr;
-    QRExpr122: TQRExpr;
-    QRExpr123: TQRExpr;
-    QRExpr124: TQRExpr;
-    QRExpr125: TQRExpr;
-    QRExpr126: TQRExpr;
-    QRExpr127: TQRExpr;
-    QRExpr128: TQRExpr;
-    QRExpr129: TQRExpr;
-    QRExpr131: TQRExpr;
-    QRExpr132: TQRExpr;
-    QRExpr133: TQRExpr;
-    QRExpr134: TQRExpr;
-    QRExpr135: TQRExpr;
-    QRExpr136: TQRExpr;
-    QRExpr137: TQRExpr;
-    QRExpr138: TQRExpr;
-    QRExpr139: TQRExpr;
-    QRExpr140: TQRExpr;
-    QRExpr141: TQRExpr;
-    QRExpr142: TQRExpr;
-    QRExpr143: TQRExpr;
-    QRExpr144: TQRExpr;
-    QRExpr145: TQRExpr;
-    QRExpr146: TQRExpr;
-    QRExpr147: TQRExpr;
-    QRExpr148: TQRExpr;
-    QRExpr149: TQRExpr;
-    QRExpr150: TQRExpr;
-    QRShape90: TQRShape;
-    QRBand10: TQRBand;
-    QRLabel171: TQRLabel;
-    QRLabel172: TQRLabel;
-    QRShape91: TQRShape;
-    QRBand11: TQRBand;
-    QRShape92: TQRShape;
-    QRShape93: TQRShape;
-    QRShape94: TQRShape;
-    QRShape95: TQRShape;
-    QRShape96: TQRShape;
-    QRShape97: TQRShape;
-    QRShape98: TQRShape;
-    QRDBText11: TQRDBText;
-    QRDBText12: TQRDBText;
-    QRDBText14: TQRDBText;
-    Buyer_SupplierNoFeed: TQRDBText;
-    QRDBText18: TQRDBText;
-    QRDBText19: TQRDBText;
-    QRDBText42: TQRDBText;
-    QRDBText44: TQRDBText;
-    QRDBText45: TQRDBText;
-    QRDBText46: TQRDBText;
-    QRDBText47: TQRDBText;
-    QRDBText48: TQRDBText;
-    QRDBText49: TQRDBText;
-    QRDBText50: TQRDBText;
-    QRDBText51: TQRDBText;
-    QRDBText52: TQRDBText;
-    QRDBText53: TQRDBText;
-    QRDBText54: TQRDBText;
-    QRDBText55: TQRDBText;
-    QRDBText56: TQRDBText;
-    QRDBText57: TQRDBText;
-    QRDBText58: TQRDBText;
-    QRDBText59: TQRDBText;
-    QRDBText60: TQRDBText;
-    QRDBText61: TQRDBText;
-    QRDBText62: TQRDBText;
-    QRDBText63: TQRDBText;
-    QRLabel132: TQRLabel;
-    QRDBText43: TQRDBText;
-    QRExpr83: TQRExpr;
-    QRExpr130: TQRExpr;
     btnOptions: TRxSpeedButton;
     ToolButton4: TToolButton;
     pmIncludeOptions: TPopupMenu;
     pmiExtendedSuppBuyFields: TMenuItem;
     pmiIncludeCrushWeight: TMenuItem;
     cbIncludeDeadAnimals: TCheckBox;
-    qrCattleCostings: TQuickRep;
-    QRBand12: TQRBand;
-    CattleCostingsTitleLabel: TQRLabel;
-    QRShape99: TQRShape;
-    CattleCostsSortLabel: TQRLabel;
-    CattleCostsOrderLabel: TQRLabel;
-    CattleCostsSortOptionsLabel: TQRLabel;
-    QRSysData8: TQRSysData;
-    QRSysData9: TQRSysData;
-    QRShape100: TQRShape;
-    QRShape101: TQRShape;
-    QRLabel30: TQRLabel;
-    CattleCostingsSupplierLabel: TQRLabel;
-    CattleCostingsBuyerLabel: TQRLabel;
-    QRLabel89: TQRLabel;
-    QRLabel91: TQRLabel;
-    CattleCostingsCustomerLabel: TQRLabel;
-    QRLabel118: TQRLabel;
-    QRLabel121: TQRLabel;
-    QRLabel159: TQRLabel;
-    QRLabel162: TQRLabel;
-    lCattleCostingsSaleFrom: TQRLabel;
-    lCattleCostingsPurchFrom: TQRLabel;
-    lCattleCostingsSaleTo: TQRLabel;
-    lCattleCostingsPurchTo: TQRLabel;
-    QRLabel173: TQRLabel;
-    lCattleCostingsSexType: TQRLabel;
-    QRShape102: TQRShape;
-    QRShape103: TQRShape;
-    QRShape104: TQRShape;
-    QRShape105: TQRShape;
-    QRShape106: TQRShape;
-    QRShape107: TQRShape;
-    QRLabel175: TQRLabel;
-    QRLabel176: TQRLabel;
-    QRLabel177: TQRLabel;
-    QRLabel178: TQRLabel;
-    QRLabel179: TQRLabel;
-    QRLabel180: TQRLabel;
-    QRLabel181: TQRLabel;
-    QRLabel182: TQRLabel;
-    QRLabel183: TQRLabel;
-    QRLabel184: TQRLabel;
-    QRLabel185: TQRLabel;
-    QRLabel186: TQRLabel;
-    QRLabel187: TQRLabel;
-    QRLabel188: TQRLabel;
-    QRLabel189: TQRLabel;
-    QRLabel190: TQRLabel;
-    QRLabel191: TQRLabel;
-    QRLabel192: TQRLabel;
-    QRLabel193: TQRLabel;
-    QRLabel194: TQRLabel;
-    QRLabel195: TQRLabel;
-    QRLabel197: TQRLabel;
-    QRLabel198: TQRLabel;
-    QRLabel199: TQRLabel;
-    QRLabel200: TQRLabel;
-    QRLabel201: TQRLabel;
-    QRLabel202: TQRLabel;
-    QRLabel203: TQRLabel;
-    QRLabel204: TQRLabel;
-    QRLabel205: TQRLabel;
-    QRLabel206: TQRLabel;
-    qrlBuyerSupplierCattleCostings: TQRLabel;
-    QRShape108: TQRShape;
-    QRLabel208: TQRLabel;
-    QRLabel209: TQRLabel;
-    lCattleCostingsGradesTitle: TQRLabel;
-    lCattleCostingsWeightsTitle: TQRLabel;
-    lCattleCostingsGrades: TQRLabel;
-    lCattleCostsWeights: TQRLabel;
-    QRLabel214: TQRLabel;
-    QRLabel215: TQRLabel;
-    qrlCattleCostsHerdName: TQRLabel;
-    QRBand13: TQRBand;
-    QRLabel217: TQRLabel;
-    QRLabel218: TQRLabel;
-    QRShape109: TQRShape;
-    QRShape110: TQRShape;
-    QRShape111: TQRShape;
-    QRShape112: TQRShape;
-    QRShape113: TQRShape;
-    QRShape114: TQRShape;
-    QRExpr151: TQRExpr;
-    QRExpr152: TQRExpr;
-    QRExpr153: TQRExpr;
-    QRExpr154: TQRExpr;
-    QRExpr155: TQRExpr;
-    QRExpr156: TQRExpr;
-    QRExpr157: TQRExpr;
-    QRExpr158: TQRExpr;
-    QRExpr159: TQRExpr;
-    QRExpr160: TQRExpr;
-    QRExpr161: TQRExpr;
-    QRExpr162: TQRExpr;
-    QRExpr163: TQRExpr;
-    QRExpr165: TQRExpr;
-    QRExpr166: TQRExpr;
-    QRExpr167: TQRExpr;
-    QRExpr168: TQRExpr;
-    QRExpr169: TQRExpr;
-    QRExpr170: TQRExpr;
-    QRExpr171: TQRExpr;
-    QRExpr172: TQRExpr;
-    QRExpr173: TQRExpr;
-    QRExpr174: TQRExpr;
-    QRExpr175: TQRExpr;
-    QRExpr176: TQRExpr;
-    QRExpr177: TQRExpr;
-    QRExpr178: TQRExpr;
-    QRExpr179: TQRExpr;
-    QRExpr180: TQRExpr;
-    QRExpr181: TQRExpr;
-    QRExpr183: TQRExpr;
-    QRExpr184: TQRExpr;
-    QRExpr185: TQRExpr;
-    QRExpr186: TQRExpr;
-    QRExpr187: TQRExpr;
-    QRExpr188: TQRExpr;
-    QRExpr189: TQRExpr;
-    QRShape115: TQRShape;
-    QRBand14: TQRBand;
-    QRLabel219: TQRLabel;
-    QRLabel220: TQRLabel;
-    QRShape116: TQRShape;
-    QRBand15: TQRBand;
-    QRShape117: TQRShape;
-    QRShape118: TQRShape;
-    QRShape119: TQRShape;
-    QRShape120: TQRShape;
-    QRShape121: TQRShape;
-    QRShape122: TQRShape;
-    QRShape123: TQRShape;
-    QRDBText17: TQRDBText;
-    QRDBText64: TQRDBText;
-    QRDBText65: TQRDBText;
-    qrdbBuyer_SupplierCattleCostings: TQRDBText;
-    QRDBText67: TQRDBText;
-    QRDBText68: TQRDBText;
-    QRDBText69: TQRDBText;
-    QRDBText70: TQRDBText;
-    QRDBText71: TQRDBText;
-    QRDBText72: TQRDBText;
-    QRDBText73: TQRDBText;
-    QRDBText74: TQRDBText;
-    QRDBText75: TQRDBText;
-    QRDBText76: TQRDBText;
-    QRDBText77: TQRDBText;
-    QRDBText78: TQRDBText;
-    QRDBText79: TQRDBText;
-    QRDBText80: TQRDBText;
-    QRDBText81: TQRDBText;
-    QRDBText82: TQRDBText;
-    QRDBText83: TQRDBText;
-    QRDBText84: TQRDBText;
-    QRDBText85: TQRDBText;
-    QRDBText86: TQRDBText;
-    QRDBText87: TQRDBText;
-    QRDBText89: TQRDBText;
-    QRDBText90: TQRDBText;
     pmiCattleCostings: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure ExitBtnClick(Sender: TObject);
@@ -1024,7 +553,8 @@ implementation
 
 uses
     GenTypesConst,
-    DairyData, kRoutines, SQLHelper;
+    DairyData, kRoutines, SQLHelper,
+    uCattleCostingsRep, uSalesRepNoFeedCosts, uSalesRepNoFarmCosts;
 
 var
   fSalesRep: TfSalesRep;
@@ -1059,9 +589,7 @@ begin
    WinData.CanShowStandardReportHint := True;
    try
       qrCattleMargins.Hide;
-      qrNoFarmCost.Hide;
-      qrNoFeedCosts.Hide;
-      qrCattleCostings.Hide;
+
       SalesRep.Hide;
       cbUseFilter.Checked := WinData.ActiveFilter;
       WinData.QueryCustomers.Close;
@@ -1167,6 +695,10 @@ begin
    WinData.cxHint.HideHint;
    WinData.CanShowStandardReportHint := False;
 
+   fmCattleCostingsReport := TfmCattleCostingsReport.Create(nil);
+   fmSalesRepNoFeedCosts := TfmSalesRepNoFeedCosts.Create(nil);
+   fmSalesRepNoFarmCosts := TfmSalesRepNoFarmCosts.Create(nil);
+
    lWait.Visible  := True;
    pSalesRep.Refresh;
    pbWait.Visible := True;
@@ -1186,7 +718,7 @@ begin
             MyTable := TTable.Create(nil);
             CreateSalesRepTable;
             PremVerLabel.Caption := 'Herd Management ' + HerdVerNo;
-            NoFarmCostsPremVerLabel.Caption := PremVerLabel.Caption;
+            fmSalesRepNoFarmCosts.NoFarmCostsPremVerLabel.Caption := PremVerLabel.Caption;
             qSalesRep.SQL.Clear;
             qSalesRep.SQL.Add('DELETE FROM tSalesRep');
             qSalesRep.ExecSQL;
@@ -1313,21 +845,21 @@ begin
             lGradesTitle.Caption := '';
             lGradesTitle1.Caption := '';
             lGrades.Caption := '';
-            lNoFarmCostsGradesTitle.Caption := '';
-            lNoFarmCostsGrades.Caption := '';
-            lNoFeedCostsGradesTitle.Caption := '';
-            lNoFeedCostsGradesTitle.Caption := '';
-            lCattleCostingsGrades.Caption := '';
-            lCattleCostingsGradesTitle.Caption := '';
+            fmSalesRepNoFarmCosts.lNoFarmCostsGradesTitle.Caption := '';
+            fmSalesRepNoFarmCosts.lNoFarmCostsGrades.Caption := '';
+            fmSalesRepNoFeedCosts.lNoFeedCostsGradesTitle.Caption := '';
+            fmSalesRepNoFeedCosts.lNoFeedCostsGrades.Caption := '';
+            fmCattleCostingsReport.lCattleCostingsGradesTitle.Caption := '';
+            fmCattleCostingsReport.lCattleCostingsGrades.Caption := '';
             lWeightsTitle1.Caption := '';
             lWeightsTitle.Caption := '';
             lWeights.Caption := '';
-            lNoFarmCostsWeightsTitle.Caption := '';
-            lNoFarmCostsWeights.Caption := '';
-            lNoFeedCostsWeightsTitle.Caption := '';
-            lNoFeedCostsWeights.Caption := '';
-            lCattleCostingsWeightsTitle.Caption := '';
-            lCattleCostsWeights.Caption := '';
+            fmSalesRepNoFarmCosts.lNoFarmCostsWeightsTitle.Caption := '';
+            fmSalesRepNoFarmCosts.lNoFarmCostsWeights.Caption := '';
+            fmSalesRepNoFeedCosts.lNoFeedCostsWeightsTitle.Caption := '';
+            fmSalesRepNoFeedCosts.lNoFeedCostsWeights.Caption := '';
+            fmCattleCostingsReport.lCattleCostingsWeightsTitle.Caption := '';
+            fmCattleCostingsReport.lCattleCostingsWeights.Caption := '';
 
             if cbFilterBySaleGrade.Checked then
                begin
@@ -1355,20 +887,20 @@ begin
                         lWeights.Caption := weights;
                      end;
 
-                  lNoFarmCostsGradesTitle.Caption := lGradesTitle.Caption;
-                  lNoFarmCostsGrades.Caption := lGrades.Caption;
-                  lNoFarmCostsWeightsTitle.Caption := lWeightsTitle.Caption;
-                  lNoFarmCostsWeights.Caption := lWeights.Caption;
+                  fmSalesRepNoFarmCosts.lNoFarmCostsGradesTitle.Caption := lGradesTitle.Caption;
+                  fmSalesRepNoFarmCosts.lNoFarmCostsGrades.Caption := lGrades.Caption;
+                  fmSalesRepNoFarmCosts.lNoFarmCostsWeightsTitle.Caption := lWeightsTitle.Caption;
+                  fmSalesRepNoFarmCosts.lNoFarmCostsWeights.Caption := lWeights.Caption;
 
-                  lNoFeedCostsGradesTitle.Caption := lGradesTitle.Caption;
-                  lNoFeedCostsGrades.Caption := lGrades.Caption;
-                  lNoFeedCostsWeightsTitle.Caption := lWeightsTitle.Caption;
-                  lNoFeedCostsWeights.Caption := lWeights.Caption;
+                  fmSalesRepNoFeedCosts.lNoFeedCostsGradesTitle.Caption := lGradesTitle.Caption;
+                  fmSalesRepNoFeedCosts.lNoFeedCostsGrades.Caption := lGrades.Caption;
+                  fmSalesRepNoFeedCosts.lNoFeedCostsWeightsTitle.Caption := lWeightsTitle.Caption;
+                  fmSalesRepNoFeedCosts.lNoFeedCostsWeights.Caption := lWeights.Caption;
 
-                  lCattleCostingsGradesTitle.Caption := lGradesTitle.Caption;
-                  lCattleCostingsGrades.Caption := lGrades.Caption;
-                  lCattleCostingsWeightsTitle.Caption := lWeightsTitle.Caption;
-                  lCattleCostsWeights.Caption := lWeights.Caption;
+                  fmCattleCostingsReport.lCattleCostingsGradesTitle.Caption := lGradesTitle.Caption;
+                  fmCattleCostingsReport.lCattleCostingsGrades.Caption := lGrades.Caption;
+                  fmCattleCostingsReport.lCattleCostingsWeightsTitle.Caption := lWeightsTitle.Caption;
+                  fmCattleCostingsReport.lCattleCostingsWeights.Caption := lWeights.Caption;
                end;
 
             // include sort and order
@@ -1396,9 +928,9 @@ begin
                       SortLabel.Caption := 'Live Weight';
                    end;
             end;
-            NoFarmCostsSortLabel.Caption := SortLabel.Caption;
-            NoFeedCostsSortLabel.Caption := SortLabel.Caption;
-            CattleCostsSortLabel.Caption := SortLabel.Caption;
+            fmSalesRepNoFarmCosts.NoFarmCostsSortLabel.Caption := SortLabel.Caption;
+            fmSalesRepNoFeedCosts.NoFeedCostsSortLabel.Caption := SortLabel.Caption;
+            fmCattleCostingsReport.CattleCostsSortLabel.Caption := SortLabel.Caption;
             case gOrder.ItemIndex of
                0  : begin
                        qSalesRep.SQL.Add('Asc');
@@ -1409,9 +941,9 @@ begin
                        OrderLabel.Caption := 'In Descending Order';
                     end;
             end;
-            NoFarmCostsOrderLabel.Caption := OrderLabel.Caption;
-            NoFeedCostsOrderLabel.Caption := OrderLabel.Caption;
-            CattleCostsOrderLabel.Caption := OrderLabel.Caption;
+            fmSalesRepNoFarmCosts.NoFarmCostsOrderLabel.Caption := OrderLabel.Caption;
+            fmSalesRepNoFeedCosts.NoFeedCostsOrderLabel.Caption := OrderLabel.Caption;
+            fmCattleCostingsReport.CattleCostsOrderLabel.Caption := OrderLabel.Caption;
             qSalesRep.Open;
             //   15/02/16 [V5.5 R3.8] /MK Bug Fix - Don't preview/print report if no data to print.
             if ( qSalesRep.RecordCount = 0 ) then
@@ -1427,16 +959,16 @@ begin
                   if ( FromDate.Text <> '  /  /    ' ) and ( FromDate.Date > 0 ) then
                      begin
                         lSaleFrom.Caption := FormatDateTime(cIrishDateStyle,StrToDate(FromDate.Text));
-                        lNoFarmCostsSaleFrom.Caption := lSaleFrom.Caption;
-                        lNoFeedCostsSaleFrom.Caption := lSaleFrom.Caption;
-                        lCattleCostingsSaleFrom.Caption := lSaleFrom.Caption;
+                        fmSalesRepNoFarmCosts.lNoFarmCostsSaleFrom.Caption := lSaleFrom.Caption;
+                        fmSalesRepNoFeedCosts.lNoFeedCostsSaleFrom.Caption := lSaleFrom.Caption;
+                        fmCattleCostingsReport.lCattleCostingsSaleFrom.Caption := lSaleFrom.Caption;
                      end;
                   if (ToDate.Text <> '  /  /    ') and ( ToDate.Date > 0 ) then
                      begin
                         lSaleTo.Caption := FormatDateTime(cIrishDateStyle,StrToDate(ToDate.Text));
-                        lNoFarmCostsSaleTo.Caption := lSaleTo.Caption;
-                        lNoFeedCostsSaleTo.Caption := lSaleTo.Caption;
-                        lCattleCostingsSaleTo.Caption := lSaleTo.Caption;
+                        fmSalesRepNoFarmCosts.lNoFarmCostsSaleTo.Caption := lSaleTo.Caption;
+                        fmSalesRepNoFeedCosts.lNoFeedCostsSaleTo.Caption := lSaleTo.Caption;
+                        fmCattleCostingsReport.lCattleCostingsSaleTo.Caption := lSaleTo.Caption;
                      end;
                end;
             if ( cbPurch.Checked ) then
@@ -1444,39 +976,39 @@ begin
                   if (FromPurchDate.Text <> '  /  /    ') and ( FromPurchDate.Date > 0 ) then
                      begin
                         lPurchFrom.Caption := FormatDateTime(cIrishDateStyle,StrToDate(FromPurchDate.Text));
-                        lNoFarmCostsPurchFrom.Caption := lPurchFrom.Caption;
-                        lNoFeedCostsPurchFrom.Caption := lPurchFrom.Caption;
-                        lCattleCostingsPurchFrom.Caption := lPurchFrom.Caption;
+                        fmSalesRepNoFarmCosts.lNoFarmCostsPurchFrom.Caption := lPurchFrom.Caption;
+                        fmSalesRepNoFeedCosts.lNoFeedCostsPurchFrom.Caption := lPurchFrom.Caption;
+                        fmCattleCostingsReport.lCattleCostingsPurchFrom.Caption := lPurchFrom.Caption;
                      end;
                   if (ToPurchDate.Text <> '  /  /    ') and ( ToPurchDate.Date > 0 ) then
                      begin
                         lPurchTo.Caption := FormatDateTime(cIrishDateStyle,StrToDate(ToPurchDate.Text));
-                        lNoFarmCostsPurchTo.Caption := lPurchTo.Caption;
-                        lNoFeedCostsPurchTo.Caption := lPurchTo.Caption;
-                        lCattleCostingsPurchTo.Caption := lPurchTo.Caption;
+                        fmSalesRepNoFarmCosts.lNoFarmCostsPurchTo.Caption := lPurchTo.Caption;
+                        fmSalesRepNoFeedCosts.lNoFeedCostsPurchTo.Caption := lPurchTo.Caption;
+                        fmCattleCostingsReport.lCattleCostingsPurchTo.Caption := lPurchTo.Caption;
                      end;
                end;
 
             CustomerLabel.Caption := 'All Customers';
             if ( cbCustomer.Value <> '0' ) then
                CustomerLabel.Caption := cbCustomer.Text;
-            NoFarmCostsCustomerLabel.Caption := CustomerLabel.Caption;
-            NoFeedCostsCustomerLabel.Caption := CustomerLabel.Caption;
-            CattleCostingsCustomerLabel.Caption := CustomerLabel.Caption;
+            fmSalesRepNoFarmCosts.NoFarmCostsCustomerLabel.Caption := CustomerLabel.Caption;
+            fmSalesRepNoFeedCosts.NoFeedCostsCustomerLabel.Caption := CustomerLabel.Caption;
+            fmCattleCostingsReport.CattleCostingsCustomerLabel.Caption := CustomerLabel.Caption;
 
             SupplierLabel.Caption := 'All Suppliers';
             if ( cbSupplier.Value <> '0' ) then
                SupplierLabel.Caption := cbSupplier.Text;
-            NoFarmCostsSupplierLabel.Caption := SupplierLabel.Caption;
-            NoFeedCostsSupplierLabel.Caption := SupplierLabel.Caption;
-            CattleCostingsSupplierLabel.Caption := SupplierLabel.Caption;
+            fmSalesRepNoFarmCosts.NoFarmCostsSupplierLabel.Caption := SupplierLabel.Caption;
+            fmSalesRepNoFeedCosts.NoFeedCostsSupplierLabel.Caption := SupplierLabel.Caption;
+            fmCattleCostingsReport.CattleCostingsSupplierLabel.Caption := SupplierLabel.Caption;
 
             BuyerLabel.Caption := 'All Buyers';
             if ( cbBuyer.Value <> '0' ) then
                BuyerLabel.Caption := cbBuyer.Text;
-            NoFarmCostsBuyerLabel.Caption := BuyerLabel.Caption;
-            NoFeedCostsBuyerLabel.Caption := BuyerLabel.Caption;
-            CattleCostingsBuyerLabel.Caption := BuyerLabel.Caption;
+            fmSalesRepNoFarmCosts.NoFarmCostsBuyerLabel.Caption := BuyerLabel.Caption;
+            fmSalesRepNoFeedCosts.NoFeedCostsBuyerLabel.Caption := BuyerLabel.Caption;
+            fmCattleCostingsReport.CattleCostingsBuyerLabel.Caption := BuyerLabel.Caption;
 
             lSexType.Caption := 'All';
             if ( cbSex.Checked ) then
@@ -1486,9 +1018,9 @@ begin
                   if rgSex.ItemIndex = 0 then
                      lSexType.Caption := 'Male';
                end;
-            lNoFarmCostsSexType.Caption := lSexType.Caption;
-            lNoFeedCostsSexType.Caption := lSexType.Caption;
-            lCattleCostingsSexType.Caption := lSexType.Caption;
+            fmSalesRepNoFarmCosts.lNoFarmCostsSexType.Caption := lSexType.Caption;
+            fmSalesRepNoFeedCosts.lNoFeedCostsSexType.Caption := lSexType.Caption;
+            fmCattleCostingsReport.lCattleCostingsSexType.Caption := lSexType.Caption;
 
             //   16/12/13 [V5.2 R7.1] /MK Change - Check radio group to see whether to show Buyer or Supplier.
             //   21/11/18 [V5.8 R4.7] /MK Bug Fix - Since new quickreports were added for Show Crush weigh and Hide Feed Costs, the supplier/buyer switch hasn't worked. 
@@ -1503,20 +1035,20 @@ begin
                   Buyer_Supplier.DataField := 'Supplier';
                end;
 
-            qrlBuyerSupplierNoFeed.Caption := qrlBuyerSupplier.Caption;
-            Buyer_SupplierNoFeed.DataField := Buyer_Supplier.DataField;
+            fmSalesRepNoFeedCosts.qrlBuyerSupplierNoFeed.Caption := qrlBuyerSupplier.Caption;
+            fmSalesRepNoFeedCosts.Buyer_SupplierNoFeed.DataField := Buyer_Supplier.DataField;
             qrlBuyerSupplier.Caption := qrlBuyerSupplier.Caption;
-            qrdbBuyer_SupplierCattleCostings.DataField := Buyer_Supplier.DataField;
-            qrlBuyerSupplierCattleCostings.Caption := qrlBuyerSupplier.Caption;
+            fmCattleCostingsReport.qrdbBuyer_SupplierCattleCostings.DataField := Buyer_Supplier.DataField;
+            fmCattleCostingsReport.qrlBuyerSupplierCattleCostings.Caption := qrlBuyerSupplier.Caption;
 
-            qrlNoFarmCostsBuyerSupplier.Caption := qrlBuyerSupplier.Caption;
-            NoFarmCostsBuyer_Supplier.DataField := Buyer_Supplier.DataField;
+            fmSalesRepNoFarmCosts.qrlNoFarmCostsBuyerSupplier.Caption := qrlBuyerSupplier.Caption;
+            fmSalesRepNoFarmCosts.NoFarmCostsBuyer_Supplier.DataField := Buyer_Supplier.DataField;
 
             qrlHerdName.Caption := '';
             qrlHerdName.Caption := WinData.UserDefaultHerdName;
-            qrlNoFarmCostsHerdName.Caption := qrlHerdName.Caption;
-            qrlNoFeedCostsHerdName.Caption := qrlHerdName.Caption;
-            qrlCattleCostsHerdName.Caption := qrlHerdName.Caption;
+            fmSalesRepNoFarmCosts.qrlNoFarmCostsHerdName.Caption := qrlHerdName.Caption;
+            fmSalesRepNoFeedCosts.qrlNoFeedCostsHerdName.Caption := qrlHerdName.Caption;
+            fmCattleCostingsReport.qrlCattleCostsHerdName.Caption := qrlHerdName.Caption;
 
             if WinData.ExportToPDA then
                WinData.PDALinkExport.ExportReport( qrCattleMargins)
@@ -1524,21 +1056,21 @@ begin
                begin
                   if ( pmiExtendedSuppBuyFields.Checked ) then
                      begin
-                        NoFarmCostsTitleLabel.Font.Color := ClRed;
-                        NoFarmCostsDetailBand.Font.Color := ClNavy;
-                        qrNoFarmCost.Preview;
+                        fmSalesRepNoFarmCosts.NoFarmCostsTitleLabel.Font.Color := ClRed;
+                        fmSalesRepNoFarmCosts.NoFarmCostsDetailBand.Font.Color := ClNavy;
+                        fmSalesRepNoFarmCosts.qrNoFarmCost.Preview;
                      end
                   else if ( pmiIncludeCrushWeight.Checked ) then
                      begin
-                        NoFeedCostsTitleLabel.Font.Color := ClRed;
-                        NoFeedCostsTitleLabel.Font.Color := ClNavy;
-                        qrNoFeedCosts.Preview;
+                        fmSalesRepNoFeedCosts.NoFeedCostsTitleLabel.Font.Color := ClRed;
+                        fmSalesRepNoFeedCosts.QRBand11.Font.Color := clNavy;
+                        fmSalesRepNoFeedCosts.qrNoFeedCosts.Preview;
                      end
                   else if ( pmiCattleCostings.Checked ) then
                      begin
-                        CattleCostingsTitleLabel.Font.Color := ClRed;
-                        CattleCostingsTitleLabel.Font.Color := ClNavy;
-                        qrCattleCostings.Preview;
+                        fmCattleCostingsReport.CattleCostingsTitleLabel.Font.Color := ClRed;
+                        fmCattleCostingsReport.QRBand15.Font.Color := clNavy;
+                        fmCattleCostingsReport.qrCattleCostings.Preview;
                      end
                   else
                      begin
@@ -1551,21 +1083,21 @@ begin
                begin
                   if ( pmiExtendedSuppBuyFields.Checked ) then
                      begin
-                        NoFarmCostsTitleLabel.Font.Color := ClBlack;
-                        NoFarmCostsDetailBand.Font.Color := ClBlack;
-                        WinData.CallPrintDialog(qrNoFarmCost);
+                        fmSalesRepNoFarmCosts.NoFarmCostsTitleLabel.Font.Color := ClBlack;
+                        fmSalesRepNoFarmCosts.NoFarmCostsDetailBand.Font.Color := ClBlack;
+                        WinData.CallPrintDialog(fmSalesRepNoFarmCosts.qrNoFarmCost);
                      end
                   else if ( pmiIncludeCrushWeight.Checked ) then
                      begin
-                        NoFeedCostsTitleLabel.Font.Color := ClRed;
-                        NoFeedCostsTitleLabel.Font.Color := ClNavy;
-                        WinData.CallPrintDialog(qrNoFeedCosts);
+                        fmSalesRepNoFeedCosts.NoFeedCostsTitleLabel.Font.Color := ClRed;
+                        fmSalesRepNoFeedCosts.QRBand11.Font.Color := ClNavy;
+                        WinData.CallPrintDialog(fmSalesRepNoFeedCosts.qrNoFeedCosts);
                      end
                   else if ( pmiCattleCostings.Checked ) then
                      begin
-                        CattleCostingsTitleLabel.Font.Color := ClRed;
-                        CattleCostingsTitleLabel.Font.Color := ClNavy;
-                        WinData.CallPrintDialog(qrCattleCostings);
+                        fmCattleCostingsReport.CattleCostingsTitleLabel.Font.Color := ClRed;
+                        fmCattleCostingsReport.QRBand15.Font.Color := ClNavy;
+                        WinData.CallPrintDialog(fmCattleCostingsReport.qrCattleCostings);
                      end
                   else
                      begin

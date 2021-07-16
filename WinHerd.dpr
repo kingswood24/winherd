@@ -480,7 +480,10 @@ uses
   uPopupAnimalEdit in 'uPopupAnimalEdit.pas' {fmPopupAnimalEdit},
   uCalculateGridColSelect in 'uCalculateGridColSelect.pas' {fmCalculateGridColSelect},
   uGeneralMemo in 'uGeneralMemo.pas' {fmGeneralMemo},
-  uApplicationLog in 'uApplicationLog.pas';
+  uApplicationLog in 'uApplicationLog.pas',
+  uCattleCostingsRep in 'uCattleCostingsRep.pas' {fmCattleCostingsReport},
+  uSalesRepNoFeedCosts in 'uSalesRepNoFeedCosts.pas' {fmSalesRepNoFeedCosts},
+  uSalesRepNoFarmCosts in 'uSalesRepNoFarmCosts.pas' {fmSalesRepNoFarmCosts};
 
 {$R *.RES}
 { 08/03/12 [V5.0 R4.1] - Program has dependancy on qrpdflib.dll. }
