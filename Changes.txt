@@ -1,6 +1,10 @@
 Version V6.0 R1.7
 
 12/07/21 /MK Change - DairyData - LoadPreferences - Default ShowBlockTempMovements off - GL request.
+16/07/21 /MK Change - uPurchSaleReport - GrossMarginPrint - As in the new Gross Margin column on the main grid, don't show minus values.
+                                       - QRExpr9Print - Only average fields where the value is > 0.
+                                       - QRExpr13Print - Only sum fields where the value is > 0.
+                                       - GetFieldType - Added function to find what the field type is for GetSUMValueBySQL & GetAVGValueBySQL to check for FloatField Value > 0.
 
 Version V6.0 R1.6
 

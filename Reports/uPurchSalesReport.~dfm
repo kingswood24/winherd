@@ -2287,6 +2287,7 @@ object fmPurchSalesReport: TfmPurchSalesReport
         Font.Style = []
         Color = clWhite
         Master = PurchSalesDetail
+        OnPrint = MarginPrint
         ParentFont = False
         ResetAfterPrint = False
         Transparent = False

@@ -1,9 +1,9 @@
 [Closed Files]
-File_0=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Reports\uPurchSalesReport.pas',0,1,1,1,8,1,0
-File_1=SourceModule,'c:\program files (x86)\borland\delphi5\Source\Vcl\Db.pas',0,1,35,23,56,0,0
-File_2=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Reports\uPurchSalesReport.dfm',0,1,1,1,1,0,0
-File_3=SourceModule,'c:\program files (x86)\borland\delphi5\Source\Vcl\Dbtables.pas',0,1,4550,1,4570,0,0
-File_4=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Changes.txt',0,1,1,1,1,0,0
+File_0=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Reports\uPurchSalesReport.pas',0,1,1,1,13,1,0
+File_1=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Changes.txt',0,1,1,1,7,0,0
+File_2=SourceModule,'c:\program files (x86)\borland\delphi5\Source\Vcl\Db.pas',0,1,35,23,56,0,0
+File_3=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\Reports\uPurchSalesReport.dfm',0,1,1,1,1,0,0
+File_4=SourceModule,'c:\program files (x86)\borland\delphi5\Source\Vcl\Dbtables.pas',0,1,4550,1,4570,0,0
 File_5=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uMartImportByFile.pas',0,1,1703,74,1723,0,0
 File_6=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\DairyData.pas',0,1,22303,67,22340,1,0
 File_7=SourceModule,'C:\Kingswood\Delphi Development\Delphi 5\Herd\Source\winherd\uMartImportByFileReview.pas',0,1,448,36,472,0,0
@@ -65,8 +65,9 @@ TopLine=1
 LeftCol=1
 
 [Watches]
-Count=1
+Count=2
 Watch0='iDaysBetween',256,0,18,1,0
+Watch1='PurchSalesDetail.DataSet.RecNo',256,0,18,1,0
 
 [Breakpoints]
 Count=0
@@ -336,7 +337,7 @@ TBDockHeight=926
 LRDockWidth=219
 Dockable=1
 TabPosition=0
-ActiveTab=Object Inspector
+ActiveTab=Project Manager
 TabDockClients=PropertyInspector,ProjectManager
 
 [DockSite1]
