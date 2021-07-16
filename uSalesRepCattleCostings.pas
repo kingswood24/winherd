@@ -1,4 +1,4 @@
-unit uCattleCostingsRep;
+unit uSalesRepCattleCostings;
 
 interface
 
@@ -7,7 +7,7 @@ uses
   QRCtrls, QuickRpt, ExtCtrls, QRExport;
 
 type
-  TfmCattleCostingsReport = class(TForm)
+  TfmSalesRepCattleCostings = class(TForm)
     QRTextFilter1: TQRTextFilter;
     QRCSVFilter1: TQRCSVFilter;
     QRHTMLFilter1: TQRHTMLFilter;
@@ -184,7 +184,7 @@ type
   end;
 
 var
-  fmCattleCostingsReport: TfmCattleCostingsReport;
+  fmSalesRepCattleCostings: TfmSalesRepCattleCostings;
 
 implementation
 
@@ -192,7 +192,7 @@ uses uSalesReport;
 
 {$R *.DFM}
 
-procedure TfmCattleCostingsReport.QRBand15BeforePrint(
+procedure TfmSalesRepCattleCostings.QRBand15BeforePrint(
   Sender: TQRCustomBand; var PrintBand: Boolean);
 var
    i : Integer;

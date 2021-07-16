@@ -1,9 +1,9 @@
-object fmCattleCostingsReport: TfmCattleCostingsReport
+object fmSalesRepCattleCostings: TfmSalesRepCattleCostings
   Left = 495
   Top = 162
   Width = 1236
   Height = 675
-  Caption = 'fmCattleCostingsReport'
+  Caption = 'fmSalesRepCattleCostings'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText

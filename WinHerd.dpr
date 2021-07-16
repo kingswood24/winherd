@@ -481,7 +481,7 @@ uses
   uCalculateGridColSelect in 'uCalculateGridColSelect.pas' {fmCalculateGridColSelect},
   uGeneralMemo in 'uGeneralMemo.pas' {fmGeneralMemo},
   uApplicationLog in 'uApplicationLog.pas',
-  uCattleCostingsRep in 'uCattleCostingsRep.pas' {fmCattleCostingsReport},
+  uSalesRepCattleCostings in 'uSalesRepCattleCostings.pas' {fmSalesRepCattleCostings},
   uSalesRepNoFeedCosts in 'uSalesRepNoFeedCosts.pas' {fmSalesRepNoFeedCosts},
   uSalesRepNoFarmCosts in 'uSalesRepNoFarmCosts.pas' {fmSalesRepNoFarmCosts};
 
