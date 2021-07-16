@@ -364,7 +364,7 @@ type
     procedure pmiIncludeCrushWeightClick(Sender: TObject);
     procedure pmIncludeOptionsPopup(Sender: TObject);
     procedure pmiCattleCostingsClick(Sender: TObject);
-
+    procedure PrintExpressionWithValues(sender: TObject; var Value: String);
   private
     { Private declarations }
     MyTable : TTable;
@@ -379,6 +379,7 @@ type
     procedure SetupSaleGrades;
     function GetSaleGrades : string;
     function GetSaleWeights : string;
+    function GetFieldType(AFieldName: String): TFieldType;
   public
     { Public declarations }
   end;
@@ -530,7 +531,7 @@ begin
    WinData.CanShowStandardReportHint := False;
 
    fmSalesRepNoFeedCosts := TfmSalesRepNoFeedCosts.Create(nil);
-   fmSalesRepCattleCostings := TfmCattleCostingsReport.Create(nil);
+   fmSalesRepCattleCostings := TfmSalesRepCattleCostings.Create(nil);
    fmSalesRepNoFarmCosts := TfmSalesRepNoFarmCosts.Create(nil);
 
    lWait.Visible  := True;
@@ -1605,6 +1606,61 @@ begin
    pmiExtendedSuppBuyFields.Checked := False;
    pmiIncludeCrushWeight.Checked := False;
    Caption := 'Cattle Costings';
+end;
+
+function TfSalesRep.GetFieldType(AFieldName: String): TFieldType;
+var
+   i : Integer;
+begin
+   Result := ftUnknown;
+   if ( not(MyTable.Exists) ) then Exit;
+   MyTable.Open;
+   for i := 0 to MyTable.FieldDefs.Count-1 do
+      if ( UpperCase(MyTable.Fields[i].FieldName) = UpperCase(AFieldName) ) then
+         begin
+            Result := MyTable.Fields[i].DataType;
+            Break;
+         end;
+end;
+
+procedure TfSalesRep.PrintExpressionWithValues(sender: TObject; var Value: String);
+var
+   sFieldName : String;
+   sAVGorSUM : String;
+   qData : TQuery;
+begin
+   Value := '';
+   if ( Sender is TQRExpr ) then
+      if ( Length((Sender as TQRExpr).Expression) > 0 ) then
+         begin
+            sFieldName := (Sender as TQRExpr).Expression;
+            sFieldName := Copy(sFieldName,Pos('.',sFieldName)+1,Length(sFieldName)-Pos('.',sFieldName)-1);
+            sAVGorSUM := (Sender as TQRExpr).Expression;
+            sAVGorSUM := Copy(sAVGorSUM,0,Pos('(',sAVGorSUM)-1);
+            if ( Length(sFieldName) > 0 ) and ( Length(sAVGorSUM) > 0 ) then
+               begin
+                  qData := TQuery.Create(nil);
+                  with qData do
+                     try
+                        DatabaseName := AliasName;
+                        SQL.Clear;
+                        SQL.Add('SELECT '+sAVGorSUM+'('+sFieldName+')');
+                        SQL.Add('FROM '+MyTable.TableName);
+                        if ( GetFieldType(sFieldName) = ftFloat ) then
+                           SQL.Add('WHERE ('+sFieldName+' > 0)');
+                        try
+                           Open;
+                           if ( RecordCount > 0 ) and ( Fields[0].AsFloat > 0 ) then
+                              Value := FormatFloat('#.00',Fields[0].AsFloat);
+                        except
+                           on e : Exception do
+                              ShowDebugMessage(e.Message);
+                        end;
+                     finally
+                        Free;
+                     end;
+               end;
+         end;
 end;
 
 end.
